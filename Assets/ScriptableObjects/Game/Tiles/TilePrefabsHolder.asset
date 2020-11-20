@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 200b29d88e2709b47b3c6345aacdd8ea, type: 3}
+  m_Name: TilePrefabsHolder
+  m_EditorClassIdentifier: 
+  serializationData:
+    SerializedFormat: 2
+    SerializedBytes: 
+    ReferencedUnityObjects: []
+    SerializedBytesString: 
+    Prefab: {fileID: 0}
+    PrefabModificationsReferencedUnityObjects: []
+    PrefabModifications: []
+    SerializationNodes: []
+  tilePrefabs:
+    m_Keys: 0000000001000000020000000300000004000000
+    m_Values:
+    - {fileID: 7594314150262590957, guid: 2cc9ff5eae6be474d94c774ee78ad7f8, type: 3}
+    - {fileID: 7032916919265020135, guid: 53ab8f14d0c34af46963e81b50305f7a, type: 3}
+    - {fileID: 289454246185063951, guid: 0a106eebd20a6fe44ac99547ddbd427d, type: 3}
+    - {fileID: 6465029212061170260, guid: a1b4c07f51da0fa44afc8edbe6145b31, type: 3}
+    - {fileID: 8124927811233534169, guid: 3186c35d8b9184440b6958bfd56b1dc8, type: 3}

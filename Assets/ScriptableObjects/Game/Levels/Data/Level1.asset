@@ -1,0 +1,65 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Game.TilesObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7126b9c1309bd8a418748c882885cd26, type: 3}
+  m_Name: Level1
+  m_EditorClassIdentifier: 
+  serializationData:
+    SerializedFormat: 2
+    SerializedBytes: 
+    ReferencedUnityObjects: []
+    SerializedBytesString: 
+    Prefab: {fileID: 0}
+    PrefabModificationsReferencedUnityObjects: []
+    PrefabModifications: []
+    SerializationNodes:
+    - Name: id
+      Entry: 2
+      Data: f6710fe69c434956b91153b32118d9fd
+  startPosition:
+    x: 0
+    y: 0
+  tiles:
+    data:
+    - type: 1
+      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Assembly-CSharp","grassHeight":1}'
+    - type: 1
+      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Assembly-CSharp","grassHeight":2}'
+    - type: 1
+      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Assembly-CSharp","grassHeight":2}'
+    - type: 1
+      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Assembly-CSharp","grassHeight":2}'
+    - type: 1
+      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Assembly-CSharp","grassHeight":2}'
+    - type: 1
+      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Assembly-CSharp","grassHeight":2}'
+    - type: 1
+      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Assembly-CSharp","grassHeight":2}'
+    - type: 1
+      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Assembly-CSharp","grassHeight":2}'
+    - type: 1
+      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Assembly-CSharp","grassHeight":2}'
+    - type: 1
+      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Assembly-CSharp","grassHeight":2}'
+    - type: 1
+      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Assembly-CSharp","grassHeight":2}'
+    - type: 1
+      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Assembly-CSharp","grassHeight":2}'
+    - type: 1
+      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Assembly-CSharp","grassHeight":2}'
+    - type: 1
+      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Assembly-CSharp","grassHeight":2}'
+    - type: 1
+      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Assembly-CSharp","grassHeight":2}'
+    - type: 1
+      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Assembly-CSharp","grassHeight":2}'
+    width: 4
+    depth: 4

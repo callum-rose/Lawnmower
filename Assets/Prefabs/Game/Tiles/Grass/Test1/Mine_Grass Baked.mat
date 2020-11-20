@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 6
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Mine_Grass Baked
+  m_Shader: {fileID: 4800000, guid: a97be003b3cb73a4fac55a6584f23a3d, type: 3}
+  m_ShaderKeywords: _BAKED_ON
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 1
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs: []
+    m_Floats:
+    - _AlphaCutoff: 0.5
+    - _Baked: 1
+    - _VertexOffsetMaxOffset: 0.02
+    - _VertexOffsetNoiseSize: 0.6
+    m_Colors:
+    - _ColourFadeBaseColour: {r: 0.2219579, g: 0.3867925, b: 0.2169119, a: 0}
+    - _ColourFadeTipColour: {r: 0.2865941, g: 0.6698113, b: 0.2745243, a: 0}
+    - _ColourFadeYRange: {r: 0, g: 1, b: 0, a: 0}
+    - _EmissionColor: {r: 1, g: 1, b: 1, a: 1}
+    - _Offset: {r: 0, g: 0, b: 0, a: 0}
+    - _VertexOffsetNoiseFactorYRange: {r: 0, g: 1, b: 0, a: 0}
+    - _VertexOffsetNoiseVelocity: {r: 1, g: 0, b: 0, a: 0}
+  m_BuildTextureStacks: []
