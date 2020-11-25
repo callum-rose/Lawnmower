@@ -1,11 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 namespace UI.Buttons
 {
-	internal class ButtonIconSetter : MonoBehaviour
+    internal class ButtonIconSetter : MonoBehaviour
 	{
 		[SerializeField] private IconDataHolder iconData;
 		[SerializeField] private IconType icon;
@@ -35,6 +33,7 @@ namespace UI.Buttons
         private void UpdateSprite()
         {
             iconImage.sprite = iconData.GetIcon(icon);
+            iconImage.gameObject.SetActive(icon != IconType.None);
         }
 
         #endregion

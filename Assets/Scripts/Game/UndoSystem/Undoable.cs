@@ -2,12 +2,12 @@ using System;
 
 namespace Game.UndoSystem
 {
-    internal class Undoer : IUndoable
+    internal class Undoable : IUndoable
     {
         private readonly Action _doAction;
         private readonly Action _undoAction;
 
-        public Undoer(Action doAction, Action undoAction)
+        public Undoable(Action doAction, Action undoAction)
         {
             _doAction = doAction;
             _undoAction = undoAction;

@@ -1,6 +1,5 @@
 ﻿using DG.Tweening;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using BalsamicBits.Extensions;
 using Sirenix.OdinInspector;
@@ -49,19 +48,24 @@ namespace UI.Buttons
         {
             if (instant)
             {
-                SetContent_Internal(useIcon, useText);
                 FitToContent_Internal(useIcon, useText, instant);
             }
             else
             {
-                StartCoroutine(SetContentRoutine(useIcon, useText));
+                StartCoroutine(FitToContentRoutine(useIcon, useText));
             }
         }
 
         [Button]
         public void Set(bool useIcon, bool useText, bool instant)
         {
-            SetContent_Internal(true, true);
+#if UNITY_EDITOR
+            if (!Application.isPlaying)
+            {
+                instant = true;
+            }
+#endif
+
             SetContent(useIcon, useText, instant);
         }
 
@@ -74,29 +78,21 @@ namespace UI.Buttons
             float fittedWidth = layoutGroup.padding.left +
                 (useIcon ? icon.rectTransform.sizeDelta.x : 0) +
                 (useIcon && useText ? layoutGroup.spacing : 0) +
-                (useText ? text.GetRenderedValues(true).x : 0) +
+                (useText ? text.preferredWidth : 0) +
                 layoutGroup.padding.right;
 
             SetWidth(fittedWidth, instant);
-        }
-
-        private void SetContent_Internal(bool useIcon, bool useText)
-        {
-            icon.gameObject.SetActive(useIcon);
-            text.gameObject.SetActive(useText);
         }
 
         #endregion
 
         #region Routines
 
-        private IEnumerator SetContentRoutine(bool useIcon, bool useText)
+        private IEnumerator FitToContentRoutine(bool useIcon, bool useText)
         {
             FitToContent_Internal(useIcon, useText, false);
 
             yield return _currentTween?.WaitForCompletion();
-
-            SetContent_Internal(useIcon, useText);
         }
 
         #endregion

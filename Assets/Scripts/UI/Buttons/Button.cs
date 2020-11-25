@@ -28,14 +28,20 @@ namespace UI.Buttons
         private Color _initialBackgroundColour;
         private const float _tintAnimDuration = 0.2f;
 
+        #region Unity
+
         private void Awake()
         {
             _initialBackgroundColour = backgroundImage.color;
         }
 
+        #endregion
+
+        #region API
+
         public void Init(ButtonInfo info)
         {
-            messageText.text = info.Message;
+            SetText(info.Message);
 
             _action = info.Action;
 
@@ -75,10 +81,14 @@ namespace UI.Buttons
             backgroundImage.DOColor(_initialBackgroundColour, _tintAnimDuration);
         }
 
-        #region Odin
+        #endregion
 
-        private void OnShadowOffsetValueChanged(Vector2 newOffset)
+        #region Methods
+
+        private void SetText(string message)
         {
+            messageText.text = message;
+            messageText.gameObject.SetActive(!String.IsNullOrWhiteSpace(message));
         }
 
         #endregion

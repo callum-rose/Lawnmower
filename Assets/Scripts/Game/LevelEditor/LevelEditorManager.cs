@@ -1,19 +1,19 @@
-using Core;
 using Game.Core;
-using Game.LevelEditor;
+using Game.Levels;
 using Game.Mowers;
 using Game.Tiles;
+using Game.UndoSystem;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
-namespace Game.Levels
+namespace Game.LevelEditor
 {
     public class LevelEditorManager : MonoBehaviour
     {
         [Space]
         [SerializeField] private GameManager gameManager;
         [SerializeField] private LevelManager levelManager;
-        [SerializeField] private MouseTileSelector tileSelector;
+        [SerializeField] private ITileSelectorContainer tileSelector;
 
         [Space]
         [SerializeField] private GameObject uiContainer;
@@ -29,14 +29,14 @@ namespace Game.Levels
 
         private void Awake()
         {
-            tileSelector.Selected += TileSelector_Clicked;
+            tileSelector.Result.Selected += TileSelector_Clicked;
 
             levelManager.LevelChanged += LevelManager_LevelChanged;
         }
 
         private void OnDestroy()
         {
-            tileSelector.Selected -= TileSelector_Clicked;
+            tileSelector.Result.Selected -= TileSelector_Clicked;
 
             levelManager.LevelChanged -= LevelManager_LevelChanged;
         }
@@ -76,11 +76,8 @@ namespace Game.Levels
                 Level = levelAsset.GetCopy()
             };
 
-            gameManager.Begin(data);
+            Begin(data, false);
 
-            uiContainer.SetActive(false);
-
-            SetEditMode(false);
         }
 
         [Button("Build In Edit Mode"), BoxGroup("Debug"), EnableIf(nameof(AppRunning))]
@@ -92,11 +89,7 @@ namespace Game.Levels
                 Level = levelAsset.GetCopy()
             };
 
-            gameManager.Begin(data);
-
-            uiContainer.SetActive(true);
-
-            SetEditMode(true);
+            Begin(data, true);
         }
 
         [Button(Expanded = true), BoxGroup("Debug"), EnableIf(nameof(AppRunning))]
@@ -111,17 +104,22 @@ namespace Game.Levels
                 Level = emptyLevel
             };
 
-            gameManager.Begin(data);
-
-            uiContainer.SetActive(true);
-
-            SetEditMode(true);
+            Begin(data, true);
         }
 
 #endif
         #endregion
 
         #region Methods
+
+        private void Begin(GameSetupPassThroughData data, bool isEdit)
+        {
+            gameManager.Begin(data);
+
+            uiContainer.SetActive(isEdit);
+
+            SetEditMode(isEdit);
+        }
 
         private void SetEditMode(bool isEditMode)
         {

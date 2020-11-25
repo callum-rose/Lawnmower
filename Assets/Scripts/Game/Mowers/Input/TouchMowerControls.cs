@@ -1,9 +1,6 @@
 using Game.Core;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using Lean.Touch;
 using System.Linq;
 
 namespace Game.Mowers.Input

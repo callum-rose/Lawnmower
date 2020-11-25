@@ -74,7 +74,7 @@ namespace Game.Levels
             SetDependanciesOfTiles();
 
             _mowerMovement.SetPosition(level.StartPosition);
-            _mowerMovement.Running = true;
+            _mowerMovement.IsRunning = true;
 
             positioner.OffsetContainer(-worldOffset);
 
@@ -114,6 +114,11 @@ namespace Game.Levels
             SetDependanciesOfTiles();
         }
 
+        public TileData GetTileData(GridVector position)
+        {
+            return _level.GetTile(position);
+        }
+
         public void ClearTiles()
         {
             if (_tiles != null)
@@ -133,7 +138,7 @@ namespace Game.Levels
         private void OnLevelCompleted(Xor isUndo)
         {
             bool isLevelResuming = isUndo;
-            _mowerMovement.Running = isLevelResuming;
+            _mowerMovement.IsRunning = isLevelResuming;
 
             LevelCompleted.Invoke(isUndo);
         }
@@ -141,7 +146,7 @@ namespace Game.Levels
         private void OnLevelFailed(Xor isUndo)
         {
             bool isLevelResuming = isUndo;
-            _mowerMovement.Running = isLevelResuming;
+            _mowerMovement.IsRunning = isLevelResuming;
 
             LevelFailed.Invoke(isUndo);
         }

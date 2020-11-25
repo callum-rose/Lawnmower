@@ -1,10 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-namespace Default
+﻿namespace Default
 {
-	internal class NewBehaviourScript
+    internal class NewBehaviourScript
 	{
 		#region Unity
 		

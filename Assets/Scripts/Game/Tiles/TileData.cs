@@ -2,7 +2,6 @@ using System;
 using UnityEngine;
 using Newtonsoft.Json;
 using Sirenix.OdinInspector;
-using Game.Tiles;
 
 namespace Game.Tiles
 {
@@ -38,6 +37,24 @@ namespace Game.Tiles
         public void OnBeforeSerialize()
         {
             dataStr = JsonConvert.SerializeObject(Data, jsonSettings);
+        }
+
+        public override string ToString()
+        {
+            switch (Type)
+            {
+                case TileType.Empty:
+                case TileType.Stone:
+                case TileType.Water:
+                case TileType.Wood:
+                    return Type.ToString();
+
+                case TileType.Grass:
+                    return $"{Type.ToString()} {(Data as GrassTileSetupData).grassHeight}";
+
+                default:
+                    throw new ArgumentException();
+            }
         }
 
         public static class Factory

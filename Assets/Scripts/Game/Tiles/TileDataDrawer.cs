@@ -1,5 +1,4 @@
 #if UNITY_EDITOR
-using Game.Tiles;
 using Sirenix.OdinInspector.Editor;
 using Sirenix.Utilities;
 using Sirenix.Utilities.Editor;

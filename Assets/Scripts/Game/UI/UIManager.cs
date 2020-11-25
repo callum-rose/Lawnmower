@@ -1,13 +1,12 @@
 ﻿using Core;
 using System.Collections;
-using System.Collections.Generic;
 using UI.Buttons;
 using UI.Dialogs;
 using UnityEngine;
 
 namespace Game.UI
 {
-	internal class UIManager : MonoBehaviour
+    internal class UIManager : MonoBehaviour
 	{
 		[SerializeField] private ButtonResizer quitButtonResizer, undoButtonResizer;
         [SerializeField] private float buttonShrinkPause = 3;

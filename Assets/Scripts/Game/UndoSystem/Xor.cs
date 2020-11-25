@@ -1,6 +1,3 @@
-using System.Collections;
-using UnityEngine;
-
 namespace Game.UndoSystem
 {
     public struct Xor

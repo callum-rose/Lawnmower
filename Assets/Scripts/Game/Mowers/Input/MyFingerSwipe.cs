@@ -1,5 +1,4 @@
 ﻿using Lean.Touch;
-using System.Collections;
 using UnityEngine;
 
 namespace Game.Mowers.Input

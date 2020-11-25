@@ -8,7 +8,7 @@ using UnityEngine.Assertions;
 
 namespace Game.Mowers
 {
-    internal partial class MowerMovementManager : MonoBehaviour, IMowerPosition
+    internal partial class MowerMovementManager : MonoBehaviour, IMowerPosition, IMowerRunnable
     {
         [SerializeField] private MowerMover mowerMover;
         [SerializeField] private LevelTraversalChecker traversalChecker;
@@ -21,7 +21,7 @@ namespace Game.Mowers
 
         public GridVector MowerPosition => mowerMover.CurrentPosition;
 
-        public bool Running { get; set; } = false;
+        public bool IsRunning { get; set; } = false;
 
         private IMowerControls[] _mowerControls;
 
@@ -67,7 +67,7 @@ namespace Game.Mowers
         {
             Assert.AreApproximatelyEqual(direction.Magnitude, 1f);
 
-            if (!Running)
+            if (!IsRunning)
             {
                 return;
             }

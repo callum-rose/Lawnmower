@@ -1,16 +1,15 @@
 ﻿using Game.Tiles;
-using System;
 using System.Collections.Generic;
+using UI.Buttons;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Game.LevelEditor
 {
     public class EditorTileUiManager : MonoBehaviour
     {
-        [SerializeField] private TileIconCapturer iconCapturerPrefab;
-        [SerializeField] private Transform iconCapturerContainer;
-        [SerializeField] private TileUiIcon iconPrefab;
-        [SerializeField] private Transform iconUiContainer;
+        [SerializeField] private Button buttonPrefab;
+        [SerializeField, FormerlySerializedAs("iconUiContainer")] private Transform buttonContainer;
 
         private readonly IReadOnlyList<TileData> IconData = new TileData[]
         {
@@ -23,40 +22,31 @@ namespace Game.LevelEditor
             TileData.Factory.Create(TileType.Wood, null),
         };
 
-        private List<TileIconCapturer> _tileIconCapturers = new List<TileIconCapturer>(Enum.GetNames(typeof(TileType)).Length);
-
         public TileData Selected { get; private set; }
 
-        private void Awake()
+        #region Unity
+
+        private void Start()
         {
-            for (int i = 0; i < IconData.Count; i++)
+            foreach (var data in IconData)
             {
-                TileData data = IconData[i];
-
-                TileIconCapturer newIconCapturer = Instantiate(iconCapturerPrefab, iconCapturerContainer);
-                newIconCapturer.transform.localPosition = Vector3.right * i * 3;
-                RenderTexture renderTexture = newIconCapturer.Setup(data);
-
-                TileUiIcon newIcon = Instantiate(iconPrefab, iconUiContainer);
-                newIcon.Setup(data, renderTexture);
-
-                newIcon.Clicked += OnIconClicked;
-
-                _tileIconCapturers.Add(newIconCapturer);
+                Button newButton = Instantiate(buttonPrefab, buttonContainer);
+                ButtonInfo info = new ButtonInfo(
+                    data.ToString(), 
+                    action: () => OnIconClicked(data));
+                newButton.Init(info);
             }
         }
+
+        #endregion
+
+        #region Events
 
         private void OnIconClicked(TileData data)
         {
             Selected = data;
         }
 
-        private void Start()
-        {
-            foreach (var ic in _tileIconCapturers)
-            {
-                ic.Render();
-            }
-        }
+        #endregion
     }
 }

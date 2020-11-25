@@ -1,6 +1,4 @@
 ﻿using Game.UndoSystem;
-using System.Collections;
-using UnityEngine;
 
 namespace Game.Core
 {

@@ -11,7 +11,7 @@ namespace Game.Levels
     [CreateAssetMenu(fileName = nameof(LevelDataManager), menuName = SONames.GameDir + nameof(LevelDataManager))]
     internal class LevelDataManager : ScriptableObject
     {
-        [SerializeField, OnValueChanged(nameof(OnLevelListChanged)), AssetsOnly, ListDrawerSettings(Expanded = true, ShowIndexLabels = true), PropertyOrder(1)]
+        [SerializeField, OnValueChanged(nameof(UpdateNotIncludedLevels)), AssetsOnly, ListDrawerSettings(Expanded = true, ShowIndexLabels = true), PropertyOrder(1)]
         private LevelData[] levelDatas;
 
         [ShowInInspector, PropertyOrder(2), BoxGroup("InGameData")]
@@ -40,7 +40,7 @@ namespace Game.Levels
 
         private void OnEnable()
         {
-            OnLevelListChanged();
+            UpdateNotIncludedLevels();
         }
 
         #endregion
@@ -83,13 +83,24 @@ namespace Game.Levels
         #region Odin
 
         [Button("Update Not Included Levels"), PropertyOrder(3)]
-        private void OnLevelListChanged()
+        private void UpdateNotIncludedLevels()
         {
             notIncludedLevels = AssetDatabase.FindAssets("t:LevelData")
                .Select(id => AssetDatabase.GUIDToAssetPath(id))
                .Select(path => AssetDatabase.LoadAssetAtPath<LevelData>(path))
                .Except(levelDatas)
                .ToList();
+        }
+
+        
+        [Button, PropertyOrder(3)]
+        private void AddNotIncludedLevels()
+        {
+            var tempLevels = levelDatas.ToList();
+            tempLevels.AddRange(notIncludedLevels);
+            levelDatas = tempLevels.ToArray();
+
+            UpdateNotIncludedLevels();
         }
 
         #endregion

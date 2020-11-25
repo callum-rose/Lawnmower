@@ -4,9 +4,6 @@ using Game.Levels;
 using Lean.Touch;
 using Sirenix.OdinInspector;
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEditor.Callbacks;
 using UnityEngine;
 
 namespace Game.Mowers.Input
