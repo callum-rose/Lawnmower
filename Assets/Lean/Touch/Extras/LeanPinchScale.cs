@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace Lean.Touch
 {
@@ -31,6 +32,8 @@ namespace Lean.Touch
 		/// 10 = Quickly change.</summary>
 		[Tooltip("If you want this component to change smoothly over time, then this allows you to control how quick the changes reach their target value.\n\n-1 = Instantly change.\n\n1 = Slowly change.\n\n10 = Quickly change.")]
 		public float Dampening = -1.0f;
+
+		public UnityEvent<float> Scale; 
 
 		[HideInInspector]
 		[SerializeField]
@@ -97,6 +100,11 @@ namespace Lean.Touch
 				}
 
 				transform.localScale *= pinchScale;
+
+				if (Scale != null)
+                {
+					Scale.Invoke(transform.localScale.x);
+				}
 
 				remainingScale += transform.localPosition - oldScale;
 			}

@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Game.Mowers.Input
 {
-    internal class TouchSwipeHandler : MonoBehaviour, IMovementGestureHandler
+    internal class TouchSwipeHandler : MonoBehaviour, IMowerMovementGestureHandler
     {
         [SerializeField] private ScreenToWorldPointConverter screenToWorldConverter;
 

@@ -11,7 +11,7 @@ using UnityEngine;
 
 namespace Game.Mowers.Input
 {
-    internal class TouchTapHandler : MonoBehaviour, IMovementGestureHandler, IRequiresMowerPosition
+    internal class TouchTapHandler : MonoBehaviour, IMowerMovementGestureHandler, IRequiresMowerPosition
     {
         [SerializeField] private ScreenToWorldPointConverter screenToWorldConverter;
         [SerializeField] private Positioner positioner;

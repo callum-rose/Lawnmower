@@ -6,5 +6,6 @@ namespace Core
         public const string CoreDir = Dir + "Core/";
         public const string GameDir = Dir + "Game/";
         public const string MainMenuDir = Dir + "MainMenu/";
+        public const string UIDir = Dir + "UI/";
     }
 }

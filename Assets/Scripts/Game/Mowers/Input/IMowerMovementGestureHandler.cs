@@ -3,13 +3,13 @@ using System;
 
 namespace Game.Mowers.Input
 {
-    internal interface IMovementGestureHandler
+    internal interface IMowerMovementGestureHandler
     {
         event Action<GridVector> Move;
     }
 
     [Serializable]
-    class IMovementGestureHandlerContainer : IUnifiedContainer<IMovementGestureHandler>
+    class IMowerMovementGestureHandlerContainer : IUnifiedContainer<IMowerMovementGestureHandler>
     {
 
     }

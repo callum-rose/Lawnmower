@@ -12,7 +12,8 @@ namespace UI.Buttons
     internal class Button : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler
     {
         [SerializeField] private TextMeshProUGUI messageText;
-        [SerializeField] private Image iconImage;
+        [SerializeField] private ButtonResizer resizer;
+        [SerializeField] private ButtonIconSetter iconSetter;
 
         [Header("Background")]
         [SerializeField] private Image backgroundImage;
@@ -36,12 +37,11 @@ namespace UI.Buttons
         {
             messageText.text = info.Message;
 
-            iconImage.sprite = info.Icon;
-            iconImage.gameObject.SetActive(info.Icon != null);
-
             _action = info.Action;
 
-            GetComponent<ButtonResizer>().FitToContent(true);
+            iconSetter.Set(info.Icon);
+
+            resizer.FitToContent(true);
         }
 
         public void OnPointerClick(PointerEventData eventData)

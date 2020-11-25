@@ -7,4 +7,10 @@ namespace Game.Tiles
     {
         event Action<GridVector> Selected;
     }
+
+    [Serializable]
+    class ITileSelectorContainer : IUnifiedContainer<ITileSelector>
+    {
+
+    }
 }

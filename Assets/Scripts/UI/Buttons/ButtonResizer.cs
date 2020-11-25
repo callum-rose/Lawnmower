@@ -21,16 +21,15 @@ namespace UI.Buttons
 
         private Tween _currentTween;
 
-        [Button]
+        #region API
+
         public void SetWidth(float width, bool instant = false)
         {
-#if UNITY_EDITOR
             if (instant || !Application.isPlaying)
             {
                 RectTransform.sizeDelta = RectTransform.sizeDelta.SetX(width);
                 return;
             }
-#endif
 
             if (_currentTween?.IsComplete() ?? false)
             {
@@ -41,16 +40,65 @@ namespace UI.Buttons
             _currentTween = RectTransform.DOSizeDelta(currentSize.SetX(width), animationDuration).SetEase(animationEase);
         }
 
-        [Button]
         public void FitToContent(bool instant = false)
         {
+            FitToContent_Internal(icon.gameObject.activeSelf, text.gameObject.activeSelf, instant);
+        }
+
+        public void SetContent(bool useIcon, bool useText, bool instant)
+        {
+            if (instant)
+            {
+                SetContent_Internal(useIcon, useText);
+                FitToContent_Internal(useIcon, useText, instant);
+            }
+            else
+            {
+                StartCoroutine(SetContentRoutine(useIcon, useText));
+            }
+        }
+
+        [Button]
+        public void Set(bool useIcon, bool useText, bool instant)
+        {
+            SetContent_Internal(true, true);
+            SetContent(useIcon, useText, instant);
+        }
+
+        #endregion
+
+        #region Methods
+
+        private void FitToContent_Internal(bool useIcon, bool useText, bool instant)
+        {
             float fittedWidth = layoutGroup.padding.left +
-                (icon.gameObject.activeSelf ? icon.rectTransform.sizeDelta.x : 0) +
-                (icon.gameObject.activeSelf && text.gameObject.activeSelf ? layoutGroup.spacing : 0) +
-                (text.gameObject.activeSelf ? text.GetRenderedValues(true).x : 0) +
+                (useIcon ? icon.rectTransform.sizeDelta.x : 0) +
+                (useIcon && useText ? layoutGroup.spacing : 0) +
+                (useText ? text.GetRenderedValues(true).x : 0) +
                 layoutGroup.padding.right;
 
             SetWidth(fittedWidth, instant);
         }
+
+        private void SetContent_Internal(bool useIcon, bool useText)
+        {
+            icon.gameObject.SetActive(useIcon);
+            text.gameObject.SetActive(useText);
+        }
+
+        #endregion
+
+        #region Routines
+
+        private IEnumerator SetContentRoutine(bool useIcon, bool useText)
+        {
+            FitToContent_Internal(useIcon, useText, false);
+
+            yield return _currentTween?.WaitForCompletion();
+
+            SetContent_Internal(useIcon, useText);
+        }
+
+        #endregion
     }
 }

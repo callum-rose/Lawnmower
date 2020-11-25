@@ -11,7 +11,7 @@ namespace Game.Mowers.Input
     [DefaultExecutionOrder(-99)]
     class TouchMowerControls : MonoBehaviour, IMowerControls
     {
-        [SerializeField] private IMovementGestureHandlerContainer[] _gestureHandlerContainers;
+        [SerializeField] private IMowerMovementGestureHandlerContainer[] _gestureHandlerContainers;
 
         public event Action<GridVector> Moved;
 

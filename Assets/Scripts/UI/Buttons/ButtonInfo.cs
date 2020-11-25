@@ -5,7 +5,7 @@ namespace UI.Buttons
 {
     public struct ButtonInfo
     {
-        public ButtonInfo(string message = null, Sprite icon = null, Action action = null) : this()
+        public ButtonInfo(string message = null, IconType icon = IconType.None, Action action = null) : this()
         {
             Message = message;
             Icon = icon;
@@ -13,7 +13,7 @@ namespace UI.Buttons
         }
 
         public string Message { get; }
-        public Sprite Icon { get; }
+        public IconType Icon { get; }
         public Action Action { get; }
     }
 }

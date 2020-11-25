@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Game.Mowers.Input
 {
-    internal class TouchDragHandler : MonoBehaviour, IMovementGestureHandler, IRequiresMowerPosition
+    internal class TouchDragHandler : MonoBehaviour, IMowerMovementGestureHandler, IRequiresMowerPosition
     {
         [SerializeField] private ScreenToWorldPointConverter screenToWorldConverter;
         [SerializeField] private Positioner positioner;

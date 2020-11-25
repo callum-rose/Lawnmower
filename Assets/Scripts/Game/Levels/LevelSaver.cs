@@ -18,12 +18,19 @@ namespace Game.Levels
 
         public void Save_Editor(ReadOnlyTiles tiles, GridVector mowerPosition)
         {
+            string path = Path.Combine(savePath, $"{fileName}.asset");
+
+            if (AssetDatabase.LoadAssetAtPath<Object>(path) != default && !EditorUtility.DisplayDialog($"Overwrite {fileName}?", "Overwrite", "Yes", "No"))
+            {
+                return;
+            }
+
             LevelData newLevel = CreateInstance<LevelData>();
             levelConverter.ConvertTilesToLevelData(newLevel, tiles, mowerPosition);
 
             LevelData trimmedLevel = LevelShaper.TrimExcess(newLevel);
 
-            AssetDatabase.CreateAsset(trimmedLevel, Path.Combine(savePath, $"{fileName}.asset"));
+            AssetDatabase.CreateAsset(trimmedLevel, path);
             AssetDatabase.SaveAssets();
 
             EditorUtility.FocusProjectWindow();

@@ -2,32 +2,31 @@
 using Game.Levels;
 using Game.Tiles;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Game.LevelEditor
 {
     internal class EditorTileUpdator : MonoBehaviour, IHasEditMode
     {
-        [SerializeField] private MouseTileSelector tileSelector;
+        [SerializeField, FormerlySerializedAs("tileSelector")] private ITileSelectorContainer tileSelectorContainer;
         [SerializeField] private EditorTileUiManager tileUiManager;
         [SerializeField] private LevelManager levelManager;
 
         public bool IsEditMode { get; set; }
 
+        private ITileSelector TileSelector => tileSelectorContainer.Result;
+
         #region Unity
 
         private void Awake()
         {
-            tileSelector.Selected += OnTileSelected;
+            TileSelector.Selected += OnTileSelected;
         }
 
         private void OnDestroy()
         {
-            tileSelector.Selected -= OnTileSelected;
+            TileSelector.Selected -= OnTileSelected;
         }
-
-        #endregion
-
-        #region API
 
         #endregion
 
