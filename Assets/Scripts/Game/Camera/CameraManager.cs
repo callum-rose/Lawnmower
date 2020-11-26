@@ -3,6 +3,7 @@ using Cinemachine;
 using UnityEngine.Serialization;
 using Game.Levels;
 using Game.Tiles;
+using System.Linq;
 
 namespace Game.Camera
 {
@@ -56,6 +57,14 @@ namespace Game.Camera
 
         private void LevelManager_TileDestroyed(Tile tile)
         {
+            if (tile == null)
+            {
+                cameraTargetGroup.m_Targets = cameraTargetGroup.m_Targets
+                    .Where(t => t.target != null)
+                    .ToArray();
+                return;
+            }
+
             cameraTargetGroup.RemoveMember(tile.transform);
         }
 

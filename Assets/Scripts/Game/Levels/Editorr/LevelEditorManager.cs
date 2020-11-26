@@ -5,25 +5,42 @@ using Game.Tiles;
 using Game.UndoSystem;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using R = Sirenix.OdinInspector.RequiredAttribute;
 
-namespace Game.LevelEditor
+namespace Game.Levels.Editor
 {
-    public class LevelEditorManager : MonoBehaviour
+    public class LevelEditorManager : MonoBehaviour, IHasEditMode
     {
         [Space]
-        [SerializeField] private GameManager gameManager;
-        [SerializeField] private LevelManager levelManager;
-        [SerializeField] private ITileSelectorContainer tileSelector;
+        [SerializeField, R] private GameManager gameManager;
+        [SerializeField, R] private LevelManager levelManager;
+        [SerializeField, R] private ITileSelectorContainer tileSelector;
 
         [Space]
-        [SerializeField] private GameObject uiContainer;
+        [SerializeField, R] private GameObject uiContainer;
 
         [Space]
-        [SerializeField] private GizmoGridRenderer gridRenderer;
-        [SerializeField] private GizmoSelectedTileRenderer tileRenderer;
+        [SerializeField, R] private GizmoGridRenderer gridRenderer;
+        [SerializeField, R] private GizmoSelectedTileRenderer tileRenderer;
 
-        [SerializeField, BoxGroup(nameof(IHasEditMode) + "s"), ListDrawerSettings(Expanded = true)]
+        [SerializeField, R, ListDrawerSettings]
         private IHasEditModeContainer[] hasEditModes;
+
+        public bool IsEditMode
+        {
+            get => ___isEditMode;
+            set
+            {
+                ___isEditMode = value;
+
+                foreach (var e in hasEditModes)
+                {
+                    e.Result.IsEditMode = ___isEditMode;
+                }
+            }
+        }
+
+        private bool ___isEditMode;
 
         #region Unity
 
@@ -62,12 +79,15 @@ namespace Game.LevelEditor
         #region Odin
 #if UNITY_EDITOR
 
-        [SerializeField, AssetsOnly, BoxGroup("Debug")] private LevelData levelAsset;
-        [SerializeField, AssetsOnly, BoxGroup("Debug")] private MowerData mowerData;
+        [SerializeField, R, AssetsOnly, BoxGroup(Build)] private LevelData levelAsset;
+        [SerializeField, R, AssetsOnly, BoxGroup(Build)] private MowerData mowerData;
+
+        private const string Build = "Build";
+        private const string Save = "Save";
 
         private bool AppRunning => Application.isPlaying;
 
-        [Button("Build"), BoxGroup("Debug"), EnableIf(nameof(AppRunning))]
+        [Button("Build"), BoxGroup(Build), EnableIf(nameof(AppRunning))]
         private void BuildSelectedLevel()
         {
             GameSetupPassThroughData data = new GameSetupPassThroughData
@@ -80,7 +100,7 @@ namespace Game.LevelEditor
 
         }
 
-        [Button("Build In Edit Mode"), BoxGroup("Debug"), EnableIf(nameof(AppRunning))]
+        [Button("Build In Edit Mode"), BoxGroup(Build), EnableIf(nameof(AppRunning))]
         private void BuildSelectedLevelInEdit()
         {
             GameSetupPassThroughData data = new GameSetupPassThroughData
@@ -92,7 +112,7 @@ namespace Game.LevelEditor
             Begin(data, true);
         }
 
-        [Button(Expanded = true), BoxGroup("Debug"), EnableIf(nameof(AppRunning))]
+        [Button(Expanded = true), BoxGroup(Build), EnableIf(nameof(AppRunning))]
         private void BuildEmptyLevelInEdit(int width, int depth)
         {
             var emptyLevel = ScriptableObject.CreateInstance<LevelData>();
@@ -107,6 +127,14 @@ namespace Game.LevelEditor
             Begin(data, true);
         }
 
+        [SerializeField, R, BoxGroup(Save), InlineEditor(Expanded = true)] private LevelSaver levelSaver;
+
+        [Button, EnableIf(nameof(IsEditMode)), BoxGroup(Save)]
+        private void SaveLevel()
+        {
+            levelSaver.Save_Editor(levelManager.Tiles, levelManager.MowerPosition);
+        }
+
 #endif
         #endregion
 
@@ -118,15 +146,9 @@ namespace Game.LevelEditor
 
             uiContainer.SetActive(isEdit);
 
-            SetEditMode(isEdit);
-        }
+            IsEditMode = isEdit;
 
-        private void SetEditMode(bool isEditMode)
-        {
-            foreach (var e in hasEditModes)
-            {
-                e.Result.IsEditMode = isEditMode;
-            }
+            InterfaceHelper.FindObject<IMowerRunnable>().IsRunning = !isEdit;
         }
 
         #endregion

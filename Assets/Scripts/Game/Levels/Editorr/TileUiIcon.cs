@@ -3,7 +3,7 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Game.LevelEditor
+namespace Game.Levels.Editor
 {
     internal class TileUiIcon : MonoBehaviour
     {

@@ -2,7 +2,7 @@
 using UnityEngine;
 using static Game.Levels.LevelDimensions;
 
-namespace Game.LevelEditor
+namespace Game.Levels.Editor
 {
     public class GizmoSelectedTileRenderer : MonoBehaviour
     {

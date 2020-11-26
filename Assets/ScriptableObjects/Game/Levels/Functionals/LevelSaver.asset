@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   levelConverter: {fileID: 11400000, guid: 14139ac5ca05add4697c788cbf285ea5, type: 2}
   savePath: Assets/ScriptableObjects/Game/Levels/Data
-  fileName: Level7
+  fileName: Level8

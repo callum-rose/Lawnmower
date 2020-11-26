@@ -3,7 +3,7 @@ using BalsamicBits.Extensions;
 using Core;
 using Game.Tiles;
 
-namespace Game.LevelEditor
+namespace Game.Levels.Editor
 {
     public class TileIconCapturer : MonoBehaviour
     {

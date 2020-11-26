@@ -120,18 +120,18 @@ namespace Game.Core
 
         private void OnLevelFailed(Xor isUndo)
         {
-            if (!isUndo)
-            {
-                void ButtonAction()
-                {
-                    Begin(_inputData);
-                };
-                _levelFailedDialogId = dialogManager.Show("Level Completed!", "Nice one", new ButtonInfo("Retry", action: ButtonAction));
-            }
-            else
-            {
-                dialogManager.Close(_levelFailedDialogId);
-            }
+            //if (!isUndo)
+            //{
+            //    void ButtonAction()
+            //    {
+            //        Begin(_inputData);
+            //    };
+            //    _levelFailedDialogId = dialogManager.Show("Level Completed!", "Nice one", new ButtonInfo("Retry", action: ButtonAction));
+            //}
+            //else
+            //{
+            //    dialogManager.Close(_levelFailedDialogId);
+            //}
         }
 
         #endregion

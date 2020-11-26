@@ -4,7 +4,7 @@ using UI.Buttons;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-namespace Game.LevelEditor
+namespace Game.Levels.Editor
 {
     public class EditorTileUiManager : MonoBehaviour
     {

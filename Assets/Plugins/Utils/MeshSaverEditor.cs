@@ -27,7 +27,7 @@ namespace Utils
 
         public static void SaveMesh(Mesh mesh, string name, bool makeNewInstance, bool optimizeMesh)
         {
-            string path = EditorUtility.SaveFilePanel("Save Separate Mesh Asset", "Assets/", name, "asset");
+            string path = EditorUtility.SaveFilePanel("Save Separate Mesh Asset", "Assets/Meshes", name, "asset");
             if (string.IsNullOrEmpty(path))
             {
                 return;

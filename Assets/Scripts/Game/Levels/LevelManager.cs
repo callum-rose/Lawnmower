@@ -23,7 +23,10 @@ namespace Game.Levels
 
         public bool IsEditMode { get; set; }
 
+        public ReadOnlyTiles Tiles => new ReadOnlyTiles(_tiles);
+
         public IReadOnlyLevelData Level => _level;
+        public GridVector MowerPosition => _mowerMovement.MowerPosition;
 
         private LevelData _level;
         private MowerMovementManager _mowerMovement;
@@ -62,7 +65,13 @@ namespace Game.Levels
             _mowerMovement = mowerMovement;
         }
 
-        public void SetLevel(LevelData level, GridVector worldOffset = default)
+        public void SetLevel(LevelData level)
+        {
+            SetLevelAfterResize(level, GridVector.Zero);
+            _mowerMovement.IsRunning = true;
+        }
+
+        public void SetLevelAfterResize(LevelData level, GridVector worldOffset)
         {
             ClearTiles();
 
@@ -74,7 +83,6 @@ namespace Game.Levels
             SetDependanciesOfTiles();
 
             _mowerMovement.SetPosition(level.StartPosition);
-            _mowerMovement.IsRunning = true;
 
             positioner.OffsetContainer(-worldOffset);
 
@@ -146,7 +154,7 @@ namespace Game.Levels
         private void OnLevelFailed(Xor isUndo)
         {
             bool isLevelResuming = isUndo;
-            _mowerMovement.IsRunning = isLevelResuming;
+            //_mowerMovement.IsRunning = isLevelResuming;
 
             LevelFailed.Invoke(isUndo);
         }
@@ -157,25 +165,11 @@ namespace Game.Levels
 
         private void SetDependanciesOfTiles()
         {
-            ReadOnlyTiles readOnlyTiles = new ReadOnlyTiles(_tiles);
+            ReadOnlyTiles readOnlyTiles = Tiles;
             traversalChecker.SetTiles(readOnlyTiles);
             levelInteractor.SetTiles(readOnlyTiles);
         }
 
-        #endregion
-
-        #region Odin
-#if UNITY_EDITOR
-
-        [SerializeField, BoxGroup("Debug"), InlineEditor(Expanded = true)] private LevelSaver levelSaver;
-
-        [Button, EnableIf(nameof(IsEditMode)), BoxGroup("Debug")]
-        private void SaveLevel()
-        {
-            levelSaver.Save_Editor(new ReadOnlyTiles(_tiles), _mowerMovement.MowerPosition);
-        }
-
-#endif
         #endregion
     }
 }

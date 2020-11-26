@@ -5,7 +5,7 @@ using Game.UndoSystem;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-namespace Game.LevelEditor
+namespace Game.Levels.Editor
 {
     internal class EditorTileUpdator : MonoBehaviour, IHasEditMode
     {
@@ -62,7 +62,7 @@ namespace Game.LevelEditor
             {
                 var newLevel = LevelShaper.EncapsulatePosition(level, position, out GridVector offset);
                 position += offset;
-                levelManager.SetLevel(newLevel, offset);
+                levelManager.SetLevelAfterResize(newLevel, offset);
             }
         }
 
