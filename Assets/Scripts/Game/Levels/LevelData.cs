@@ -117,14 +117,14 @@ namespace Game.Levels
             SetTile(position.x, position.y, data);
         }
 
-        public LevelData GetCopy()
-        {
-            var newLevel = CreateInstance<LevelData>();
-            newLevel.tiles = new Serialised2dArray<TileData>(tiles);
-            newLevel.startPosition = startPosition;
-            newLevel.id = id;
-            return newLevel;
-        }
+        // public LevelData GetCopy()
+        // {
+        //     var newLevel = CreateInstance<LevelData>();
+        //     newLevel.tiles = new Serialised2dArray<TileData>(tiles);
+        //     newLevel.startPosition = startPosition;
+        //     newLevel.id = id;
+        //     return newLevel;
+        // }
 
         #endregion
 

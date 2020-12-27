@@ -2,7 +2,7 @@
 using UI.Buttons;
 using UnityEngine;
 
-namespace Game.Levels.Editor
+namespace Game.Levels.Editorr
 {
     internal class EditorMowerActivator : MonoBehaviour
 	{

@@ -1,11 +1,10 @@
 ﻿using Game.Core;
-using Game.Levels;
 using Game.Tiles;
 using Game.UndoSystem;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-namespace Game.Levels.Editor
+namespace Game.Levels.Editorr
 {
     internal class EditorTileUpdator : MonoBehaviour, IHasEditMode
     {

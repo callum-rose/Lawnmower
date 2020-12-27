@@ -1,9 +1,9 @@
-﻿using UnityEngine;
-using BalsamicBits.Extensions;
+﻿using BalsamicBits.Extensions;
 using Core;
 using Game.Tiles;
+using UnityEngine;
 
-namespace Game.Levels.Editor
+namespace Game.Levels.Editorr
 {
     public class TileIconCapturer : MonoBehaviour
     {

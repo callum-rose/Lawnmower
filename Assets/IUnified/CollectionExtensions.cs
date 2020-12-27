@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Assets.IUnified
+namespace IUnified
 {
     public static class CollectionExtensions
     {

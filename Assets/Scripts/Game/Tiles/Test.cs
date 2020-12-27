@@ -1,39 +1,42 @@
 ﻿using UnityEngine;
 
-[RequireComponent(typeof(Renderer)), ExecuteInEditMode]
-public class Test : MonoBehaviour
+namespace Game.Tiles
 {
-    [SerializeField] private Vector3 test;
-    [SerializeField] private float curveMaxSize;
-
-    private static MaterialPropertyBlock _propertyBlock;
-
-    private Renderer _renderer;
-
-    private void Awake()
+    [RequireComponent(typeof(Renderer)), ExecuteInEditMode]
+    public class Test : MonoBehaviour
     {
-        OnValidate();
+        [SerializeField] private Vector3 test;
+        [SerializeField] private float curveMaxSize;
 
-        transform.localScale = Vector3.one * (10 * Random.Range(0.9f, 1.1f));
-    }
+        private static MaterialPropertyBlock _propertyBlock;
 
-    private void OnValidate()
-    {
-        var circle = Random.insideUnitCircle;
-        test = new Vector3(circle.x, 0, circle.y) * curveMaxSize;
+        private Renderer _renderer;
 
-        if (_propertyBlock == null)
+        private void Awake()
         {
-            _propertyBlock = new MaterialPropertyBlock();
+            OnValidate();
+
+            transform.localScale = Vector3.one * (10 * Random.Range(0.9f, 1.1f));
         }
 
-        if (_renderer == null)
+        private void OnValidate()
         {
-            _renderer = GetComponent<Renderer>();
-        }
+            var circle = Random.insideUnitCircle;
+            test = new Vector3(circle.x, 0, circle.y) * curveMaxSize;
 
-        _renderer.GetPropertyBlock(_propertyBlock);
-        _propertyBlock.SetVector("_Offset", test);
-        _renderer.SetPropertyBlock(_propertyBlock);
+            if (_propertyBlock == null)
+            {
+                _propertyBlock = new MaterialPropertyBlock();
+            }
+
+            if (_renderer == null)
+            {
+                _renderer = GetComponent<Renderer>();
+            }
+
+            _renderer.GetPropertyBlock(_propertyBlock);
+            _propertyBlock.SetVector("_Offset", test);
+            _renderer.SetPropertyBlock(_propertyBlock);
+        }
     }
 }

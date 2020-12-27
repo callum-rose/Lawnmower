@@ -1,3 +1,6 @@
+using System;
+using Lean.Common;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Events;
 using FSA = UnityEngine.Serialization.FormerlySerializedAsAttribute;
@@ -9,10 +12,6 @@ namespace Lean.Touch
 	[AddComponentMenu(LeanTouch.ComponentPathPrefix + "Finger Tap")]
 	public class LeanFingerTap : MonoBehaviour
 	{
-		[System.Serializable] public class LeanFingerEvent : UnityEvent<LeanFinger> {}
-		[System.Serializable] public class Vector3Event : UnityEvent<Vector3> {}
-		[System.Serializable] public class IntEvent : UnityEvent<int> {}
-
 		/// <summary>Ignore fingers with StartedOverGui?</summary>
 		public bool IgnoreStartedOverGui = true;
 
@@ -22,28 +21,69 @@ namespace Lean.Touch
 		/// <summary>Do nothing if this LeanSelectable isn't selected?</summary>
 		public LeanSelectable RequiredSelectable;
 
-		/// <summary>How many times must this finger tap before OnTap gets called?
-		/// 0 = Every time (keep in mind OnTap will only be called once if you use this).</summary>
-		public int RequiredTapCount = 0;
+		/// <summary>
+		///     How many times must this finger tap before OnTap gets called?
+		///     0 = Every time (keep in mind OnTap will only be called once if you use this).
+		/// </summary>
+		public int RequiredTapCount;
 
-		/// <summary>How many times repeating must this finger tap before OnTap gets called?
-		/// 0 = Every time (e.g. a setting of 2 means OnTap will get called when you tap 2 times, 4 times, 6, 8, 10, etc).</summary>
+		/// <summary>
+		///     How many times repeating must this finger tap before OnTap gets called?
+		///     0 = Every time (e.g. a setting of 2 means OnTap will get called when you tap 2 times, 4 times, 6, 8, 10, etc).
+		/// </summary>
 		public int RequiredTapInterval;
 
-		/// <summary>Called on the first frame the conditions are met.
-		/// LeanFinger = The finger that triggered the event.</summary>
-		public LeanFingerEvent OnFinger { get { if (onFinger == null) onFinger = new LeanFingerEvent(); return onFinger; } } [FSA("onTap")] [FSA("OnTap")] [SerializeField] private LeanFingerEvent onFinger;
+		[FSA("onTap")] [FSA("OnTap")] [SerializeField]
+		private LeanFingerEvent onFinger;
 
-		/// <summary>Called on the first frame the conditions are met.
-		/// Int = The finger tap count.</summary>
-		public IntEvent OnCount { get { if (onCount == null) onCount = new IntEvent(); return onCount; } } [SerializeField] private IntEvent onCount;
+		[SerializeField] private IntEvent onCount;
 
-		/// <summary>The method used to find world coordinates from a finger. See LeanScreenDepth documentation for more information.</summary>
+		/// <summary>
+		///     The method used to find world coordinates from a finger. See LeanScreenDepth documentation for more
+		///     information.
+		/// </summary>
 		public LeanScreenDepth ScreenDepth = new LeanScreenDepth(LeanScreenDepth.ConversionType.DepthIntercept);
 
-		/// <summary>Called on the first frame the conditions are met.
-		/// Vector3 = Start point based on the ScreenDepth settings.</summary>
-		public Vector3Event OnWorld { get { if (onWorld == null) onWorld = new Vector3Event(); return onWorld; } } [FSA("onPosition")] [SerializeField] private Vector3Event onWorld;
+		[FSA("onPosition")] [SerializeField] private Vector3Event onWorld;
+
+		/// <summary>
+		///     Called on the first frame the conditions are met.
+		///     LeanFinger = The finger that triggered the event.
+		/// </summary>
+		public LeanFingerEvent OnFinger
+		{
+			get
+			{
+				if (onFinger == null) onFinger = new LeanFingerEvent();
+				return onFinger;
+			}
+		}
+
+		/// <summary>
+		///     Called on the first frame the conditions are met.
+		///     Int = The finger tap count.
+		/// </summary>
+		public IntEvent OnCount
+		{
+			get
+			{
+				if (onCount == null) onCount = new IntEvent();
+				return onCount;
+			}
+		}
+
+		/// <summary>
+		///     Called on the first frame the conditions are met.
+		///     Vector3 = Start point based on the ScreenDepth settings.
+		/// </summary>
+		public Vector3Event OnWorld
+		{
+			get
+			{
+				if (onWorld == null) onWorld = new Vector3Event();
+				return onWorld;
+			}
+		}
 
 #if UNITY_EDITOR
 		protected virtual void Reset()
@@ -54,10 +94,7 @@ namespace Lean.Touch
 
 		protected virtual void Start()
 		{
-			if (RequiredSelectable == null)
-			{
-				RequiredSelectable = GetComponentInParent<LeanSelectable>();
-			}
+			if (RequiredSelectable == null) RequiredSelectable = GetComponentInParent<LeanSelectable>();
 		}
 
 		protected virtual void OnEnable()
@@ -73,40 +110,19 @@ namespace Lean.Touch
 		private void HandleFingerTap(LeanFinger finger)
 		{
 			// Ignore?
-			if (IgnoreStartedOverGui == true && finger.StartedOverGui == true)
-			{
-				return;
-			}
+			if (IgnoreStartedOverGui && finger.StartedOverGui) return;
 
-			if (IgnoreIsOverGui == true && finger.IsOverGui == true)
-			{
-				return;
-			}
+			if (IgnoreIsOverGui && finger.IsOverGui) return;
 
-			if (RequiredTapCount > 0 && finger.TapCount != RequiredTapCount)
-			{
-				return;
-			}
+			if (RequiredTapCount > 0 && finger.TapCount != RequiredTapCount) return;
 
-			if (RequiredTapInterval > 0 && (finger.TapCount % RequiredTapInterval) != 0)
-			{
-				return;
-			}
+			if (RequiredTapInterval > 0 && finger.TapCount % RequiredTapInterval != 0) return;
 
-			if (RequiredSelectable != null && RequiredSelectable.IsSelected == false)
-			{
-				return;
-			}
+			if (RequiredSelectable != null && RequiredSelectable.IsSelected == false) return;
 
-			if (onFinger != null)
-			{
-				onFinger.Invoke(finger);
-			}
+			if (onFinger != null) onFinger.Invoke(finger);
 
-			if (onCount != null)
-			{
-				onCount.Invoke(finger.TapCount);
-			}
+			if (onCount != null) onCount.Invoke(finger.TapCount);
 
 			if (onWorld != null)
 			{
@@ -115,17 +131,30 @@ namespace Lean.Touch
 				onWorld.Invoke(position);
 			}
 		}
+
+		[Serializable]
+		public class LeanFingerEvent : UnityEvent<LeanFinger>
+		{
+		}
+
+		[Serializable]
+		public class Vector3Event : UnityEvent<Vector3>
+		{
+		}
+
+		[Serializable]
+		public class IntEvent : UnityEvent<int>
+		{
+		}
 	}
 }
 
 #if UNITY_EDITOR
 namespace Lean.Touch.Inspector
 {
-	using UnityEditor;
-
 	[CanEditMultipleObjects]
 	[CustomEditor(typeof(LeanFingerTap))]
-	public class LeanFingerTap_Inspector : Lean.Common.LeanInspector<LeanFingerTap>
+	public class LeanFingerTap_Inspector : LeanInspector<LeanFingerTap>
 	{
 		private bool showUnusedEvents;
 
@@ -134,8 +163,10 @@ namespace Lean.Touch.Inspector
 			Draw("IgnoreStartedOverGui", "Ignore fingers with StartedOverGui?");
 			Draw("IgnoreIsOverGui", "Ignore fingers with OverGui?");
 			Draw("RequiredSelectable", "Do nothing if this LeanSelectable isn't selected?");
-			Draw("RequiredTapCount", "How many times must this finger tap before OnTap gets called?\n\n0 = Every time (keep in mind OnTap will only be called once if you use this).");
-			Draw("RequiredTapInterval", "How many times repeating must this finger tap before OnTap gets called?\n\n0 = Every time (e.g. a setting of 2 means OnTap will get called when you tap 2 times, 4 times, 6, 8, 10, etc).");
+			Draw("RequiredTapCount",
+				"How many times must this finger tap before OnTap gets called?\n\n0 = Every time (keep in mind OnTap will only be called once if you use this).");
+			Draw("RequiredTapInterval",
+				"How many times repeating must this finger tap before OnTap gets called?\n\n0 = Every time (e.g. a setting of 2 means OnTap will get called when you tap 2 times, 4 times, 6, 8, 10, etc).");
 
 			EditorGUILayout.Separator();
 
@@ -144,22 +175,16 @@ namespace Lean.Touch.Inspector
 			var usedC = Any(t => t.OnWorld.GetPersistentEventCount() > 0);
 
 			EditorGUI.BeginDisabledGroup(usedA && usedC);
-				showUnusedEvents = EditorGUILayout.Foldout(showUnusedEvents, "Show Unused Events");
+			showUnusedEvents = EditorGUILayout.Foldout(showUnusedEvents, "Show Unused Events");
 			EditorGUI.EndDisabledGroup();
 
 			EditorGUILayout.Separator();
 
-			if (usedA == true || showUnusedEvents == true)
-			{
-				Draw("onFinger");
-			}
+			if (usedA || showUnusedEvents) Draw("onFinger");
 
-			if (usedB == true || showUnusedEvents == true)
-			{
-				Draw("onCount");
-			}
+			if (usedB || showUnusedEvents) Draw("onCount");
 
-			if (usedC == true || showUnusedEvents == true)
+			if (usedC || showUnusedEvents)
 			{
 				Draw("ScreenDepth");
 				Draw("onWorld");

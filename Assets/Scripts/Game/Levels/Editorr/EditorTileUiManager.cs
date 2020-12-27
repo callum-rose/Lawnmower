@@ -1,10 +1,10 @@
-﻿using Game.Tiles;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Game.Tiles;
 using UI.Buttons;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-namespace Game.Levels.Editor
+namespace Game.Levels.Editorr
 {
     public class EditorTileUiManager : MonoBehaviour
     {

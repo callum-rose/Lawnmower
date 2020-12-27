@@ -1,9 +1,9 @@
-﻿using Game.Tiles;
-using System;
+﻿using System;
+using Game.Tiles;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Game.Levels.Editor
+namespace Game.Levels.Editorr
 {
     internal class TileUiIcon : MonoBehaviour
     {

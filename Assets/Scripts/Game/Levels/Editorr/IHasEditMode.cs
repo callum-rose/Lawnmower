@@ -1,6 +1,7 @@
 ﻿using System;
+using IUnified;
 
-namespace Game
+namespace Game.Levels.Editorr
 {
     internal interface IHasEditMode
     {

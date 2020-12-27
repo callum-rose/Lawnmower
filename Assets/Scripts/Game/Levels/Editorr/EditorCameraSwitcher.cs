@@ -1,9 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using Cinemachine;
 using UnityEngine;
-using Cinemachine;
 
-namespace Game.Levels.Editor
+namespace Game.Levels.Editorr
 {
 	internal class EditorCameraSwitcher : MonoBehaviour
 	{

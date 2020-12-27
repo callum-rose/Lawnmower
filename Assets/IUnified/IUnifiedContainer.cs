@@ -4,19 +4,21 @@ using System.Text.RegularExpressions;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-/// <summary>
-/// Derivatives should be decorated with [System.Serializable] attribute.
-/// </summary>
-[Serializable]
-public abstract class IUnifiedContainer<TResult> : IUnifiedContainerBase.IUnifiedContainerBase
-    where TResult : class
+namespace IUnified
 {
-    public TResult Result
+    /// <summary>
+    /// Derivatives should be decorated with [System.Serializable] attribute.
+    /// </summary>
+    [Serializable]
+    public abstract class IUnifiedContainer<TResult> : IUnifiedContainerBase
+        where TResult : class
     {
-        //Using the null coalescing operator will break web player execution
-        get
+        public TResult Result
         {
-            #if UNITY_EDITOR
+            //Using the null coalescing operator will break web player execution
+            get
+            {
+#if UNITY_EDITOR
                 if(ObjectField == null && string.IsNullOrEmpty(ResultType))
                 {
                     return _result = null;
@@ -25,16 +27,16 @@ public abstract class IUnifiedContainer<TResult> : IUnifiedContainerBase.IUnifie
                 {
                     _result = null;
                 }
-            #endif
+#endif
 
-            return _result != null ? _result : (_result = ObjectField as TResult);
-        }
-        set
-        {
-            _result = value;
-            ObjectField = _result as Object;
+                return _result != null ? _result : (_result = ObjectField as TResult);
+            }
+            set
+            {
+                _result = value;
+                ObjectField = _result as Object;
 
-            #if UNITY_EDITOR
+#if UNITY_EDITOR
                 if(!Application.isPlaying)
                 {
                     if(_result != null && ObjectField == null)
@@ -44,21 +46,19 @@ public abstract class IUnifiedContainer<TResult> : IUnifiedContainerBase.IUnifie
                     }
                 }
                 ResultType = _result != null ? ConstructResolvedName(_result.GetType()) : "";
-            #endif
+#endif
+            }
         }
-    }
 
-    public Object Object
-    {
-        //Using the null coalescing operator will break web player execution
-        get { return ObjectField != null ? ObjectField : (ObjectField = _result as Object); }
-    }
+        public Object Object
+        {
+            //Using the null coalescing operator will break web player execution
+            get { return ObjectField != null ? ObjectField : (ObjectField = _result as Object); }
+        }
     
-    private TResult _result;
-}
+        private TResult _result;
+    }
 
-namespace IUnifiedContainerBase
-{
     /// <summary>
     /// Used to enable a single CustomPropertyDrawer for all derivatives.
     /// Do not derive from this class, use the generic IUnifiedContainer&lt;TResult&gt; class instead.

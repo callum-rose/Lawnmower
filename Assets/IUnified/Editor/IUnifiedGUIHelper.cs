@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using IUnified;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -121,7 +122,7 @@ namespace Assets.IUnified.Editor
 
             if(@object is Component || string.IsNullOrEmpty(@object.name))
             {
-                return IUnifiedContainerBase.IUnifiedContainerBase.ConstructResolvedName(@object.GetType());
+                return IUnifiedContainerBase.ConstructResolvedName(@object.GetType());
             }
 
             return @object.name;

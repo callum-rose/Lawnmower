@@ -10,25 +10,14 @@ namespace Game.Mowers
 {
     internal class MowerCreator : MonoBehaviour
     {
-        [SerializeField] private MowerPrefabsHolder mowerPrefabsHolder;
         [SerializeField] private Transform container;
         [SerializeField] private Positioner positioner;
         [SerializeField] private IMowerControlsContainer[] mowerControls;
         [SerializeField] private IRequiresMowerPositionContainer[] mowerPositionRequirers;
 
-        public MowerManager Create(Guid? mowerId, IUndoSystem undoManager)
+        public MowerManager Create(MowerData mower, IUndoSystem undoManager)
         {
-            MowerManager prefab;
-            if (mowerId.HasValue)
-            {
-                prefab = mowerPrefabsHolder.GetPrefab(mowerId.Value);
-            }
-            else
-            {
-                prefab = mowerPrefabsHolder.GetFirstPrefab();
-            }
-
-            MowerManager newMower = Instantiate(prefab, container);
+            MowerManager newMower = Instantiate(mower.Prefab, container);
 
             InitMowerMovement(undoManager, newMower.Movement);
             InitObjectsNeedingMowerPosition(newMower.Movement);
@@ -39,7 +28,7 @@ namespace Game.Mowers
 
         private static void InitCollider(GameObject gameObject)
         {
-            var collider = gameObject.AddComponent<SphereCollider>();
+            SphereCollider collider = gameObject.AddComponent<SphereCollider>();
             collider.radius = TileSize * 0.5f;
             collider.center = new Vector3(0, TileSize * 0.5f, 0);
         }

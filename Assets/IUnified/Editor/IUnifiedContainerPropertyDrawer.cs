@@ -5,11 +5,12 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using Assets.IUnified.Editor;
+using IUnified;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-[CustomPropertyDrawer(typeof(IUnifiedContainerBase.IUnifiedContainerBase), true)]
+[CustomPropertyDrawer(typeof(IUnifiedContainerBase), true)]
 public class IUnifiedContainerPropertyDrawer : PropertyDrawer
 {
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
@@ -58,7 +59,7 @@ public class IUnifiedContainerPropertyDrawer : PropertyDrawer
         where TResult : class
     {
         _currentEvent = Event.current;
-        var resultTypeName = IUnifiedContainerBase.IUnifiedContainerBase.ConstructResolvedName(CachedType<TResult>.Type);
+        var resultTypeName = IUnifiedContainerBase.ConstructResolvedName(CachedType<TResult>.Type);
 
         if(string.IsNullOrEmpty(label.tooltip))
         {
@@ -274,7 +275,7 @@ public class IUnifiedContainerPropertyDrawer : PropertyDrawer
             var component = @object as Component;
             if(component != null)
             {
-                return $"{component.gameObject.name} ( {IUnifiedContainerBase.IUnifiedContainerBase.ConstructResolvedName(@object.GetType())} )";
+                return $"{component.gameObject.name} ( {IUnifiedContainerBase.ConstructResolvedName(@object.GetType())} )";
             }
 
             return IUnifiedGUIHelper.GetObjectName(@object);

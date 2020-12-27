@@ -1,15 +1,13 @@
 using Game.Core;
-using Game.Levels;
 using Game.Mowers;
 using Game.Tiles;
-using Game.UndoSystem;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using R = Sirenix.OdinInspector.RequiredAttribute;
 
-namespace Game.Levels.Editor
+namespace Game.Levels.Editorr
 {
-    public class LevelEditorManager : MonoBehaviour, IHasEditMode
+    public partial class LevelEditorManager : MonoBehaviour, IHasEditMode
     {
         [Space]
         [SerializeField, R] private GameManager gameManager;
@@ -75,69 +73,7 @@ namespace Game.Levels.Editor
         }
 
         #endregion
-
-        #region Odin
-#if UNITY_EDITOR
-
-        [SerializeField, R, AssetsOnly, BoxGroup(Build)] private LevelData levelAsset;
-        [SerializeField, R, AssetsOnly, BoxGroup(Build)] private MowerData mowerData;
-
-        private const string Build = "Build";
-        private const string Save = "Save";
-
-        private bool AppRunning => Application.isPlaying;
-
-        [Button("Build"), BoxGroup(Build), EnableIf(nameof(AppRunning))]
-        private void BuildSelectedLevel()
-        {
-            GameSetupPassThroughData data = new GameSetupPassThroughData
-            {
-                MowerId = mowerData.Id,
-                Level = levelAsset.GetCopy()
-            };
-
-            Begin(data, false);
-
-        }
-
-        [Button("Build In Edit Mode"), BoxGroup(Build), EnableIf(nameof(AppRunning))]
-        private void BuildSelectedLevelInEdit()
-        {
-            GameSetupPassThroughData data = new GameSetupPassThroughData
-            {
-                MowerId = mowerData.Id,
-                Level = levelAsset.GetCopy()
-            };
-
-            Begin(data, true);
-        }
-
-        [Button(Expanded = true), BoxGroup(Build), EnableIf(nameof(AppRunning))]
-        private void BuildEmptyLevelInEdit(int width, int depth)
-        {
-            var emptyLevel = ScriptableObject.CreateInstance<LevelData>();
-            emptyLevel.Resize(width, depth);
-
-            GameSetupPassThroughData data = new GameSetupPassThroughData
-            {
-                MowerId = mowerData.Id,
-                Level = emptyLevel
-            };
-
-            Begin(data, true);
-        }
-
-        [SerializeField, R, BoxGroup(Save), InlineEditor(Expanded = true)] private LevelSaver levelSaver;
-
-        [Button, EnableIf(nameof(IsEditMode)), BoxGroup(Save)]
-        private void SaveLevel()
-        {
-            levelSaver.Save_Editor(levelManager.Tiles, levelManager.MowerPosition);
-        }
-
-#endif
-        #endregion
-
+        
         #region Methods
 
         private void Begin(GameSetupPassThroughData data, bool isEdit)

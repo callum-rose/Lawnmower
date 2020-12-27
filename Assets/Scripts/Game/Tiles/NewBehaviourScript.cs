@@ -1,4 +1,4 @@
-﻿namespace Default
+﻿namespace Game.Tiles
 {
     internal class NewBehaviourScript
 	{

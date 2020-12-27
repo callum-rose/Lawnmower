@@ -64,7 +64,7 @@ namespace Game.Core
 
             undoController.IsRunning = true;
 
-            _mower = mowerCreator.Create(_inputData.MowerId, UndoSystem);
+            _mower = mowerCreator.Create(_inputData.Mower, UndoSystem);
 
             levelManager.Init(_mower.Movement);
             levelManager.SetLevel(_inputData.Level);
@@ -103,7 +103,7 @@ namespace Game.Core
                 {
                     void ButtonAction()
                     {
-                        Begin(new GameSetupPassThroughData { Level = nextLevel, MowerId = _inputData.MowerId });
+                        Begin(new GameSetupPassThroughData { Level = nextLevel, Mower = _inputData.Mower });
                     };
                     _levelCompletedDialogId = dialogManager.Show("Level Completed!", "Nice one", new ButtonInfo("Next Level", action: ButtonAction));
                 }

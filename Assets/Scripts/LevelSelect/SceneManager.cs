@@ -29,7 +29,7 @@ namespace LevelSelect
         {
             GameSetupPassThroughData data = new GameSetupPassThroughData
             {
-                MowerId = null,
+                Mower = null,
                 Level = level
             };
             ViewManager.Instance.Load(UnityScene.Game, data);
