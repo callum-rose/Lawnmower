@@ -4,7 +4,7 @@ using IUnified;
 
 namespace Game.Mowers.Input
 {
-    internal interface IMowerControls
+    public interface IMowerControls
     {
         event Action<GridVector> Moved;
     }

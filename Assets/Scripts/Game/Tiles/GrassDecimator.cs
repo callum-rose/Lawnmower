@@ -32,7 +32,7 @@ namespace Game.Tiles
 
         private void Decimate()
         {
-            foreach (var g in _gameObjects)
+            foreach (GameObject g in _gameObjects)
             {
                 g.SetActive(true);
             }
@@ -54,7 +54,7 @@ namespace Game.Tiles
         {
             Action<GameObject> destroyAction = Application.isPlaying ? (Action<GameObject>)Destroy : DestroyImmediate;
 
-            foreach (var obj in _gameObjects)
+            foreach (GameObject obj in _gameObjects)
             {
                 if (!obj.activeSelf)
                 {

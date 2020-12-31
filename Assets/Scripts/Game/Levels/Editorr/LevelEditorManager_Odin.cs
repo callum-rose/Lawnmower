@@ -32,12 +32,7 @@ namespace Game.Levels.Editorr
 		[EnableIf(nameof(HasEnoughInfoToBuild))]
 		private void BuildSelectedLevel()
 		{
-			GameSetupPassThroughData data = new GameSetupPassThroughData
-			{
-				Mower = mowerData,
-				Level = Instantiate(levelAsset)
-			};
-
+			GameSetupPassThroughData data = new GameSetupPassThroughData(mowerData, Instantiate(levelAsset));
 			Begin(data, false);
 		}
 
@@ -47,12 +42,7 @@ namespace Game.Levels.Editorr
 		[EnableIf(nameof(HasEnoughInfoToBuild))]
 		private void BuildSelectedLevelInEdit()
 		{
-			GameSetupPassThroughData data = new GameSetupPassThroughData
-			{
-				Mower = mowerData,
-				Level = Instantiate(levelAsset)
-			};
-
+			GameSetupPassThroughData data = new GameSetupPassThroughData(mowerData, Instantiate(levelAsset));
 			Begin(data, true);
 		}
 
@@ -64,12 +54,7 @@ namespace Game.Levels.Editorr
 			LevelData emptyLevel = ScriptableObject.CreateInstance<LevelData>();
 			emptyLevel.Resize(width, depth);
 
-			GameSetupPassThroughData data = new GameSetupPassThroughData
-			{
-				Mower = mowerData,
-				Level = emptyLevel
-			};
-
+			GameSetupPassThroughData data = new GameSetupPassThroughData(mowerData, emptyLevel);
 			Begin(data, true);
 		}
 

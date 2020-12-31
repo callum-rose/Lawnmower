@@ -241,13 +241,14 @@ GameObject:
   m_Component:
   - component: {fileID: 4163151605430347187}
   - component: {fileID: 1937153989369049887}
-  - component: {fileID: 9200237905882389980}
   - component: {fileID: 862406501132985853}
   - component: {fileID: 6644677775316149615}
   - component: {fileID: 4747925336798367234}
+  - component: {fileID: 5978777715594575539}
+  - component: {fileID: 9200237905882389980}
   - component: {fileID: 8848167857044394653}
   - component: {fileID: 1019857728346892863}
-  - component: {fileID: 5978777715594575539}
+  - component: {fileID: 3797487811517866868}
   m_Layer: 5
   m_Name: Button
   m_TagString: Untagged
@@ -284,27 +285,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5313034047017068139}
   m_CullTransparentMesh: 1
---- !u!114 &9200237905882389980
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5313034047017068139}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3048046ae3f3ec54d9518b040409d54f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  messageText: {fileID: 5309388134446331204}
-  resizer: {fileID: 8848167857044394653}
-  iconSetter: {fileID: 1019857728346892863}
-  backgroundImage: {fileID: 4396474349899805723}
-  pointerEnterTint: {r: 0.9, g: 0.9, b: 0.9, a: 1}
-  pointerDownTint: {r: 0.9, g: 0.9, b: 0.9, a: 1}
-  unityEvent:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!223 &862406501132985853
 Canvas:
   m_ObjectHideFlags: 0
@@ -373,6 +353,47 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 823
+--- !u!114 &5978777715594575539
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5313034047017068139}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreLayout: 0
+  m_MinWidth: 200
+  m_MinHeight: 200
+  m_PreferredWidth: -1
+  m_PreferredHeight: 200
+  m_FlexibleWidth: 0
+  m_FlexibleHeight: 0
+  m_LayoutPriority: 1
+--- !u!114 &9200237905882389980
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5313034047017068139}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3048046ae3f3ec54d9518b040409d54f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  messageText: {fileID: 5309388134446331204}
+  resizer: {fileID: 8848167857044394653}
+  iconSetter: {fileID: 1019857728346892863}
+  backgroundImage: {fileID: 4396474349899805723}
+  pointerEnterTint: {r: 0.9, g: 0.9, b: 0.9, a: 1}
+  pointerDownTint: {r: 0.9, g: 0.9, b: 0.9, a: 1}
+  unityEvent:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!114 &8848167857044394653
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -405,7 +426,7 @@ MonoBehaviour:
   iconData: {fileID: 11400000, guid: 7fc960bddbf23ec4ebfdd0aa1a4a38c3, type: 2}
   icon: 1
   iconImage: {fileID: 5462128404942310847}
---- !u!114 &5978777715594575539
+--- !u!114 &3797487811517866868
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -414,17 +435,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 5313034047017068139}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Script: {fileID: 11500000, guid: 290bc79af1be437489243d20d2de5cec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_IgnoreLayout: 0
-  m_MinWidth: 200
-  m_MinHeight: 200
-  m_PreferredWidth: -1
-  m_PreferredHeight: 200
-  m_FlexibleWidth: 0
-  m_FlexibleHeight: 0
-  m_LayoutPriority: 1
+  eventChannel: {fileID: 0}
+  pulseScale: 1.2
+  pulseDuration: 2
 --- !u!1 &6158878766298999382
 GameObject:
   m_ObjectHideFlags: 0

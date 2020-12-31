@@ -13,7 +13,8 @@ namespace Game.Mowers.Input
         [SerializeField] private ScreenToWorldPointConverter screenToWorldConverter;
         [SerializeField] private Positioner positioner;
         [SerializeField, Range(0, 45)] private float toleranceAngle = 45;
-        [SerializeField, Min(0)] private float maxDistanceFromMower;
+        [SerializeField] private bool unlimitedDistance;
+        [SerializeField, Min(0), HideIf(nameof(unlimitedDistance))] private float maxDistanceFromMower;
 
 #if UNITY_EDITOR
         [ShowInInspector, DisableIf(nameof(DisableFakeMowerPos))] private GridVector fakeMowerPos;
@@ -35,13 +36,15 @@ namespace Game.Mowers.Input
 
             GridVector[] cardinalVectors = new GridVector[] { GridVector.Right, GridVector.Down, GridVector.Left, GridVector.Up };
 
-            foreach (var cv in cardinalVectors)
+            float distToUse = unlimitedDistance ? 9999f : maxDistanceFromMower;
+            
+            foreach (GridVector cv in cardinalVectors)
             {
                 GetConeDirections(cv, out Vector3 cone0LeftDirection, out Vector3 cone0RightDirection);
                 GetConeLineOrigins(worldMowerPos, cv, out Vector3 coneLeftOrigin, out Vector3 coneRightOrigin);
 
-                Gizmos.DrawLine(coneLeftOrigin, coneLeftOrigin + cone0LeftDirection * maxDistanceFromMower);
-                Gizmos.DrawLine(coneRightOrigin, coneRightOrigin + cone0RightDirection * maxDistanceFromMower);
+                Gizmos.DrawLine(coneLeftOrigin, coneLeftOrigin + cone0LeftDirection * distToUse);
+                Gizmos.DrawLine(coneRightOrigin, coneRightOrigin + cone0RightDirection * distToUse);
             }
 
             Gizmos.DrawWireCube(worldMowerPos, new Vector3(LevelDimensions.TileSize, 0, LevelDimensions.TileSize));
@@ -86,7 +89,7 @@ namespace Game.Mowers.Input
                 return;
             }
 
-            bool test = IsWorldPositionWithinToleranceAngle(tapWorldPos, out var direction);
+            bool test = IsWorldPositionWithinToleranceAngle(tapWorldPos, out GridVector direction);
             if (test)
             {
                 Move?.Invoke(direction);
@@ -99,6 +102,11 @@ namespace Game.Mowers.Input
 
         private bool IsTapTooFarAway(Vector3 tapWorldPos)
         {
+            if (unlimitedDistance)
+            {
+                return false;
+            }
+            
             return Vector3.SqrMagnitude(tapWorldPos - positioner.GetWorldPosition(_mowerPosition.MowerPosition)) > maxDistanceFromMower * maxDistanceFromMower;
         }
 

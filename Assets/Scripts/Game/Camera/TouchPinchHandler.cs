@@ -12,7 +12,7 @@ namespace Game.Camera
 
         public void OnPinch(float scale)
         {
-            var groupComposer = gameCamera.GetCinemachineComponent<CinemachineGroupComposer>();
+            CinemachineGroupComposer groupComposer = gameCamera.GetCinemachineComponent<CinemachineGroupComposer>();
             groupComposer.m_GroupFramingSize = defaultCameraOrthoSize * scale;
         }
 

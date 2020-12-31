@@ -47,14 +47,14 @@ namespace IUnified
 
         public void CopyTo(TInterface[] array, int arrayIndex)
         {
-            var list = _getList().Select(c => c == null ? null : c.Result).ToList();
+            List<TInterface> list = _getList().Select(c => c == null ? null : c.Result).ToList();
             Array.Copy(list.ToArray(), 0, array, arrayIndex, list.Count);
         }
 
         public bool Remove(TInterface item)
         {
-            var list = _getList();
-            var indexToRemove = IndexOf(list, item);
+            IList<TContainer> list = _getList();
+            int indexToRemove = IndexOf(list, item);
             if(indexToRemove < 0)
             {
                 return false;
@@ -83,7 +83,7 @@ namespace IUnified
         {
             get
             {
-                var container = _getList()[index];
+                TContainer container = _getList()[index];
                 return container == null ? null : container.Result;
             }
             set { _getList()[index] = new TContainer { Result = value }; }

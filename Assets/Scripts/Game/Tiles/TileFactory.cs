@@ -14,9 +14,9 @@ namespace Game.Tiles
         private void Awake()
         {
             _poolDict = new Dictionary<TileType, IPool<Tile>>();
-            foreach (var t in EnumExtensions.GetValues<TileType>())
+            foreach (TileType t in EnumExtensions.GetValues<TileType>())
             {
-                var prefab = tilePrefabsHolder.GetPrefab(t);
+                Tile prefab = tilePrefabsHolder.GetPrefab(t);
                 IPool<Tile> newPool = new MonoBehaviourPool<Tile>(prefab);
                 _poolDict.Add(t, newPool);
             }

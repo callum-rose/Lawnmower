@@ -21,7 +21,7 @@ namespace Game.Tiles
 
         private void OnValidate()
         {
-            var circle = Random.insideUnitCircle;
+            Vector2 circle = Random.insideUnitCircle;
             test = new Vector3(circle.x, 0, circle.y) * curveMaxSize;
 
             if (_propertyBlock == null)

@@ -3,7 +3,7 @@ using Game.UndoSystem;
 
 namespace Game.Mowers
 {
-    internal partial class MowerMovementManager
+    public partial class MowerMovementManager
     {
         private class UndoableBump : IUndoable
         {

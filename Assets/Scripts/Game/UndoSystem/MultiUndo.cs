@@ -13,7 +13,7 @@ namespace Game.UndoSystem
 
         public void Undo()
         {
-            foreach (var u in _undoables)
+            foreach (IUndoable u in _undoables)
             {
                 u.Undo();
             }
@@ -21,7 +21,7 @@ namespace Game.UndoSystem
 
         public void Do()
         {
-            foreach (var u in _undoables)
+            foreach (IUndoable u in _undoables)
             {
                 u.Do();
             }

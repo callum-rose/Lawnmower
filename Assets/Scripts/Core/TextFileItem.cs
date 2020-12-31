@@ -4,52 +4,72 @@ using UnityEngine;
 
 namespace Core
 {
-    internal class TextFileItem<T> : IPersistentDataItem<T>
-    {
-        private static readonly JsonSerializerSettings Settings = new JsonSerializerSettings
-        {
-            TypeNameHandling = TypeNameHandling.All
-        };
+	internal abstract class TextFileItem
+	{
+		public static string GetKeyFromFilePath(string path)
+		{
+			return Path.GetFileNameWithoutExtension(path);
+		}
 
-        private readonly string _directory;
-        private readonly string _fullPath;
+		public static string GetDirectoryPath(string folder)
+		{
+			return Path.Combine(Application.persistentDataPath, "save_data", folder);
+		}
+		
+		public static string GetFilePath(string directory, string key)
+		{
+			return Path.Combine(directory, key + ".txt");
+		}
+	}
+	
+	internal class TextFileItem<T> : TextFileItem, IPersistentDataItem<T>
+	{
+		private static readonly JsonSerializerSettings Settings = new JsonSerializerSettings
+		{
+			TypeNameHandling = TypeNameHandling.All
+		};
+		
+		private readonly T _defaultValue;
 
-        public TextFileItem(string key)
-        {
-            _directory = Path.Combine(Application.persistentDataPath, "savedata");
-            _fullPath = Path.Combine(_directory, key + ".txt");
-        }
+		private readonly string _directory;
+		private readonly string _fullPath;
+		
+		public TextFileItem(string folder, string key, T defaultValue)
+		{
+			_defaultValue = defaultValue;
 
-        public void Save(T value)
-        {
-            string jsonStr = JsonConvert.SerializeObject(value, Settings);
+			_directory = GetDirectoryPath(folder);
+			_fullPath = GetFilePath(_directory, key);
+		}
 
-            if (!Directory.Exists(_directory))
-            {
-                Directory.CreateDirectory(_directory);
-            }
+		public void Save(T value)
+		{
+			string jsonStr = JsonConvert.SerializeObject(value, Settings);
 
-            if (!File.Exists(_fullPath))
-            {
-                File.Create(_fullPath);
-            }
+			if (!Directory.Exists(_directory))
+			{
+				Directory.CreateDirectory(_directory);
+			}
 
-            File.WriteAllText(_fullPath, jsonStr);
-        }
+			if (!File.Exists(_fullPath))
+			{
+				File.Create(_fullPath);
+			}
 
-        public bool TryLoad(out T value)
-        {
-            Debug.Log(_fullPath);
+			File.WriteAllText(_fullPath, jsonStr);
+		}
 
-            if (!File.Exists(_fullPath))
-            {
-                value = default;
-                return false;
-            }
+		public T Load()
+		{
+			Debug.Log(_fullPath);
 
-            string jsonStr = File.ReadAllText(_fullPath);
-            value = JsonConvert.DeserializeObject<T>(jsonStr, Settings);
-            return true;
-        }
-    }
+			if (!File.Exists(_fullPath))
+			{
+				return _defaultValue;
+			}
+
+			string jsonStr = File.ReadAllText(_fullPath);
+			return JsonConvert.DeserializeObject<T>(jsonStr, Settings);
+		}
+	}
 }

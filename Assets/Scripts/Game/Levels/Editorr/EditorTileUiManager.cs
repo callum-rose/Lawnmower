@@ -28,7 +28,7 @@ namespace Game.Levels.Editorr
 
         private void Start()
         {
-            foreach (var data in IconData)
+            foreach (TileData data in IconData)
             {
                 Button newButton = Instantiate(buttonPrefab, buttonContainer);
                 ButtonInfo info = new ButtonInfo(

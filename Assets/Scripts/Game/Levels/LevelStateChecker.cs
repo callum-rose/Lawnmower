@@ -11,6 +11,8 @@ namespace Game.Levels
     [CreateAssetMenu(fileName = nameof(LevelStateChecker), menuName = SONames.GameDir + nameof(LevelStateChecker))]
     internal class LevelStateChecker : ScriptableObject
     {
+        [SerializeField] private VoidEventChannel levelRuinedChannel;
+        
         public UndoableAction LevelCompleted, LevelFailed;
 
         private ReadOnlyTiles _tiles;
@@ -79,6 +81,7 @@ namespace Game.Levels
         private void OnTileRuined(Xor isUndo)
         {
             LevelFailed.Invoke(isUndo);
+            levelRuinedChannel.RaiseEvent();
         }
 
         #endregion

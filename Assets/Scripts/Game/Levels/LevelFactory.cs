@@ -47,7 +47,7 @@ namespace Game.Levels
                 return;
             }
 
-            foreach (var t in tiles)
+            foreach (Tile t in tiles)
             {
                 Destroy(t);
             }

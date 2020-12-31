@@ -4,6 +4,6 @@ namespace Core
 {
     public abstract class BaseSceneManager : MonoBehaviour
     {
-        public abstract void Begin(PassThroughData data);
+        public abstract void Begin(object data);
     }
 }

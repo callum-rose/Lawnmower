@@ -1,4 +1,7 @@
+using System.Collections;
+using System.Linq;
 using Sirenix.OdinInspector;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 namespace Game.Tiles
@@ -50,6 +53,23 @@ namespace Game.Tiles
                     grassTrans.localRotation = Quaternion.Euler(0, Random.Range(0f, 360f), 0) * grassTrans.localRotation;
                 }
             });
+        }
+
+        [Button]
+        private void DestroyAllChildren()
+        {
+            while(transform.childCount > 0)
+            {
+                var child = transform.GetChild(0);
+                if (Application.isPlaying)
+                {
+                    Destroy(child.gameObject);
+                }
+                else
+                {
+                    DestroyImmediate(child.gameObject);
+                }
+            }
         }
     }
 }

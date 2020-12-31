@@ -13,127 +13,143 @@ using UI.Buttons;
 
 namespace Game.Core
 {
-    internal class GameManager : BaseSceneManager
-    {
-        [SerializeField] private CameraManager cameraManager;
-        [SerializeField] private MowerCreator mowerCreator;
-        [SerializeField] private LevelManager levelManager;
-        [SerializeField, AssetsOnly] private LevelDataManager levelDataManager;
-        [SerializeField] private IUndoSystemContainer undoSystemContainer;
-        [SerializeField] private UndoController undoController;
-        [SerializeField, AssetsOnly] private DialogManager dialogManager;
+	internal class GameManager : BaseSceneManager
+	{
+		[SerializeField] private CameraManager cameraManager;
+		[SerializeField] private MowerCreator mowerCreator;
+		[SerializeField] private LevelManager levelManager;
+		[SerializeField, AssetsOnly] private LevelDataManager levelDataManager;
+		[SerializeField] private IUndoSystemContainer undoSystemContainer;
+		[SerializeField] private UndoController undoController;
+		[SerializeField, AssetsOnly] private DialogManager dialogManager;
 
-        private IUndoSystem UndoSystem => undoSystemContainer.Result;
+		private IUndoSystem UndoSystem => undoSystemContainer.Result;
 
-        private GameSetupPassThroughData _inputData;
+		private GameSetupPassThroughData? _inputData;
 
-        private MowerManager _mower;
+		private MowerManager _mower;
 
-        private int _levelCompletedDialogId, _levelFailedDialogId;
+		private LevelDataRecorder _levelDataRecorder;
 
-        #region Unity
+		private int _levelCompletedDialogId, _levelFailedDialogId;
 
-        private void Awake()
-        {
-            levelManager.LevelCompleted += OnLevelCompleted;
-            levelManager.LevelFailed += OnLevelFailed;
-        }
+		#region Unity
 
-        private void OnDestroy()
-        {
-            levelManager.LevelCompleted -= OnLevelCompleted;
-            levelManager.LevelFailed -= OnLevelFailed;
-        }
+		private void Awake()
+		{
+			levelManager.LevelCompleted += OnLevelCompleted;
+			levelManager.LevelFailed += OnLevelFailed;
+		}
 
-        #endregion
+		private void OnDestroy()
+		{
+			levelManager.LevelCompleted -= OnLevelCompleted;
+			levelManager.LevelFailed -= OnLevelFailed;
+		}
 
-        #region API
+		#endregion
 
-        public override void Begin(PassThroughData data)
-        {
-            End();
+		#region API
 
-            if (data is GameSetupPassThroughData @in)
-            {
-                _inputData = @in;
-            }
-            else
-            {
-                throw new InvalidTypeException(data, typeof(GameSetupPassThroughData));
-            }
+		public override void Begin(object data)
+		{
+			End();
 
-            undoController.IsRunning = true;
+			if (data is GameSetupPassThroughData input)
+			{
+				_inputData = input;
+			}
+			else
+			{
+				throw new InvalidTypeException(data, typeof(GameSetupPassThroughData));
+			}
 
-            _mower = mowerCreator.Create(_inputData.Mower, UndoSystem);
+			undoController.IsRunning = true;
 
-            levelManager.Init(_mower.Movement);
-            levelManager.SetLevel(_inputData.Level);
+			_mower = mowerCreator.Create(_inputData.Value.Mower, UndoSystem);
 
-            cameraManager.Init(_mower.transform);
-        }
+			levelManager.Init(_mower.Movement);
+			levelManager.SetLevel(_inputData.Value.Level);
 
-        public void End()
-        {
-            levelManager.ClearTiles();
-            cameraManager.Clear();
+			cameraManager.Init(_mower.transform);
 
-            if (_mower != null)
-            {
-                Destroy(_mower.gameObject);
-            }
+			_levelDataRecorder = new LevelDataRecorder(UndoSystem);
+			_levelDataRecorder.StartRecording();
+		}
 
-            _inputData = null;
-        }
+		public void End()
+		{
+			levelManager.ClearTiles();
+			cameraManager.Clear();
 
-        #endregion
+			if (_mower != null)
+			{
+				Destroy(_mower.gameObject);
+			}
 
-        #region Events
+			_inputData = null;
+		}
 
-        private void OnLevelCompleted(Xor isUndo)
-        {
-            if (!isUndo)
-            {
-                //undoController.IsRunning = false;
+		#endregion
 
-                Assert.IsNotNull(_inputData);
-                int levelIndex = levelDataManager.GetLevelIndex(_inputData.Level);
-                levelDataManager.SetLevelCompleted(levelIndex);
+		#region Events
 
-                if (levelDataManager.TryGetLevel(levelIndex + 1, out LevelData nextLevel))
-                {
-                    void ButtonAction()
-                    {
-                        Begin(new GameSetupPassThroughData { Level = nextLevel, Mower = _inputData.Mower });
-                    };
-                    _levelCompletedDialogId = dialogManager.Show("Level Completed!", "Nice one", new ButtonInfo("Next Level", action: ButtonAction));
-                }
-                else
-                {
-                    throw new NotImplementedException();
-                }
-            }
-            else
-            {
-                dialogManager.Close(_levelCompletedDialogId);
-            }
-        }
+		private void OnLevelCompleted(Xor isUndo)
+		{
+			if (!isUndo)
+			{
+				Assert.IsTrue(_inputData.HasValue);
 
-        private void OnLevelFailed(Xor isUndo)
-        {
-            //if (!isUndo)
-            //{
-            //    void ButtonAction()
-            //    {
-            //        Begin(_inputData);
-            //    };
-            //    _levelFailedDialogId = dialogManager.Show("Level Completed!", "Nice one", new ButtonInfo("Retry", action: ButtonAction));
-            //}
-            //else
-            //{
-            //    dialogManager.Close(_levelFailedDialogId);
-            //}
-        }
+				_levelDataRecorder.StopRecording();
+				var recordedData = _levelDataRecorder.ExtractData();
+				PersistantData.Level.SaveLevelMetaData(_inputData.Value.Level.Id, recordedData);
+				
+				int levelIndex = levelDataManager.GetLevelIndex(_inputData.Value.Level);
+				levelDataManager.SetLevelCompleted(levelIndex);
 
-        #endregion
-    }
+				int nextLevelIndex = levelIndex + 1;
+				if (levelDataManager.TryGetLevel(nextLevelIndex, out LevelData nextLevel))
+				{
+					MowerData cachedMower = _inputData.Value.Mower;
+
+					void ButtonAction()
+					{
+						Begin(new GameSetupPassThroughData(cachedMower, nextLevel));
+					}
+
+					;
+
+					_levelCompletedDialogId = dialogManager.Show("Level Completed!", "Nice one",
+						new ButtonInfo("Next Level", action: ButtonAction));
+				}
+				else
+				{
+					// TODO
+					throw new NotImplementedException();
+				}
+			}
+			else
+			{
+				dialogManager.Close(_levelCompletedDialogId);
+			}
+		}
+
+		private void OnLevelFailed(Xor isUndo)
+		{
+			//if (!isUndo)
+			//{
+			//    void ButtonAction()
+			//    {
+			//        Begin(_inputData);
+			//    };
+			//    _levelFailedDialogId = dialogManager.Show("Level Completed!", "Nice one", new ButtonInfo("Retry", action: ButtonAction));
+			//}
+			//else
+			//{
+			//    dialogManager.Close(_levelFailedDialogId);
+			//}
+		}
+
+		#endregion
+	}
 }

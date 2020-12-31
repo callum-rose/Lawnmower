@@ -38,7 +38,7 @@ namespace Game.Tiles
 
         public TileType GetTileTypeForTile(Tile tile)
         {
-            foreach (var kv in tilePrefabs)
+            foreach (KeyValuePair<TileType, Tile> kv in tilePrefabs)
             {
                 if (kv.Value.GetType() == tile.GetType())
                 {

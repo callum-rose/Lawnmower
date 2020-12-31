@@ -31,7 +31,7 @@ namespace Game.Levels.Editorr
             {
                 ___isEditMode = value;
 
-                foreach (var e in hasEditModes)
+                foreach (IHasEditModeContainer e in hasEditModes)
                 {
                     e.Result.IsEditMode = ___isEditMode;
                 }
@@ -51,9 +51,15 @@ namespace Game.Levels.Editorr
 
         private void OnDestroy()
         {
-            tileSelector.Result.Selected -= TileSelector_Clicked;
+            if (tileSelector.Result != null)
+            {
+                tileSelector.Result.Selected -= TileSelector_Clicked;
+            }
 
-            levelManager.LevelChanged -= LevelManager_LevelChanged;
+            if (levelManager != null)
+            {
+                levelManager.LevelChanged -= LevelManager_LevelChanged;
+            }
         }
 
         #endregion

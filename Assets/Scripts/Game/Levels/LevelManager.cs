@@ -77,7 +77,7 @@ namespace Game.Levels
             ClearTiles();
 
             _tiles = levelFactory.Build(level);
-            foreach (var tile in _tiles)
+            foreach (Tile tile in _tiles)
             {
                 TileAdded.Invoke(tile);
             }
@@ -132,7 +132,7 @@ namespace Game.Levels
         {
             if (_tiles != null)
             {
-                foreach (var t in _tiles)
+                foreach (Tile t in _tiles)
                 {
                     TileDestroyed.Invoke(t);
                 }

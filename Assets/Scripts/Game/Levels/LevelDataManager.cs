@@ -8,101 +8,70 @@ using UnityEditor;
 
 namespace Game.Levels
 {
-    [CreateAssetMenu(fileName = nameof(LevelDataManager), menuName = SONames.GameDir + nameof(LevelDataManager))]
-    internal class LevelDataManager : ScriptableObject
-    {
-        [SerializeField, OnValueChanged(nameof(UpdateNotIncludedLevels)), AssetsOnly, ListDrawerSettings(Expanded = true, ShowIndexLabels = true), PropertyOrder(1)]
-        private LevelData[] levelDatas;
+	[CreateAssetMenu(fileName = nameof(LevelDataManager), menuName = SONames.GameDir + nameof(LevelDataManager))]
+	internal partial class LevelDataManager : ScriptableObject
+	{
+		[ShowInInspector, PropertyOrder(5), TitleGroup("In Game Data")]
+		public int LevelsCompleted { get; private set; }
+		
+		[SerializeField, OnValueChanged(nameof(UpdateNotIncludedLevels)), AssetsOnly,
+		 ListDrawerSettings(Expanded = true, ShowIndexLabels = true), PropertyOrder(1)]
+		private LevelData[] levelDatas;
 
-        [ShowInInspector, PropertyOrder(2), BoxGroup("InGameData")]
-        public int LevelsCompleted => _levelsCompleted;
+		[ShowInInspector, ListDrawerSettings(Expanded = true, IsReadOnly = true), ReadOnly, PropertyOrder(4)]
+		private List<LevelData> _notIncludedLevels;
 
-        [ShowInInspector, ListDrawerSettings(Expanded = true, IsReadOnly = true), ReadOnly, PropertyOrder(4)]
-        private List<LevelData> notIncludedLevels;
+		public int LevelCount => levelDatas.Length;
 
-        [ShowInInspector, ReadOnly]
-        [BoxGroup("InGameData")]
-        private int _lastLevel = -1;
+		#region Unity
 
-        private int _levelsCompleted = -1;
+		private void Awake()
+		{
+			LevelsCompleted = PersistantData.Level.LevelsCompleted.Load();
+		}
 
-        public int LevelCount => levelDatas.Length;
+		private void OnEnable()
+		{
+			UpdateNotIncludedLevels();
+		}
 
-        #region Unity
+		#endregion
 
-        private void Awake()
-        {
-            if (!PersistantData.Level.LevelsCompleted.TryLoad(out _levelsCompleted))
-            {
-                PersistantData.Level.LevelsCompleted.Save(0);
-            }
-        }
+		#region API
 
-        private void OnEnable()
-        {
-            UpdateNotIncludedLevels();
-        }
+		public bool TryGetLevel(int index, out LevelData level)
+		{
+			if (index < 0 || index >= levelDatas.Length)
+			{
+				level = null;
+				return false;
+			}
+			
+			level = levelDatas[index];
+			return true;
+		}
 
-        #endregion
+		public bool IsLevelLocked(int index) => index > LevelsCompleted;
 
-        #region API
+		public int GetLevelIndex(LevelData level)
+		{
+			for (int i = 0; i < levelDatas.Length; i++)
+			{
+				if (levelDatas[i].Id == level.Id)
+				{
+					return i;
+				}
+			}
 
-        public bool TryGetLevel(int index, out LevelData level)
-        {
-            if (index > _levelsCompleted + 1)
-            {
-                level = null;
-                return false;
-            }
+			throw new System.Exception("Level index not found");
+		}
 
-            level = levelDatas[index];
-            return true;
-        }
-
-        public int GetLevelIndex(LevelData level)
-        {
-            for (int i = 0; i < levelDatas.Length; i++)
-            {
-                if (levelDatas[i].Id == level.Id)
-                {
-                    return i;
-                }
-            }
-
-            throw new System.Exception("Level index not found");
-        }
-
-        public void SetLevelCompleted(int index)
-        {
-            _levelsCompleted = index;
-            PersistantData.Level.LevelsCompleted.Save(_levelsCompleted);
-        }
-
-        #endregion
-
-        #region Odin
-
-        [Button("Update Not Included Levels"), PropertyOrder(3)]
-        private void UpdateNotIncludedLevels()
-        {
-            notIncludedLevels = AssetDatabase.FindAssets("t:LevelData")
-               .Select(id => AssetDatabase.GUIDToAssetPath(id))
-               .Select(path => AssetDatabase.LoadAssetAtPath<LevelData>(path))
-               .Except(levelDatas)
-               .ToList();
-        }
-
-        
-        [Button, PropertyOrder(3)]
-        private void AddNotIncludedLevels()
-        {
-            var tempLevels = levelDatas.ToList();
-            tempLevels.AddRange(notIncludedLevels);
-            levelDatas = tempLevels.ToArray();
-
-            UpdateNotIncludedLevels();
-        }
-
-        #endregion
-    }
+		public void SetLevelCompleted(int index)
+		{
+			LevelsCompleted = index + 1;
+			PersistantData.Level.LevelsCompleted.Save(LevelsCompleted);
+		}
+		
+		#endregion
+	}
 }

@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Game.Mowers
 {
-    internal class MowerManager : MonoBehaviour
+    public class MowerManager : MonoBehaviour
     {
         [SerializeField] private MowerMovementManager movement;
 

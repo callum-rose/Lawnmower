@@ -10,13 +10,15 @@ namespace Core
         {
             get
             {
-                if (___instance == null)
+                if (___instance != null)
                 {
-                    T[] instances = Resources.FindObjectsOfTypeAll<T>();
-                    Assert.IsTrue(instances.Length == 1);
-                    ___instance = instances[0];
+                    return ___instance;
                 }
 
+                T[] instances = Resources.LoadAll<T>("");
+                Assert.IsTrue(instances.Length == 1);
+                ___instance = instances[0];
+                
                 return ___instance;
             }
         }

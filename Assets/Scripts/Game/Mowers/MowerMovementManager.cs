@@ -8,7 +8,7 @@ using UnityEngine.Assertions;
 
 namespace Game.Mowers
 {
-    internal partial class MowerMovementManager : MonoBehaviour, IMowerPosition, IMowerRunnable
+    public partial class MowerMovementManager : MonoBehaviour, IMowerPosition, IMowerRunnable
     {
         [SerializeField] private MowerMover mowerMover;
         [SerializeField] private LevelTraversalChecker traversalChecker;
@@ -31,7 +31,7 @@ namespace Game.Mowers
 
         private void OnDestroy()
         {
-            foreach (var mc in _mowerControls)
+            foreach (IMowerControls mc in _mowerControls)
             {
                 mc.Moved -= OnInput;
             }
@@ -44,7 +44,7 @@ namespace Game.Mowers
         public void Init(IMowerControls[] controls, Positioner positioner, IUndoSystem undoManager)
         {
             _mowerControls = controls;
-            foreach (var mc in _mowerControls)
+            foreach (IMowerControls mc in _mowerControls)
             {
                 mc.Moved += OnInput;
             }

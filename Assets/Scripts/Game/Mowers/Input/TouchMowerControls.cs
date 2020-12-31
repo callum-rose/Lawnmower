@@ -14,7 +14,7 @@ namespace Game.Mowers.Input
 
         private void OnEnable()
         {
-            foreach (var gh in _gestureHandlerContainers.Select(c => c.Result))
+            foreach (IMowerMovementGestureHandler gh in _gestureHandlerContainers.Select(c => c.Result))
             {
                 gh.Move += OnTouchGestureMoved;
             }
@@ -22,7 +22,7 @@ namespace Game.Mowers.Input
 
         private void OnDisable()
         {
-            foreach (var gh in _gestureHandlerContainers.Select(c => c.Result))
+            foreach (IMowerMovementGestureHandler gh in _gestureHandlerContainers.Select(c => c.Result))
             {
                 gh.Move -= OnTouchGestureMoved;
             }

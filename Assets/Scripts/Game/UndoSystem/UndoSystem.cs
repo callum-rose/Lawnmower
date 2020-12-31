@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,6 +11,9 @@ namespace Game.UndoSystem
 
         public int Count => _undoables.Count;
         public int Limit { get; private set; }
+        
+        public event Action Undone;
+        public event Action Redone;
 
         private int _currentIndex;
         private List<IUndoable> _undoables;
@@ -48,6 +52,8 @@ namespace Game.UndoSystem
             IUndoable undoable = _undoables[_currentIndex--];
             undoable.Undo();
 
+            Undone?.Invoke();
+            
             return true;
         }
 
@@ -60,6 +66,8 @@ namespace Game.UndoSystem
 
             IUndoable undoable = _undoables[++_currentIndex];
             undoable.Do();
+
+            Redone?.Invoke();
 
             return true;
         }

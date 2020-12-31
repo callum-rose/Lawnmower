@@ -10,7 +10,7 @@ namespace Game.Levels.Editorr
 		
 		public void Toggle()
         {
-			var runner = InterfaceHelper.FindObject<IMowerRunnable>();
+			IMowerRunnable runner = InterfaceHelper.FindObject<IMowerRunnable>();
 
 			if (runner == null)
             {

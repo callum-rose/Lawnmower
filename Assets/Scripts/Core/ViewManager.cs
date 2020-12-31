@@ -1,5 +1,7 @@
+using System;
 using Sirenix.OdinInspector;
 using System.Collections;
+using Game.Core;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.SceneManagement;
@@ -7,12 +9,8 @@ using UnityEngine.SceneManagement;
 namespace Core
 {
     [CreateAssetMenu(fileName = nameof(ViewManager), menuName = SONames.GameDir + nameof(ViewManager))]
-    public class ViewManager : Singleton<ViewManager>
+    public partial class ViewManager : Singleton<ViewManager>
     {
-        [Header("Scene To Load First")]
-        [SerializeField, EnumToggleButtons, HideLabel]
-        private UnityScene sceneToOpenFirst;
-
         private UnityScene CurrentScene { get; set; } = UnityScene.None;
 
         private LoadData _nextLoadData;
@@ -22,22 +20,25 @@ namespace Core
         [RuntimeInitializeOnLoadMethod]
         private static void Init()
         {
-            Instance.Load(Instance.sceneToOpenFirst, null);
+            if (!WasAppStartedByViewManager)
+            {
+                return;
+            }
+
+            SetAppWasStartedByViewManager(false);
+            
+            Instance.Load(Instance.sceneToOpen, Instance.GetData());
         }
 
         #region API
 
-        [Button(Expanded = true)]
-        public void Load(UnityScene scene, PassThroughData data = null)
+        public void Load(UnityScene scene, object data = null)
         {
             Assert.IsFalse(scene == UnityScene.None);
 
             _nextLoadData = new LoadData(scene, data);
 
-            if (_loadRoutine == null)
-            {
-                _loadRoutine = StartCoroutine(ProcessLoadsRoutine());
-            }
+            _loadRoutine ??= StartCoroutine(ProcessLoadsRoutine());
         }
 
         #endregion
@@ -50,7 +51,7 @@ namespace Core
             {
                 StartCoroutine(UnloadRoutine(CurrentScene));
 
-                var temp = _nextLoadData;
+                LoadData temp = _nextLoadData;
                 _nextLoadData = null;
                 yield return StartCoroutine(LoadRoutine(temp));
             }
@@ -63,7 +64,7 @@ namespace Core
         {
             int buildIndex = GetBuildIndex(data.Scene);
 
-            var op = SceneManager.LoadSceneAsync(buildIndex);
+            AsyncOperation op = SceneManager.LoadSceneAsync(buildIndex);
             op.allowSceneActivation = true;
             yield return op;
 
@@ -90,24 +91,31 @@ namespace Core
 
             int buildIndex = GetBuildIndex(scene);
 
-            AsyncOperation op = SceneManager.UnloadSceneAsync(buildIndex);
+            AsyncOperation op = null;
+            try
+            {
+                op = SceneManager.UnloadSceneAsync(buildIndex);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
+
+            if (op == null)
+            {
+                yield break;
+            }
+
             yield return op;
         }
 
         #endregion
 
-        #region Odin
-
-        //[ShowInInspector, EnumToggleButtons] private UnityScene sceneToLoad;
-        //[ShowInInspector] private GameSetupPassThroughData gameData = new GameSetupPassThroughData();
-
-        #endregion
-
         #region Methods
 
-        private static void FindAndStartBaseSceneManager(Scene loadedScene, PassThroughData data)
+        private static void FindAndStartBaseSceneManager(Scene loadedScene, object data)
         {
-            foreach (var root in loadedScene.GetRootGameObjects())
+            foreach (GameObject root in loadedScene.GetRootGameObjects())
             {
                 BaseSceneManager bsm = root.GetComponentInChildren<BaseSceneManager>();
                 if (bsm != null)
@@ -129,14 +137,14 @@ namespace Core
 
         private class LoadData
         {
-            public LoadData(UnityScene scene, PassThroughData data)
+            public LoadData(UnityScene scene, object data)
             {
                 Scene = scene;
                 Data = data;
             }
 
             public UnityScene Scene { get; }
-            public PassThroughData Data { get; }
+            public object Data { get; }
         }
 
         #endregion

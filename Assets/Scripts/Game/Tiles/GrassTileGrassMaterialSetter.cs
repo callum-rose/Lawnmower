@@ -3,87 +3,86 @@ using UnityEngine;
 
 namespace Game.Tiles
 {
-    [ExecuteInEditMode]
-    internal class GrassTileGrassMaterialSetter : MonoBehaviour
-    {
-        [SerializeField] private bool enabled = true;
+	[ExecuteInEditMode]
+	internal class GrassTileGrassMaterialSetter : MonoBehaviour
+	{
+		[SerializeField] private bool enabled = true;
 
-        [SerializeField, InlineEditor, ShowIf(nameof(enabled))] private GrassMaterialDataHolder materialData;
-        [SerializeField, ShowIf(nameof(enabled))] private int height;
+		[SerializeField, InlineEditor, ShowIf(nameof(enabled))]
+		private GrassMaterialDataHolder materialData;
 
-        [ShowInInspector, ShowIf(nameof(enabled))] private GrassMaterialDataHolder.GrassData DataToUse => materialData.GetDataForHeight(height);
+		[SerializeField, ShowIf(nameof(enabled))]
+		private int height;
 
-        private static MaterialPropertyBlock _propertyBlock;
+		[ShowInInspector, ShowIf(nameof(enabled))]
+		private GrassMaterialDataHolder.GrassData DataToUse => materialData.GetDataForHeight(height);
 
-        private Renderer[] _renderers;
+		private static MaterialPropertyBlock _propertyBlock;
 
-        #region Unity
+		private static readonly int 
+			ColourFadeBaseColour = Shader.PropertyToID("_ColourFadeBaseColour"),
+			ColourFadeTipColour = Shader.PropertyToID("_ColourFadeTipColour"),
+			ColourFadeYRange = Shader.PropertyToID("_ColourFadeYRange");
 
-        private void Awake()
-        {
-            if (!enabled)
-            {
-                return;
-            }
+		private Renderer[] _renderers;
 
-            if (_propertyBlock == null)
-            {
-                _propertyBlock = new MaterialPropertyBlock();
-            }
+		#region Unity
 
-            UpdateRendererArray();
-            SetPropertyBlock();
-        }
+		private void Awake()
+		{
+			if (!enabled)
+			{
+				return;
+			}
 
-        private void OnValidate()
-        {
-            if (!enabled)
-            {
-                return;
-            }
+			_propertyBlock ??= new MaterialPropertyBlock();
 
-            SetPropertyBlock();
-        }
+			UpdateRendererArray();
+			SetPropertyBlock();
+		}
 
-        #endregion
+		private void OnValidate()
+		{
+			if (!enabled)
+			{
+				return;
+			}
 
-        #region Methods
+			SetPropertyBlock();
+		}
 
-        [Button, EnableIf(nameof(enabled))]
-        private void SetPropertyBlock()
-        {
+		#endregion
+
+		#region Methods
+
+		[Button, EnableIf(nameof(enabled))]
+		private void SetPropertyBlock()
+		{
 #if UNITY_EDITOR
-            if (!UnityEditor.EditorApplication.isPlaying)
-            {
-                if (_propertyBlock == null)
-                {
-                    _propertyBlock = new MaterialPropertyBlock();
-                }
-
-                if (_renderers == null)
-                {
-                    _renderers = GetComponentsInChildren<Renderer>();
-                }
-            }
+			if (!UnityEditor.EditorApplication.isPlaying)
+			{
+				_propertyBlock ??= new MaterialPropertyBlock();
+				_renderers ??= GetComponentsInChildren<Renderer>();
+			}
 #endif
 
-            var data = materialData.GetDataForHeight(height);
-            foreach (Renderer r in _renderers)
-            {
-                r.GetPropertyBlock(_propertyBlock);
-                _propertyBlock.SetColor("_ColourFadeBaseColour", data.BaseColour);
-                _propertyBlock.SetColor("_ColourFadeTipColour", materialData.VaryColour(data.TipColour));
-                _propertyBlock.SetVector("_ColourFadeYRange", data.ColourFadeYRange);
-                r.SetPropertyBlock(_propertyBlock);
-            }
-        }
+			GrassMaterialDataHolder.GrassData data = materialData.GetDataForHeight(height);
+			foreach (Renderer r in _renderers)
+			{
+				r.GetPropertyBlock(_propertyBlock);
+				_propertyBlock.SetColor(ColourFadeBaseColour, data.BaseColour);
+				_propertyBlock.SetColor(ColourFadeTipColour, materialData.VaryColour(data.TipColour));
+				_propertyBlock.SetVector(ColourFadeYRange, data.ColourFadeYRange);
+				r.SetPropertyBlock(_propertyBlock);
+			}
+		}
 
-        [Button, EnableIf(nameof(enabled))]
-        private void UpdateRendererArray()
-        {
-            _renderers = GetComponentsInChildren<Renderer>();
-        }
+		[Button, EnableIf(nameof(enabled))]
+		private void UpdateRendererArray()
+		{
+			_renderers = GetComponentsInChildren<Renderer>();
+		}
 
-        #endregion
-    }
+		#endregion
+	}
 }

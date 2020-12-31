@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Game.Core
 {
     [Serializable]
-    internal struct GridVector : IEquatable<GridVector>
+    public struct GridVector : IEquatable<GridVector>
     {
         public int x, y;
 

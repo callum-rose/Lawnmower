@@ -43,14 +43,14 @@ namespace Pool
         {
             while(_pool.Count > 0)
             {
-                var obj = _pool.Pop();
+                T obj = _pool.Pop();
                 UnityEngine.Object.Destroy(obj.gameObject);
             }
         }
 
         private T Create()
         {
-            var newObj = UnityEngine.Object.Instantiate(_prefab, _container);
+            T newObj = UnityEngine.Object.Instantiate(_prefab, _container);
             return newObj;
         }
     }

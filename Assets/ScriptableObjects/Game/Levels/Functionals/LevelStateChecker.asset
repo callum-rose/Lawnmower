@@ -12,3 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca5b9a1a221a23244aa5efc50136dc75, type: 3}
   m_Name: LevelStateChecker
   m_EditorClassIdentifier: 
+  levelRuinedChannel: {fileID: 11400000, guid: ef59841d334928842bd924ddebf485be, type: 2}

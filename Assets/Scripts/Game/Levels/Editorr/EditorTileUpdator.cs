@@ -27,7 +27,10 @@ namespace Game.Levels.Editorr
 
         private void OnDestroy()
         {
-            TileSelector.Selected -= OnTileSelected;
+            if (TileSelector != null)
+            {
+                TileSelector.Selected -= OnTileSelected;
+            }
         }
 
         #endregion
@@ -46,7 +49,7 @@ namespace Game.Levels.Editorr
             TileData data = tileUiManager.Selected;
             TileData prevData = levelManager.GetTileData(position);
 
-            var undoable = new Undoable(
+            Undoable undoable = new Undoable(
                 () => levelManager.UpdateTile(position, data),
                 () => levelManager.UpdateTile(position, prevData));
             undoable.Do();
@@ -59,7 +62,7 @@ namespace Game.Levels.Editorr
             IReadOnlyLevelData level = levelManager.Level;
             if (LevelShaper.RequiresReshapeToEncapsulatePosition(level.Width, level.Depth, position))
             {
-                var newLevel = LevelShaper.EncapsulatePosition(level, position, out GridVector offset);
+                LevelData newLevel = LevelShaper.EncapsulatePosition(level, position, out GridVector offset);
                 position += offset;
                 levelManager.SetLevelAfterResize(newLevel, offset);
             }

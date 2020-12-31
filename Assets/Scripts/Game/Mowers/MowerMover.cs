@@ -1,69 +1,125 @@
-using UnityEngine;
-using DG.Tweening;
-using System.Collections.Generic;
+using System;
 using System.Collections;
+using UnityEngine;
+using System.Collections.Generic;
+using System.Linq;
+using System.Numerics;
 using Game.Core;
+using Sirenix.OdinInspector;
+using Vector3 = UnityEngine.Vector3;
 
 namespace Game.Mowers
 {
-    internal class MowerMover : MonoBehaviour
-    {
-        [SerializeField] private float movementDuration = 0.25f;
-        [SerializeField] private Ease movementAnimEase;
+	internal class MowerMover : MonoBehaviour
+	{
+		[SerializeField, InlineEditor(Expanded = true)]
+		private MowerMoverData data;
 
-        public GridVector CurrentPosition { get; private set; }
+		public GridVector CurrentPosition { get; private set; }
 
-        private Positioner _positioner;
+		private Positioner _positioner;
 
-        private Queue<GridVector> _positionQueue = new Queue<GridVector>();
-        private Coroutine _animationRoutine;
+		private readonly Queue<Vector3> _positionQueue = new Queue<Vector3>();
+		private float _pathFractionComplete;
 
-        public void Init(Positioner positioner)
-        {
-            _positioner = positioner;
-        }
+		#region Unity
 
-        public void Move(GridVector toPosition, bool animated = true)
-        {
-            CurrentPosition = toPosition;
+		private void Update()
+		{
+			if (_positionQueue.Count == 0)
+			{
+				return;
+			}
+			
+			float speed = _positionQueue.Count * Time.deltaTime;
+			if (speed > 0)
+			{
+				float floatIndex = _pathFractionComplete * _positionQueue.Count;
+				floatIndex += speed;
+				_pathFractionComplete = floatIndex / _positionQueue.Count;
+			}
 
-            if (animated)
-            {
-                _positionQueue.Enqueue(toPosition);
+			transform.position = GetTargetPositionOnPath(_pathFractionComplete, _positionQueue);
+		}
 
-                if (_animationRoutine == null)
-                {
-                    _animationRoutine = StartCoroutine(RunAnimationQueueRoutine());
-                }
-            }
-            else
-            {
-                transform.localPosition = _positioner.GetLocalPosition(toPosition);
-            }
-        }
+		#endregion
 
-        public void Bump(GridVector toPosition)
-        {
-        }
+		#region API
 
-        private IEnumerator RunAnimationQueueRoutine()
-        {
-            YieldInstruction AnimateMove(GridVector toPosition)
-            {
-                Vector3 vec = _positioner.GetLocalPosition(toPosition);
-                return transform
-                    .DOLocalMove(vec, movementDuration)
-                    .SetEase(movementAnimEase)
-                    .WaitForCompletion();
-            }
+		public void Init(Positioner positioner)
+		{
+			_positioner = positioner;
+		}
 
-            while (_positionQueue.Count > 0)
-            {
-                GridVector pos = _positionQueue.Dequeue();
-                yield return AnimateMove(pos);
-            }
+		public void Move(GridVector toPosition, bool animated = true)
+		{
+			CurrentPosition = toPosition;
 
-            _animationRoutine = null;
-        }
-    }
+			Vector3 worldPosition = _positioner.GetWorldPosition(toPosition);
+			EnqueueToTargetPath(worldPosition);
+		}
+
+		public void Bump(GridVector toPosition)
+		{
+		}
+
+		#endregion
+
+		#region Routines
+
+		#endregion
+
+		#region Methods
+
+		private static Vector3 GetTargetPositionOnPath(float pathFractionComplete, IEnumerable<Vector3> positionQueue)
+		{
+			if (positionQueue.Count() == 0)
+			{
+				return Vector3.zero;
+			}
+			
+			if (pathFractionComplete >= 1f)
+			{
+				return positionQueue.Last();
+			}
+
+			float floatIndex = pathFractionComplete * positionQueue.Count();
+			(int prevIndex, int postIndex) = (Mathf.FloorToInt(floatIndex), Mathf.CeilToInt(floatIndex));
+
+			if (prevIndex == postIndex)
+			{
+				return positionQueue.ElementAt(prevIndex);
+			}
+
+			Vector3 prevPosition, postPosition;
+			using (IEnumerator<Vector3> enumerator = positionQueue.GetEnumerator())
+			{
+				for (int i = 0; i <= prevIndex; i++)
+				{
+					enumerator.MoveNext();
+				}
+
+				prevPosition = enumerator.Current;
+				enumerator.MoveNext();
+				postPosition = enumerator.Current;
+			}
+
+			float t = floatIndex - prevIndex;
+			return Vector3.Lerp(prevPosition, postPosition, t);
+		}
+
+		private void EnqueueToTargetPath(Vector3 position)
+		{
+			_positionQueue.Enqueue(position);
+			_pathFractionComplete *= (_positionQueue.Count - 1f) / _positionQueue.Count;
+		}
+
+		private void DequeueFromTargetPath()
+		{
+			_positionQueue.Dequeue();
+			_pathFractionComplete *= _positionQueue.Count / (_positionQueue.Count + 1f);
+		}
+
+		#endregion
+	}
 }

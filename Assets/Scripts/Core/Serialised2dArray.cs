@@ -65,7 +65,7 @@ namespace Core
 
         public IEnumerator<T> GetEnumerator()
         {
-            foreach (var d in data)
+            foreach (T d in data)
             {
                 yield return d;
             }

@@ -82,14 +82,14 @@ namespace IUnified
         private static readonly Regex TypeArgumentsReplace = new Regex(@"`[0-9]+");
         public static string ConstructResolvedName(Type type)
         {
-            var typeName = type.Name;
+            string typeName = type.Name;
 
             if(!type.IsGenericType)
             {
                 return typeName;
             }
 
-            var argumentsString = type.GetGenericArguments().Aggregate((string)null, (s, t) => s == null ? (ConstructResolvedName(t)) : string.Format("{0}, {1}", s, (ConstructResolvedName(t))));
+            string argumentsString = type.GetGenericArguments().Aggregate((string)null, (s, t) => s == null ? (ConstructResolvedName(t)) : string.Format("{0}, {1}", s, (ConstructResolvedName(t))));
             return TypeArgumentsReplace.Replace(typeName, $"<{argumentsString}>");
         }
     }

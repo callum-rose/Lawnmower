@@ -8,6 +8,8 @@ namespace Game.UndoSystem
         int Count { get; }
         int Limit { get; }
 
+        event Action Undone, Redone;
+        
         void Add(IUndoable undoable);
         bool Redo();
         bool Undo();

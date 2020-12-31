@@ -21,7 +21,7 @@ namespace UI.Buttons
         [SerializeField] private Color pointerDownTint = new Color(0.9f, 0.9f, 0.9f);
 
         [Header("Action")]
-        [SerializeField] private UnityEvent unityEvent;
+        [SerializeField] public UnityEvent unityEvent;
 
         private Action _action;
 

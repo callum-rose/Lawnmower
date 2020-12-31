@@ -12,4 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c170a0d445e163e449b60f30f040a857, type: 3}
   m_Name: ViewManager
   m_EditorClassIdentifier: 
-  sceneToOpenFirst: 2
+  sceneToOpen: 1
+  gameSetupPassThroughData:
+    mower: {fileID: 11400000, guid: 9d84f272dfc01484eb3161f5466cb403, type: 2}
+    level: {fileID: 11400000, guid: 335784b4cd9bd24488aa81a35771e2c7, type: 2}

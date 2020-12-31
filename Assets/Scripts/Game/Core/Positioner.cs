@@ -3,7 +3,7 @@ using static Game.Levels.LevelDimensions;
 
 namespace Game.Core
 {
-    internal class Positioner : MonoBehaviour
+    public class Positioner : MonoBehaviour
     {
         [SerializeField] private Transform container;
 

@@ -21,7 +21,7 @@ namespace UI.Buttons
                 iconToSpriteDict = EnumExtensions.GetValues<IconType>().ToDictionary(i => i, i => (Sprite)null);
             }
 
-            foreach (var i in EnumExtensions.GetValues<IconType>())
+            foreach (IconType i in EnumExtensions.GetValues<IconType>())
             {
                 if (!iconToSpriteDict.ContainsKey(i))
                 {

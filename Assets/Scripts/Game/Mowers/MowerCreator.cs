@@ -44,7 +44,7 @@ namespace Game.Mowers
 
         private void InitObjectsNeedingMowerPosition(IMowerPosition position)
         {
-            foreach (var mpr in mowerPositionRequirers.Select(c => c.Result))
+            foreach (IRequiresMowerPosition mpr in mowerPositionRequirers.Select(c => c.Result))
             {
                 mpr.Init(position);
             }
