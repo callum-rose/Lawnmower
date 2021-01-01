@@ -1,152 +1,151 @@
 using System;
-using Sirenix.OdinInspector;
 using System.Collections;
-using Game.Core;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.SceneManagement;
 
 namespace Core
 {
-    [CreateAssetMenu(fileName = nameof(ViewManager), menuName = SONames.GameDir + nameof(ViewManager))]
-    public partial class ViewManager : Singleton<ViewManager>
-    {
-        private UnityScene CurrentScene { get; set; } = UnityScene.None;
+	[CreateAssetMenu(fileName = nameof(ViewManager), menuName = SONames.GameDir + nameof(ViewManager))]
+	public partial class ViewManager : Singleton<ViewManager>
+	{
+		private UnityScene CurrentScene { get; set; } = UnityScene.None;
 
-        private LoadData _nextLoadData;
+		private LoadData _nextLoadData;
 
-        private Coroutine _loadRoutine;
+		private Coroutine _loadRoutine;
 
-        [RuntimeInitializeOnLoadMethod]
-        private static void Init()
-        {
-            if (!WasAppStartedByViewManager)
-            {
-                return;
-            }
+#if UNITY_EDITOR
+		[RuntimeInitializeOnLoadMethod]
+		private static void Init()
+		{
+			if (!WasAppStartedByViewManager)
+			{
+				return;
+			}
 
-            SetAppWasStartedByViewManager(false);
-            
-            Instance.Load(Instance.sceneToOpen, Instance.GetData());
-        }
+			SetAppWasStartedByViewManager(false);
 
-        #region API
+			Instance.Load(Instance.sceneToOpen, Instance.GetData());
+		}
+#endif
 
-        public void Load(UnityScene scene, object data = null)
-        {
-            Assert.IsFalse(scene == UnityScene.None);
+		#region API
 
-            _nextLoadData = new LoadData(scene, data);
+		public void Load(UnityScene scene, object data = null)
+		{
+			Assert.IsFalse(scene == UnityScene.None);
 
-            _loadRoutine ??= StartCoroutine(ProcessLoadsRoutine());
-        }
+			_nextLoadData = new LoadData(scene, data);
 
-        #endregion
+			_loadRoutine ??= StartCoroutine(ProcessLoadsRoutine());
+		}
 
-        #region Routines
+		#endregion
 
-        private IEnumerator ProcessLoadsRoutine()
-        {
-            do
-            {
-                StartCoroutine(UnloadRoutine(CurrentScene));
+		#region Routines
 
-                LoadData temp = _nextLoadData;
-                _nextLoadData = null;
-                yield return StartCoroutine(LoadRoutine(temp));
-            }
-            while (_nextLoadData != null);
+		private IEnumerator ProcessLoadsRoutine()
+		{
+			do
+			{
+				StartCoroutine(UnloadRoutine(CurrentScene));
 
-            _loadRoutine = null;
-        }
+				LoadData temp = _nextLoadData;
+				_nextLoadData = null;
+				yield return StartCoroutine(LoadRoutine(temp));
+			} while (_nextLoadData != null);
 
-        private IEnumerator LoadRoutine(LoadData data)
-        {
-            int buildIndex = GetBuildIndex(data.Scene);
+			_loadRoutine = null;
+		}
 
-            AsyncOperation op = SceneManager.LoadSceneAsync(buildIndex);
-            op.allowSceneActivation = true;
-            yield return op;
+		private IEnumerator LoadRoutine(LoadData data)
+		{
+			int buildIndex = GetBuildIndex(data.Scene);
 
-            CurrentScene = data.Scene;
+			AsyncOperation op = SceneManager.LoadSceneAsync(buildIndex);
+			op.allowSceneActivation = true;
+			yield return op;
 
-            Scene loadedScene = SceneManager.GetSceneByBuildIndex(buildIndex);
+			CurrentScene = data.Scene;
 
-            try
-            {
-                FindAndStartBaseSceneManager(loadedScene, data.Data);
-            }
-            catch(System.Exception e)
-            {
-                Debug.LogException(e);
-            }
-        }
+			Scene loadedScene = SceneManager.GetSceneByBuildIndex(buildIndex);
 
-        private IEnumerator UnloadRoutine(UnityScene scene)
-        {
-            if (scene == UnityScene.None)
-            {
-                yield break;
-            }
+			try
+			{
+				FindAndStartBaseSceneManager(loadedScene, data.Data);
+			}
+			catch (System.Exception e)
+			{
+				Debug.LogException(e);
+			}
+		}
 
-            int buildIndex = GetBuildIndex(scene);
+		private IEnumerator UnloadRoutine(UnityScene scene)
+		{
+			if (scene == UnityScene.None)
+			{
+				yield break;
+			}
 
-            AsyncOperation op = null;
-            try
-            {
-                op = SceneManager.UnloadSceneAsync(buildIndex);
-            }
-            catch (Exception e)
-            {
-                Debug.LogException(e);
-            }
+			int buildIndex = GetBuildIndex(scene);
 
-            if (op == null)
-            {
-                yield break;
-            }
+			AsyncOperation op = null;
+			try
+			{
+				op = SceneManager.UnloadSceneAsync(buildIndex);
+			}
+			catch (Exception e)
+			{
+				Debug.LogException(e);
+			}
 
-            yield return op;
-        }
+			if (op == null)
+			{
+				yield break;
+			}
 
-        #endregion
+			yield return op;
+		}
 
-        #region Methods
+		#endregion
 
-        private static void FindAndStartBaseSceneManager(Scene loadedScene, object data)
-        {
-            foreach (GameObject root in loadedScene.GetRootGameObjects())
-            {
-                BaseSceneManager bsm = root.GetComponentInChildren<BaseSceneManager>();
-                if (bsm != null)
-                {
-                    bsm.Begin(data);
-                    break;
-                }
-            }
-        }
+		#region Methods
 
-        private static int GetBuildIndex(UnityScene scene)
-        {
-            return (int)scene;
-        }
+		private static void FindAndStartBaseSceneManager(Scene loadedScene, object data)
+		{
+			foreach (GameObject root in loadedScene.GetRootGameObjects())
+			{
+				BaseSceneManager bsm = root.GetComponentInChildren<BaseSceneManager>();
+				if (bsm != null)
+				{
+					bsm.Begin(data);
+					break;
+				}
+			}
+		}
 
-        #endregion
+		private static int GetBuildIndex(UnityScene scene)
+		{
+			return (int) scene;
+		}
 
-        #region Classes
+		#endregion
 
-        private class LoadData
-        {
-            public LoadData(UnityScene scene, object data)
-            {
-                Scene = scene;
-                Data = data;
-            }
+		#region Classes
 
-            public UnityScene Scene { get; }
-            public object Data { get; }
-        }
+		private class LoadData
+		{
+			public LoadData(UnityScene scene, object data)
+			{
+				Scene = scene;
+				Data = data;
+			}
 
-        #endregion
-    }
+			public UnityScene Scene { get; }
+			public object Data { get; }
+		}
+
+		#endregion
+	}
 }

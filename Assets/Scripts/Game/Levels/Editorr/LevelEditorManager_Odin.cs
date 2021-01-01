@@ -1,3 +1,5 @@
+#if UNITY_EDITOR
+
 using Game.Core;
 using Game.Mowers;
 using Sirenix.OdinInspector;
@@ -5,7 +7,6 @@ using UnityEngine;
 
 namespace Game.Levels.Editorr
 {
-#if ODIN_INSPECTOR
 	public partial class LevelEditorManager
 	{
 		private const string Build = "Build";
@@ -66,5 +67,5 @@ namespace Game.Levels.Editorr
 			levelSaver.Save_Editor(levelManager.Tiles, levelManager.MowerPosition);
 		}
 	}
-#endif
 }
+#endif

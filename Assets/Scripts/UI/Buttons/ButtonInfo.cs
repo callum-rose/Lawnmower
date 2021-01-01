@@ -35,7 +35,7 @@ namespace UI.Buttons
 			
 			if (channel != null)
 			{
-				channel.RaiseEvent();
+				channel.Raise();
 			}
 		}
 	}

@@ -1,10 +1,7 @@
 using Core;
 using Sirenix.OdinInspector;
 using UnityEngine;
-using UnityEngine.UI;
-using System.Linq;
 using System.Collections.Generic;
-using UnityEditor;
 
 namespace Game.Levels
 {
@@ -13,9 +10,12 @@ namespace Game.Levels
 	{
 		[ShowInInspector, PropertyOrder(5), TitleGroup("In Game Data")]
 		public int LevelsCompleted { get; private set; }
-		
-		[SerializeField, OnValueChanged(nameof(UpdateNotIncludedLevels)), AssetsOnly,
+
+		[SerializeField]
+#if UNITY_EDITOR
+		[OnValueChanged(nameof(UpdateNotIncludedLevels)), AssetsOnly,
 		 ListDrawerSettings(Expanded = true, ShowIndexLabels = true), PropertyOrder(1)]
+#endif
 		private LevelData[] levelDatas;
 
 		[ShowInInspector, ListDrawerSettings(Expanded = true, IsReadOnly = true), ReadOnly, PropertyOrder(4)]
@@ -30,10 +30,12 @@ namespace Game.Levels
 			LevelsCompleted = PersistantData.Level.LevelsCompleted.Load();
 		}
 
+#if UNITY_EDITOR
 		private void OnEnable()
 		{
 			UpdateNotIncludedLevels();
 		}
+#endif
 
 		#endregion
 
@@ -46,7 +48,7 @@ namespace Game.Levels
 				level = null;
 				return false;
 			}
-			
+
 			level = levelDatas[index];
 			return true;
 		}
@@ -71,7 +73,7 @@ namespace Game.Levels
 			LevelsCompleted = index + 1;
 			PersistantData.Level.LevelsCompleted.Save(LevelsCompleted);
 		}
-		
+
 		#endregion
 	}
 }

@@ -9,7 +9,8 @@ namespace Game.Tiles
     [RequireComponent(typeof(IAppearanceSetter))]
     internal partial class GrassTile : Tile
     {
-
+        [SerializeField] private DirtAppearanceSetter dirtAppearanceSetter;
+        
         public const int MaxGrassHeight = 3;
         public const int PerfectGrassHeight = 1;
 
@@ -25,6 +26,11 @@ namespace Game.Tiles
             get => ___grassHeight;
             set
             {
+                if (value < 0 || value > MaxGrassHeight)
+                {
+                    return;
+                }
+                
                 ___grassHeight = value;
                 SetAppearance(___grassHeight);
             }
@@ -33,6 +39,7 @@ namespace Game.Tiles
         private static MaterialPropertyBlock _propertyBlock;
 
         private IAppearanceSetter _appearanceSetter;
+
 
         private GridVector _lastTraverseOntoDirection;
 
@@ -74,6 +81,7 @@ namespace Game.Tiles
             if (!inverted)
             {
                 GrassHeight--;
+                
                 if (GrassHeight < 1)
                 {
                     Ruined.Invoke(inverted);
@@ -89,7 +97,12 @@ namespace Game.Tiles
 
         public override void TraverseAway(GridVector toDirection, Xor inverted)
         {
-            // TODO
+            if (GrassHeight > 0)
+            {
+                return;
+            }
+            
+            dirtAppearanceSetter.Set(_lastTraverseOntoDirection, toDirection);
         }
 
         #endregion

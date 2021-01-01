@@ -81,7 +81,7 @@ namespace Game.Levels
         private void OnTileRuined(Xor isUndo)
         {
             LevelFailed.Invoke(isUndo);
-            levelRuinedChannel.RaiseEvent();
+            levelRuinedChannel.Raise();
         }
 
         #endregion

@@ -1,8 +1,5 @@
-using System;
-using Core;
 using Sirenix.OdinInspector;
 using UnityEngine;
-using UnityEngine.Experimental.Rendering;
 using UnityEngine.UI;
 
 namespace MainMenu

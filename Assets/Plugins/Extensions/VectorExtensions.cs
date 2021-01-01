@@ -61,10 +61,21 @@ namespace BalsamicBits.Extensions
         {
             return new Vector3(vec.x, 0, vec.y);
         }
-
-        public static Vector3 PerElementMultiply(Vector3 vec1, Vector3 vec2)
+        
+        public static Vector3 PerElementMultiply(this Vector3 vec1, Vector3 vec2)
         {
             return new Vector3(vec1.x * vec2.x, vec1.y * vec2.y, vec1.z * vec2.z);
+        }
+
+        /// <summary>
+        /// Returns a random vector using the input vector as a range for each component
+        /// </summary>
+        /// <param name="vec"></param>
+        /// <returns></returns>
+        public static Vector3 RandomiseInRange(this Vector3 vec)
+        {
+            float GetRandom(float range) => Random.Range(-range, range);
+            return new Vector3(GetRandom(vec.x), GetRandom(vec.y), GetRandom(vec.z));
         }
     }
 }

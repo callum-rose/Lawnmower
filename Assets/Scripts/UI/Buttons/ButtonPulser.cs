@@ -1,7 +1,4 @@
-using System;
-using System.Collections;
 using Core;
-using DG.Tweening;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
@@ -11,17 +8,14 @@ namespace UI.Buttons
 	internal class ButtonPulser : MonoBehaviour
 	{
 		[SerializeField] private VoidEventChannel eventChannel;
-		[SerializeField] private float pulseScale = 1.2f;
-		[SerializeField] private float pulseDuration = 2;
 
 		private Button _button;
 		private Animator _animator;
 
-		private Coroutine _pulseRoutine;
-		private bool _doStopPulsing;
+		private readonly int _doPulseId = Animator.StringToHash("doPulse");
 
-		private bool PulsePlaying => _pulseRoutine != null && !_doStopPulsing;
-
+		private bool IsPulsing => _animator != null && _animator.GetBool(_doPulseId);
+		
 		#region Unity
 
 		private void Awake()
@@ -56,21 +50,16 @@ namespace UI.Buttons
 
 		#region API
 
-		[Button, DisableInEditorMode, ShowIf("@!" + nameof(PulsePlaying))]
+		[Button, DisableInEditorMode, HideIf(nameof(IsPulsing))]
 		public void Pulse()
 		{
-			if (_pulseRoutine != null)
-			{
-				return;
-			}
-
-			_pulseRoutine = StartCoroutine(PulseRoutine());
+			_animator.SetBool(_doPulseId, true);
 		}
 
-		[Button, DisableInEditorMode, ShowIf("@" + nameof(PulsePlaying))]
+		[Button, DisableInEditorMode, ShowIf(nameof(IsPulsing))]
 		public void StopPulse()
 		{
-			_doStopPulsing = true;
+			_animator.SetBool(_doPulseId, false);
 		}
 
 		#endregion
@@ -80,52 +69,6 @@ namespace UI.Buttons
 		private void OnEvent()
 		{
 			Pulse();
-		}
-
-		#endregion
-
-		#region Routines
-
-		private IEnumerator PulseRoutine()
-		{
-			float initialTime = Time.time;
-
-			float GetTimeSinceStart()
-			{
-				return Time.time - initialTime;
-			}
-
-			void SetScale()
-			{
-				float timeSinceStart = GetTimeSinceStart();
-				float t = timeSinceStart * (2f * Mathf.PI) / pulseDuration;
-				float cos = Mathf.Cos(t);
-				float cos0To1 = 0.5f * (1 - cos);
-				float cosLowerToUpper = 1 + cos0To1 * (pulseScale - 1);
-
-				transform.localScale = Vector3.one * cosLowerToUpper;
-			}
-
-			while (!_doStopPulsing)
-			{
-				SetScale();
-
-				yield return null;
-			}
-			
-			_doStopPulsing = false;
-			_pulseRoutine = null;
-
-			float timeToStop = Mathf.Ceil(GetTimeSinceStart() / pulseDuration) * pulseDuration;
-
-			while (GetTimeSinceStart() < timeToStop)
-			{
-				SetScale();
-
-				yield return null;
-			}
-
-			transform.localScale = Vector3.one;
 		}
 
 		#endregion

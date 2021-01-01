@@ -2,7 +2,6 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using Debug = System.Diagnostics.Debug;
 
 namespace LevelSelect
 {
