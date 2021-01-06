@@ -35,7 +35,7 @@ namespace Game.Tiles
         public void OnPointerClick(PointerEventData eventData)
         {
             GridVector position = GetGridPosition(eventData);
-            Selected.Invoke(position);
+            Selected?.Invoke(position);
         }
 
         private void OnDrag_Internal(PointerEventData eventData)

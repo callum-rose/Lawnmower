@@ -439,7 +439,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 290bc79af1be437489243d20d2de5cec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  eventChannel: {fileID: 0}
+  doPulseEventChannel: {fileID: 0}
 --- !u!95 &6770946665738566033
 Animator:
   serializedVersion: 3

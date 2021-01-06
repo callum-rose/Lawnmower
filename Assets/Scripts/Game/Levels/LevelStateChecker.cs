@@ -11,9 +11,9 @@ namespace Game.Levels
     [CreateAssetMenu(fileName = nameof(LevelStateChecker), menuName = SONames.GameDir + nameof(LevelStateChecker))]
     internal class LevelStateChecker : ScriptableObject
     {
-        [SerializeField] private VoidEventChannel levelRuinedChannel;
+        [SerializeField] private UndoableEventChannel levelRuinedChannel;
         
-        public UndoableAction LevelCompleted, LevelFailed;
+        public UndoableAction LevelCompleted, LevelFailed, LevelFixed;
 
         private ReadOnlyTiles _tiles;
         private MowerMovementManager _mowerMovement;
@@ -43,7 +43,7 @@ namespace Game.Levels
             }
         }
 
-        public void OnMowerMoved(GridVector _prevPosition, GridVector _targetPosition, Xor isUndo)
+        public void OnMowerMoved(GridVector prevPosition, GridVector targetPosition, Xor isUndo)
         {
             bool isLevelComplete = IsLevelComplete();
             if ((isUndo && _wasLevelCompleted) || isLevelComplete)
@@ -63,7 +63,7 @@ namespace Game.Levels
                     break;
             }
         }
-
+        
         public void RemoveTile(Tile tile)
         {
             switch (tile)
@@ -81,7 +81,7 @@ namespace Game.Levels
         private void OnTileRuined(Xor isUndo)
         {
             LevelFailed.Invoke(isUndo);
-            levelRuinedChannel.Raise();
+            levelRuinedChannel.Raise(isUndo);
         }
 
         #endregion

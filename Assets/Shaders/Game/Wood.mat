@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 6
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Wood
+  m_Shader: {fileID: 4800000, guid: 527ca7c8997b2ae428a66ae5be2d6a91, type: 3}
+  m_ShaderKeywords: _COLOURINGTOUSE_VERTEXCOLOURTOLUT _USEAMBIENTOCCLUSIONMAP_ON
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _AmbientOcclusion:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _VertexColourLUTHigh:
+        m_Texture: {fileID: 2800000, guid: 77a75c0550f32da4faad036977b3d1b0, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _VertexColourLUTLow:
+        m_Texture: {fileID: 2800000, guid: 09b86daacee22d545a446509bf83ad31, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Floats:
+    - _AOStrength: 1
+    - _AlphaCutoff: 0.5
+    - _ColouringToUse: 1
+    - _Float1: 0.221
+    - _FresnelPower: 1
+    - _FresnelStrength: 0.4610691
+    - _LightingStrength: 0
+    - _UseAmbientOcclusionMap: 1
+    - _UseGlobalLightColour: 0
+    - _VertexColourPadding: 0
+    m_Colors:
+    - _EmissionColor: {r: 1, g: 1, b: 1, a: 1}
+    - _FresnelColour: {r: 1, g: 1, b: 1, a: 0}
+    - _HighColour: {r: 0, g: 0, b: 0, a: 0}
+    - _LowColour: {r: 0, g: 0, b: 0, a: 0}
+    - _Range: {r: -0.05, g: 0.1, b: 0, a: 0}
+    - _ShadeColour: {r: 1, g: 1, b: 1, a: 0}
+    - _Vector0: {r: 0, g: 0, b: 0, a: 0}
+  m_BuildTextureStacks: []

@@ -7,12 +7,12 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7e729c60142941049177c9df0d07cfa6, type: 3}
+  m_Script: {fileID: 11500000, guid: d6d8d5bcf0b94ce6990aa118ef18cdc9, type: 3}
   m_Name: DirtParticlesManager
   m_EditorClassIdentifier: 
-  particlesEventChannel: {fileID: 11400000, guid: c50c4a082720ead48b7e0f97b1db35c5,
-    type: 2}
   particlesPrefab: {fileID: 9180337449105964199, guid: 66408428e67e7bb449619b3970ef615d,
     type: 3}
+  particlesEventChannel: {fileID: 11400000, guid: c50c4a082720ead48b7e0f97b1db35c5,
+    type: 2}

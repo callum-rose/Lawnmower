@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: TilePrefabsHolder
   m_EditorClassIdentifier: 
   serializationData:
-    SerializedFormat: 2
+    SerializedFormat: 0
     SerializedBytes: 
     ReferencedUnityObjects: []
     SerializedBytesString: 
@@ -22,8 +22,8 @@ MonoBehaviour:
     PrefabModifications: []
     SerializationNodes: []
   tilePrefabs:
-    m_Keys: 0000000001000000020000000300000004000000
-    m_Values:
+    keys: 0000000001000000020000000300000004000000
+    values:
     - {fileID: 7594314150262590957, guid: 2cc9ff5eae6be474d94c774ee78ad7f8, type: 3}
     - {fileID: 7032916919265020135, guid: 53ab8f14d0c34af46963e81b50305f7a, type: 3}
     - {fileID: 289454246185063951, guid: 0a106eebd20a6fe44ac99547ddbd427d, type: 3}

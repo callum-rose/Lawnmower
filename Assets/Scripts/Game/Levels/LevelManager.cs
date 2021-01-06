@@ -90,7 +90,8 @@ namespace Game.Levels
 
             Assert.IsNotNull(level);
             _level = level;
-            LevelChanged.Invoke();
+
+            LevelChanged?.Invoke();
         }
 
         public void UpdateTile(GridVector position, TileData data)
@@ -153,9 +154,6 @@ namespace Game.Levels
 
         private void OnLevelFailed(Xor isUndo)
         {
-            bool isLevelResuming = isUndo;
-            //_mowerMovement.IsRunning = isLevelResuming;
-
             LevelFailed.Invoke(isUndo);
         }
 

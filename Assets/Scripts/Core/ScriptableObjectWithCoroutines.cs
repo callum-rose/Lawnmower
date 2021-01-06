@@ -4,7 +4,6 @@ using UnityEngine.Assertions;
 
 namespace Core
 {
-
     public abstract class ScriptableObjectWithCoroutines : ScriptableObject
     {
         private CoroutineSurrogate ___routiner;
@@ -37,6 +36,7 @@ namespace Core
             Routiner.StopCoroutine(routine);
         }
 
+        // ReSharper disable Unity.PerformanceAnalysis
         private CoroutineSurrogate CreateCoroutineSurrogate()
         {
             AssertAppPlaying();

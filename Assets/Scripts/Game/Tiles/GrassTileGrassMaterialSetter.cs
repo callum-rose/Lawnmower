@@ -6,8 +6,6 @@ namespace Game.Tiles
 	[ExecuteInEditMode]
 	internal class GrassTileGrassMaterialSetter : MonoBehaviour
 	{
-		[SerializeField] private bool enabled = true;
-
 		[SerializeField, InlineEditor, ShowIf(nameof(enabled))]
 		private GrassMaterialDataHolder materialData;
 
@@ -28,13 +26,8 @@ namespace Game.Tiles
 
 		#region Unity
 
-		private void Awake()
+		private void OnEnable()
 		{
-			if (!enabled)
-			{
-				return;
-			}
-
 			_propertyBlock ??= new MaterialPropertyBlock();
 
 			UpdateRendererArray();

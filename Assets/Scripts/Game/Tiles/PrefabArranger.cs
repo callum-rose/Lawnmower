@@ -1,9 +1,8 @@
-#if UNITY_EDITOR
-
 using System;
 using System.Linq;
 using BalsamicBits.Extensions;
 using Sirenix.OdinInspector;
+using UnityEditor;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -37,8 +36,20 @@ namespace Game.Tiles
 		[TitleGroup("Instantiated")] [SerializeField]
 		private Transform[] transforms;
 
+#if UNITY_EDITOR
+
 		private void OnValidate()
 		{
+			if (prefabs.IsNullOrEmpty())
+			{
+				return;
+			}
+
+			if (prefabs.Length == 1)
+			{
+				prefabs[0].weight = 1;
+			}
+			
 			float totalWeight = prefabs.Sum(p => p.weight);
 			for (int index = 0; index < prefabs.Length; index++)
 			{
@@ -147,6 +158,10 @@ namespace Game.Tiles
 			}
 		}
 
+
+		
+#endif
+
 		[Serializable]
 		private struct WeightedPrefab
 		{
@@ -164,5 +179,3 @@ namespace Game.Tiles
 		}
 	}
 }
-
-#endif

@@ -9,7 +9,7 @@ namespace Game.Levels.Editorr
 {
     public partial class LevelEditorManager : MonoBehaviour, IHasEditMode
     {
-        [Space]
+        [TitleGroup("Dependencies")]
         [SerializeField, R] private GameManager gameManager;
         [SerializeField, R] private LevelManager levelManager;
         [SerializeField, R] private ITileSelectorContainer tileSelector;
@@ -21,7 +21,7 @@ namespace Game.Levels.Editorr
         [SerializeField, R] private GizmoGridRenderer gridRenderer;
         [SerializeField, R] private GizmoSelectedTileRenderer tileRenderer;
 
-        [SerializeField, R, ListDrawerSettings]
+        [SerializeField, R, ListDrawerSettings, LabelWidth(0)]
         private IHasEditModeContainer[] hasEditModes;
 
         public bool IsEditMode

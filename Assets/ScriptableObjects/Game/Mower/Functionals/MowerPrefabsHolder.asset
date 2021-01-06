@@ -14,3 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mowerData:
   - {fileID: 11400000, guid: 9d84f272dfc01484eb3161f5466cb403, type: 2}
+  - {fileID: 11400000, guid: b667b35408d62714abeed621c885f83a, type: 2}

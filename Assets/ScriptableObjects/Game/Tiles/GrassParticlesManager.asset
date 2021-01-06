@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8c0cfac725754e83ab2665b11452b7f4, type: 3}
+  m_Name: GrassParticlesManager
+  m_EditorClassIdentifier: 
+  particlesPrefab: {fileID: 5282348629548063579, guid: 8d53969c26a780845839765f2e566fa7,
+    type: 3}
+  particlesEventChannel: {fileID: 11400000, guid: a0d44f1fe0272654481648582818aafc,
+    type: 2}

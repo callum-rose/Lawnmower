@@ -1,5 +1,6 @@
 using System;
 using Core;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Game.Mowers
@@ -8,6 +9,7 @@ namespace Game.Mowers
     public class CurrentMowerManager : ScriptableObject
     {
         [SerializeField] private MowerDataHolder mowerDataHolder;
+        [SerializeField, PropertyRange(0, "@")]
 
         public Guid CurrentId { get; private set; }
 

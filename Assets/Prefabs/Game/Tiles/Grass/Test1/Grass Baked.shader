@@ -14,8 +14,8 @@ Shader "Mine/Grass Baked"
 		_VertexOffsetNoiseVelocity("VertexOffsetNoiseVelocity", Vector) = (1,0,0,0)
 		[RemapSliders]_VertexOffsetNoiseFactorYRange("VertexOffsetNoiseFactorYRange", Vector) = (0,1,0,0)
 		_VertexOffsetMaxOffset("VertexOffsetMaxOffset", Float) = 0.01
-		[PerRendererData]_Offset("Offset", Vector) = (0,0,0,0)
-		[ASEEnd][Toggle(_BAKED_ON)] _Baked("Baked", Float) = 1
+		[ASEEnd][PerRendererData]_Offset("Offset", Vector) = (0,0,0,0)
+		[HideInInspector][Toggle(_BAKED_ON)] _Baked("Baked", Float) = 1
 
 		//_TessPhongStrength( "Tess Phong Strength", Range( 0, 1 ) ) = 0.5
 		//_TessValue( "Tess Max Tessellation", Range( 1, 32 ) ) = 16
@@ -154,7 +154,7 @@ Shader "Mine/Grass Baked"
 			HLSLPROGRAM
 			#define _RECEIVE_SHADOWS_OFF 1
 			#pragma multi_compile_instancing
-			#define ASE_SRP_VERSION 80200
+			#define ASE_SRP_VERSION 999999
 
 			#pragma prefer_hlslcc gles
 			#pragma exclude_renderers d3d11_9x
@@ -267,23 +267,23 @@ Shader "Mine/Grass Baked"
 				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
 				float3 ase_worldPos = mul(GetObjectToWorldMatrix(), v.vertex).xyz;
-				half2 temp_output_8_0_g38 = ( ( (ase_worldPos).xz * _VertexOffsetNoiseSize ) + ( _VertexOffsetNoiseVelocity * _TimeParameters.x ) );
-				half simplePerlin2D3_g38 = snoise( temp_output_8_0_g38 );
-				half2 temp_output_13_0_g38 = ( float2( 10,10 ) + temp_output_8_0_g38 );
-				half simplePerlin2D12_g38 = snoise( temp_output_13_0_g38 );
-				half3 appendResult14_g38 = (half3(simplePerlin2D3_g38 , 0.0 , simplePerlin2D12_g38));
-				half3 temp_output_42_0_g38 = ( appendResult14_g38 * _VertexOffsetMaxOffset );
+				half2 temp_output_8_0_g2 = ( ( (ase_worldPos).xz * _VertexOffsetNoiseSize ) + ( _VertexOffsetNoiseVelocity * _TimeParameters.x ) );
+				half simplePerlin2D3_g2 = snoise( temp_output_8_0_g2 );
+				half2 temp_output_13_0_g2 = ( float2( 10,10 ) + temp_output_8_0_g2 );
+				half simplePerlin2D12_g2 = snoise( temp_output_13_0_g2 );
+				half3 appendResult14_g2 = (half3(simplePerlin2D3_g2 , 0.0 , simplePerlin2D12_g2));
+				half3 temp_output_42_0_g2 = ( appendResult14_g2 * _VertexOffsetMaxOffset );
 				half3 _Offset_Instance = UNITY_ACCESS_INSTANCED_PROP(MineGrassBaked,_Offset);
 				#ifdef _BAKED_ON
-				half3 staticSwitch44_g38 = ( temp_output_42_0_g38 + _Offset_Instance );
+				half3 staticSwitch44_g2 = ( temp_output_42_0_g2 + _Offset_Instance );
 				#else
-				half3 staticSwitch44_g38 = temp_output_42_0_g38;
+				half3 staticSwitch44_g2 = temp_output_42_0_g2;
 				#endif
-				half clampResult26_g38 = clamp( (0.0 + ((ase_worldPos).y - _VertexOffsetNoiseFactorYRange.x) * (1.0 - 0.0) / (_VertexOffsetNoiseFactorYRange.y - _VertexOffsetNoiseFactorYRange.x)) , 0.0 , 1.0 );
+				half clampResult26_g2 = clamp( (0.0 + ((ase_worldPos).y - _VertexOffsetNoiseFactorYRange.x) * (1.0 - 0.0) / (_VertexOffsetNoiseFactorYRange.y - _VertexOffsetNoiseFactorYRange.x)) , 0.0 , 1.0 );
 				#ifdef _BAKED_ON
-				half staticSwitch47_g38 = v.ase_color.a;
+				half staticSwitch47_g2 = v.ase_color.a;
 				#else
-				half staticSwitch47_g38 = ( clampResult26_g38 * clampResult26_g38 );
+				half staticSwitch47_g2 = ( clampResult26_g2 * clampResult26_g2 );
 				#endif
 				
 				o.ase_color = v.ase_color;
@@ -292,7 +292,7 @@ Shader "Mine/Grass Baked"
 				#else
 					float3 defaultVertexValue = float3(0, 0, 0);
 				#endif
-				float3 vertexValue = ( staticSwitch44_g38 * staticSwitch47_g38 );
+				float3 vertexValue = ( staticSwitch44_g2 * staticSwitch47_g2 );
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
 					v.vertex.xyz = vertexValue;
 				#else
@@ -469,7 +469,7 @@ Shader "Mine/Grass Baked"
 			HLSLPROGRAM
 			#define _RECEIVE_SHADOWS_OFF 1
 			#pragma multi_compile_instancing
-			#define ASE_SRP_VERSION 80200
+			#define ASE_SRP_VERSION 999999
 
 			#pragma prefer_hlslcc gles
 			#pragma exclude_renderers d3d11_9x
@@ -566,23 +566,23 @@ Shader "Mine/Grass Baked"
 				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
 				float3 ase_worldPos = mul(GetObjectToWorldMatrix(), v.vertex).xyz;
-				half2 temp_output_8_0_g38 = ( ( (ase_worldPos).xz * _VertexOffsetNoiseSize ) + ( _VertexOffsetNoiseVelocity * _TimeParameters.x ) );
-				half simplePerlin2D3_g38 = snoise( temp_output_8_0_g38 );
-				half2 temp_output_13_0_g38 = ( float2( 10,10 ) + temp_output_8_0_g38 );
-				half simplePerlin2D12_g38 = snoise( temp_output_13_0_g38 );
-				half3 appendResult14_g38 = (half3(simplePerlin2D3_g38 , 0.0 , simplePerlin2D12_g38));
-				half3 temp_output_42_0_g38 = ( appendResult14_g38 * _VertexOffsetMaxOffset );
+				half2 temp_output_8_0_g2 = ( ( (ase_worldPos).xz * _VertexOffsetNoiseSize ) + ( _VertexOffsetNoiseVelocity * _TimeParameters.x ) );
+				half simplePerlin2D3_g2 = snoise( temp_output_8_0_g2 );
+				half2 temp_output_13_0_g2 = ( float2( 10,10 ) + temp_output_8_0_g2 );
+				half simplePerlin2D12_g2 = snoise( temp_output_13_0_g2 );
+				half3 appendResult14_g2 = (half3(simplePerlin2D3_g2 , 0.0 , simplePerlin2D12_g2));
+				half3 temp_output_42_0_g2 = ( appendResult14_g2 * _VertexOffsetMaxOffset );
 				half3 _Offset_Instance = UNITY_ACCESS_INSTANCED_PROP(MineGrassBaked,_Offset);
 				#ifdef _BAKED_ON
-				half3 staticSwitch44_g38 = ( temp_output_42_0_g38 + _Offset_Instance );
+				half3 staticSwitch44_g2 = ( temp_output_42_0_g2 + _Offset_Instance );
 				#else
-				half3 staticSwitch44_g38 = temp_output_42_0_g38;
+				half3 staticSwitch44_g2 = temp_output_42_0_g2;
 				#endif
-				half clampResult26_g38 = clamp( (0.0 + ((ase_worldPos).y - _VertexOffsetNoiseFactorYRange.x) * (1.0 - 0.0) / (_VertexOffsetNoiseFactorYRange.y - _VertexOffsetNoiseFactorYRange.x)) , 0.0 , 1.0 );
+				half clampResult26_g2 = clamp( (0.0 + ((ase_worldPos).y - _VertexOffsetNoiseFactorYRange.x) * (1.0 - 0.0) / (_VertexOffsetNoiseFactorYRange.y - _VertexOffsetNoiseFactorYRange.x)) , 0.0 , 1.0 );
 				#ifdef _BAKED_ON
-				half staticSwitch47_g38 = v.ase_color.a;
+				half staticSwitch47_g2 = v.ase_color.a;
 				#else
-				half staticSwitch47_g38 = ( clampResult26_g38 * clampResult26_g38 );
+				half staticSwitch47_g2 = ( clampResult26_g2 * clampResult26_g2 );
 				#endif
 				
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
@@ -590,7 +590,7 @@ Shader "Mine/Grass Baked"
 				#else
 					float3 defaultVertexValue = float3(0, 0, 0);
 				#endif
-				float3 vertexValue = ( staticSwitch44_g38 * staticSwitch47_g38 );
+				float3 vertexValue = ( staticSwitch44_g2 * staticSwitch47_g2 );
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
 					v.vertex.xyz = vertexValue;
 				#else
@@ -737,20 +737,20 @@ Shader "Mine/Grass Baked"
 }
 /*ASEBEGIN
 Version=18500
-5.777778;9.777778;1695.111;899;667.7831;701.875;1;True;True
+0;16.88889;1696.444;883.4445;668.4498;691.4305;1;True;True
 Node;AmplifyShaderEditor.FunctionNode;33;-230.1957,-178.6587;Inherit;False;XZPositionColourVariance;5;;23;4de741f1ae55a3e4383941f33fca0fe0;0;0;1;FLOAT3;0
 Node;AmplifyShaderEditor.FunctionNode;55;-207.0888,-257.3356;Inherit;False;YPositionColourFade;0;;30;6ec08ed10e3f592468983bdacdc89d74;0;0;1;COLOR;0
 Node;AmplifyShaderEditor.LightColorNode;63;-134.7831,-381.8748;Inherit;False;0;3;COLOR;0;FLOAT3;1;FLOAT;2
-Node;AmplifyShaderEditor.LightAttenuation;62;-180.7831,-455.8748;Inherit;False;0;1;FLOAT;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;64;114.2169,-434.8748;Inherit;False;3;3;0;FLOAT;0;False;1;FLOAT3;0,0,0;False;2;COLOR;0,0,0,0;False;1;COLOR;0
 Node;AmplifyShaderEditor.VertexColorNode;67;114.2169,-309.5416;Inherit;False;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.FunctionNode;72;-176.077,-89.65517;Inherit;False;GrassVertexOffset;8;;38;0e80a25179e14014ebbcd0d608e11015;0;0;1;FLOAT3;0
+Node;AmplifyShaderEditor.FunctionNode;66;-176.7831,-552.5415;Inherit;False;SRP Additional Light;-1;;39;6c86746ad131a0a408ca599df5f40861;3,6,0,9,0,23,0;5;2;FLOAT3;0,0,0;False;11;FLOAT3;0,0,0;False;15;FLOAT3;0,0,0;False;14;FLOAT3;1,1,1;False;18;FLOAT;0.5;False;1;FLOAT3;0
+Node;AmplifyShaderEditor.LightAttenuation;62;-180.7831,-455.8748;Inherit;False;0;1;FLOAT;0
 Node;AmplifyShaderEditor.StaticSwitch;70;327.2169,-446.5416;Inherit;False;Property;_Baked;Baked;4;0;Create;True;0;0;False;0;False;0;0;0;True;;Toggle;2;Key0;Key1;Create;True;True;9;1;COLOR;0,0,0,0;False;0;COLOR;0,0,0,0;False;2;COLOR;0,0,0,0;False;3;COLOR;0,0,0,0;False;4;COLOR;0,0,0,0;False;5;COLOR;0,0,0,0;False;6;COLOR;0,0,0,0;False;7;COLOR;0,0,0,0;False;8;COLOR;0,0,0,0;False;1;COLOR;0
-Node;AmplifyShaderEditor.FunctionNode;66;-176.7831,-552.5415;Inherit;False;SRP Additional Light;-1;;36;6c86746ad131a0a408ca599df5f40861;3,6,0,9,0,23,0;5;2;FLOAT3;0,0,0;False;11;FLOAT3;0,0,0;False;15;FLOAT3;0,0,0;False;14;FLOAT3;1,1,1;False;18;FLOAT;0.5;False;1;FLOAT3;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;39;325.4366,-140.169;Float;False;False;-1;2;UnityEditor.ShaderGraph.PBRMasterGUI;0;1;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;ExtraPrePass;0;0;ExtraPrePass;5;False;False;False;False;False;False;False;False;True;0;False;-1;True;0;False;-1;False;False;False;False;False;False;False;False;True;3;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;0;0;True;1;1;False;-1;0;False;-1;0;1;False;-1;0;False;-1;False;False;False;False;False;False;False;False;True;0;False;-1;True;True;True;True;True;0;False;-1;False;False;False;True;False;255;False;-1;255;False;-1;255;False;-1;7;False;-1;1;False;-1;1;False;-1;1;False;-1;7;False;-1;1;False;-1;1;False;-1;1;False;-1;True;1;False;-1;True;3;False;-1;True;True;0;False;-1;0;False;-1;True;0;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;41;325.4366,-140.169;Float;False;False;-1;2;UnityEditor.ShaderGraph.PBRMasterGUI;0;1;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;ShadowCaster;0;2;ShadowCaster;0;False;False;False;False;False;False;False;False;True;0;False;-1;True;0;False;-1;False;False;False;False;False;False;False;False;True;3;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;0;0;False;False;False;False;False;False;False;False;True;0;False;-1;False;False;False;False;False;False;True;1;False;-1;True;3;False;-1;False;True;1;LightMode=ShadowCaster;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;42;325.4366,-140.169;Float;False;False;-1;2;UnityEditor.ShaderGraph.PBRMasterGUI;0;1;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;DepthOnly;0;3;DepthOnly;0;False;False;False;False;False;False;False;False;True;0;False;-1;True;0;False;-1;False;False;False;False;False;False;False;False;True;3;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;0;0;False;False;False;False;False;False;False;False;True;0;False;-1;False;True;False;False;False;False;0;False;-1;False;False;False;False;True;1;False;-1;False;False;True;1;LightMode=DepthOnly;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;43;325.4366,-140.169;Float;False;False;-1;2;UnityEditor.ShaderGraph.PBRMasterGUI;0;1;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;Meta;0;4;Meta;0;False;False;False;False;False;False;False;False;True;0;False;-1;True;0;False;-1;False;False;False;False;False;False;False;False;True;3;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;0;0;False;False;False;False;False;False;False;False;False;True;2;False;-1;False;False;False;False;False;False;False;False;True;1;LightMode=Meta;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.FunctionNode;76;-176.077,-89.65517;Inherit;False;GrassVertexOffset;8;;2;0e80a25179e14014ebbcd0d608e11015;0;0;1;FLOAT3;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;39;325.4366,-140.169;Float;False;False;-1;2;UnityEditor.ShaderGraph.PBRMasterGUI;0;3;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;ExtraPrePass;0;0;ExtraPrePass;5;False;False;False;False;False;False;False;False;True;0;False;-1;True;0;False;-1;False;False;False;False;False;False;False;False;True;3;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;0;0;True;1;1;False;-1;0;False;-1;0;1;False;-1;0;False;-1;False;False;False;False;False;False;False;False;True;0;False;-1;True;True;True;True;True;0;False;-1;False;False;False;True;False;255;False;-1;255;False;-1;255;False;-1;7;False;-1;1;False;-1;1;False;-1;1;False;-1;7;False;-1;1;False;-1;1;False;-1;1;False;-1;True;1;False;-1;True;3;False;-1;True;True;0;False;-1;0;False;-1;True;0;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;41;325.4366,-140.169;Float;False;False;-1;2;UnityEditor.ShaderGraph.PBRMasterGUI;0;3;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;ShadowCaster;0;2;ShadowCaster;0;False;False;False;False;False;False;False;False;True;0;False;-1;True;0;False;-1;False;False;False;False;False;False;False;False;True;3;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;0;0;False;False;False;False;False;False;False;False;True;0;False;-1;False;False;False;False;False;False;True;1;False;-1;True;3;False;-1;False;True;1;LightMode=ShadowCaster;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;42;325.4366,-140.169;Float;False;False;-1;2;UnityEditor.ShaderGraph.PBRMasterGUI;0;3;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;DepthOnly;0;3;DepthOnly;0;False;False;False;False;False;False;False;False;True;0;False;-1;True;0;False;-1;False;False;False;False;False;False;False;False;True;3;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;0;0;False;False;False;False;False;False;False;False;True;0;False;-1;False;True;False;False;False;False;0;False;-1;False;False;False;False;True;1;False;-1;False;False;True;1;LightMode=DepthOnly;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;43;325.4366,-140.169;Float;False;False;-1;2;UnityEditor.ShaderGraph.PBRMasterGUI;0;3;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;Meta;0;4;Meta;0;False;False;False;False;False;False;False;False;True;0;False;-1;True;0;False;-1;False;False;False;False;False;False;False;False;True;3;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;0;0;False;False;False;False;False;False;False;False;False;True;2;False;-1;False;False;False;False;False;False;False;False;True;1;LightMode=Meta;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;40;606.4366,-373.169;Half;False;True;-1;2;UnityEditor.ShaderGraph.PBRMasterGUI;0;3;Mine/Grass Baked;2992e84f91cbeb14eab234972e07ea9d;True;Forward;0;1;Forward;8;False;False;False;False;False;False;False;False;True;0;False;-1;True;0;False;-1;False;False;False;False;False;False;False;False;True;3;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;0;0;True;1;1;False;-1;0;False;-1;1;1;False;-1;0;False;-1;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;-1;False;False;False;True;False;255;False;-1;255;False;-1;255;False;-1;7;False;-1;1;False;-1;1;False;-1;1;False;-1;7;False;-1;1;False;-1;1;False;-1;1;False;-1;True;1;False;-1;True;3;False;-1;True;True;0;False;-1;0;False;-1;True;1;LightMode=UniversalForward;False;0;Hidden/InternalErrorShader;0;0;Standard;22;Surface;0;  Blend;0;Two Sided;1;Cast Shadows;0;  Use Shadow Threshold;0;Receive Shadows;0;GPU Instancing;1;LOD CrossFade;0;Built-in Fog;0;DOTS Instancing;0;Meta Pass;0;Extra Pre Pass;0;Tessellation;0;  Phong;0;  Strength;0.5,False,-1;  Type;0;  Tess;16,False,-1;  Min;10,False,-1;  Max;25,False,-1;  Edge Length;16,False,-1;  Max Displacement;25,False,-1;Vertex Position,InvertActionOnDeselection;1;0;5;False;True;False;True;False;False;;True;0
 WireConnection;64;0;62;0
 WireConnection;64;1;63;1
@@ -758,6 +758,6 @@ WireConnection;64;2;55;0
 WireConnection;70;1;64;0
 WireConnection;70;0;67;0
 WireConnection;40;2;70;0
-WireConnection;40;5;72;0
+WireConnection;40;5;76;0
 ASEEND*/
-//CHKSM=A32C32F2CB56A5D86ED3333EE8289609A83449A3
+//CHKSM=D1AA4042ED73B25C8BCDF8CF976F55C83FF54525

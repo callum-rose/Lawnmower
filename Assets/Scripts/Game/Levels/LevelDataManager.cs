@@ -10,6 +10,7 @@ namespace Game.Levels
 	{
 		[ShowInInspector, PropertyOrder(5), TitleGroup("In Game Data")]
 		public int LevelsCompleted { get; private set; }
+		[SerializeField, PropertyOrder(5)] private bool unlockAllLevels;
 
 		[SerializeField]
 #if UNITY_EDITOR

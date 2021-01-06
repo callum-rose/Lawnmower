@@ -7,60 +7,15 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 6098662119948920175}
     m_Modifications:
-    - target: {fileID: 6820933288158783026, guid: 4243aa498dc686241aa5501518088050,
-        type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 0.9957421
-      objectReference: {fileID: 0}
-    - target: {fileID: 6820933288158783026, guid: 4243aa498dc686241aa5501518088050,
-        type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0.08787541
-      objectReference: {fileID: 0}
-    - target: {fileID: 6820933288158783026, guid: 4243aa498dc686241aa5501518088050,
-        type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0.004341399
-      objectReference: {fileID: 0}
-    - target: {fileID: 6820933288158783026, guid: 4243aa498dc686241aa5501518088050,
-        type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0.027511047
-      objectReference: {fileID: 0}
     - target: {fileID: 7077939351314272584, guid: 4243aa498dc686241aa5501518088050,
         type: 3}
       propertyPath: m_Name
       value: robo_bunny Variant
       objectReference: {fileID: 0}
-    - target: {fileID: 7518300977653513430, guid: 4243aa498dc686241aa5501518088050,
-        type: 3}
-      propertyPath: spring
-      value: 0.48
-      objectReference: {fileID: 0}
-    - target: {fileID: 7518300977653513430, guid: 4243aa498dc686241aa5501518088050,
-        type: 3}
-      propertyPath: damping
-      value: 0.47
-      objectReference: {fileID: 0}
     - target: {fileID: 7598193771593386994, guid: 4243aa498dc686241aa5501518088050,
         type: 3}
       propertyPath: m_RootOrder
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7598193771593386994, guid: 4243aa498dc686241aa5501518088050,
-        type: 3}
-      propertyPath: m_LocalScale.x
-      value: 37.286922
-      objectReference: {fileID: 0}
-    - target: {fileID: 7598193771593386994, guid: 4243aa498dc686241aa5501518088050,
-        type: 3}
-      propertyPath: m_LocalScale.y
-      value: 37.286922
-      objectReference: {fileID: 0}
-    - target: {fileID: 7598193771593386994, guid: 4243aa498dc686241aa5501518088050,
-        type: 3}
-      propertyPath: m_LocalScale.z
-      value: 37.286922
       objectReference: {fileID: 0}
     - target: {fileID: 7598193771593386994, guid: 4243aa498dc686241aa5501518088050,
         type: 3}

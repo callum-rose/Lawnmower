@@ -1,6 +1,6 @@
 using Core;
 using Exceptions;
-using Game.Camera;
+using Game.Cameras;
 using Game.Levels;
 using Game.Mowers;
 using UI.Dialogs;
@@ -88,6 +88,8 @@ namespace Game.Core
 			}
 
 			_inputData = null;
+
+			UndoSystem.Reset();
 		}
 
 		#endregion

@@ -7,9 +7,9 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: DirtTest 1
+  m_Name: Pebble
   m_Shader: {fileID: 4800000, guid: 527ca7c8997b2ae428a66ae5be2d6a91, type: 3}
-  m_ShaderKeywords: 
+  m_ShaderKeywords: _COLOURINGTOUSE_MANUAL
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -18,11 +18,28 @@ Material:
   disabledShaderPasses: []
   m_SavedProperties:
     serializedVersion: 3
-    m_TexEnvs: []
+    m_TexEnvs:
+    - _AmbientOcclusion:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _VertexColourLUTHigh:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _VertexColourLUTLow:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     m_Floats:
+    - _AOStrength: 1
     - _AlphaCutoff: 0.5
     - _ClipBelowXZPlane: 0
     - _ColourVariation: 0
+    - _ColouringToUse: 0
+    - _FresnelPower: 1
+    - _FresnelStrength: 0.4610691
+    - _LightingStrength: 0
     - _Scale: 3.2
     - _TessEdgeLength: 16
     - _TessMax: 25
@@ -37,9 +54,15 @@ Material:
     - _TransShadow: 0.5
     - _TransStrength: 1
     - _TransmissionShadow: 0.5
+    - _UseAmbientOcclusionMap: 0
+    - _UseGlobalLightColour: 0
     m_Colors:
     - _Color0: {r: 0.3207547, g: 0.2729114, b: 0.25267, a: 0}
     - _Color1: {r: 0.503, g: 0.503, b: 0.503, a: 0}
     - _EmissionColor: {r: 1, g: 1, b: 1, a: 1}
+    - _FresnelColour: {r: 1, g: 1, b: 1, a: 0}
+    - _HighColour: {r: 0.78039217, g: 0.7351736, b: 0.6937686, a: 0}
+    - _LowColour: {r: 0.27450982, g: 0.2584461, b: 0.2434902, a: 0}
     - _Range: {r: 0, g: 0.1, b: 0, a: 0}
+    - _ShadeColour: {r: 1, g: 1, b: 1, a: 0}
   m_BuildTextureStacks: []

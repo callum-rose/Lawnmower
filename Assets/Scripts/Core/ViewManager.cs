@@ -15,10 +15,10 @@ namespace Core
 
 		private Coroutine _loadRoutine;
 
-#if UNITY_EDITOR
 		[RuntimeInitializeOnLoadMethod]
 		private static void Init()
 		{
+#if UNITY_EDITOR
 			if (!WasAppStartedByViewManager)
 			{
 				return;
@@ -27,10 +27,12 @@ namespace Core
 			SetAppWasStartedByViewManager(false);
 
 			Instance.Load(Instance.sceneToOpen, Instance.GetData());
-		}
-#endif
+#else
 
-		#region API
+#endif
+		}
+
+#region API
 
 		public void Load(UnityScene scene, object data = null)
 		{
@@ -41,9 +43,9 @@ namespace Core
 			_loadRoutine ??= StartCoroutine(ProcessLoadsRoutine());
 		}
 
-		#endregion
+#endregion
 
-		#region Routines
+#region Routines
 
 		private IEnumerator ProcessLoadsRoutine()
 		{
@@ -108,9 +110,9 @@ namespace Core
 			yield return op;
 		}
 
-		#endregion
+#endregion
 
-		#region Methods
+#region Methods
 
 		private static void FindAndStartBaseSceneManager(Scene loadedScene, object data)
 		{
@@ -130,9 +132,9 @@ namespace Core
 			return (int) scene;
 		}
 
-		#endregion
+#endregion
 
-		#region Classes
+#region Classes
 
 		private class LoadData
 		{
@@ -146,6 +148,6 @@ namespace Core
 			public object Data { get; }
 		}
 
-		#endregion
+#endregion
 	}
 }

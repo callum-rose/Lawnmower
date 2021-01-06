@@ -87,21 +87,12 @@ namespace Game.Mowers
 
                 case LevelTraversalChecker.CheckValue.OutOfBounds:
                 default:
-                    action = null;
-                    break;
+                    return;
             }
 
-            if (action != null)
-            {
-                action.Do();
-                _undoManager.Add(action);
-            }
+            action.Do();
+            _undoManager.Add(action);
         }
-
-        #endregion
-
-        #region Methods
-
 
         #endregion
     }

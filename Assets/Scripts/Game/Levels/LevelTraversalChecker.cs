@@ -8,22 +8,11 @@ using UnityEngine;
 namespace Game.Levels
 {
     [CreateAssetMenu(fileName = nameof(LevelTraversalChecker), menuName = SONames.GameDir + nameof(LevelTraversalChecker))]
-    internal class LevelTraversalChecker : ScriptableObject, IHasEditMode
+    internal class LevelTraversalChecker : BaseLevelTraversalChecker
     {
-        [SerializeField] private TilePrefabsHolder tilePrefabsHolder;
-
-        public bool IsEditMode { get; set; }
-
-        private ReadOnlyTiles _tiles;
-
         #region API
 
-        public void SetTiles(ReadOnlyTiles tiles)
-        {
-            _tiles = tiles;
-        }
-
-        public CheckValue CanTraverseTo(GridVector position)
+        public override CheckValue CanTraverseTo(GridVector position)
         {
             if (_tiles == null)
             {
@@ -40,10 +29,5 @@ namespace Game.Levels
         }
 
         #endregion
-
-        public enum CheckValue
-        {
-            Yes, NonTraversableTile, OutOfBounds
-        }
     }
 }

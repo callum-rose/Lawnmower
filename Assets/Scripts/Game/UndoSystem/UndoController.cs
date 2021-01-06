@@ -41,6 +41,15 @@ namespace Game.UndoSystem
         }
 
         [Button]
+        public void UndoAll()
+        {
+            for (int i = 0; i < UndoManager.Count; i++)
+            {
+                UndoManager.Undo();
+            }
+        }
+
+        [Button]
         public void Redo()
         {
             UndoManager.Redo();

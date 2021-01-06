@@ -27,7 +27,7 @@ namespace Game.Levels
             }
         }
 
-        private TileData ConvertTileToData(Tile tile)
+        public TileData ConvertTileToData(Tile tile)
         {
             TileType type = tilePrefabs.GetTileTypeForTile(tile);
             BaseTileSetupData setupData = CreateDataFor(tile);

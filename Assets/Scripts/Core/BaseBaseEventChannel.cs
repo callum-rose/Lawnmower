@@ -23,6 +23,16 @@ namespace Core
 			EventRaised?.Invoke(arg);
 		}
 	}
+	
+	public abstract class BaseEventChannel<T0, T1> : ScriptableObject
+	{
+		public event Action<T0, T1> EventRaised;
+		
+		public void Raise(T0 arg0, T1 arg1)
+		{
+			EventRaised?.Invoke(arg0, arg1);
+		}
+	}
 
 	// public abstract class BaseBaseEventChannel : ScriptableObject
 	// {
