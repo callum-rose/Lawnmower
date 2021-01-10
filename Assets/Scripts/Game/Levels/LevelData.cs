@@ -1,10 +1,14 @@
 using System;
+using System.Linq;
 using UnityEngine;
 using Sirenix.OdinInspector;
 using BalsamicBits.Extensions;
 using Core;
 using Game.Core;
 using Game.Tiles;
+using Sirenix.Serialization;
+using Sirenix.Utilities;
+using Utils;
 #if UNITY_EDITOR
 using UnityEditor;
 
@@ -13,7 +17,7 @@ using UnityEditor;
 namespace Game.Levels
 {
 	[CreateAssetMenu(fileName = "LevelData", menuName = SONames.GameDir + "Level Data")]
-	internal class LevelData : SerializedScriptableObject, IReadOnlyLevelData
+	internal partial class LevelData : SerializedScriptableObject, IReadOnlyLevelData
 	{
 		[SerializeField] private Guid id;
 
@@ -21,9 +25,14 @@ namespace Game.Levels
 
 		[SerializeField]
 #if UNITY_EDITOR
-		[PropertyOrder(2), OnValueChanged(nameof(OnTileDataChanged), true)]
+		[PropertyOrder(2)]
 #endif
-		private Serialised2dArray<TileData> tiles;
+		internal Serialised2dArray<TileData> tiles;
+
+		[OdinSerialize,
+		 TableMatrix(SquareCells = true, DrawElementMethod = nameof(DrawColouredTileElement), HideColumnIndices = true,
+			 HideRowIndices = true)]
+		internal TileData[,] test;
 
 		[HideInInspector] public Guid Id => id;
 
@@ -80,6 +89,16 @@ namespace Game.Levels
 			return GetTile(position.x, position.y);
 		}
 
+		public void SetTile(int x, int y, TileData data)
+		{
+			tiles[x, y] = data;
+		}
+
+		public void SetTile(GridVector position, TileData data)
+		{
+			SetTile(position.x, position.y, data);
+		}
+
 		public void Resize(int newWidth, int newDepth)
 		{
 			if (newWidth <= 0 || newDepth <= 0)
@@ -112,56 +131,6 @@ namespace Game.Levels
 			// update values
 			tiles = newTiles;
 		}
-
-		public void SetTile(int x, int y, TileData data)
-		{
-			tiles[x, y] = data;
-		}
-
-		public void SetTile(GridVector position, TileData data)
-		{
-			SetTile(position.x, position.y, data);
-		}
-
-		// public LevelData GetCopy()
-		// {
-		//     var newLevel = CreateInstance<LevelData>();
-		//     newLevel.tiles = new Serialised2dArray<TileData>(tiles);
-		//     newLevel.startPosition = startPosition;
-		//     newLevel.id = id;
-		//     return newLevel;
-		// }
-
-		#endregion
-
-		#region Odin
-
-#if UNITY_EDITOR
-
-		private void OnTileDataChanged()
-		{
-			//Debug.Log("data changed");
-		}
-
-		private void ValidateStartPos()
-		{
-			int x = Mathf.Min(Width - 1, Mathf.Max(0, StartPosition.x));
-			int y = Mathf.Min(Depth - 1, Mathf.Max(0, StartPosition.y));
-			StartPosition = new GridVector(x, y);
-		}
-
-		[Button]
-		private void SelectInProjectileWindow()
-		{
-			EditorUtility.FocusProjectWindow();
-			Selection.activeObject = this;
-		}
-
-#endif
-
-		#endregion
-
-		#region Methods
 
 		#endregion
 	}

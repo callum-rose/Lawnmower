@@ -30,36 +30,36 @@ MonoBehaviour:
   tiles:
     data:
     - type: 1
-      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Assembly-CSharp","grassHeight":2}'
+      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Scripts","grassHeight":2}'
     - type: 1
-      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Assembly-CSharp","grassHeight":2}'
+      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Scripts","grassHeight":2}'
     - type: 1
-      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Assembly-CSharp","grassHeight":2}'
+      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Scripts","grassHeight":2}'
     - type: 1
-      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Assembly-CSharp","grassHeight":2}'
+      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Scripts","grassHeight":2}'
     - type: 1
-      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Assembly-CSharp","grassHeight":2}'
+      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Scripts","grassHeight":2}'
     - type: 1
-      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Assembly-CSharp","grassHeight":3}'
+      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Scripts","grassHeight":3}'
     - type: 1
-      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Assembly-CSharp","grassHeight":3}'
+      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Scripts","grassHeight":3}'
     - type: 1
-      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Assembly-CSharp","grassHeight":2}'
+      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Scripts","grassHeight":2}'
     - type: 1
-      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Assembly-CSharp","grassHeight":2}'
+      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Scripts","grassHeight":2}'
     - type: 1
-      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Assembly-CSharp","grassHeight":3}'
+      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Scripts","grassHeight":3}'
     - type: 1
-      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Assembly-CSharp","grassHeight":3}'
+      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Scripts","grassHeight":3}'
     - type: 1
-      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Assembly-CSharp","grassHeight":2}'
+      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Scripts","grassHeight":2}'
     - type: 1
-      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Assembly-CSharp","grassHeight":2}'
+      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Scripts","grassHeight":2}'
     - type: 1
-      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Assembly-CSharp","grassHeight":2}'
+      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Scripts","grassHeight":2}'
     - type: 1
-      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Assembly-CSharp","grassHeight":2}'
+      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Scripts","grassHeight":2}'
     - type: 1
-      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Assembly-CSharp","grassHeight":2}'
+      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Scripts","grassHeight":2}'
     width: 4
     depth: 4

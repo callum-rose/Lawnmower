@@ -6,7 +6,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Game.TilesObject: {fileID: 0}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7126b9c1309bd8a418748c882885cd26, type: 3}
@@ -24,42 +24,425 @@ MonoBehaviour:
     - Name: id
       Entry: 2
       Data: f6710fe69c434956b91153b32118d9fd
+    - Name: test
+      Entry: 7
+      Data: 0|Game.Tiles.TileData[,], Scripts
+    - Name: 
+      Entry: 12
+      Data: 16
+    - Name: ranks
+      Entry: 1
+      Data: 4|4
+    - Name: 
+      Entry: 7
+      Data: Game.Tiles.TileData, Scripts
+    - Name: type
+      Entry: 3
+      Data: 1
+    - Name: grassTileSetupData
+      Entry: 7
+      Data: Game.Tiles.GrassTileSetupData, Scripts
+    - Name: grassHeight
+      Entry: 3
+      Data: 2
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: dataStr
+      Entry: 1
+      Data: null
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: Game.Tiles.TileData, Scripts
+    - Name: type
+      Entry: 3
+      Data: 1
+    - Name: grassTileSetupData
+      Entry: 7
+      Data: Game.Tiles.GrassTileSetupData, Scripts
+    - Name: grassHeight
+      Entry: 3
+      Data: 0
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: dataStr
+      Entry: 1
+      Data: null
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: Game.Tiles.TileData, Scripts
+    - Name: type
+      Entry: 3
+      Data: 1
+    - Name: grassTileSetupData
+      Entry: 7
+      Data: Game.Tiles.GrassTileSetupData, Scripts
+    - Name: grassHeight
+      Entry: 3
+      Data: 0
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: dataStr
+      Entry: 1
+      Data: null
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: Game.Tiles.TileData, Scripts
+    - Name: type
+      Entry: 3
+      Data: 1
+    - Name: grassTileSetupData
+      Entry: 7
+      Data: Game.Tiles.GrassTileSetupData, Scripts
+    - Name: grassHeight
+      Entry: 3
+      Data: 0
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: dataStr
+      Entry: 1
+      Data: null
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: Game.Tiles.TileData, Scripts
+    - Name: type
+      Entry: 3
+      Data: 1
+    - Name: grassTileSetupData
+      Entry: 7
+      Data: Game.Tiles.GrassTileSetupData, Scripts
+    - Name: grassHeight
+      Entry: 3
+      Data: 0
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: dataStr
+      Entry: 1
+      Data: null
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: Game.Tiles.TileData, Scripts
+    - Name: type
+      Entry: 3
+      Data: 1
+    - Name: grassTileSetupData
+      Entry: 7
+      Data: Game.Tiles.GrassTileSetupData, Scripts
+    - Name: grassHeight
+      Entry: 3
+      Data: 0
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: dataStr
+      Entry: 1
+      Data: null
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: Game.Tiles.TileData, Scripts
+    - Name: type
+      Entry: 3
+      Data: 1
+    - Name: grassTileSetupData
+      Entry: 7
+      Data: Game.Tiles.GrassTileSetupData, Scripts
+    - Name: grassHeight
+      Entry: 3
+      Data: 0
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: dataStr
+      Entry: 1
+      Data: null
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: Game.Tiles.TileData, Scripts
+    - Name: type
+      Entry: 3
+      Data: 1
+    - Name: grassTileSetupData
+      Entry: 7
+      Data: Game.Tiles.GrassTileSetupData, Scripts
+    - Name: grassHeight
+      Entry: 3
+      Data: 0
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: dataStr
+      Entry: 1
+      Data: null
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: Game.Tiles.TileData, Scripts
+    - Name: type
+      Entry: 3
+      Data: 1
+    - Name: grassTileSetupData
+      Entry: 7
+      Data: Game.Tiles.GrassTileSetupData, Scripts
+    - Name: grassHeight
+      Entry: 3
+      Data: 0
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: dataStr
+      Entry: 1
+      Data: null
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: Game.Tiles.TileData, Scripts
+    - Name: type
+      Entry: 3
+      Data: 1
+    - Name: grassTileSetupData
+      Entry: 7
+      Data: Game.Tiles.GrassTileSetupData, Scripts
+    - Name: grassHeight
+      Entry: 3
+      Data: 0
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: dataStr
+      Entry: 1
+      Data: null
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: Game.Tiles.TileData, Scripts
+    - Name: type
+      Entry: 3
+      Data: 1
+    - Name: grassTileSetupData
+      Entry: 7
+      Data: Game.Tiles.GrassTileSetupData, Scripts
+    - Name: grassHeight
+      Entry: 3
+      Data: 0
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: dataStr
+      Entry: 1
+      Data: null
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: Game.Tiles.TileData, Scripts
+    - Name: type
+      Entry: 3
+      Data: 1
+    - Name: grassTileSetupData
+      Entry: 7
+      Data: Game.Tiles.GrassTileSetupData, Scripts
+    - Name: grassHeight
+      Entry: 3
+      Data: 0
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: dataStr
+      Entry: 1
+      Data: null
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: Game.Tiles.TileData, Scripts
+    - Name: type
+      Entry: 3
+      Data: 1
+    - Name: grassTileSetupData
+      Entry: 7
+      Data: Game.Tiles.GrassTileSetupData, Scripts
+    - Name: grassHeight
+      Entry: 3
+      Data: 0
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: dataStr
+      Entry: 1
+      Data: null
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: Game.Tiles.TileData, Scripts
+    - Name: type
+      Entry: 3
+      Data: 1
+    - Name: grassTileSetupData
+      Entry: 7
+      Data: Game.Tiles.GrassTileSetupData, Scripts
+    - Name: grassHeight
+      Entry: 3
+      Data: 0
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: dataStr
+      Entry: 1
+      Data: null
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: Game.Tiles.TileData, Scripts
+    - Name: type
+      Entry: 3
+      Data: 1
+    - Name: grassTileSetupData
+      Entry: 7
+      Data: Game.Tiles.GrassTileSetupData, Scripts
+    - Name: grassHeight
+      Entry: 3
+      Data: 0
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: dataStr
+      Entry: 1
+      Data: null
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: Game.Tiles.TileData, Scripts
+    - Name: type
+      Entry: 3
+      Data: 1
+    - Name: grassTileSetupData
+      Entry: 7
+      Data: Game.Tiles.GrassTileSetupData, Scripts
+    - Name: grassHeight
+      Entry: 3
+      Data: 0
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: dataStr
+      Entry: 1
+      Data: null
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
   startPosition:
     x: 0
     y: 0
   tiles:
     data:
     - type: 1
-      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Assembly-CSharp","grassHeight":1}'
+      grassTileSetupData:
+        grassHeight: 2
+      dataStr: null
     - type: 1
-      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Assembly-CSharp","grassHeight":2}'
+      grassTileSetupData:
+        grassHeight: 0
+      dataStr: null
     - type: 1
-      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Assembly-CSharp","grassHeight":2}'
+      grassTileSetupData:
+        grassHeight: 0
+      dataStr: null
     - type: 1
-      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Assembly-CSharp","grassHeight":2}'
+      grassTileSetupData:
+        grassHeight: 0
+      dataStr: null
     - type: 1
-      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Assembly-CSharp","grassHeight":2}'
+      grassTileSetupData:
+        grassHeight: 0
+      dataStr: null
     - type: 1
-      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Assembly-CSharp","grassHeight":2}'
+      grassTileSetupData:
+        grassHeight: 0
+      dataStr: null
     - type: 1
-      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Assembly-CSharp","grassHeight":2}'
+      grassTileSetupData:
+        grassHeight: 0
+      dataStr: null
     - type: 1
-      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Assembly-CSharp","grassHeight":2}'
+      grassTileSetupData:
+        grassHeight: 0
+      dataStr: null
     - type: 1
-      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Assembly-CSharp","grassHeight":2}'
+      grassTileSetupData:
+        grassHeight: 0
+      dataStr: null
     - type: 1
-      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Assembly-CSharp","grassHeight":2}'
+      grassTileSetupData:
+        grassHeight: 0
+      dataStr: null
     - type: 1
-      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Assembly-CSharp","grassHeight":2}'
+      grassTileSetupData:
+        grassHeight: 0
+      dataStr: null
     - type: 1
-      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Assembly-CSharp","grassHeight":2}'
+      grassTileSetupData:
+        grassHeight: 0
+      dataStr: null
     - type: 1
-      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Assembly-CSharp","grassHeight":2}'
+      grassTileSetupData:
+        grassHeight: 0
+      dataStr: null
     - type: 1
-      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Assembly-CSharp","grassHeight":2}'
+      grassTileSetupData:
+        grassHeight: 0
+      dataStr: null
     - type: 1
-      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Assembly-CSharp","grassHeight":2}'
+      grassTileSetupData:
+        grassHeight: 0
+      dataStr: null
     - type: 1
-      dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Assembly-CSharp","grassHeight":2}'
+      grassTileSetupData:
+        grassHeight: 0
+      dataStr: null
     width: 4
     depth: 4

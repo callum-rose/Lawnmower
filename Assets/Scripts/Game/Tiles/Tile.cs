@@ -12,7 +12,7 @@ namespace Game.Tiles
         public abstract bool IsTraversable(bool editMode);
         public abstract bool IsComplete { get; }
 
-        public virtual void Setup(BaseTileSetupData data)
+        public virtual void Setup(object data)
         {
             Assert.IsNull(data);
         }

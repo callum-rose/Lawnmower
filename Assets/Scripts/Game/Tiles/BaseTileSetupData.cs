@@ -1,6 +1,6 @@
 namespace Game.Tiles
 {
-    public abstract class BaseTileSetupData
-    {
-    }
+    // public abstract class BaseTileSetupData
+    // {
+    // }
 }

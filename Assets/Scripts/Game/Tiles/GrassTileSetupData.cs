@@ -1,15 +1,16 @@
 using System;
+using UnityEngine;
 
 namespace Game.Tiles
 {
-    [Serializable]
-    public class GrassTileSetupData : BaseTileSetupData
-    {
-        public int grassHeight = 1;
-
-        public GrassTileSetupData(int grassHeight)
-        {
-            this.grassHeight = grassHeight;
-        }
-    }
+	[Serializable]
+	public struct GrassTileSetupData
+	{
+		[Range(0, GrassTile.MaxGrassHeight)] public int grassHeight;
+		
+		public GrassTileSetupData(int grassHeight)
+		{
+			this.grassHeight = grassHeight;
+		}
+	}
 }

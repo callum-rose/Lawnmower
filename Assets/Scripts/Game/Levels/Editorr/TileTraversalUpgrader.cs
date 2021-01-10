@@ -12,7 +12,7 @@ namespace Game.Levels.Editorr
 			switch (tileData.Type)
 			{
 				case TileType.Grass:
-					var data = tileData.Data as GrassTileSetupData;
+					var data = (GrassTileSetupData)tileData.Data;
 					if (data.grassHeight == GrassTile.MaxGrassHeight)
 					{
 						upgradeToTile = new TileData { Type = TileType.Wood };

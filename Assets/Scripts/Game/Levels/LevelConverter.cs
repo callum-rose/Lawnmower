@@ -30,11 +30,11 @@ namespace Game.Levels
         public TileData ConvertTileToData(Tile tile)
         {
             TileType type = tilePrefabs.GetTileTypeForTile(tile);
-            BaseTileSetupData setupData = CreateDataFor(tile);
+            object setupData = CreateDataFor(tile);
             return TileData.Factory.Create(type, setupData);
         }
 
-        private static BaseTileSetupData CreateDataFor(Tile tile)
+        private static object CreateDataFor(Tile tile)
         {
             switch (tile)
             {

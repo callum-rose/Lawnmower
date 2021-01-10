@@ -5,74 +5,101 @@ using Sirenix.OdinInspector;
 
 namespace Game.Tiles
 {
-    [Serializable]
-    public struct TileData : ISerializationCallbackReceiver
-    {
-        [SerializeField, EnumToggleButtons] private TileType type;
-        [SerializeField] private string dataStr;
+	[Serializable]
+	public struct TileData : ISerializationCallbackReceiver
+	{
+		[SerializeField, OnValueChanged(nameof(OnValueChanged))]
+		private TileType type;
+		
+		private bool IsGrass => type == TileType.Grass;
+		[SerializeField, ShowIf(nameof(IsGrass)), InlineProperty, HideLabel, OnValueChanged(nameof(OnValueChanged))] private GrassTileSetupData grassTileSetupData;
 
-        public TileType Type
-        {
-            get => type;
-            set => type = value;
-        }
+		[SerializeField, HideInInspector] private string dataStr;
 
-        public BaseTileSetupData Data { get; set; }
+		public TileType Type
+		{
+			get => type;
+			set => type = value;
+		}
 
-        private static readonly JsonSerializerSettings jsonSettings = new JsonSerializerSettings
-        {
-            TypeNameHandling = TypeNameHandling.All
-        };
+		public object Data { get; set; }
 
-        public void UpdateJsonData()
-        {
-            dataStr = JsonConvert.SerializeObject(Data, jsonSettings);
-        }
+		private static readonly JsonSerializerSettings jsonSettings = new JsonSerializerSettings
+		{
+			TypeNameHandling = TypeNameHandling.All
+		};
 
-        public void OnAfterDeserialize()
-        {
-            Data = JsonConvert.DeserializeObject(dataStr, jsonSettings) as BaseTileSetupData;
-        }
+		public void UpdateJsonData()
+		{
+			dataStr = JsonConvert.SerializeObject(Data, jsonSettings);
+		}
 
-        public void OnBeforeSerialize()
-        {
-            dataStr = JsonConvert.SerializeObject(Data, jsonSettings);
-        }
+		public void OnAfterDeserialize()
+		{
+			Data = JsonConvert.DeserializeObject(dataStr, jsonSettings);
+		}
 
-        public override string ToString()
-        {
-            switch (Type)
-            {
-                case TileType.Empty:
-                case TileType.Stone:
-                case TileType.Water:
-                case TileType.Wood:
-                    return Type.ToString();
+		public void OnBeforeSerialize()
+		{
+			UpdateJsonData();
+		}
 
-                case TileType.Grass:
-                    return $"{Type.ToString()} {(Data as GrassTileSetupData).grassHeight}";
+		private void OnValueChanged()
+		{
+			switch (type)
+			{
+				case TileType.Grass:
+					Data = grassTileSetupData;
+					break;
+				
+				case TileType.Empty:
+				case TileType.Stone:
+				case TileType.Water:
+				case TileType.Wood:
+					Data = null;
+					break;
+				
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
+			
+			UpdateJsonData();
+		}
 
-                default:
-                    throw new ArgumentException();
-            }
-        }
+		public override string ToString()
+		{
+			switch (Type)
+			{
+				case TileType.Empty:
+				case TileType.Stone:
+				case TileType.Water:
+				case TileType.Wood:
+					return Type.ToString();
 
-        public static class Factory
-        {
-            public readonly static TileData Default = new TileData
-            {
-                Type = TileType.Empty,
-                Data = null
-            };
+				case TileType.Grass:
+					return $"{Type.ToString()} {((GrassTileSetupData)Data).grassHeight}";
 
-            public static TileData Create(TileType type, BaseTileSetupData data)
-            {
-                return new TileData
-                {
-                    Type = type,
-                    Data = data
-                };
-            }
-        }
-    }
+				default:
+					throw new ArgumentException();
+			}
+		}
+
+		public static class Factory
+		{
+			public readonly static TileData Default = new TileData
+			{
+				Type = TileType.Empty,
+				Data = null
+			};
+
+			public static TileData Create(TileType type, object data)
+			{
+				return new TileData
+				{
+					Type = type,
+					Data = data
+				};
+			}
+		}
+	}
 }

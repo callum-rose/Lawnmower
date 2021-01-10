@@ -45,7 +45,7 @@ namespace Game.Tiles
 
 		#region API
 
-		public override void Setup(BaseTileSetupData data)
+		public override void Setup(object data)
 		{
 			if (!(data is GrassTileSetupData grassData))
 			{

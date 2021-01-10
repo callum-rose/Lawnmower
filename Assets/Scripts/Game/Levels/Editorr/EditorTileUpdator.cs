@@ -52,9 +52,8 @@ namespace Game.Levels.Editorr
             Undoable undoable = new Undoable(
                 () => levelManager.UpdateTile(position, data),
                 () => levelManager.UpdateTile(position, prevData));
-            undoable.Do();
 
-            UndoSystem.Add(undoable);
+            UndoSystem.Do(undoable);
         }
 
         private void ExpandLevel(ref GridVector position)

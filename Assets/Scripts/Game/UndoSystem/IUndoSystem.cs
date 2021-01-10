@@ -10,7 +10,7 @@ namespace Game.UndoSystem
 
         event Action Undone, Redone;
         
-        void Add(IUndoable undoable);
+        void Do(IUndoable undoable);
         bool Redo();
         bool Undo();
         void Reset();

@@ -90,8 +90,7 @@ namespace Game.Mowers
                     return;
             }
 
-            action.Do();
-            _undoManager.Add(action);
+            _undoManager.Do(action);
         }
 
         #endregion
