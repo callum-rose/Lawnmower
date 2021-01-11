@@ -1,47 +1,34 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
-using Sirenix.OdinInspector;
 using Game.Core;
 using Game.UndoSystem;
-using Core;
+using Newtonsoft.Json;
 
 namespace Game.Tiles
 {
-	[RequireComponent(typeof(IAppearanceSetter))]
-	internal partial class GrassTile : Tile
+	[Serializable]
+	internal partial class GrassTile : Tilee
 	{
-		[SerializeField] private DirtAppearanceSetter dirtAppearanceSetter;
-		[SerializeField, AssetsOnly] private Vector3AndIntEventChannel grassParticlesEventChannel;
-		[SerializeField, AssetsOnly] private Vector3EventChannel dirtParticlesEventChannel;
-		[SerializeField] private int internalGrassHeight;
-
 		public const int MaxGrassHeight = 3;
-		public const int PerfectGrassHeight = 1;
+		private const int PerfectGrassHeight = 1;
 
-		public event UndoableAction Ruined;
-		public override bool IsComplete => GrassHeight == PerfectGrassHeight;
+		public override bool IsComplete => GrassHeight.Value == PerfectGrassHeight;
+		public override bool IsRuined => GrassHeight.Value == 0;
 
-		public int GrassHeight => Mathf.Clamp(internalGrassHeight, 0, MaxGrassHeight);
+		public IListenableProperty<int> GrassHeight => InternalGrassHeight;
 
-		private static MaterialPropertyBlock _propertyBlock;
+		private EventProperty<int> InternalGrassHeight { get; }
 
-		private IAppearanceSetter _appearanceSetter;
-
-		private GridVector _lastTraverseOntoDirection;
-
-		#region Unity
-
-		private void Awake()
+		public GrassTile()
 		{
-			_appearanceSetter = GetComponent<IAppearanceSetter>();
+			InternalGrassHeight = new EventProperty<int>(i => Mathf.Clamp(i, 0, MaxGrassHeight));
 		}
-
-		private void OnValidate()
+		
+		public GrassTile(int grassHeight) : this()
 		{
-			SetAppearance(internalGrassHeight);
+			InternalGrassHeight.Value = grassHeight;
 		}
-
-		#endregion
 
 		#region API
 
@@ -52,104 +39,81 @@ namespace Game.Tiles
 				throw new ArgumentException($"Argument must be of type {nameof(GrassTileSetupData)}");
 			}
 
-			internalGrassHeight = grassData.grassHeight;
-			SetAppearance(internalGrassHeight);
+			InternalGrassHeight.Value = grassData.grassHeight;
 		}
 
-		public override bool IsTraversable(bool editMode)
-		{
-			if (!editMode)
-			{
-				return true;
-			}
-			else
-			{
-				return GrassHeight < MaxGrassHeight;
-			}
-		}
+		public override bool IsTraversable(bool editMode) => !editMode || GrassHeight.Value < MaxGrassHeight;
 
 		public override void TraverseOnto(GridVector fromDirection, Xor inverted)
 		{
-			void CheckInvokeRuinedEvent()
-			{
-				if (GrassHeight == PerfectGrassHeight)
-				{
-					// ReSharper disable once PossibleNullReferenceException
-					Ruined.Invoke(inverted);
-				}
-			}
-
-			void TriggerParticleEvent()
-			{
-				if (GrassHeight == 0)
-				{
-					dirtParticlesEventChannel.Raise(transform.position);
-				}
-				else
-				{
-					grassParticlesEventChannel.Raise(transform.position, internalGrassHeight);
-				}
-			}
-
-			void IncrementGrassHeight()
-			{
-				internalGrassHeight += inverted ? 1 : -1;
-			}
-
 			if (!inverted)
 			{
-				CheckInvokeRuinedEvent();
-				TriggerParticleEvent();
-				IncrementGrassHeight();
+				InternalGrassHeight.Value--;
 			}
 			else
 			{
-				if (internalGrassHeight + 1 > MaxGrassHeight)
+				InternalGrassHeight.Value++;
+
+				if (InternalGrassHeight.Value > MaxGrassHeight)
 				{
 					throw new InvalidOperationException("Grass height too high");
 				}
-
-				IncrementGrassHeight();
-				CheckInvokeRuinedEvent();
 			}
 
-			dirtAppearanceSetter.Set(fromDirection);
-			SetAppearance(internalGrassHeight);
-
-			_lastTraverseOntoDirection = fromDirection;
+			base.TraverseOnto(fromDirection, inverted);
 		}
 
-		public override void TraverseAway(GridVector toDirection, Xor inverted)
-		{
-			if (!inverted)
-			{
-				if (GrassHeight > 0)
-				{
-					return;
-				}
-
-				dirtAppearanceSetter.Set(_lastTraverseOntoDirection, toDirection);
-			}
-			else
-			{
-			}
-		}
+		public override void TraverseAway(GridVector toDirection, Xor inverted) =>
+			base.TraverseAway(toDirection, inverted);
 
 		#endregion
 
 		#region Methods
 
-		private void SetAppearance(int grassHeight)
-		{
-			if (_appearanceSetter == null)
-			{
-				_appearanceSetter = GetComponent<IAppearanceSetter>();
-			}
-
-			internalGrassHeight = grassHeight;
-			_appearanceSetter.SetAppearance(this);
-		}
+		// protected override List<KeyValuePair<string, object>> OnSerialise()
+		// {
+		// 	if (InternalGrassHeight == null)
+		// 	{
+		// 		return null;
+		// 	}
+		// 	
+		// 	return new List<KeyValuePair<string, object>>
+		// 	{
+		// 		new KeyValuePair<string, object>(nameof(InternalGrassHeight), InternalGrassHeight.Value)
+		// 	};
+		// }
+		//
+		// protected override void OnDeserialise(List<KeyValuePair<string, object>> keyValuePairs)
+		// {
+		// 	if (keyValuePairs == null)
+		// 	{
+		// 		return;
+		// 	}
+		// 	
+		// 	foreach (KeyValuePair<string, object> kvp in keyValuePairs)
+		// 	{
+		// 		switch (kvp.Key)
+		// 		{
+		// 			case nameof(InternalGrassHeight):
+		// 				try
+		// 				{
+		// 					InternalGrassHeight.Value = int.Parse(kvp.Value.ToString());
+		// 				}
+		// 				catch (Exception e)
+		// 				{
+		// 					Debug.Log(kvp.Value + " " + kvp.Value.GetType());
+		// 					Debug.LogException(e);
+		// 				}
+		// 				break;
+		// 		}
+		// 	}
+		// }
 
 		#endregion
+
+		public override string ToString()
+		{
+			return $"{GetType()}: {InternalGrassHeight.Value}";
+		}
 	}
 }

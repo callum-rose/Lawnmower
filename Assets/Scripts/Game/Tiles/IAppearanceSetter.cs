@@ -2,7 +2,7 @@ namespace Game.Tiles
 {
     internal interface IAppearanceSetter
     {
-        void SetAppearance(GrassTile tile);
+        void SetAppearance(int grassHeight);
     }
 
 }

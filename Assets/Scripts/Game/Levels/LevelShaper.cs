@@ -14,7 +14,7 @@ namespace Game.Levels
             {
                 for (int x = 0; x < level.Width; x++)
                 {
-                    if (level.GetTile(x, y).Type != TileType.Empty)
+                    if (level.GetTile(x, y).GetType() != typeof(EmptyTile))
                     {
                         goto ExitLowRowsLoop;
                     }
@@ -29,7 +29,7 @@ ExitLowRowsLoop:
             {
                 for (int y = 0; y < level.Depth; y++)
                 {
-                    if (level.GetTile(x, y).Type != TileType.Empty)
+                    if (level.GetTile(x, y).GetType() != typeof(EmptyTile))
                     {
                         goto ExitLowColsLoop;
                     }
@@ -44,7 +44,7 @@ ExitLowColsLoop:
             {
                 for (int x = 0; x < level.Width; x++)
                 {
-                    if (level.GetTile(x, y).Type != TileType.Empty)
+                    if (level.GetTile(x, y).GetType() != typeof(EmptyTile))
                     {
                         goto ExitHighRowsLoop;
                     }
@@ -59,7 +59,7 @@ ExitHighRowsLoop:
             {
                 for (int y = 0; y < level.Depth; y++)
                 {
-                    if (level.GetTile(x, y).Type != TileType.Empty)
+                    if (level.GetTile(x, y).GetType() != typeof(EmptyTile))
                     {
                         goto ExitHighColsLoop;
                     }
@@ -69,9 +69,8 @@ ExitHighRowsLoop:
             }
 ExitHighColsLoop:
 
-            TileData[,] tiles = new TileData[level.Width, level.Depth];
-            Utils.Loops.TwoD(level.Width, level.Depth,
-                (x, y) => tiles[x, y] = level.GetTile(x, y));
+            Tilee[,] tiles = new Tilee[level.Width, level.Depth];
+            Utils.Loops.TwoD(level.Width, level.Depth, (x, y) => tiles[x, y] = level.GetTile(x, y));
 
             tiles = tiles
                 .Offset(-lowEmptyColsCount, -lowEmptyRowsCount)
@@ -89,19 +88,19 @@ ExitHighColsLoop:
 
         public static LevelData EncapsulatePosition(IReadOnlyLevelData level, GridVector position, out GridVector offset)
         {
-            TileData[,] tiles = new TileData[level.Width, level.Depth];
+            Tilee[,] tiles = new Tilee[level.Width, level.Depth];
             Utils.Loops.TwoD(level.Width, level.Depth,
                 (x, y) => tiles[x, y] = level.GetTile(x, y));
 
             int newWidth = Mathf.Max(level.Width, level.Width - position.x, position.x + 1);
             int newDepth = Mathf.Max(level.Depth, level.Depth - position.y, position.y + 1);
 
-            TileData[,] newTiles = tiles.Resize(newWidth, newDepth, TileData.Factory.Default);
+            Tilee[,] newTiles = tiles.Resize(newWidth, newDepth, new EmptyTile());
             GridVector newMowerStartPosition = level.StartPosition;
             if (position.x < 0 || position.y < 0)
             {
                 offset = new GridVector(Mathf.Max(-position.x, 0), Mathf.Max(-position.y, 0));
-                newTiles = newTiles.Offset(offset.x, offset.y, TileData.Factory.Default);
+                newTiles = newTiles.Offset(offset.x, offset.y, new EmptyTile());
                 newMowerStartPosition += offset;
             }
             else

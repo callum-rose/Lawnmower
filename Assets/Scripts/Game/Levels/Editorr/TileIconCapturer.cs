@@ -2,14 +2,15 @@
 using Core;
 using Game.Tiles;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Game.Levels.Editorr
 {
-    public class TileIconCapturer : MonoBehaviour
+    internal class TileIconCapturer : MonoBehaviour
     {
         [SerializeField] private int textureSize = 100;
         [SerializeField] private UnityEngine.Camera camera;
-        [SerializeField] private TilePrefabsHolder tilePrefabHolder;
+        [FormerlySerializedAs("tilePrefabHolder")] [SerializeField] private TilePrefabsManager tilePrefabManager;
 
         private RenderTexture _renderTexture;
 
@@ -29,18 +30,17 @@ namespace Game.Levels.Editorr
 
         #region API
 
-        public RenderTexture Setup(TileData data)
+        public RenderTexture Setup(Tilee data)
         {
-            Tile prefab = tilePrefabHolder.GetPrefab(data.Type);
-
-            Tile newTile = Instantiate(prefab, transform);
-            newTile.Setup(data.Data);
-            newTile.transform.localPosition = Vector3.zero;
-            newTile.gameObject.SetLayerRecursively((int)UnityLayers.UiTile);
+            BaseTileObject<Tilee> newTileObject = tilePrefabManager.GetPrefabAndInstantiate(data);
+            newTileObject.Setup(data);
+            
+            newTileObject.transform.localPosition = Vector3.zero;
+            newTileObject.gameObject.SetLayerRecursively((int)UnityLayers.UiTile);
 
             _renderTexture = new RenderTexture(textureSize, textureSize, 1);
             camera.targetTexture = _renderTexture;
-            _renderTexture.name = data.Type.ToString();
+            _renderTexture.name = data.GetType().ToString();
 
             return _renderTexture;
         }

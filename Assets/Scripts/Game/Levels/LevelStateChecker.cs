@@ -8,99 +8,93 @@ using UnityEngine.Assertions;
 
 namespace Game.Levels
 {
-    [CreateAssetMenu(fileName = nameof(LevelStateChecker), menuName = SONames.GameDir + nameof(LevelStateChecker))]
-    internal class LevelStateChecker : ScriptableObject
-    {
-        [SerializeField] private UndoableEventChannel levelRuinedChannel;
-        
-        public UndoableAction LevelCompleted, LevelFailed, LevelFixed;
+	[CreateAssetMenu(fileName = nameof(LevelStateChecker), menuName = SONames.GameDir + nameof(LevelStateChecker))]
+	internal class LevelStateChecker : ScriptableObject
+	{
+		[SerializeField] private UndoableEventChannel levelRuinedChannel;
 
-        private ReadOnlyTiles _tiles;
-        private MowerMovementManager _mowerMovement;
+		public UndoableAction LevelCompleted, LevelFailed;
 
-        private bool _wasLevelCompleted;
+		private IReadOnlyLevelData _levelData;
+		private MowerMovementManager _mowerMovement;
 
-        #region API
+		private bool _wasLevelCompleted;
+		private bool _wasLevelRuined;
 
-        public void Init(ReadOnlyTiles tiles, MowerMovementManager mowerMovement)
-        {
-            Assert.IsNotNull(tiles);
-            _tiles = tiles;
+		#region API
 
-            Assert.IsNotNull(mowerMovement);
-            _mowerMovement = mowerMovement;
-            _mowerMovement.Moved += OnMowerMoved;
-        }
+		public void Init(IReadOnlyLevelData levelData, MowerMovementManager mowerMovement)
+		{
+			Assert.IsNotNull(levelData);
+			_levelData = levelData;
 
-        public void Clear()
-        {
-            _tiles = null;
+			Assert.IsNotNull(mowerMovement);
+			_mowerMovement = mowerMovement;
+			_mowerMovement.Moved += OnMowerMoved;
+		}
 
-            if (_mowerMovement != null)
-            {
-                _mowerMovement.Moved -= OnMowerMoved;
-                _mowerMovement = null;
-            }
-        }
+		public void Clear()
+		{
+			_levelData = null;
 
-        public void OnMowerMoved(GridVector prevPosition, GridVector targetPosition, Xor isUndo)
-        {
-            bool isLevelComplete = IsLevelComplete();
-            if ((isUndo && _wasLevelCompleted) || isLevelComplete)
-            {
-                LevelCompleted.Invoke(isUndo);
-            }
+			if (_mowerMovement != null)
+			{
+				_mowerMovement.Moved -= OnMowerMoved;
+				_mowerMovement = null;
+			}
+		}
 
-            _wasLevelCompleted = isLevelComplete;
-        }
+		public void OnMowerMoved(GridVector prevPosition, GridVector targetPosition, Xor isInverted)
+		{
+			bool isLevelRuined = IsLevelRuined();
+			bool cachedWasLevelRuined = _wasLevelRuined;
+			_wasLevelRuined = isLevelRuined;
+			if (isLevelRuined || isInverted && cachedWasLevelRuined)
+			{
+				LevelFailed.Invoke(isInverted);
+				levelRuinedChannel.Raise(isInverted);
+				return;
+			}
+			
+			bool isLevelComplete = IsLevelComplete();
+			if (isLevelComplete || isInverted && _wasLevelCompleted)
+			{
+				LevelCompleted.Invoke(isInverted);
+			}
 
-        public void AddTile(Tile tile)
-        {
-            switch (tile)
-            {
-                case GrassTile gTile:
-                    gTile.Ruined += OnTileRuined;
-                    break;
-            }
-        }
-        
-        public void RemoveTile(Tile tile)
-        {
-            switch (tile)
-            {
-                case GrassTile gTile:
-                    gTile.Ruined -= OnTileRuined;
-                    break;
-            }
-        }
+			_wasLevelCompleted = isLevelComplete;
+		}
 
-        #endregion
+		#endregion
 
-        #region Events
+		#region Methods
 
-        private void OnTileRuined(Xor isUndo)
-        {
-            LevelFailed.Invoke(isUndo);
-            levelRuinedChannel.Raise(isUndo);
-        }
+		private bool IsLevelComplete()
+		{
+			foreach (Tilee tile in _levelData)
+			{
+				if (!tile.IsComplete)
+				{
+					return false;
+				}
+			}
 
-        #endregion
+			return true;
+		}
 
-        #region Methods
+		private bool IsLevelRuined()
+		{
+			foreach (Tilee tile in _levelData)
+			{
+				if (!tile.IsRuined)
+				{
+					return true;
+				}
+			}
 
-        private bool IsLevelComplete()
-        {
-            foreach (Tile tile in _tiles)
-            {
-                if (!tile.IsComplete)
-                {
-                    return false;
-                }
-            }
+			return false;
+		}
 
-            return true;
-        }
-
-        #endregion
-    }
+		#endregion
+	}
 }

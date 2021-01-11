@@ -24,9 +24,9 @@ MonoBehaviour:
     - Name: id
       Entry: 2
       Data: f6710fe69c434956b91153b32118d9fd
-    - Name: test
+    - Name: newTiles
       Entry: 7
-      Data: 0|Game.Tiles.TileData[,], Scripts
+      Data: 0|Game.Tiles.Tilee[,], Scripts
     - Name: 
       Entry: 12
       Data: 16
@@ -35,337 +35,145 @@ MonoBehaviour:
       Data: 4|4
     - Name: 
       Entry: 7
-      Data: Game.Tiles.TileData, Scripts
-    - Name: type
-      Entry: 3
-      Data: 1
-    - Name: grassTileSetupData
-      Entry: 7
-      Data: Game.Tiles.GrassTileSetupData, Scripts
-    - Name: grassHeight
-      Entry: 3
-      Data: 2
-    - Name: 
-      Entry: 8
+      Data: 1|Game.Tiles.GrassTile, Scripts
+    - Name: data
+      Entry: 6
       Data: 
-    - Name: dataStr
-      Entry: 1
-      Data: null
     - Name: 
       Entry: 8
       Data: 
     - Name: 
       Entry: 7
-      Data: Game.Tiles.TileData, Scripts
-    - Name: type
-      Entry: 3
-      Data: 1
-    - Name: grassTileSetupData
-      Entry: 7
-      Data: Game.Tiles.GrassTileSetupData, Scripts
-    - Name: grassHeight
-      Entry: 3
-      Data: 0
-    - Name: 
-      Entry: 8
+      Data: 2|Game.Tiles.GrassTile, Scripts
+    - Name: data
+      Entry: 6
       Data: 
-    - Name: dataStr
-      Entry: 1
-      Data: null
     - Name: 
       Entry: 8
       Data: 
     - Name: 
       Entry: 7
-      Data: Game.Tiles.TileData, Scripts
-    - Name: type
-      Entry: 3
-      Data: 1
-    - Name: grassTileSetupData
-      Entry: 7
-      Data: Game.Tiles.GrassTileSetupData, Scripts
-    - Name: grassHeight
-      Entry: 3
-      Data: 0
-    - Name: 
-      Entry: 8
+      Data: 3|Game.Tiles.GrassTile, Scripts
+    - Name: data
+      Entry: 6
       Data: 
-    - Name: dataStr
-      Entry: 1
-      Data: null
     - Name: 
       Entry: 8
       Data: 
     - Name: 
       Entry: 7
-      Data: Game.Tiles.TileData, Scripts
-    - Name: type
-      Entry: 3
-      Data: 1
-    - Name: grassTileSetupData
-      Entry: 7
-      Data: Game.Tiles.GrassTileSetupData, Scripts
-    - Name: grassHeight
-      Entry: 3
-      Data: 0
-    - Name: 
-      Entry: 8
+      Data: 4|Game.Tiles.GrassTile, Scripts
+    - Name: data
+      Entry: 6
       Data: 
-    - Name: dataStr
-      Entry: 1
-      Data: null
     - Name: 
       Entry: 8
       Data: 
     - Name: 
       Entry: 7
-      Data: Game.Tiles.TileData, Scripts
-    - Name: type
-      Entry: 3
-      Data: 1
-    - Name: grassTileSetupData
-      Entry: 7
-      Data: Game.Tiles.GrassTileSetupData, Scripts
-    - Name: grassHeight
-      Entry: 3
-      Data: 0
-    - Name: 
-      Entry: 8
+      Data: 5|Game.Tiles.GrassTile, Scripts
+    - Name: data
+      Entry: 6
       Data: 
-    - Name: dataStr
-      Entry: 1
-      Data: null
     - Name: 
       Entry: 8
       Data: 
     - Name: 
       Entry: 7
-      Data: Game.Tiles.TileData, Scripts
-    - Name: type
-      Entry: 3
-      Data: 1
-    - Name: grassTileSetupData
-      Entry: 7
-      Data: Game.Tiles.GrassTileSetupData, Scripts
-    - Name: grassHeight
-      Entry: 3
-      Data: 0
-    - Name: 
-      Entry: 8
+      Data: 6|Game.Tiles.GrassTile, Scripts
+    - Name: data
+      Entry: 6
       Data: 
-    - Name: dataStr
-      Entry: 1
-      Data: null
     - Name: 
       Entry: 8
       Data: 
     - Name: 
       Entry: 7
-      Data: Game.Tiles.TileData, Scripts
-    - Name: type
-      Entry: 3
-      Data: 1
-    - Name: grassTileSetupData
-      Entry: 7
-      Data: Game.Tiles.GrassTileSetupData, Scripts
-    - Name: grassHeight
-      Entry: 3
-      Data: 0
-    - Name: 
-      Entry: 8
+      Data: 7|Game.Tiles.GrassTile, Scripts
+    - Name: data
+      Entry: 6
       Data: 
-    - Name: dataStr
-      Entry: 1
-      Data: null
     - Name: 
       Entry: 8
       Data: 
     - Name: 
       Entry: 7
-      Data: Game.Tiles.TileData, Scripts
-    - Name: type
-      Entry: 3
-      Data: 1
-    - Name: grassTileSetupData
-      Entry: 7
-      Data: Game.Tiles.GrassTileSetupData, Scripts
-    - Name: grassHeight
-      Entry: 3
-      Data: 0
-    - Name: 
-      Entry: 8
+      Data: 8|Game.Tiles.GrassTile, Scripts
+    - Name: data
+      Entry: 6
       Data: 
-    - Name: dataStr
-      Entry: 1
-      Data: null
     - Name: 
       Entry: 8
       Data: 
     - Name: 
       Entry: 7
-      Data: Game.Tiles.TileData, Scripts
-    - Name: type
-      Entry: 3
-      Data: 1
-    - Name: grassTileSetupData
-      Entry: 7
-      Data: Game.Tiles.GrassTileSetupData, Scripts
-    - Name: grassHeight
-      Entry: 3
-      Data: 0
-    - Name: 
-      Entry: 8
+      Data: 9|Game.Tiles.GrassTile, Scripts
+    - Name: data
+      Entry: 6
       Data: 
-    - Name: dataStr
-      Entry: 1
-      Data: null
     - Name: 
       Entry: 8
       Data: 
     - Name: 
       Entry: 7
-      Data: Game.Tiles.TileData, Scripts
-    - Name: type
-      Entry: 3
-      Data: 1
-    - Name: grassTileSetupData
-      Entry: 7
-      Data: Game.Tiles.GrassTileSetupData, Scripts
-    - Name: grassHeight
-      Entry: 3
-      Data: 0
-    - Name: 
-      Entry: 8
+      Data: 10|Game.Tiles.GrassTile, Scripts
+    - Name: data
+      Entry: 6
       Data: 
-    - Name: dataStr
-      Entry: 1
-      Data: null
     - Name: 
       Entry: 8
       Data: 
     - Name: 
       Entry: 7
-      Data: Game.Tiles.TileData, Scripts
-    - Name: type
-      Entry: 3
-      Data: 1
-    - Name: grassTileSetupData
-      Entry: 7
-      Data: Game.Tiles.GrassTileSetupData, Scripts
-    - Name: grassHeight
-      Entry: 3
-      Data: 0
-    - Name: 
-      Entry: 8
+      Data: 11|Game.Tiles.GrassTile, Scripts
+    - Name: data
+      Entry: 6
       Data: 
-    - Name: dataStr
-      Entry: 1
-      Data: null
     - Name: 
       Entry: 8
       Data: 
     - Name: 
       Entry: 7
-      Data: Game.Tiles.TileData, Scripts
-    - Name: type
-      Entry: 3
-      Data: 1
-    - Name: grassTileSetupData
-      Entry: 7
-      Data: Game.Tiles.GrassTileSetupData, Scripts
-    - Name: grassHeight
-      Entry: 3
-      Data: 0
-    - Name: 
-      Entry: 8
+      Data: 12|Game.Tiles.GrassTile, Scripts
+    - Name: data
+      Entry: 6
       Data: 
-    - Name: dataStr
-      Entry: 1
-      Data: null
     - Name: 
       Entry: 8
       Data: 
     - Name: 
       Entry: 7
-      Data: Game.Tiles.TileData, Scripts
-    - Name: type
-      Entry: 3
-      Data: 1
-    - Name: grassTileSetupData
-      Entry: 7
-      Data: Game.Tiles.GrassTileSetupData, Scripts
-    - Name: grassHeight
-      Entry: 3
-      Data: 0
-    - Name: 
-      Entry: 8
+      Data: 13|Game.Tiles.GrassTile, Scripts
+    - Name: data
+      Entry: 6
       Data: 
-    - Name: dataStr
-      Entry: 1
-      Data: null
     - Name: 
       Entry: 8
       Data: 
     - Name: 
       Entry: 7
-      Data: Game.Tiles.TileData, Scripts
-    - Name: type
-      Entry: 3
-      Data: 1
-    - Name: grassTileSetupData
-      Entry: 7
-      Data: Game.Tiles.GrassTileSetupData, Scripts
-    - Name: grassHeight
-      Entry: 3
-      Data: 0
-    - Name: 
-      Entry: 8
+      Data: 14|Game.Tiles.GrassTile, Scripts
+    - Name: data
+      Entry: 6
       Data: 
-    - Name: dataStr
-      Entry: 1
-      Data: null
     - Name: 
       Entry: 8
       Data: 
     - Name: 
       Entry: 7
-      Data: Game.Tiles.TileData, Scripts
-    - Name: type
-      Entry: 3
-      Data: 1
-    - Name: grassTileSetupData
-      Entry: 7
-      Data: Game.Tiles.GrassTileSetupData, Scripts
-    - Name: grassHeight
-      Entry: 3
-      Data: 0
-    - Name: 
-      Entry: 8
+      Data: 15|Game.Tiles.GrassTile, Scripts
+    - Name: data
+      Entry: 6
       Data: 
-    - Name: dataStr
-      Entry: 1
-      Data: null
     - Name: 
       Entry: 8
       Data: 
     - Name: 
       Entry: 7
-      Data: Game.Tiles.TileData, Scripts
-    - Name: type
-      Entry: 3
-      Data: 1
-    - Name: grassTileSetupData
-      Entry: 7
-      Data: Game.Tiles.GrassTileSetupData, Scripts
-    - Name: grassHeight
-      Entry: 3
-      Data: 0
-    - Name: 
-      Entry: 8
+      Data: 16|Game.Tiles.GrassTile, Scripts
+    - Name: data
+      Entry: 6
       Data: 
-    - Name: dataStr
-      Entry: 1
-      Data: null
     - Name: 
       Entry: 8
       Data: 
@@ -378,6 +186,26 @@ MonoBehaviour:
   startPosition:
     x: 0
     y: 0
+  tilesData: '[[{"$type":"Game.Tiles.GrassTile, Scripts","IsComplete":true,"IsRuined":false,"GrassHeight":{"$type":"Game.Tiles.EventProperty`1[[System.Int32,
+    mscorlib]], Scripts","_value":1,"Value":1}},{"$type":"Game.Tiles.GrassTile, Scripts","IsComplete":true,"IsRuined":false,"GrassHeight":{"$type":"Game.Tiles.EventProperty`1[[System.Int32,
+    mscorlib]], Scripts","_value":1,"Value":1}},{"$type":"Game.Tiles.GrassTile, Scripts","IsComplete":true,"IsRuined":false,"GrassHeight":{"$type":"Game.Tiles.EventProperty`1[[System.Int32,
+    mscorlib]], Scripts","_value":1,"Value":1}},{"$type":"Game.Tiles.GrassTile, Scripts","IsComplete":true,"IsRuined":false,"GrassHeight":{"$type":"Game.Tiles.EventProperty`1[[System.Int32,
+    mscorlib]], Scripts","_value":1,"Value":1}}],[{"$type":"Game.Tiles.GrassTile,
+    Scripts","IsComplete":true,"IsRuined":false,"GrassHeight":{"$type":"Game.Tiles.EventProperty`1[[System.Int32,
+    mscorlib]], Scripts","_value":1,"Value":1}},{"$type":"Game.Tiles.GrassTile, Scripts","IsComplete":true,"IsRuined":false,"GrassHeight":{"$type":"Game.Tiles.EventProperty`1[[System.Int32,
+    mscorlib]], Scripts","_value":1,"Value":1}},{"$type":"Game.Tiles.GrassTile, Scripts","IsComplete":true,"IsRuined":false,"GrassHeight":{"$type":"Game.Tiles.EventProperty`1[[System.Int32,
+    mscorlib]], Scripts","_value":1,"Value":1}},{"$type":"Game.Tiles.GrassTile, Scripts","IsComplete":true,"IsRuined":false,"GrassHeight":{"$type":"Game.Tiles.EventProperty`1[[System.Int32,
+    mscorlib]], Scripts","_value":1,"Value":1}}],[{"$type":"Game.Tiles.GrassTile,
+    Scripts","IsComplete":true,"IsRuined":false,"GrassHeight":{"$type":"Game.Tiles.EventProperty`1[[System.Int32,
+    mscorlib]], Scripts","_value":1,"Value":1}},{"$type":"Game.Tiles.GrassTile, Scripts","IsComplete":true,"IsRuined":false,"GrassHeight":{"$type":"Game.Tiles.EventProperty`1[[System.Int32,
+    mscorlib]], Scripts","_value":1,"Value":1}},{"$type":"Game.Tiles.GrassTile, Scripts","IsComplete":true,"IsRuined":false,"GrassHeight":{"$type":"Game.Tiles.EventProperty`1[[System.Int32,
+    mscorlib]], Scripts","_value":1,"Value":1}},{"$type":"Game.Tiles.GrassTile, Scripts","IsComplete":true,"IsRuined":false,"GrassHeight":{"$type":"Game.Tiles.EventProperty`1[[System.Int32,
+    mscorlib]], Scripts","_value":1,"Value":1}}],[{"$type":"Game.Tiles.GrassTile,
+    Scripts","IsComplete":true,"IsRuined":false,"GrassHeight":{"$type":"Game.Tiles.EventProperty`1[[System.Int32,
+    mscorlib]], Scripts","_value":1,"Value":1}},{"$type":"Game.Tiles.GrassTile, Scripts","IsComplete":true,"IsRuined":false,"GrassHeight":{"$type":"Game.Tiles.EventProperty`1[[System.Int32,
+    mscorlib]], Scripts","_value":1,"Value":1}},{"$type":"Game.Tiles.GrassTile, Scripts","IsComplete":true,"IsRuined":false,"GrassHeight":{"$type":"Game.Tiles.EventProperty`1[[System.Int32,
+    mscorlib]], Scripts","_value":1,"Value":1}},{"$type":"Game.Tiles.GrassTile, Scripts","IsComplete":true,"IsRuined":false,"GrassHeight":{"$type":"Game.Tiles.EventProperty`1[[System.Int32,
+    mscorlib]], Scripts","_value":1,"Value":1}}]]'
   tiles:
     data:
     - type: 1

@@ -7,15 +7,15 @@ namespace Game.Levels
 {
 	internal abstract class BaseLevelTraversalChecker : ScriptableObject, IHasEditMode
 	{
-		[SerializeField] private TilePrefabsHolder tilePrefabsHolder;
+		[SerializeField] private TilePrefabsManager tilePrefabsManager;
 		
 		public bool IsEditMode { get; set; }
 		
-		protected ReadOnlyTiles _tiles;
+		protected IReadOnlyLevelData LevelData;
 
-		public void SetTiles(ReadOnlyTiles tiles)
+		public void SetTiles(IReadOnlyLevelData levelData)
 		{
-			_tiles = tiles;
+			LevelData = levelData;
 		}
 
 		public abstract CheckValue CanTraverseTo(GridVector position);

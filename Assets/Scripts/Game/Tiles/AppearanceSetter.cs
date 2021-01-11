@@ -6,12 +6,12 @@ namespace Game.Tiles
     {
         [SerializeField] private GameObject largeContainer, mediumContainer, smallContainer, ruinedContainer;
 
-        public void SetAppearance(GrassTile tile)
+        public void SetAppearance(int grassHeight)
         {
-            largeContainer.SetActive(tile.GrassHeight == 3);
-            mediumContainer.SetActive(tile.GrassHeight == 2);
-            smallContainer.SetActive(tile.GrassHeight == 1);
-            ruinedContainer.SetActive(tile.GrassHeight == 0);
+            largeContainer.SetActive(grassHeight == 3);
+            mediumContainer.SetActive(grassHeight == 2);
+            smallContainer.SetActive(grassHeight== 1);
+            ruinedContainer.SetActive(grassHeight == 0);
         }
     }
 }

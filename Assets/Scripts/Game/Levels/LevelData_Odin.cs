@@ -12,13 +12,6 @@ namespace Game.Levels
 	internal partial class LevelData
 	{
 		private static Color? _defaultEditorColour;
-		
-		[Button]
-		internal void ConvertOldArrayTo2D()
-		{
-			test = new TileData[tiles.Width, tiles.Depth];
-			Loops.TwoD(tiles.Width, tiles.Depth, (x, y) => { test[x, y] = tiles[x, y]; });
-		}
 
 		[Button]
 		private void SelectInProjectWindow()
@@ -33,23 +26,22 @@ namespace Game.Levels
 			LevelEditorWindow.OpenWindow(this);
 		}
 
-		private static TileData DrawColouredTileElement(Rect rect, TileData[,] arr, int x, int y)
+		private static Tilee DrawColouredTileElement(Rect rect, Tilee[,] arr, int x, int y)
 		{
 			_defaultEditorColour ??= GUI.color;
-			
+
 			int flippedY = arr.GetLength(1) - 1 - y;
-			TileData value = arr[x, flippedY];
+			Tilee value = arr[x, flippedY];
 
 			Color colour;
 			string text = "";
-			switch (value.Type)
+			switch (value)
 			{
-				case TileType.Empty:
+				case EmptyTile emptyTile:
 					colour = Color.white;
 					break;
-				case TileType.Grass:
-					GrassTileSetupData grassData = (GrassTileSetupData)value.Data;
-					switch (grassData.grassHeight)
+				case GrassTile grassTile:
+					switch (grassTile.GrassHeight.Value)
 					{
 						case 3:
 							ColorUtility.TryParseHtmlString("#0D7352", out colour);
@@ -65,22 +57,21 @@ namespace Game.Levels
 							break;
 					}
 
-					text = grassData.grassHeight.ToString();
-
+					text = grassTile.GrassHeight.Value.ToString();
 					break;
-				case TileType.Stone:
+				case StoneTile stoneTile:
 					colour = Color.gray;
 					break;
-				case TileType.Water:
+				case WaterTile waterTile:
 					colour = Color.blue;
 					break;
-				case TileType.Wood:
+				case WoodTile woodTile:
 					ColorUtility.TryParseHtmlString("#916B4C", out colour);
 					break;
 				default:
 					throw new ArgumentOutOfRangeException();
 			}
-			
+
 			EditorGUI.DrawRect(rect.Padding(1), colour);
 			EditorGUI.LabelField(rect, text, new GUIStyle() { alignment = TextAnchor.MiddleCenter });
 
@@ -88,7 +79,7 @@ namespace Game.Levels
 			{
 				GUI.color = _defaultEditorColour.Value;
 			}
-			
+
 			return value;
 		}
 

@@ -9,165 +9,158 @@ using UnityEngine.Assertions;
 
 namespace Game.Levels
 {
-    internal class LevelManager : MonoBehaviour, IHasEditMode
-    {
-        [SerializeField] private LevelFactory levelFactory;
-        [SerializeField] private LevelTraversalChecker traversalChecker;
-        [SerializeField] private LevelInteractor levelInteractor;
-        [SerializeField] private LevelStateChecker levelStateChecker;
-        [SerializeField] private Positioner positioner;
+	internal class LevelManager : MonoBehaviour, IHasEditMode
+	{
+		[SerializeField] private LevelObjectFactory levelFactory;
+		[SerializeField] private LevelTraversalChecker traversalChecker;
+		[SerializeField] private LevelInteractor levelInteractor;
+		[SerializeField] private LevelStateChecker levelStateChecker;
+		[SerializeField] private Positioner positioner;
 
-        public event Action<Tile> TileAdded, TileDestroyed;
-        public event Action LevelChanged;
-        public event UndoableAction LevelCompleted, LevelFailed;
+		public event Action<GameObject> TileAdded, TileDestroyed;
+		public event Action LevelChanged;
+		public event UndoableAction LevelCompleted, LevelFailed;
 
-        public bool IsEditMode { get; set; }
+		public bool IsEditMode { get; set; }
 
-        public ReadOnlyTiles Tiles => new ReadOnlyTiles(_tiles);
+		public IReadOnlyLevelData Level => _level;
+		public GridVector MowerPosition => _mowerMovement.MowerPosition;
 
-        public IReadOnlyLevelData Level => _level;
-        public GridVector MowerPosition => _mowerMovement.MowerPosition;
+		private LevelData _level;
+		private MowerMovementManager _mowerMovement;
 
-        private LevelData _level;
-        private MowerMovementManager _mowerMovement;
+		private GameObject[,] _tileObjects;
 
-        private Tile[,] _tiles;
+		#region Unity
 
-        #region Unity
+		private void Awake()
+		{
+			levelStateChecker.LevelCompleted += OnLevelCompleted;
+			levelStateChecker.LevelFailed += OnLevelFailed;
+		}
 
-        private void Awake()
-        {
-            TileAdded += levelStateChecker.AddTile;
-            TileDestroyed += levelStateChecker.RemoveTile;
+		private void OnDestroy()
+		{
+			levelStateChecker.LevelCompleted -= OnLevelCompleted;
+			levelStateChecker.LevelFailed -= OnLevelFailed;
+		}
 
-            levelStateChecker.LevelCompleted += OnLevelCompleted;
-            levelStateChecker.LevelFailed += OnLevelFailed;
-        }
+		#endregion
 
-        private void OnDestroy()
-        {
-            TileAdded -= levelStateChecker.AddTile;
-            TileDestroyed -= levelStateChecker.RemoveTile;
+		#region API
 
-            levelStateChecker.LevelCompleted -= OnLevelCompleted;
-            levelStateChecker.LevelFailed -= OnLevelFailed;
-        }
+		public void Init(MowerMovementManager mowerMovement)
+		{
+			Assert.IsNotNull(mowerMovement);
+			levelInteractor.Init(mowerMovement);
 
-        #endregion
+			_mowerMovement = mowerMovement;
+		}
 
-        #region API
+		public void SetLevel(LevelData level)
+		{
+			SetLevelAfterResize(level, GridVector.Zero);
+			_mowerMovement.IsRunning = true;
+		}
 
-        public void Init(MowerMovementManager mowerMovement)
-        {
-            Assert.IsNotNull(mowerMovement);
-            levelInteractor.Init(mowerMovement);
+		public void SetLevelAfterResize(LevelData level, GridVector worldOffset)
+		{
+			ClearTiles();
 
-            _mowerMovement = mowerMovement;
-        }
+			_tileObjects = levelFactory.Build(level);
+			foreach (var tileObject in _tileObjects)
+			{
+				TileAdded.Invoke(tileObject);
+			}
 
-        public void SetLevel(LevelData level)
-        {
-            SetLevelAfterResize(level, GridVector.Zero);
-            _mowerMovement.IsRunning = true;
-        }
+			SetDependenciesOfTiles();
+			
+			Assert.IsNotNull(level);
+			_level = level;
 
-        public void SetLevelAfterResize(LevelData level, GridVector worldOffset)
-        {
-            ClearTiles();
+			_mowerMovement.SetPosition(_level.StartPosition);
 
-            _tiles = levelFactory.Build(level);
-            foreach (Tile tile in _tiles)
-            {
-                TileAdded.Invoke(tile);
-            }
-            SetDependanciesOfTiles();
+			positioner.OffsetContainer(-worldOffset);
 
-            _mowerMovement.SetPosition(level.StartPosition);
+			levelStateChecker.Init(_level, _mowerMovement);
+			
+			LevelChanged?.Invoke();
+		}
 
-            positioner.OffsetContainer(-worldOffset);
+		// public void UpdateTile(GridVector position, TileData data)
+		// {
+		//     if (_tileObjects == null)
+		//     {
+		//         throw new Exception("Cannot update tile before level is built");
+		//     }
+		//
+		//     // update 
+		//     try
+		//     {
+		//         Tile oldTile = _tileObjects[position.x, position.y];
+		//         TileDestroyed.Invoke(oldTile);
+		//         levelFactory.Destroy(oldTile);
+		//     }
+		//     catch (Exception e)
+		//     {
+		//         Debug.LogException(e);
+		//     }
+		//
+		//     Tile newTile = levelFactory.BuildAt(position, data);
+		//     TileAdded.Invoke(newTile);
+		//     _tileObjects[position.x, position.y] = newTile;
+		//
+		//     // update internal level data
+		//     _level.SetTile(position, data);
+		//
+		//     SetDependenciesOfTiles();
+		// }
 
-            levelStateChecker.Init(_tiles, _mowerMovement);
+		// public Tilee GetTileData(GridVector position)
+		// {
+		// 	return _level.GetTile(position);
+		// }
 
-            Assert.IsNotNull(level);
-            _level = level;
+		public void ClearTiles()
+		{
+			if (_tileObjects != null)
+			{
+				foreach (GameObject tileObject in _tileObjects)
+				{
+					TileDestroyed.Invoke(tileObject);
+				}
 
-            LevelChanged?.Invoke();
-        }
+				levelFactory.Destroy(_tileObjects);
+			}
+		}
 
-        public void UpdateTile(GridVector position, TileData data)
-        {
-            if (_tiles == null)
-            {
-                throw new Exception("Cannot update tile before level is built");
-            }
+		#endregion
 
-            // update 
-            try
-            {
-                Tile oldTile = _tiles[position.x, position.y];
-                TileDestroyed.Invoke(oldTile);
-                levelFactory.Destroy(oldTile);
-            }
-            catch (Exception e)
-            {
-                Debug.LogException(e);
-            }
+		#region Events
 
-            Tile newTile = levelFactory.BuildAt(position, data);
-            TileAdded.Invoke(newTile);
-            _tiles[position.x, position.y] = newTile;
+		private void OnLevelCompleted(Xor isUndo)
+		{
+			bool isLevelResuming = isUndo;
+			_mowerMovement.IsRunning = isLevelResuming;
 
-            // update internal level data
-            _level.SetTile(position, data);
+			LevelCompleted.Invoke(isUndo);
+		}
 
-            SetDependanciesOfTiles();
-        }
+		private void OnLevelFailed(Xor isUndo)
+		{
+			LevelFailed.Invoke(isUndo);
+		}
 
-        public TileData GetTileData(GridVector position)
-        {
-            return _level.GetTile(position);
-        }
+		#endregion
 
-        public void ClearTiles()
-        {
-            if (_tiles != null)
-            {
-                foreach (Tile t in _tiles)
-                {
-                    TileDestroyed.Invoke(t);
-                }
-                levelFactory.Destroy(_tiles);
-            }
-        }
+		#region Methods
 
-        #endregion
+		private void SetDependenciesOfTiles()
+		{
+			traversalChecker.SetTiles(Level);
+			levelInteractor.SetTiles(Level);
+		}
 
-        #region Events
-
-        private void OnLevelCompleted(Xor isUndo)
-        {
-            bool isLevelResuming = isUndo;
-            _mowerMovement.IsRunning = isLevelResuming;
-
-            LevelCompleted.Invoke(isUndo);
-        }
-
-        private void OnLevelFailed(Xor isUndo)
-        {
-            LevelFailed.Invoke(isUndo);
-        }
-
-        #endregion
-
-        #region Methods
-
-        private void SetDependanciesOfTiles()
-        {
-            ReadOnlyTiles readOnlyTiles = Tiles;
-            traversalChecker.SetTiles(readOnlyTiles);
-            levelInteractor.SetTiles(readOnlyTiles);
-        }
-
-        #endregion
-    }
+		#endregion
+	}
 }

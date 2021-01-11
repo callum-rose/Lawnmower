@@ -1,6 +1,9 @@
+using System;
+
 namespace Game.Tiles
 {
-    internal class StoneTile : Tile
+    [Serializable]
+    internal class StoneTile : Tilee
     {
         public override bool IsTraversable(bool editMode) => false;
         public override bool IsComplete => true;

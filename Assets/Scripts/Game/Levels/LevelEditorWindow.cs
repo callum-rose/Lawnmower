@@ -28,7 +28,7 @@ namespace Game.Levels
 		private LevelData _clonedCurrent;
 
 		[BoxGroup(SplitLeft), ShowInInspector, DisplayAsString, LabelText("Current Selection:")] 
-		private string TileDataString => _tileData.ToString();
+		private string TileDataString => _currentTilePaint.ToString();
 
 		[ShowInInspector, BoxGroup(SplitLeft), InlineProperty, HideLabel] private TileTypeButtons _tileTypeButtons;
 
@@ -48,8 +48,8 @@ namespace Game.Levels
 		
 		private bool CurrentNotNull => _clonedCurrent != null;
 		private bool CurrentNull => _clonedCurrent == null;
-		
-		private TileData _tileData;
+
+		private Tilee _currentTilePaint = new GrassTile(2);
 
 		private IUndoSystem _undoSystem;
 
@@ -86,11 +86,6 @@ namespace Game.Levels
 
 		private void CloneLevel()
 		{
-			if (_current.test == null)
-			{
-				_current.ConvertOldArrayTo2D();
-			}
-
 			_clonedCurrent = Instantiate(_current);
 			Debug.Log("Cloned " + _clonedCurrent.name);
 		}
@@ -107,44 +102,46 @@ namespace Game.Levels
 			return EditorPrefs.GetString(key, null);
 		}
 
-		private static Color GetColourForTile(TileData tileData)
+		private static Color GetColourForTile(Tilee tileData)
 		{
 			Color colour;
-			switch (tileData.Type)
+			if (tileData is EmptyTile)
 			{
-				case TileType.Empty:
-					colour = Color.white;
-					break;
-				case TileType.Grass:
-					GrassTileSetupData grassData = (GrassTileSetupData) tileData.Data;
-					switch (grassData.grassHeight)
-					{
-						case 3:
-							ColorUtility.TryParseHtmlString("#0D7352", out colour);
-							break;
-						case 2:
-							ColorUtility.TryParseHtmlString("#12A175", out colour);
-							break;
-						case 1:
-							ColorUtility.TryParseHtmlString("#1BF1AC", out colour);
-							break;
-						default:
-							colour = Color.black;
-							break;
-					}
-
-					break;
-				case TileType.Stone:
-					colour = Color.gray;
-					break;
-				case TileType.Water:
-					colour = Color.blue;
-					break;
-				case TileType.Wood:
-					ColorUtility.TryParseHtmlString("#916B4C", out colour);
-					break;
-				default:
-					throw new ArgumentOutOfRangeException();
+				colour = Color.white;
+			}
+			else if (tileData is GrassTile grassTile)
+			{
+				switch (grassTile.GrassHeight.Value)
+				{
+					case 3:
+						ColorUtility.TryParseHtmlString("#0D7352", out colour);
+						break;
+					case 2:
+						ColorUtility.TryParseHtmlString("#12A175", out colour);
+						break;
+					case 1:
+						ColorUtility.TryParseHtmlString("#1BF1AC", out colour);
+						break;
+					default:
+						colour = Color.black;
+						break;
+				}
+			}
+			else if (tileData is StoneTile)
+			{
+				colour = Color.gray;
+			}
+			else if (tileData is WaterTile)
+			{
+				colour = Color.blue;
+			}
+			else if (tileData is WoodTile)
+			{
+				ColorUtility.TryParseHtmlString("#916B4C", out colour);
+			}
+			else
+			{
+				throw new ArgumentOutOfRangeException();
 			}
 
 			return colour;

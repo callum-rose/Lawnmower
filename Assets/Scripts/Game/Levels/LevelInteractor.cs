@@ -12,7 +12,7 @@ namespace Game.Levels
     internal class LevelInteractor : ScriptableObject, IHasEditMode
     {
         private MowerMovementManager _mowerMovement;
-        private ReadOnlyTiles _tiles;
+        private IReadOnlyLevelData _levelData;
 
         public bool IsEditMode { get; set; }
 
@@ -25,9 +25,9 @@ namespace Game.Levels
             _mowerMovement.Bumped += Bump;
         }
 
-        public void SetTiles(ReadOnlyTiles tiles)
+        public void SetTiles(IReadOnlyLevelData levelData)
         {
-            _tiles = tiles;
+            _levelData = levelData;
         }
 
         #endregion
@@ -53,10 +53,10 @@ namespace Game.Levels
 
             GridVector direction = positionToInteract - positionMovingFrom;
 
-            Tile tileTo = _tiles.GetTile(positionToInteract);
+            Tilee tileTo = _levelData.GetTile(positionToInteract);
             tileTo.TraverseOnto(direction, inverted);
 
-            Tile tileFrom = _tiles.GetTile(positionMovingFrom);
+            Tilee tileFrom = _levelData.GetTile(positionMovingFrom);
             tileFrom.TraverseAway(direction, inverted);
         }
 
@@ -67,8 +67,8 @@ namespace Game.Levels
                 return;
             }
 
-            Tile tile = _tiles.GetTile(targetPosition);
-            tile.BumpInto(targetPosition - prevPosition);
+            Tilee tile = _levelData.GetTile(targetPosition);
+            tile.BumpInto(targetPosition - prevPosition, isUndo);
         }
 
         #endregion

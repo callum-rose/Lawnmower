@@ -14,17 +14,17 @@ namespace Game.Levels
 
         public override CheckValue CanTraverseTo(GridVector position)
         {
-            if (_tiles == null)
+            if (LevelData == null)
             {
                 throw new NullReferenceException("Tiles object is null");
             }
 
-            if (position.x < 0 || position.y < 0 || position.x >= _tiles.Width || position.y >= _tiles.Depth)
+            if (position.x < 0 || position.y < 0 || position.x >= LevelData.Width || position.y >= LevelData.Depth)
             {
                 return CheckValue.OutOfBounds;
             }
 
-            Tile tile = _tiles.GetTile(position);
+            Tilee tile = LevelData.GetTile(position);
             return tile.IsTraversable(IsEditMode) ? CheckValue.Yes : CheckValue.NonTraversableTile;
         }
 

@@ -2,9 +2,11 @@ using System;
 
 namespace Game.Tiles
 {
-    internal class EmptyTile : Tile
+    [Serializable]
+    internal class EmptyTile : Tilee
     {
-        public event Action Ruined;
+        // TODO
+        // public event Action Ruined;
 
         public override bool IsComplete => true;
 

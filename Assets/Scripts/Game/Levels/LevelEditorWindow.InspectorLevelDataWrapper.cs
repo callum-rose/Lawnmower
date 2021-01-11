@@ -71,7 +71,7 @@ namespace Game.Levels
 
 			private static void DrawTile(LevelData levelData, int x, int levelY, Rect cellRect)
 			{
-				TileData tileData = levelData.GetTile(x, levelY);
+				Tilee tileData = levelData.GetTile(x, levelY);
 				Color tileColour = GetColourForTile(tileData);
 
 				EditorGUI.DrawRect(cellRect.Padding(1), tileColour);
@@ -91,15 +91,15 @@ namespace Game.Levels
 			private static void SetTile(LevelData levelData, LevelEditorWindow levelEditorWindow, int x, int y,
 				IUndoSystem undoSystem)
 			{
-				TileData currentTile = levelData.GetTile(x, y);
+				Tilee currentTile = levelData.GetTile(x, y);
 
-				void Set_Local(TileData tileData)
+				void Set_Local(Tilee tile)
 				{
-					levelData.SetTile(x, y, tileData);
+					levelData.SetTile(x, y, tile);
 				}
 
 				IUndoable undoable = new Undoable(
-					() => Set_Local(levelEditorWindow._tileData),
+					() => Set_Local(levelEditorWindow._currentTilePaint),
 					() => Set_Local(currentTile));
 
 				undoSystem.Do(undoable);

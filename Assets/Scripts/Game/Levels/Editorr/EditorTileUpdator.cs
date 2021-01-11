@@ -1,4 +1,5 @@
-﻿using Game.Core;
+﻿using System;
+using Game.Core;
 using Game.Tiles;
 using Game.UndoSystem;
 using UnityEngine;
@@ -39,6 +40,9 @@ namespace Game.Levels.Editorr
 
         private void OnTileSelected(GridVector position)
         {
+            // TODO
+            throw new NotImplementedException();
+            
             if (!IsEditMode)
             {
                 return;
@@ -46,14 +50,14 @@ namespace Game.Levels.Editorr
 
             ExpandLevel(ref position);
 
-            TileData data = tileUiManager.Selected;
-            TileData prevData = levelManager.GetTileData(position);
-
-            Undoable undoable = new Undoable(
-                () => levelManager.UpdateTile(position, data),
-                () => levelManager.UpdateTile(position, prevData));
-
-            UndoSystem.Do(undoable);
+            // Tilee tile = tileUiManager.Selected;
+            // Tilee previousTile = levelManager.GetTileData(position);
+            //
+            // Undoable undoable = new Undoable(
+            //     () => levelManager.UpdateTile(position, tile),
+            //     () => levelManager.UpdateTile(position, previousTil));
+            //
+            // UndoSystem.Do(undoable);
         }
 
         private void ExpandLevel(ref GridVector position)

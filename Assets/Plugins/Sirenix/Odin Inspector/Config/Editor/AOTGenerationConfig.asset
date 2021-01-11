@@ -16,21 +16,21 @@ MonoBehaviour:
   deleteDllAfterBuilds: 1
   AutomateForAllAOTPlatforms: 1
   automateForPlatforms: 0900000014000000
-  lastScan: 637451380657218135
+  lastScan: 637459978631920474
   supportSerializedTypes:
   - TypeName: UnityEngine.Color, UnityEngine.CoreModule
     IsCustom: 0
     Emit: 1
-  - TypeName: System.Collections.Generic.Dictionary`2[[UI.Buttons.IconType, Assembly-CSharp],[UnityEngine.Sprite,
+  - TypeName: System.Collections.Generic.Dictionary`2[[UI.Buttons.IconType, Scripts],[UnityEngine.Sprite,
       UnityEngine.CoreModule]], mscorlib
     IsCustom: 0
     Emit: 1
   - TypeName: System.Collections.Generic.Dictionary`2[[System.Int32, mscorlib],[Game.Tiles.GrassMaterialDataHolder+GrassData,
-      Assembly-CSharp]], mscorlib
+      Scripts]], mscorlib
     IsCustom: 0
     Emit: 1
   - TypeName: System.Collections.Generic.EnumEqualityComparer`1[[UI.Buttons.IconType,
-      Assembly-CSharp]], mscorlib
+      Scripts]], mscorlib
     IsCustom: 0
     Emit: 1
   - TypeName: System.Single, mscorlib
@@ -40,17 +40,17 @@ MonoBehaviour:
       mscorlib]], mscorlib
     IsCustom: 0
     Emit: 1
-  - TypeName: Game.Tiles.GrassMaterialDataHolder+GrassData, Assembly-CSharp
+  - TypeName: Game.Tiles.GrassMaterialDataHolder+GrassData, Scripts
     IsCustom: 0
     Emit: 1
   - TypeName: System.Guid, mscorlib
     IsCustom: 0
     Emit: 1
-  - TypeName: UI.Buttons.IconType, Assembly-CSharp
+  - TypeName: UI.Buttons.IconType, Scripts
     IsCustom: 0
     Emit: 1
   - TypeName: System.Collections.Generic.IEqualityComparer`1[[UI.Buttons.IconType,
-      Assembly-CSharp]], mscorlib
+      Scripts]], mscorlib
     IsCustom: 0
     Emit: 1
   - TypeName: System.Collections.Generic.IEqualityComparer`1[[System.Int32, mscorlib]],
@@ -61,6 +61,9 @@ MonoBehaviour:
     IsCustom: 0
     Emit: 1
   - TypeName: UnityEngine.Sprite, UnityEngine.CoreModule
+    IsCustom: 0
+    Emit: 1
+  - TypeName: Game.Tiles.Tilee[,], Scripts
     IsCustom: 0
     Emit: 1
   - TypeName: UnityEngine.Vector2, UnityEngine.CoreModule

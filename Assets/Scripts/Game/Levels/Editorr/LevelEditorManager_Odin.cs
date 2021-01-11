@@ -53,7 +53,6 @@ namespace Game.Levels.Editorr
 		private void BuildEmptyLevelInEdit(int width, int depth)
 		{
 			LevelData emptyLevel = ScriptableObject.CreateInstance<LevelData>();
-			emptyLevel.Resize(width, depth);
 
 			GameSetupPassThroughData data = new GameSetupPassThroughData(mowerData, emptyLevel);
 			Begin(data, true);
@@ -64,7 +63,7 @@ namespace Game.Levels.Editorr
 		[TitleGroup(Save)]
 		private void SaveLevel()
 		{
-			levelSaver.Save_Editor(levelManager.Tiles, levelManager.MowerPosition);
+			levelSaver.Save_Editor(levelManager.Level, levelManager.MowerPosition);
 		}
 	}
 }
