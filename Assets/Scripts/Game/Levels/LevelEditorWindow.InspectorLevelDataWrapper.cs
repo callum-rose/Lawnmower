@@ -1,6 +1,6 @@
 using System;
+using System.Linq;
 using Game.Tiles;
-using Game.UndoSystem;
 using Sirenix.OdinInspector;
 using Sirenix.OdinInspector.Editor;
 using Sirenix.Utilities;
@@ -18,34 +18,36 @@ namespace Game.Levels
 			{
 				InspectorLevelDataWrapper inspectorLevelDataWrapper = ValueEntry.SmartValue;
 				LevelEditorWindow levelEditorWindow = inspectorLevelDataWrapper.Window;
-				LevelData levelData = levelEditorWindow._clonedCurrent;
+				EditableLevelData levelData = levelEditorWindow._clonedCurrent;
 
-				const float axisIndicesRelSize = 0.5f;
+				float guiWidth = GUILayoutUtility.GetAspectRect(Mathf.Infinity).width;
+
+				const float axisIndicesSize = 30;
+				float cellSize = (guiWidth - axisIndicesSize) / levelData.Width;
+
 				Rect inspectorRect =
-					GUILayoutUtility.GetAspectRect((levelData.Width + axisIndicesRelSize) /
-					                               (levelData.Depth + axisIndicesRelSize));
-
-				float cellSize = (inspectorRect.width * (levelData.Width / (levelData.Width + axisIndicesRelSize))) /
-				                 levelData.Width;
-				float axisIndicesSize = cellSize * axisIndicesRelSize;
+					GUILayoutUtility.GetAspectRect((levelData.Width * cellSize + axisIndicesSize) /
+					                               (levelData.Depth * cellSize + axisIndicesSize));
 
 				SubdivideRect(inspectorRect, new Vector2(axisIndicesSize, inspectorRect.height - axisIndicesSize),
 					out Rect yAxisRect, out Rect levelRect, out Rect _, out Rect xAxisRect);
 
-				DrawAxisLabels(levelData.Width, levelData.Depth, xAxisRect, yAxisRect);
-				DrawLevelGrid(levelData, levelRect, cellSize, levelEditorWindow, inspectorLevelDataWrapper.UndoSystem);
+				DrawAxisLabels(levelData, xAxisRect, yAxisRect);
+				DrawLevelGrid(levelData, levelRect, cellSize, levelEditorWindow);
 			}
 
-			private void DrawLevelGrid(LevelData levelData, Rect levelRect, float cellSize,
-				LevelEditorWindow levelEditorWindow, IUndoSystem undoSystem)
+			private void DrawLevelGrid(EditableLevelData levelData, Rect levelRect, float cellSize,
+				LevelEditorWindow levelEditorWindow)
 			{
-				for (int x = 0; x < levelData.Width; x++)
+				int gridX = 0;
+				int gridY = 0;
+				foreach (int y in levelData.GetYIndices())
 				{
-					for (int y = 0; y < levelData.Depth; y++)
+					foreach (int x in levelData.GetXIndices())
 					{
-						Rect cellRect = GetCellRect(levelData, levelRect, cellSize, x, y);
+						Rect cellRect = GetCellRect(levelData, levelRect, cellSize, gridX, gridY);
 
-						int levelY = GetLevelY(levelData.Depth, y);
+						int levelY = GetLevelY(levelData.Depth, levelData.GetYIndices().First(), y);
 
 						DrawTile(levelData, x, levelY, cellRect);
 
@@ -56,22 +58,27 @@ namespace Game.Levels
 
 						if (Event.current.OnLeftClick(cellRect))
 						{
-							SetTile(levelData, levelEditorWindow, x, levelY, undoSystem);
+							SetTile(levelEditorWindow, x, levelY);
 						}
+
+						gridX++;
 					}
+
+					gridY++;
+					gridX = 0;
 				}
 			}
 
-			private static Rect GetCellRect(LevelData levelData, Rect levelRect, float cellSize, int x, int y)
+			private static Rect GetCellRect(EditableLevelData levelData, Rect levelRect, float cellSize, int x, int y)
 			{
 				int index = x + y * levelData.Width;
 				Rect cellRect = levelRect.SplitTableGrid(levelData.Width, cellSize, index);
 				return cellRect;
 			}
 
-			private static void DrawTile(LevelData levelData, int x, int levelY, Rect cellRect)
+			private static void DrawTile(EditableLevelData levelData, int x, int levelY, Rect cellRect)
 			{
-				Tilee tileData = levelData.GetTile(x, levelY);
+				Tile tileData = levelData.GetTile(x, levelY);
 				Color tileColour = GetColourForTile(tileData);
 
 				EditorGUI.DrawRect(cellRect.Padding(1), tileColour);
@@ -84,41 +91,37 @@ namespace Game.Levels
 				for (int i = 0; i < columnCount * 2; i++)
 				{
 					EditorGUI.DrawRect(cellRect.SplitTableGrid(columnCount, rowHeight, i),
-						(i + (int)((float) i / columnCount) % 2) % 2 == 0 ? Color.black : Color.white);
+						(i + (int) ((float) i / columnCount) % 2) % 2 == 0 ? Color.black : Color.white);
 				}
 			}
 
-			private static void SetTile(LevelData levelData, LevelEditorWindow levelEditorWindow, int x, int y,
-				IUndoSystem undoSystem)
+			private static void SetTile(LevelEditorWindow levelEditorWindow, int x, int y)
 			{
-				Tilee currentTile = levelData.GetTile(x, y);
-
-				void Set_Local(Tilee tile)
-				{
-					levelData.SetTile(x, y, tile);
-				}
-
-				IUndoable undoable = new Undoable(
-					() => Set_Local(levelEditorWindow._currentTilePaint),
-					() => Set_Local(currentTile));
-
-				undoSystem.Do(undoable);
+				levelEditorWindow.OnTileClicked(x, y);
 			}
 
-			private static void DrawAxisLabels(int levelDataWidth, int levelDataDepth, Rect xAxisRect, Rect yAxisRect)
+			private static void DrawAxisLabels(EditableLevelData levelData, Rect xAxisRect, Rect yAxisRect)
 			{
 				// draw x axis labels
-				for (int i = 0; i < levelDataWidth; i++)
+				int gridI = 0;
+				foreach (int i in levelData.GetXIndices())
 				{
-					Rect labelRect = xAxisRect.Split(i, levelDataWidth);
+					Rect labelRect = xAxisRect.Split(gridI, levelData.Width);
 					DrawIndexLabel(labelRect, i);
+
+					gridI++;
 				}
 
 				// draw y axis labels
-				for (int j = 0; j < levelDataDepth; j++)
+				int? minY = null;
+				int gridJ = 0;
+				foreach (int j in levelData.GetYIndices())
 				{
-					Rect labelRect = yAxisRect.SplitVertical(j, levelDataDepth);
-					DrawIndexLabel(labelRect, GetLevelY(levelDataDepth, j));
+					minY ??= j;
+					Rect labelRect = yAxisRect.SplitVertical(gridJ, levelData.Depth);
+					DrawIndexLabel(labelRect, GetLevelY(levelData.Depth, minY.Value, j));
+
+					gridJ++;
 				}
 
 				static void DrawIndexLabel(Rect labelRect, int number)
@@ -132,9 +135,9 @@ namespace Game.Levels
 				}
 			}
 
-			private static int GetLevelY(int levelDepth, int j)
+			private static int GetLevelY(int levelDepth, int levelYMin, int j)
 			{
-				return levelDepth - 1 - j;
+				return (levelDepth - 1 - (j - levelYMin)) + levelYMin;
 			}
 
 			/// <summary>
@@ -155,12 +158,10 @@ namespace Game.Levels
 		private class InspectorLevelDataWrapper
 		{
 			internal readonly LevelEditorWindow Window;
-			internal readonly IUndoSystem UndoSystem;
 
-			public InspectorLevelDataWrapper(LevelEditorWindow window, IUndoSystem undoSystem)
+			public InspectorLevelDataWrapper(LevelEditorWindow window)
 			{
 				Window = window;
-				UndoSystem = undoSystem;
 			}
 		}
 	}

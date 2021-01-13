@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Game.Tiles
 {
     [Serializable]
-    internal abstract class BaseTileObject<T> : MonoBehaviour, IDataObject<T> where T : Tilee
+    internal abstract class BaseTileObject<T> : MonoBehaviour, IDataObject<T> where T : Tile
     {
         public abstract void Setup(T data);
 

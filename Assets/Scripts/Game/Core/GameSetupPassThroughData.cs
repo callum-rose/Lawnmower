@@ -9,11 +9,16 @@ namespace Game.Core
 	internal struct GameSetupPassThroughData
 	{
 		[SerializeField] private MowerData mower;
-		[SerializeField] private LevelData level;
+		[SerializeField] private IReadOnlyLevelDataContainer levelDataContainer;
 
-		public GameSetupPassThroughData(MowerData mower, LevelData level) => (this.mower, this.level) = (mower, level);
+		private IReadOnlyLevelData _levelData;
+
+		public GameSetupPassThroughData(MowerData mower, IReadOnlyLevelData level)
+		{
+			(this.mower, _levelData, levelDataContainer) = (mower, level, null);
+		}
 
 		public MowerData Mower => mower;
-		public LevelData Level => level;
+		public IReadOnlyLevelData Level => _levelData ?? levelDataContainer.Result;
 	}
 }

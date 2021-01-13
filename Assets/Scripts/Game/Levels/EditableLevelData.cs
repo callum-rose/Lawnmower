@@ -1,49 +1,122 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Game.Core;
 using Game.Tiles;
+using Sirenix.OdinInspector;
+using UnityEngine;
+using Utils;
 
 namespace Game.Levels
 {
-	internal class EditableLevelData : ILevelData
+	internal class EditableLevelData : IReadOnlyLevelData
 	{
-		public int Depth { get; set; }
-		public int Width { get; set; }
-		public GridVector StartPosition { get; }
+		public Guid Id => Guid.Empty;
+		
+		public int Depth => _grid.Bounds.height;
+		public int Width => _grid.Bounds.width;
 
-		public Tilee GetTile(GridVector position)
+		public GridVector StartPosition { get; set; }
+
+		private FlexGrid<Tile> _grid;
+
+		public EditableLevelData()
 		{
-			throw new System.NotImplementedException();
+			_grid = new FlexGrid<Tile>(() => new EmptyTile());
 		}
 
-		public Tilee GetTile(int x, int y)
+		public EditableLevelData(Tile[,] tiles, GridVector mowerStartPosition)
 		{
-			throw new System.NotImplementedException();
+			_grid = new FlexGrid<Tile>(tiles, () => new EmptyTile());
 		}
 
-		public void Init(Tilee[,] tiles, GridVector mowerStartPosition)
+		public Tile GetTile(GridVector position)
 		{
-			throw new System.NotImplementedException();
+			return GetTile(position.x, position.y);
 		}
 
-		public void SetTile(int x, int y, Tilee tile)
+		public Tile GetTile(int x, int y)
 		{
-			throw new System.NotImplementedException();
+			return _grid[x, y];
 		}
 
-		public void SetTile(GridVector position, Tilee tile)
+		public void SetTile(int x, int y, Tile tile)
 		{
-			throw new System.NotImplementedException();
+			_grid[x, y] = tile;
 		}
 
-		public IEnumerator<Tilee> GetEnumerator()
+		public void SetTile(GridVector position, Tile tile)
 		{
-			throw new System.NotImplementedException();
+			SetTile(position.x, position.y, tile);
+		}
+
+		public IEnumerator<Tile> GetEnumerator()
+		{
+			return _grid.GetEnumerator();
+		}
+
+		public void ExpandUp()
+		{
+			_grid.ExpandUp();
+		}
+		
+		public void ExpandRight()
+		{
+			_grid.ExpandRight();
+		}
+		
+		public void ExpandDown()
+		{
+			_grid.ExpandDown();
+		}
+		
+		public void ExpandLeft()
+		{
+			_grid.ExpandLeft();
+		}
+
+		public IEnumerable<Vector2Int> GetIndices()
+		{
+			foreach (int y in _grid.GetYEnumerator())
+			{
+				foreach (int x in _grid.GetXEnumerator())
+				{
+					yield return new Vector2Int(x, y);
+				}
+			}
+		}
+		
+		public IEnumerable<int> GetXIndices()
+		{
+			return _grid.GetXEnumerator();
+		}
+		
+		public IEnumerable<int> GetYIndices()
+		{
+			return _grid.GetYEnumerator();
 		}
 
 		IEnumerator IEnumerable.GetEnumerator()
 		{
 			return GetEnumerator();
+		}
+		
+		public static EditableLevelData CreateFrom(LevelData input)
+		{
+			EditableLevelData output = new EditableLevelData();
+			
+			Loops.TwoD(input.Width, input.Depth, (x, y) => output.SetTile(x, y, input.GetTile(x, y)));
+
+			output.StartPosition = input.StartPosition;
+			
+			return output;
+		}
+		
+		internal void ValidateStartPos()
+		{
+			int x = Mathf.Min(Width - 1, Mathf.Max(0, StartPosition.x));
+			int y = Mathf.Min(Depth - 1, Mathf.Max(0, StartPosition.y));
+			StartPosition = new GridVector(x, y);
 		}
 	}
 }

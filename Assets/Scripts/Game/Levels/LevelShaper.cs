@@ -5,112 +5,118 @@ using Game.Tiles;
 
 namespace Game.Levels
 {
-    internal static class LevelShaper
-    {
-        public static LevelData TrimExcess(IReadOnlyLevelData level)
-        {
-            int lowEmptyRowsCount = 0;
-            for (int y = 0; y < level.Depth; y++)
-            {
-                for (int x = 0; x < level.Width; x++)
-                {
-                    if (level.GetTile(x, y).GetType() != typeof(EmptyTile))
-                    {
-                        goto ExitLowRowsLoop;
-                    }
-                }
+	internal static class LevelShaper
+	{
+		public static EditableLevelData TrimExcess(EditableLevelData level)
+		{
+			int lowEmptyRowsCount = 0;
+			for (int y = 0; y < level.Depth; y++)
+			{
+				for (int x = 0; x < level.Width; x++)
+				{
+					if (level.GetTile(x, y).GetType() != typeof(EmptyTile))
+					{
+						goto ExitLowRowsLoop;
+					}
+				}
 
-                lowEmptyRowsCount++;
-            }
-ExitLowRowsLoop:
+				lowEmptyRowsCount++;
+			}
 
-            int lowEmptyColsCount = 0;
-            for (int x = 0; x < level.Width; x++)
-            {
-                for (int y = 0; y < level.Depth; y++)
-                {
-                    if (level.GetTile(x, y).GetType() != typeof(EmptyTile))
-                    {
-                        goto ExitLowColsLoop;
-                    }
-                }
+			ExitLowRowsLoop:
 
-                lowEmptyColsCount++;
-            }
-ExitLowColsLoop:
+			int lowEmptyColsCount = 0;
+			for (int x = 0; x < level.Width; x++)
+			{
+				for (int y = 0; y < level.Depth; y++)
+				{
+					if (level.GetTile(x, y).GetType() != typeof(EmptyTile))
+					{
+						goto ExitLowColsLoop;
+					}
+				}
 
-            int highEmptyRowsCount = 0;
-            for (int y = level.Depth - 1; y >= 0; y--)
-            {
-                for (int x = 0; x < level.Width; x++)
-                {
-                    if (level.GetTile(x, y).GetType() != typeof(EmptyTile))
-                    {
-                        goto ExitHighRowsLoop;
-                    }
-                }
+				lowEmptyColsCount++;
+			}
 
-                highEmptyRowsCount++;
-            }
-ExitHighRowsLoop:
+			ExitLowColsLoop:
 
-            int highEmptyColsCount = 0;
-            for (int x = level.Width - 1; x >= 0; x--)
-            {
-                for (int y = 0; y < level.Depth; y++)
-                {
-                    if (level.GetTile(x, y).GetType() != typeof(EmptyTile))
-                    {
-                        goto ExitHighColsLoop;
-                    }
-                }
+			int highEmptyRowsCount = 0;
+			for (int y = level.Depth - 1; y >= 0; y--)
+			{
+				for (int x = 0; x < level.Width; x++)
+				{
+					if (level.GetTile(x, y).GetType() != typeof(EmptyTile))
+					{
+						goto ExitHighRowsLoop;
+					}
+				}
 
-                highEmptyColsCount++;
-            }
-ExitHighColsLoop:
+				highEmptyRowsCount++;
+			}
 
-            Tilee[,] tiles = new Tilee[level.Width, level.Depth];
-            Utils.Loops.TwoD(level.Width, level.Depth, (x, y) => tiles[x, y] = level.GetTile(x, y));
+			ExitHighRowsLoop:
 
-            tiles = tiles
-                .Offset(-lowEmptyColsCount, -lowEmptyRowsCount)
-                .Resize(level.Width - (lowEmptyColsCount + highEmptyColsCount), level.Depth - (lowEmptyRowsCount + highEmptyRowsCount));
+			int highEmptyColsCount = 0;
+			for (int x = level.Width - 1; x >= 0; x--)
+			{
+				for (int y = 0; y < level.Depth; y++)
+				{
+					if (level.GetTile(x, y).GetType() != typeof(EmptyTile))
+					{
+						goto ExitHighColsLoop;
+					}
+				}
 
-            LevelData newLevel = ScriptableObject.CreateInstance<LevelData>();
-            newLevel.Init(tiles, level.StartPosition - new GridVector(lowEmptyColsCount, lowEmptyRowsCount));
-            return newLevel;
-        }
+				highEmptyColsCount++;
+			}
 
-        public static bool RequiresReshapeToEncapsulatePosition(int width, int depth, GridVector position)
-        {
-            return position.x < 0 || position.x >= width || position.y < 0 || position.y >= depth;
-        }
+			ExitHighColsLoop:
 
-        public static LevelData EncapsulatePosition(IReadOnlyLevelData level, GridVector position, out GridVector offset)
-        {
-            Tilee[,] tiles = new Tilee[level.Width, level.Depth];
-            Utils.Loops.TwoD(level.Width, level.Depth,
-                (x, y) => tiles[x, y] = level.GetTile(x, y));
+			Tile[,] tiles = new Tile[level.Width, level.Depth];
+			Utils.Loops.TwoD(level.Width, level.Depth, (x, y) => tiles[x, y] = level.GetTile(x, y));
 
-            int newWidth = Mathf.Max(level.Width, level.Width - position.x, position.x + 1);
-            int newDepth = Mathf.Max(level.Depth, level.Depth - position.y, position.y + 1);
+			tiles = tiles
+				.Offset(-lowEmptyColsCount, -lowEmptyRowsCount)
+				.Resize(level.Width - (lowEmptyColsCount + highEmptyColsCount),
+					level.Depth - (lowEmptyRowsCount + highEmptyRowsCount));
 
-            Tilee[,] newTiles = tiles.Resize(newWidth, newDepth, new EmptyTile());
-            GridVector newMowerStartPosition = level.StartPosition;
-            if (position.x < 0 || position.y < 0)
-            {
-                offset = new GridVector(Mathf.Max(-position.x, 0), Mathf.Max(-position.y, 0));
-                newTiles = newTiles.Offset(offset.x, offset.y, new EmptyTile());
-                newMowerStartPosition += offset;
-            }
-            else
-            {
-                offset = new GridVector(0, 0);
-            }
+			EditableLevelData newLevel = new EditableLevelData(tiles,
+				level.StartPosition - new GridVector(lowEmptyColsCount, lowEmptyRowsCount));
 
-            LevelData newLevel = ScriptableObject.CreateInstance<LevelData>();
-            newLevel.Init(newTiles, newMowerStartPosition);
-            return newLevel;
-        }
-    }
+			return newLevel;
+		}
+
+		public static bool RequiresReshapeToEncapsulatePosition(int width, int depth, GridVector position)
+		{
+			return position.x < 0 || position.x >= width || position.y < 0 || position.y >= depth;
+		}
+
+		public static EditableLevelData EncapsulatePosition(EditableLevelData level, GridVector position,
+			out GridVector offset)
+		{
+			Tile[,] tiles = new Tile[level.Width, level.Depth];
+			Utils.Loops.TwoD(level.Width, level.Depth,
+				(x, y) => tiles[x, y] = level.GetTile(x, y));
+
+			int newWidth = Mathf.Max(level.Width, level.Width - position.x, position.x + 1);
+			int newDepth = Mathf.Max(level.Depth, level.Depth - position.y, position.y + 1);
+
+			Tile[,] newTiles = tiles.Resize(newWidth, newDepth, new EmptyTile());
+			GridVector newMowerStartPosition = level.StartPosition;
+			if (position.x < 0 || position.y < 0)
+			{
+				offset = new GridVector(Mathf.Max(-position.x, 0), Mathf.Max(-position.y, 0));
+				newTiles = newTiles.Offset(offset.x, offset.y, new EmptyTile());
+				newMowerStartPosition += offset;
+			}
+			else
+			{
+				offset = new GridVector(0, 0);
+			}
+
+			EditableLevelData newLevel = new EditableLevelData(newTiles, newMowerStartPosition);
+			return newLevel;
+		}
+	}
 }

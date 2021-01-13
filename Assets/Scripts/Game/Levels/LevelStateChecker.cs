@@ -71,7 +71,7 @@ namespace Game.Levels
 
 		private bool IsLevelComplete()
 		{
-			foreach (Tilee tile in _levelData)
+			foreach (Tile tile in _levelData)
 			{
 				if (!tile.IsComplete)
 				{
@@ -84,7 +84,7 @@ namespace Game.Levels
 
 		private bool IsLevelRuined()
 		{
-			foreach (Tilee tile in _levelData)
+			foreach (Tile tile in _levelData)
 			{
 				if (!tile.IsRuined)
 				{

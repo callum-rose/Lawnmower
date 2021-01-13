@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 namespace Game.Tiles
 {
 	[Serializable]
-	internal partial class GrassTile : Tilee
+	internal partial class GrassTile : Tile
 	{
 		public const int MaxGrassHeight = 3;
 		private const int PerfectGrassHeight = 1;

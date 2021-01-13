@@ -22,10 +22,10 @@ namespace Game.Levels
 		[BoxGroup(SplitLeft), SerializeField,
 		 InfoBox("Select a " + nameof(LevelData) + " asset", nameof(CurrentNull),
 			 InfoMessageType = InfoMessageType.Warning), OnValueChanged(nameof(CloneLevel))]
-		private LevelData _current;
+		private LevelData _levelBaseOn;
 
 		[BoxGroup(SplitLeft), ReadOnly, ShowInInspector]
-		private LevelData _clonedCurrent;
+		private EditableLevelData _clonedCurrent;
 
 		[BoxGroup(SplitLeft), ShowInInspector, DisplayAsString, LabelText("Current Selection:")] 
 		private string TileDataString => _currentTilePaint.ToString();
@@ -49,9 +49,12 @@ namespace Game.Levels
 		private bool CurrentNotNull => _clonedCurrent != null;
 		private bool CurrentNull => _clonedCurrent == null;
 
-		private Tilee _currentTilePaint = new GrassTile(2);
+		private Tile _currentTilePaint = new GrassTile(2);
 
 		private IUndoSystem _undoSystem;
+		
+		private delegate void TileClickedEvent(int x, int y);
+		private TileClickedEvent _tileClicked;
 
 		public static void OpenWindow(LevelData levelData)
 		{
@@ -63,7 +66,7 @@ namespace Game.Levels
 
 		private void SetLevel(LevelData levelData)
 		{
-			_current = levelData;
+			_levelBaseOn = levelData;
 			SaveCurrentLevelPath();
 			CloneLevel();
 		}
@@ -72,28 +75,28 @@ namespace Game.Levels
 		{
 			WindowPadding = Vector4.zero;
 
-			if (_current == null)
+			if (_levelBaseOn == null)
 			{
 				string path = LoadLastSavedLevelPath();
-				_current = AssetDatabase.LoadAssetAtPath<LevelData>(path);
+				_levelBaseOn = AssetDatabase.LoadAssetAtPath<LevelData>(path);
 			}
 
 			_undoSystem = new UndoSystem.UndoSystem();
 			
-			_tiles = new InspectorLevelDataWrapper(this, _undoSystem);
+			_tiles = new InspectorLevelDataWrapper(this);
 			_tileTypeButtons = new TileTypeButtons(this);
 		}
 
 		private void CloneLevel()
 		{
-			_clonedCurrent = Instantiate(_current);
-			Debug.Log("Cloned " + _clonedCurrent.name);
+			_clonedCurrent = EditableLevelData.CreateFrom(_levelBaseOn);
+			Debug.Log("Cloned " + _levelBaseOn.name);
 		}
 
 		private void SaveCurrentLevelPath()
 		{
 			const string key = "LevelEditorWindow_LevelAssetPath";
-			EditorPrefs.SetString(key, AssetDatabase.GetAssetPath(_current));
+			EditorPrefs.SetString(key, AssetDatabase.GetAssetPath(_levelBaseOn));
 		}
 
 		private string LoadLastSavedLevelPath()
@@ -102,7 +105,7 @@ namespace Game.Levels
 			return EditorPrefs.GetString(key, null);
 		}
 
-		private static Color GetColourForTile(Tilee tileData)
+		private static Color GetColourForTile(Tile tileData)
 		{
 			Color colour;
 			if (tileData is EmptyTile)
@@ -148,13 +151,21 @@ namespace Game.Levels
 		}
 
 		[Button, BoxGroup(SplitLeft)]
+		private void ClickSetStartPosition()
+		{
+			_tileClicked = (x, y) => _clonedCurrent.StartPosition = new GridVector(x, y);
+		}
+
+		[Button, BoxGroup(SplitLeft)]
 		private void SaveLevel()
 		{
-			AssetDatabase.CreateAsset(_clonedCurrent, AssetDatabase.GetAssetPath(_current));
+			LevelData levelData = LevelData.CreateFrom(_clonedCurrent);
+			
+			AssetDatabase.CreateAsset(levelData, AssetDatabase.GetAssetPath(_levelBaseOn));
 			AssetDatabase.SaveAssets();
 			AssetDatabase.Refresh();
 
-			_current = _clonedCurrent;
+			_levelBaseOn = levelData;
 			CloneLevel();
 		}
 
@@ -168,6 +179,53 @@ namespace Game.Levels
 		private void Redo()
 		{
 			_undoSystem.Redo();
+		}
+		
+		[Button, BoxGroup(SplitLeft), HorizontalGroup(SplitLeft + "/Expand Level")]
+		private void ExpandUp()
+		{
+			_clonedCurrent.ExpandUp();
+		}
+
+		[Button, BoxGroup(SplitLeft), HorizontalGroup(SplitLeft + "/Expand Level")]
+		private void ExpandRight()
+		{
+			_clonedCurrent.ExpandRight();
+		}
+		
+		[Button, BoxGroup(SplitLeft), HorizontalGroup(SplitLeft + "/Expand Level")]
+		private void ExpandDown()
+		{
+			_clonedCurrent.ExpandDown();
+		}
+		
+		[Button, BoxGroup(SplitLeft), HorizontalGroup(SplitLeft + "/Expand Level")]
+		private void ExpandLeft()
+		{			
+			_clonedCurrent.ExpandLeft();
+		}
+
+		private void OnTileClicked(int x, int y)
+		{
+			_tileClicked ??= SetTile;
+			_tileClicked.Invoke(x, y);
+			_tileClicked = null;
+		}
+
+		private void SetTile(int x, int y)
+		{
+			Tile currentTile = _clonedCurrent.GetTile(x, y);
+
+			void Set_Local(Tile tile)
+			{
+				_clonedCurrent.SetTile(x, y, tile);
+			}
+
+			IUndoable undoable = new Undoable(
+				() => Set_Local(_currentTilePaint),
+				() => Set_Local(currentTile));
+
+			_undoSystem.Do(undoable);
 		}
 	}
 }

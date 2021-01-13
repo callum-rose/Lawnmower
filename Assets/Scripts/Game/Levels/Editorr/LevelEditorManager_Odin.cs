@@ -27,6 +27,8 @@ namespace Game.Levels.Editorr
 		private bool AppRunning => Application.isPlaying;
 		private bool HasEnoughInfoToBuild => levelAsset != null && mowerData != null;
 
+		private EditableLevelData _editableLevel;
+		
 		[Button("Build")]
 		[TabGroup(BuildTabGroup, TabBuildSaved)]
 		[EnableIf(nameof(AppRunning))]
@@ -43,7 +45,7 @@ namespace Game.Levels.Editorr
 		[EnableIf(nameof(HasEnoughInfoToBuild))]
 		private void BuildSelectedLevelInEdit()
 		{
-			GameSetupPassThroughData data = new GameSetupPassThroughData(mowerData, Instantiate(levelAsset));
+			GameSetupPassThroughData data = new GameSetupPassThroughData(mowerData, EditableLevelData.CreateFrom(levelAsset));
 			Begin(data, true);
 		}
 
@@ -63,7 +65,7 @@ namespace Game.Levels.Editorr
 		[TitleGroup(Save)]
 		private void SaveLevel()
 		{
-			levelSaver.Save_Editor(levelManager.Level, levelManager.MowerPosition);
+			levelSaver.Save_Editor(_editableLevel, levelManager.MowerPosition);
 		}
 	}
 }

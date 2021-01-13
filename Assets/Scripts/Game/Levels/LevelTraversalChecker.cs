@@ -24,7 +24,7 @@ namespace Game.Levels
                 return CheckValue.OutOfBounds;
             }
 
-            Tilee tile = LevelData.GetTile(position);
+            Tile tile = LevelData.GetTile(position);
             return tile.IsTraversable(IsEditMode) ? CheckValue.Yes : CheckValue.NonTraversableTile;
         }
 

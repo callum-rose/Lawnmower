@@ -19,7 +19,7 @@ namespace Game.Levels
             {
                 for (int x = 0; x < level.Width; x++)
                 {
-                    Tilee tile = level.GetTile(x, y);
+                    Tile tile = level.GetTile(x, y);
                     GameObject newTileObject = BuildAt(new GridVector(x, y), tile);
                     tiles[x, y] = newTileObject;
                 }
@@ -32,7 +32,7 @@ namespace Game.Levels
         
         #region Methods
 
-        private GameObject BuildAt(GridVector position, Tilee tile)
+        private GameObject BuildAt(GridVector position, Tile tile)
         {
             GameObject newTileObject = tileFactory.Create(tile);
             positioner.Position(newTileObject.transform, position);

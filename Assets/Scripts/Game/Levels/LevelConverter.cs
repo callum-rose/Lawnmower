@@ -30,14 +30,14 @@ namespace Game.Levels
 			// }
 		}
 
-		public TileData ConvertTileToData(Tilee tile)
+		public TileData ConvertTileToData(Tile tile)
 		{
 			TileType type = tilePrefabs.GetTileTypeForTile(tile);
 			object setupData = CreateDataFor(tile);
 			return TileData.Factory.Create(type, setupData);
 		}
 
-		private static object CreateDataFor(Tilee tile)
+		private static object CreateDataFor(Tile tile)
 		{
 			switch (tile)
 			{

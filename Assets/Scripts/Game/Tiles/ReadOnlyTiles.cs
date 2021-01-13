@@ -4,16 +4,16 @@ using System.Collections.Generic;
 
 namespace Game.Tiles
 {
-    internal class ReadOnlyTiles : IEnumerable<Tilee>
+    internal class ReadOnlyTiles : IEnumerable<Tile>
     {
         public int Depth { get; }
         public int Width { get; }
 
-        private Tilee[,] _tiles;
+        private Tile[,] _tiles;
 
-        public Tilee this[int x, int y] => _tiles[x, y];
+        public Tile this[int x, int y] => _tiles[x, y];
 
-        public ReadOnlyTiles(Tilee[,] tiles)
+        public ReadOnlyTiles(Tile[,] tiles)
         {
             _tiles = tiles;
 
@@ -21,17 +21,17 @@ namespace Game.Tiles
             Depth = tiles.GetLength(1);
         }
 
-        public Tilee GetTile(GridVector position)
+        public Tile GetTile(GridVector position)
         {
             return GetTile(position.x, position.y);
         }
 
-        public Tilee GetTile(int x, int y)
+        public Tile GetTile(int x, int y)
         {
             return _tiles[x, y];
         }
 
-        public IEnumerator<Tilee> GetEnumerator()
+        public IEnumerator<Tile> GetEnumerator()
         {
             for (int y = 0; y < Depth; y++)
             {
@@ -47,7 +47,7 @@ namespace Game.Tiles
             return GetEnumerator();
         }
 
-        public static implicit operator ReadOnlyTiles(Tilee[,] tiles)
+        public static implicit operator ReadOnlyTiles(Tile[,] tiles)
         {
             return new ReadOnlyTiles(tiles);
         }

@@ -3,7 +3,7 @@ using System;
 namespace Game.Tiles
 {
     [Serializable]
-    internal class WaterTile : Tilee
+    internal class WaterTile : Tile
     {
         public override bool IsTraversable(bool editMode) => false;
         public override bool IsComplete => true;

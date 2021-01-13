@@ -1,16 +1,26 @@
+using System;
 using System.Collections.Generic;
 using Game.Core;
 using Game.Tiles;
+using IUnified;
 
 namespace Game.Levels
 {
-    internal interface IReadOnlyLevelData : IEnumerable<Tilee>
+    internal interface IReadOnlyLevelData : IEnumerable<Tile>
     {
+        Guid Id { get; }
+        
         int Depth { get; }
         int Width { get; }
         GridVector StartPosition { get; }
 
-        Tilee GetTile(GridVector position);
-        Tilee GetTile(int x, int y);
+        Tile GetTile(GridVector position);
+        Tile GetTile(int x, int y);
+    }
+
+    [Serializable]
+    internal class IReadOnlyLevelDataContainer : IUnifiedContainer<IReadOnlyLevelData>
+    {
+        
     }
 }

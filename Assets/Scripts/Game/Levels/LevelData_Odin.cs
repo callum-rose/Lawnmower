@@ -26,12 +26,12 @@ namespace Game.Levels
 			LevelEditorWindow.OpenWindow(this);
 		}
 
-		private static Tilee DrawColouredTileElement(Rect rect, Tilee[,] arr, int x, int y)
+		private static Tile DrawColouredTileElement(Rect rect, Tile[,] arr, int x, int y)
 		{
 			_defaultEditorColour ??= GUI.color;
 
 			int flippedY = arr.GetLength(1) - 1 - y;
-			Tilee value = arr[x, flippedY];
+			Tile value = arr[x, flippedY];
 
 			Color colour;
 			string text = "";
@@ -81,13 +81,6 @@ namespace Game.Levels
 			}
 
 			return value;
-		}
-
-		internal void ValidateStartPos()
-		{
-			int x = Mathf.Min(Width - 1, Mathf.Max(0, StartPosition.x));
-			int y = Mathf.Min(Depth - 1, Mathf.Max(0, StartPosition.y));
-			StartPosition = new GridVector(x, y);
 		}
 	}
 }

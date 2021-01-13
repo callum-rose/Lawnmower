@@ -10,7 +10,7 @@ namespace Game.Tiles
     {
         [FormerlySerializedAs("tilePrefabsHolder")] [SerializeField] private TilePrefabsManager tilePrefabsManager;
 
-        private Dictionary<TileType, IPool<Tilee>> _poolDict;
+        private Dictionary<TileType, IPool<Tile>> _poolDict;
 
         private void Awake()
         {
@@ -23,7 +23,7 @@ namespace Game.Tiles
             // }
         }
 
-        public GameObject Create<T>(T tile) where T : Tilee
+        public GameObject Create<T>(T tile) where T : Tile
         {
             //Tile newTile = _poolDict[data.Type].Get();
 

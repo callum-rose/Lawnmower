@@ -23,7 +23,7 @@ namespace Game.Levels
 			{
 				Color cachedColour = GUI.backgroundColor;
 				
-				foreach (Tilee tile in TileeStatics.AllTileConfigurations)
+				foreach (Tile tile in TileeStatics.AllTileConfigurations)
 				{
 					string name = tile.ToString();
 					Color colour = LevelEditorWindow.GetColourForTile(tile);

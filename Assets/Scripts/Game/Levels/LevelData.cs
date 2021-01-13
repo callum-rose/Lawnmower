@@ -17,7 +17,7 @@ using Utils;
 namespace Game.Levels
 {
 	[CreateAssetMenu(fileName = "LevelData", menuName = SONames.GameDir + "Level Data")]
-	internal partial class LevelData : SerializedScriptableObject, ILevelData
+	internal partial class LevelData : SerializedScriptableObject, IReadOnlyLevelData
 	{
 		[SerializeField] private Guid id;
 
@@ -26,24 +26,20 @@ namespace Game.Levels
 		[OdinSerialize,
 		 TableMatrix(SquareCells = true, DrawElementMethod = nameof(DrawColouredTileElement), HideColumnIndices = true,
 			 HideRowIndices = true)]
-		internal Tilee[,] newTiles;
+		internal Tile[,] newTiles;
 
-		[ShowInInspector, PropertyOrder(1), MinValue(1), DelayedProperty, OnValueChanged(nameof(ValidateStartPos))]
+		[ShowInInspector, PropertyOrder(1), MinValue(1), DelayedProperty]
 		public int Width => newTiles.GetLength(0);
 
-		[ShowInInspector, PropertyOrder(1), MinValue(1), DelayedProperty, OnValueChanged(nameof(ValidateStartPos))]
+		[ShowInInspector, PropertyOrder(1), MinValue(1), DelayedProperty]
 		public int Depth => newTiles.GetLength(1);
 
-		[ShowInInspector, PropertyOrder(1), DelayedProperty, OnValueChanged(nameof(ValidateStartPos))]
-		public GridVector StartPosition
-		{
-			get => startPosition;
-			set => startPosition = value;
-		}
+		[ShowInInspector, PropertyOrder(1), DelayedProperty]
+		public GridVector StartPosition => startPosition;
 
 		// keep just in case Odin serialiser messes up
-		[SerializeField, TextArea(8, 12)] private string tilesData;
-		[SerializeField, HideInInspector] private Serialised2dArray<TileData> tiles;
+		[FormerlySerializedAs("tilesData")] [SerializeField, TextArea(8, 12)] private string ___tilesData;
+		[FormerlySerializedAs("tiles")] [SerializeField, HideInInspector] private Serialised2dArray<TileData> ___tiles;
 
 		public Guid Id => id;
 
@@ -61,75 +57,33 @@ namespace Game.Levels
 
 		#region API
 
-		public void Init(Tilee[,] tiles, GridVector mowerStartPosition)
-		{
-			StartPosition = mowerStartPosition;
-
-			int width = tiles.GetLength(0);
-			int depth = tiles.GetLength(1);
-
-			newTiles = tiles;
-			// this.tiles = new Serialised2dArray<TileData>(width, depth, tiles);
-		}
-
-		public Tilee GetTile(int x, int y)
+		public Tile GetTile(int x, int y)
 		{
 			return newTiles[x, y];
-			// return tiles[x, y];
 		}
 
-		public Tilee GetTile(GridVector position)
+		public Tile GetTile(GridVector position)
 		{
 			return GetTile(position.x, position.y);
 		}
 
-		public void SetTile(int x, int y, Tilee tile)
+		public static LevelData CreateFrom(EditableLevelData input)
 		{
-			newTiles[x, y] = tile;
-			// tiles[x, y] = data;
+			LevelData output = CreateInstance<LevelData>();
+			
+			output.newTiles = new Tile[input.Width, input.Depth];
+			Loops.TwoD(input.Width, input.Depth, (x, y) => output.newTiles[x, y] = input.GetTile(x, y));
+
+			output.startPosition = input.StartPosition;
+			
+			output.id = Guid.NewGuid();
+			
+			return output;
 		}
 
-		public void SetTile(GridVector position, Tilee tile)
+		public IEnumerator<Tile> GetEnumerator()
 		{
-			SetTile(position.x, position.y, tile);
-		}
-
-		// public void Resize(int newWidth, int newDepth)
-		// {
-		// 	if (newWidth <= 0 || newDepth <= 0)
-		// 	{
-		// 		return;
-		// 	}
-		//
-		// 	Serialised2dArray<TileData> oldTiles = tiles;
-		// 	tiles = null;
-		//
-		// 	// create new array
-		// 	Serialised2dArray<TileData> newTiles = new Serialised2dArray<TileData>(newWidth, newDepth);
-		// 	Utils.Loops.TwoD(newWidth, newDepth,
-		// 		(x, y) => { newTiles[x, y] = new TileData(); });
-		//
-		// 	if (!oldTiles.IsNullOrEmpty())
-		// 	{
-		// 		// trim if new width is smaller
-		// 		int xRange = Mathf.Min(newWidth, Width);
-		// 		for (int x = 0; x < xRange; x++)
-		// 		{
-		// 			int yRange = Mathf.Min(newDepth, Depth);
-		// 			for (int y = 0; y < yRange; y++)
-		// 			{
-		// 				newTiles[x, y] = oldTiles[x, y];
-		// 			}
-		// 		}
-		// 	}
-		//
-		// 	// update values
-		// 	tiles = newTiles;
-		// }
-
-		public IEnumerator<Tilee> GetEnumerator()
-		{
-			return newTiles.Cast<Tilee>().GetEnumerator();
+			return newTiles.Cast<Tile>().GetEnumerator();
 		}
 
 		IEnumerator IEnumerable.GetEnumerator()
@@ -146,16 +100,16 @@ namespace Game.Levels
 				TypeNameHandling = TypeNameHandling.Auto,
 				NullValueHandling = NullValueHandling.Ignore
 			};
-			tilesData = JsonConvert.SerializeObject(newTiles, settings);
+			___tilesData = JsonConvert.SerializeObject(newTiles, settings);
 		}
 
 		protected override void OnAfterDeserialize()
 		{
-			if (string.IsNullOrEmpty(tilesData))
+			if (string.IsNullOrEmpty(___tilesData))
 			{
-				newTiles = new Tilee[tiles.Width, tiles.Depth];
-				Loops.TwoD(tiles.Width, tiles.Depth,
-					(x, y) => newTiles[x, y] = TEMP_TileDataToTileeConverter.GetTilee(tiles[x, y]));
+				newTiles = new Tile[___tiles.Width, ___tiles.Depth];
+				Loops.TwoD(___tiles.Width, ___tiles.Depth,
+					(x, y) => newTiles[x, y] = TEMP_TileDataToTileeConverter.GetTilee(___tiles[x, y]));
 			}
 			else
 			{
@@ -164,8 +118,9 @@ namespace Game.Levels
 					TypeNameHandling = TypeNameHandling.Auto,
 					NullValueHandling = NullValueHandling.Ignore
 				};
-				newTiles = JsonConvert.DeserializeObject<Tilee[,]>(tilesData, settings);
-				tilesData = null;
+				___tilesData = ___tilesData.Replace("Tilee", "Tile");
+				newTiles = JsonConvert.DeserializeObject<Tile[,]>(___tilesData, settings);
+				___tilesData = null;
 			}
 		}
 	}

@@ -43,12 +43,12 @@ namespace Game.Levels.Editorr
             // TODO
             throw new NotImplementedException();
             
-            if (!IsEditMode)
-            {
-                return;
-            }
-
-            ExpandLevel(ref position);
+            // if (!IsEditMode)
+            // {
+            //     return;
+            // }
+            //
+            // ExpandLevel(ref position);
 
             // Tilee tile = tileUiManager.Selected;
             // Tilee previousTile = levelManager.GetTileData(position);
@@ -60,15 +60,16 @@ namespace Game.Levels.Editorr
             // UndoSystem.Do(undoable);
         }
 
-        private void ExpandLevel(ref GridVector position)
+        private void ExpandLevel(EditableLevelData level, ref GridVector position)
         {
-            IReadOnlyLevelData level = levelManager.Level;
-            if (LevelShaper.RequiresReshapeToEncapsulatePosition(level.Width, level.Depth, position))
-            {
-                LevelData newLevel = LevelShaper.EncapsulatePosition(level, position, out GridVector offset);
-                position += offset;
-                levelManager.SetLevelAfterResize(newLevel, offset);
-            }
+            // if (!LevelShaper.RequiresReshapeToEncapsulatePosition(level.Width, level.Depth, position))
+            // {
+            //     return;
+            // }
+            //
+            // EditableLevelData newLevel = LevelShaper.EncapsulatePosition(level, position, out GridVector offset);
+            // position += offset;
+            // levelManager.SetLevelAfterResize(newLevel, offset);
         }
 
         #endregion

@@ -24,12 +24,12 @@ namespace Game.Tiles
 
 		#region API
 
-		public BaseTileObject<T> GetPrefabAndInstantiate<T>(T tile) where T : Tilee
+		public BaseTileObject<T> GetPrefabAndInstantiate<T>(T tile) where T : Tile
 		{
 			return GetPrefabAndInstantiate<T>();
 		}
 
-		public BaseTileObject<T> GetPrefabAndInstantiate<T>() where T : Tilee
+		public BaseTileObject<T> GetPrefabAndInstantiate<T>() where T : Tile
 		{
 			GameObject prefab;
 			Func<GameObject, BaseTileObject<T>> getComponentFunc;
@@ -67,7 +67,7 @@ namespace Game.Tiles
 			return getComponentFunc(tileGameObject);
 		}
 
-		public TileType GetTileTypeForTile(Tilee tile)
+		public TileType GetTileTypeForTile(Tile tile)
 		{
 			foreach (var kv in tilePrefabs)
 			{

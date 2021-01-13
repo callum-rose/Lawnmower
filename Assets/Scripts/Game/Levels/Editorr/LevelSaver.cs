@@ -1,15 +1,14 @@
 #if UNITY_EDITOR
 
-using UnityEditor;
-using Sirenix.OdinInspector;
-using UnityEngine;
 using System.IO;
 using Core;
 using Game.Core;
-using Game.Tiles;
+using Sirenix.OdinInspector;
+using UnityEditor;
+using UnityEngine;
 using Utils;
 
-namespace Game.Levels
+namespace Game.Levels.Editorr
 {
 	[CreateAssetMenu(fileName = nameof(LevelSaver), menuName = SONames.GameDir + nameof(LevelSaver))]
 	internal class LevelSaver : ScriptableObject
@@ -18,7 +17,7 @@ namespace Game.Levels
 		[SerializeField, FolderPath] private string savePath;
 		[SerializeField] private string fileName = "NewLevel";
 
-		public void Save_Editor(IReadOnlyLevelData levelData, GridVector mowerPosition)
+		public void Save_Editor(EditableLevelData levelData, GridVector mowerPosition)
 		{
 			string path = Path.Combine(savePath, $"{fileName}.asset");
 
@@ -28,16 +27,18 @@ namespace Game.Levels
 				return;
 			}
 
-			LevelData newLevel = CreateInstance<LevelData>();
+			EditableLevelData newLevel = new EditableLevelData();
 			Loops.TwoD(levelData.Width, levelData.Depth, (x, y) => newLevel.SetTile(x, y, levelData.GetTile(x, y)));
 
-			LevelData trimmedLevel = LevelShaper.TrimExcess(newLevel);
+			EditableLevelData trimmedLevel = LevelShaper.TrimExcess(newLevel);
 
-			AssetDatabase.CreateAsset(trimmedLevel, path);
+			LevelData level = LevelData.CreateFrom(trimmedLevel);
+
+			AssetDatabase.CreateAsset(level, path);
 			AssetDatabase.SaveAssets();
 
 			EditorUtility.FocusProjectWindow();
-			Selection.activeObject = trimmedLevel;
+			Selection.activeObject = level;
 		}
 	}
 }

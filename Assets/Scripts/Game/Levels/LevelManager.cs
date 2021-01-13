@@ -23,10 +23,10 @@ namespace Game.Levels
 
 		public bool IsEditMode { get; set; }
 
-		public IReadOnlyLevelData Level => _level;
+		public IReadOnlyLevelData Level { get; private set; }
+
 		public GridVector MowerPosition => _mowerMovement.MowerPosition;
 
-		private LevelData _level;
 		private MowerMovementManager _mowerMovement;
 
 		private GameObject[,] _tileObjects;
@@ -57,13 +57,7 @@ namespace Game.Levels
 			_mowerMovement = mowerMovement;
 		}
 
-		public void SetLevel(LevelData level)
-		{
-			SetLevelAfterResize(level, GridVector.Zero);
-			_mowerMovement.IsRunning = true;
-		}
-
-		public void SetLevelAfterResize(LevelData level, GridVector worldOffset)
+		public void SetLevel(IReadOnlyLevelData level)
 		{
 			ClearTiles();
 
@@ -76,50 +70,18 @@ namespace Game.Levels
 			SetDependenciesOfTiles();
 			
 			Assert.IsNotNull(level);
-			_level = level;
+			Level = level;
 
-			_mowerMovement.SetPosition(_level.StartPosition);
+			_mowerMovement.SetPosition(Level.StartPosition);
 
-			positioner.OffsetContainer(-worldOffset);
+			positioner.OffsetContainer(-GridVector.Zero);
 
-			levelStateChecker.Init(_level, _mowerMovement);
+			levelStateChecker.Init(Level, _mowerMovement);
 			
 			LevelChanged?.Invoke();
+			
+			_mowerMovement.IsRunning = true;
 		}
-
-		// public void UpdateTile(GridVector position, TileData data)
-		// {
-		//     if (_tileObjects == null)
-		//     {
-		//         throw new Exception("Cannot update tile before level is built");
-		//     }
-		//
-		//     // update 
-		//     try
-		//     {
-		//         Tile oldTile = _tileObjects[position.x, position.y];
-		//         TileDestroyed.Invoke(oldTile);
-		//         levelFactory.Destroy(oldTile);
-		//     }
-		//     catch (Exception e)
-		//     {
-		//         Debug.LogException(e);
-		//     }
-		//
-		//     Tile newTile = levelFactory.BuildAt(position, data);
-		//     TileAdded.Invoke(newTile);
-		//     _tileObjects[position.x, position.y] = newTile;
-		//
-		//     // update internal level data
-		//     _level.SetTile(position, data);
-		//
-		//     SetDependenciesOfTiles();
-		// }
-
-		// public Tilee GetTileData(GridVector position)
-		// {
-		// 	return _level.GetTile(position);
-		// }
 
 		public void ClearTiles()
 		{

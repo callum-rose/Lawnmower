@@ -3,7 +3,7 @@ using System;
 namespace Game.Tiles
 {
     [Serializable]
-    internal class EmptyTile : Tilee
+    internal class EmptyTile : Tile
     {
         // TODO
         // public event Action Ruined;

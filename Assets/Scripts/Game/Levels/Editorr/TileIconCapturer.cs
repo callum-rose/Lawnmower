@@ -30,9 +30,9 @@ namespace Game.Levels.Editorr
 
         #region API
 
-        public RenderTexture Setup(Tilee data)
+        public RenderTexture Setup(Tile data)
         {
-            BaseTileObject<Tilee> newTileObject = tilePrefabManager.GetPrefabAndInstantiate(data);
+            BaseTileObject<Tile> newTileObject = tilePrefabManager.GetPrefabAndInstantiate(data);
             newTileObject.Setup(data);
             
             newTileObject.transform.localPosition = Vector3.zero;

@@ -5,7 +5,7 @@ namespace Game.Levels
 {
 	internal static class TEMP_TileDataToTileeConverter
 	{
-		public static Tilee GetTilee(TileData data)
+		public static Tile GetTilee(TileData data)
 		{
 			switch (data.Type)
 			{

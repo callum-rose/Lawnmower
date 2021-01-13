@@ -27,7 +27,7 @@ namespace Game.Levels
 				return CheckValue.OutOfBounds;
 			}
 			
-			Tilee tile = LevelData.GetTile(position);
+			Tile tile = LevelData.GetTile(position);
 			// TileData tileData = levelConverter.ConvertTileToData(tile);
 			// if (tileTraversalUpgrader.CanUpgradeTile(tileData, out var newData))
 			// {

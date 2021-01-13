@@ -9,7 +9,7 @@ using UnityEngine.Assertions;
 namespace Game.Tiles
 {
 	[Serializable]
-	internal abstract class Tilee
+	internal abstract class Tile
 	{
 		// [SerializeField] private string data;
 

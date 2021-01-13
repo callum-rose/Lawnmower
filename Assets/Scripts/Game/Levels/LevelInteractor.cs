@@ -53,10 +53,10 @@ namespace Game.Levels
 
             GridVector direction = positionToInteract - positionMovingFrom;
 
-            Tilee tileTo = _levelData.GetTile(positionToInteract);
+            Tile tileTo = _levelData.GetTile(positionToInteract);
             tileTo.TraverseOnto(direction, inverted);
 
-            Tilee tileFrom = _levelData.GetTile(positionMovingFrom);
+            Tile tileFrom = _levelData.GetTile(positionMovingFrom);
             tileFrom.TraverseAway(direction, inverted);
         }
 
@@ -67,7 +67,7 @@ namespace Game.Levels
                 return;
             }
 
-            Tilee tile = _levelData.GetTile(targetPosition);
+            Tile tile = _levelData.GetTile(targetPosition);
             tile.BumpInto(targetPosition - prevPosition, isUndo);
         }
 

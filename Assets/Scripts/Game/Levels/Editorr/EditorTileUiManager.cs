@@ -11,13 +11,13 @@ namespace Game.Levels.Editorr
         [SerializeField] private Button buttonPrefab;
         [SerializeField, FormerlySerializedAs("iconUiContainer")] private Transform buttonContainer;
 
-        public Tilee Selected { get; private set; }
+        public Tile Selected { get; private set; }
 
         #region Unity
 
         private void Start()
         {
-            foreach (Tilee tile in TileeStatics.AllTileConfigurations)
+            foreach (Tile tile in TileeStatics.AllTileConfigurations)
             {
                 Button newButton = Instantiate(buttonPrefab, buttonContainer);
                 ButtonInfo info = new ButtonInfo(
@@ -31,7 +31,7 @@ namespace Game.Levels.Editorr
 
         #region Events
 
-        private void OnIconClicked(Tilee tile)
+        private void OnIconClicked(Tile tile)
         {
             Selected = tile;
         }

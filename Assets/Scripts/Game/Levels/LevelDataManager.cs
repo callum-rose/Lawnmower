@@ -56,7 +56,7 @@ namespace Game.Levels
 
 		public bool IsLevelLocked(int index) => index > LevelsCompleted;
 
-		public int GetLevelIndex(LevelData level)
+		public int GetLevelIndex(IReadOnlyLevelData level)
 		{
 			for (int i = 0; i < levelDatas.Length; i++)
 			{
