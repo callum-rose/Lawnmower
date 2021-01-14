@@ -16,18 +16,18 @@ namespace Game.Tiles
 		public override bool IsComplete => GrassHeight.Value == PerfectGrassHeight;
 		public override bool IsRuined => GrassHeight.Value == 0;
 
-		public IListenableProperty<int> GrassHeight => InternalGrassHeight;
+		public IListenableProperty<int> GrassHeight => _internalGrassHeight;
 
-		private EventProperty<int> InternalGrassHeight { get; }
+		private readonly EventProperty<int> _internalGrassHeight;
 
 		public GrassTile()
 		{
-			InternalGrassHeight = new EventProperty<int>(i => Mathf.Clamp(i, 0, MaxGrassHeight));
+			_internalGrassHeight = new EventProperty<int>(i => Mathf.Clamp(i, 0, MaxGrassHeight));
 		}
 		
 		public GrassTile(int grassHeight) : this()
 		{
-			InternalGrassHeight.Value = grassHeight;
+			_internalGrassHeight.Value = grassHeight;
 		}
 
 		#region API
@@ -39,7 +39,7 @@ namespace Game.Tiles
 				throw new ArgumentException($"Argument must be of type {nameof(GrassTileSetupData)}");
 			}
 
-			InternalGrassHeight.Value = grassData.grassHeight;
+			_internalGrassHeight.Value = grassData.grassHeight;
 		}
 
 		public override bool IsTraversable(bool editMode) => !editMode || GrassHeight.Value < MaxGrassHeight;
@@ -48,13 +48,13 @@ namespace Game.Tiles
 		{
 			if (!inverted)
 			{
-				InternalGrassHeight.Value--;
+				_internalGrassHeight.Value--;
 			}
 			else
 			{
-				InternalGrassHeight.Value++;
+				_internalGrassHeight.Value++;
 
-				if (InternalGrassHeight.Value > MaxGrassHeight)
+				if (_internalGrassHeight.Value > MaxGrassHeight)
 				{
 					throw new InvalidOperationException("Grass height too high");
 				}
@@ -113,7 +113,7 @@ namespace Game.Tiles
 
 		public override string ToString()
 		{
-			return $"{GetType()}: {InternalGrassHeight.Value}";
+			return $"{GetType()}: {_internalGrassHeight.Value}";
 		}
 	}
 }

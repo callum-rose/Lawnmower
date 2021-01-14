@@ -1,8 +1,8 @@
 using System;
 
-namespace Game.Tiles
+namespace Game.Core
 {
-	internal interface IListenableProperty<out T>
+	public interface IListenableProperty<out T>
 	{
 		event Action<T> ValueChanged;
 		T Value { get; }

@@ -1,10 +1,10 @@
 using System;
 using Newtonsoft.Json;
 
-namespace Game.Tiles
+namespace Game.Core
 {
 	[Serializable]
-	internal sealed class EventProperty<T> : IListenableProperty<T>
+	public sealed class EventProperty<T> : IListenableProperty<T>
 	{
 		public event Action<T> ValueChanged;
 

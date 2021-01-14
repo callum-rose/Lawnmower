@@ -32,8 +32,8 @@ namespace Game.Levels.Editorr
 
         public RenderTexture Setup(Tile data)
         {
-            BaseTileObject<Tile> newTileObject = tilePrefabManager.GetPrefabAndInstantiate(data);
-            newTileObject.Setup(data);
+            BaseTileObject newTileObject = tilePrefabManager.GetPrefabAndInstantiate(data);
+            newTileObject.Bind(data);
             
             newTileObject.transform.localPosition = Vector3.zero;
             newTileObject.gameObject.SetLayerRecursively((int)UnityLayers.UiTile);

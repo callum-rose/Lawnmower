@@ -10,11 +10,11 @@ namespace Game.Mowers
     {
         [SerializeField] private Guid id;
         [SerializeField] private string name;
-        [SerializeField, AssetsOnly] private MowerManager prefab;
+        [SerializeField, AssetsOnly] private MowerObject prefab;
 
         public Guid Id => id;
         public string Name => name;
-        public MowerManager Prefab => prefab;
+        public MowerObject Prefab => prefab;
 
         private void Awake()
         {

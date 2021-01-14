@@ -6,18 +6,20 @@ using System;
 using Game.Levels.Editorr;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.Serialization;
+using R = Sirenix.OdinInspector.RequiredAttribute;
 
 namespace Game.Levels
 {
 	internal class LevelManager : MonoBehaviour, IHasEditMode
 	{
-		[SerializeField] private LevelObjectFactory levelFactory;
-		[SerializeField] private LevelTraversalChecker traversalChecker;
-		[SerializeField] private LevelInteractor levelInteractor;
-		[SerializeField] private LevelStateChecker levelStateChecker;
-		[SerializeField] private Positioner positioner;
+		[SerializeField, R] private MowerMovementManager mowerMovementManager;
+		[SerializeField, R] private LevelObjectFactory levelFactory;
+		[SerializeField, R] private LevelTraversalChecker traversalChecker;
+		[FormerlySerializedAs("levelInteractor")] [SerializeField, R] private TileInteractor tileInteractor;
+		[SerializeField, R] private LevelStateChecker levelStateChecker;
+		[SerializeField, R] private Positioner positioner;
 
-		public event Action<GameObject> TileAdded, TileDestroyed;
 		public event Action LevelChanged;
 		public event UndoableAction LevelCompleted, LevelFailed;
 
@@ -25,16 +27,17 @@ namespace Game.Levels
 
 		public IReadOnlyLevelData Level { get; private set; }
 
-		public GridVector MowerPosition => _mowerMovement.MowerPosition;
-
-		private MowerMovementManager _mowerMovement;
-
+		public GridVector MowerPosition => mowerMovementManager.MowerPosition;
+		
 		private GameObject[,] _tileObjects;
 
 		#region Unity
 
 		private void Awake()
 		{
+			Assert.IsNotNull(mowerMovementManager);
+			tileInteractor.Init(mowerMovementManager);
+			
 			levelStateChecker.LevelCompleted += OnLevelCompleted;
 			levelStateChecker.LevelFailed += OnLevelFailed;
 		}
@@ -49,49 +52,32 @@ namespace Game.Levels
 
 		#region API
 
-		public void Init(MowerMovementManager mowerMovement)
-		{
-			Assert.IsNotNull(mowerMovement);
-			levelInteractor.Init(mowerMovement);
-
-			_mowerMovement = mowerMovement;
-		}
-
 		public void SetLevel(IReadOnlyLevelData level)
 		{
 			ClearTiles();
 
 			_tileObjects = levelFactory.Build(level);
-			foreach (var tileObject in _tileObjects)
-			{
-				TileAdded.Invoke(tileObject);
-			}
 
 			SetDependenciesOfTiles();
 			
 			Assert.IsNotNull(level);
 			Level = level;
 
-			_mowerMovement.SetPosition(Level.StartPosition);
+			mowerMovementManager.SetPosition(Level.StartPosition);
 
 			positioner.OffsetContainer(-GridVector.Zero);
 
-			levelStateChecker.Init(Level, _mowerMovement);
+			levelStateChecker.Init(Level, mowerMovementManager);
 			
 			LevelChanged?.Invoke();
 			
-			_mowerMovement.IsRunning = true;
+			mowerMovementManager.IsRunning = true;
 		}
 
 		public void ClearTiles()
 		{
 			if (_tileObjects != null)
 			{
-				foreach (GameObject tileObject in _tileObjects)
-				{
-					TileDestroyed.Invoke(tileObject);
-				}
-
 				levelFactory.Destroy(_tileObjects);
 			}
 		}
@@ -103,14 +89,14 @@ namespace Game.Levels
 		private void OnLevelCompleted(Xor isUndo)
 		{
 			bool isLevelResuming = isUndo;
-			_mowerMovement.IsRunning = isLevelResuming;
+			mowerMovementManager.IsRunning = isLevelResuming;
 
-			LevelCompleted.Invoke(isUndo);
+			LevelCompleted!.Invoke(isUndo);
 		}
 
 		private void OnLevelFailed(Xor isUndo)
 		{
-			LevelFailed.Invoke(isUndo);
+			LevelFailed!.Invoke(isUndo);
 		}
 
 		#endregion
@@ -120,7 +106,7 @@ namespace Game.Levels
 		private void SetDependenciesOfTiles()
 		{
 			traversalChecker.SetTiles(Level);
-			levelInteractor.SetTiles(Level);
+			tileInteractor.SetTiles(Level);
 		}
 
 		#endregion

@@ -10,7 +10,6 @@ namespace Game.Levels
 	[CreateAssetMenu(fileName = nameof(EditModeLevelTraversalChecker), menuName = SONames.GameDir + nameof(EditModeLevelTraversalChecker))]
 	internal class EditModeLevelTraversalChecker : BaseLevelTraversalChecker
 	{
-		[SerializeField] private LevelConverter levelConverter;
 		[SerializeField] private TileTraversalUpgrader tileTraversalUpgrader;
 		
 		#region API

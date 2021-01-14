@@ -1,3 +1,4 @@
+using Core;
 using Game.Core;
 using Game.Levels;
 using Game.Mowers.Input;
@@ -5,24 +6,26 @@ using Game.UndoSystem;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.Serialization;
 
 namespace Game.Mowers
 {
-    public partial class MowerMovementManager : MonoBehaviour, IMowerPosition, IMowerRunnable
+    [CreateAssetMenu(fileName = nameof(MowerMovementManager), menuName = SONames.GameDir + nameof(MowerMovementManager))]
+    public partial class MowerMovementManager : ScriptableObject, IMowerRunnable
     {
-        [SerializeField] private MowerMover mowerMover;
         [SerializeField] private LevelTraversalChecker traversalChecker;
-        [SerializeField] private LevelInteractor levelInteractor;
+        [FormerlySerializedAs("levelInteractor")] [SerializeField] private TileInteractor tileInteractor;
 
         /// <summary>
         /// First parameter is the previous position, second is target position
         /// </summary>
         public event UndoableAction<GridVector, GridVector> Moved, Bumped;
-
-        public GridVector MowerPosition => mowerMover.CurrentPosition;
+        
+        public GridVector MowerPosition => _mowerMover.CurrentPosition.Value;
 
         public bool IsRunning { get; set; } = false;
-
+        
+        private MowerMoverr _mowerMover;
         private IMowerControls[] _mowerControls;
 
         private IUndoSystem _undoManager;
@@ -41,22 +44,23 @@ namespace Game.Mowers
 
         #region API
 
-        public void Init(IMowerControls[] controls, Positioner positioner, IUndoSystem undoManager)
+        public void Init(MowerMoverr mowerMover, IMowerControls[] controls, IUndoSystem undoManager)
         {
+            _mowerMover = mowerMover;
+
             _mowerControls = controls;
             foreach (IMowerControls mc in _mowerControls)
             {
                 mc.Moved += OnInput;
             }
 
-            mowerMover.Init(positioner);
             _undoManager = undoManager;
         }
 
         [Button(Expanded = true)]
         public void SetPosition(GridVector position)
         {
-            mowerMover.Move(position);
+            _mowerMover.Move(position);
         }
 
         #endregion
@@ -72,17 +76,17 @@ namespace Game.Mowers
                 return;
             }
 
-            GridVector targetPosition = mowerMover.CurrentPosition + direction;
+            GridVector targetPosition = MowerPosition + direction;
 
             IUndoable action;
             switch (traversalChecker.CanTraverseTo(targetPosition))
             {
                 case LevelTraversalChecker.CheckValue.Yes:
-                    action = new UndoableMove(this, targetPosition, mowerMover.CurrentPosition);
+                    action = new UndoableMove(this, targetPosition, MowerPosition);
                     break;
 
                 case LevelTraversalChecker.CheckValue.NonTraversableTile:
-                    action = new UndoableBump(this, targetPosition, mowerMover.CurrentPosition);
+                    action = new UndoableBump(this, targetPosition, MowerPosition);
                     break;
 
                 case LevelTraversalChecker.CheckValue.OutOfBounds:

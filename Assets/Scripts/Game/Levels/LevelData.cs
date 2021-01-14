@@ -38,10 +38,19 @@ namespace Game.Levels
 		public GridVector StartPosition => startPosition;
 
 		// keep just in case Odin serialiser messes up
-		[FormerlySerializedAs("tilesData")] [SerializeField, TextArea(8, 12)] private string ___tilesData;
-		[FormerlySerializedAs("tiles")] [SerializeField, HideInInspector] private Serialised2dArray<TileData> ___tiles;
+		[FormerlySerializedAs("tilesData")] [SerializeField, TextArea(8, 12)]
+		private string ___tilesData;
+
+		[FormerlySerializedAs("tiles")] [SerializeField]
+		private Serialised2dArray<TileData> ___tiles;
 
 		public Guid Id => id;
+
+		private readonly JsonSerializerSettings _jsonSettings = new JsonSerializerSettings
+		{
+			TypeNameHandling = TypeNameHandling.Auto,
+			NullValueHandling = NullValueHandling.Ignore
+		};
 
 		#region Unity
 
@@ -70,14 +79,14 @@ namespace Game.Levels
 		public static LevelData CreateFrom(EditableLevelData input)
 		{
 			LevelData output = CreateInstance<LevelData>();
-			
+
 			output.newTiles = new Tile[input.Width, input.Depth];
 			Loops.TwoD(input.Width, input.Depth, (x, y) => output.newTiles[x, y] = input.GetTile(x, y));
 
 			output.startPosition = input.StartPosition;
-			
+
 			output.id = Guid.NewGuid();
-			
+
 			return output;
 		}
 
@@ -95,33 +104,30 @@ namespace Game.Levels
 
 		protected override void OnBeforeSerialize()
 		{
-			JsonSerializerSettings settings = new JsonSerializerSettings
-			{
-				TypeNameHandling = TypeNameHandling.Auto,
-				NullValueHandling = NullValueHandling.Ignore
-			};
-			___tilesData = JsonConvert.SerializeObject(newTiles, settings);
+			___tilesData = JsonConvert.SerializeObject(newTiles, _jsonSettings);
 		}
 
 		protected override void OnAfterDeserialize()
 		{
 			if (string.IsNullOrEmpty(___tilesData))
 			{
-				newTiles = new Tile[___tiles.Width, ___tiles.Depth];
-				Loops.TwoD(___tiles.Width, ___tiles.Depth,
-					(x, y) => newTiles[x, y] = TEMP_TileDataToTileeConverter.GetTilee(___tiles[x, y]));
+				// TODO
+				RecreateDataFromArchived();
 			}
 			else
 			{
-				JsonSerializerSettings settings = new JsonSerializerSettings
-				{
-					TypeNameHandling = TypeNameHandling.Auto,
-					NullValueHandling = NullValueHandling.Ignore
-				};
 				___tilesData = ___tilesData.Replace("Tilee", "Tile");
-				newTiles = JsonConvert.DeserializeObject<Tile[,]>(___tilesData, settings);
+				newTiles = JsonConvert.DeserializeObject<Tile[,]>(___tilesData, _jsonSettings);
 				___tilesData = null;
 			}
+		}
+
+		[Button]
+		private void RecreateDataFromArchived()
+		{
+			newTiles = new Tile[___tiles.Width, ___tiles.Depth];
+			Loops.TwoD(___tiles.Width, ___tiles.Depth,
+				(x, y) => newTiles[x, y] = TEMP_TileDataToTileeConverter.GetTilee(___tiles[x, y]));
 		}
 	}
 }

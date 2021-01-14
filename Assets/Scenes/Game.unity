@@ -154,6 +154,7 @@ Transform:
   - {fileID: 553937441}
   - {fileID: 1701694277}
   - {fileID: 57374274}
+  - {fileID: 83278715}
   - {fileID: 165245710}
   - {fileID: 170081299}
   - {fileID: 1028350302}
@@ -231,7 +232,7 @@ GameObject:
   - component: {fileID: 57374274}
   - component: {fileID: 57374275}
   m_Layer: 0
-  m_Name: MowerCreator
+  m_Name: MowerManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -263,8 +264,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2080268e84e94443bc6eb8d4abd861b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  container: {fileID: 2014382488}
-  positioner: {fileID: 2014382489}
+  mowerObjectCreator: {fileID: 83278716}
+  mowerMovementManager: {fileID: 11400000, guid: a68236ce6e199634094c1d5570d74ed7,
+    type: 2}
   mowerControls:
   - ObjectField: {fileID: 170081300}
     ResultType: 
@@ -494,6 +496,51 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
   remainingScale: {x: 0, y: 0, z: 0}
+--- !u!1 &83278714
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 83278715}
+  - component: {fileID: 83278716}
+  m_Layer: 0
+  m_Name: MowerCreator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &83278715
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 83278714}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 12490847}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &83278716
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 83278714}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9aae3f49741478e89e55a30808a5242, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  container: {fileID: 2014382488}
+  positioner: {fileID: 2014382489}
 --- !u!1 &100722430
 GameObject:
   m_ObjectHideFlags: 0
@@ -683,7 +730,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 12490847}
-  m_RootOrder: 3
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &165245711
 MonoBehaviour:
@@ -836,7 +883,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 12490847}
-  m_RootOrder: 4
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &170081300
 MonoBehaviour:
@@ -1584,7 +1631,7 @@ Camera:
   far clip plane: 34.45
   field of view: 60
   orthographic: 1
-  orthographic size: 5
+  orthographic size: 3
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -1607,7 +1654,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 534669902}
-  m_LocalRotation: {x: 0.31402075, y: 0.29840147, z: -0.10467358, w: 0.8952044}
+  m_LocalRotation: {x: 0.3140207, y: 0.29840145, z: -0.10467353, w: 0.8952045}
   m_LocalPosition: {x: -7.5, y: 9.5, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
@@ -1742,7 +1789,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cameraManager: {fileID: 753614662}
-  mowerCreator: {fileID: 57374275}
+  mowerManager: {fileID: 57374275}
   levelManager: {fileID: 1701694278}
   levelDataManager: {fileID: 11400000, guid: aa70aff86d447fa4ea3762dc62345078, type: 2}
   undoSystemContainer:
@@ -3097,7 +3144,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 964599403}
-  m_LocalRotation: {x: 0.31402075, y: 0.29840147, z: -0.10467358, w: 0.8952044}
+  m_LocalRotation: {x: 0.3140207, y: 0.29840145, z: -0.10467353, w: 0.8952045}
   m_LocalPosition: {x: -7.5, y: 9.5, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -3501,7 +3548,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 12490847}
-  m_RootOrder: 5
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1028350303
 MonoBehaviour:
@@ -4523,9 +4570,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4abb0045628010b45aa716cb32caf211, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mowerMovementManager: {fileID: 11400000, guid: a68236ce6e199634094c1d5570d74ed7,
+    type: 2}
   levelFactory: {fileID: 2014382487}
   traversalChecker: {fileID: 11400000, guid: 3c448be198e671746bdbe22256346721, type: 2}
-  levelInteractor: {fileID: 11400000, guid: 4185931dfdfd65f42a05487f3816bcf0, type: 2}
+  tileInteractor: {fileID: 11400000, guid: 4185931dfdfd65f42a05487f3816bcf0, type: 2}
   levelStateChecker: {fileID: 11400000, guid: 1f6b20944fa48e64da8645eca9673f35, type: 2}
   positioner: {fileID: 2014382489}
 --- !u!1 &1729836877
@@ -5118,7 +5167,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8454ce62b2a1b2d4e98160037c1a6004, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tilePrefabsHolder: {fileID: 11400000, guid: 95ea346046e72964f88d3643f2660dc9, type: 2}
+  tilePrefabsManager: {fileID: 11400000, guid: 95ea346046e72964f88d3643f2660dc9, type: 2}
 --- !u!114 &2014382487
 MonoBehaviour:
   m_ObjectHideFlags: 0

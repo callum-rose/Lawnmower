@@ -7,7 +7,7 @@ using UnityEngine;
 namespace Game.Tiles
 {
 	[RequireComponent(typeof(IAppearanceSetter))]
-	internal partial class GrassTileObject : BaseTileObject<GrassTile>
+	internal partial class GrassTileObject : BaseTileObject
 	{
 		[SerializeField] private DirtAppearanceSetter dirtAppearanceSetter;
 		[SerializeField, AssetsOnly] private Vector3AndIntEventChannel grassParticlesEventChannel;
@@ -38,17 +38,16 @@ namespace Game.Tiles
 		
 		#region API
 
-		public override void Setup(GrassTile tileData)
+		public override void Bind(Tile tileData)
 		{
-			_tileData = tileData;
+			_tileData = (GrassTile)tileData;
 
 			_tileData.GrassHeight.ValueChanged += OnGrassHeightValueChanged;
-			
+			SetAppearance(_tileData.GrassHeight.Value);
+
 			_tileData.TraversedOnto += OnTraversedOnto;
 			_tileData.TraversedAway += OnTraversedAway;
 			_tileData.BumpedInto += OnBumpedInto;
-			
-			SetAppearance(_tileData.GrassHeight.Value);
 		}
 
 		public override void Dispose()

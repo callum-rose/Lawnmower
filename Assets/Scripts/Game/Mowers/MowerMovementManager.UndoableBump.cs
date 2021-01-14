@@ -21,21 +21,21 @@ namespace Game.Mowers
             public void Do()
             {
                 _movementController.Bumped.Invoke(
-                    _movementController.mowerMover.CurrentPosition,
+                    _movementController.MowerPosition,
                     _targetPosition,
                     (Xor)false);
 
-                _movementController.mowerMover.Bump(_targetPosition);
+                _movementController._mowerMover.Bump(_targetPosition);
             }
 
             public void Undo()
             {
                 _movementController.Bumped.Invoke(
-                    _movementController.mowerMover.CurrentPosition,
+                    _movementController.MowerPosition,
                     _previousPosition,
                     (Xor)true);
 
-                _movementController.mowerMover.Bump(_previousPosition);
+                _movementController._mowerMover.Bump(_previousPosition);
             }
         }
     }

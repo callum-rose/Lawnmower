@@ -8,8 +8,8 @@ using UnityEngine;
 
 namespace Game.Levels
 {
-    [CreateAssetMenu(fileName = nameof(LevelInteractor), menuName = SONames.GameDir + nameof(LevelInteractor))]
-    internal class LevelInteractor : ScriptableObject, IHasEditMode
+    [CreateAssetMenu(fileName = nameof(TileInteractor), menuName = SONames.GameDir + nameof(TileInteractor))]
+    internal class TileInteractor : ScriptableObject, IHasEditMode
     {
         private MowerMovementManager _mowerMovement;
         private IReadOnlyLevelData _levelData;

@@ -10,13 +10,14 @@ using System;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UI.Buttons;
+using UnityEngine.Serialization;
 
 namespace Game.Core
 {
 	internal class GameManager : BaseSceneManager
 	{
 		[SerializeField] private CameraManager cameraManager;
-		[SerializeField] private MowerCreator mowerCreator;
+		[FormerlySerializedAs("mowerObjectCreator")] [FormerlySerializedAs("mowerCreator")] [SerializeField] private MowerManager mowerManager;
 		[SerializeField] private LevelManager levelManager;
 		[SerializeField, AssetsOnly] private LevelDataManager levelDataManager;
 		[SerializeField] private IUndoSystemContainer undoSystemContainer;
@@ -27,7 +28,7 @@ namespace Game.Core
 
 		private GameSetupPassThroughData? _inputData;
 
-		private MowerManager _mower;
+		private GameObject _mowerObject;
 
 		private LevelDataRecorder _levelDataRecorder;
 
@@ -66,12 +67,11 @@ namespace Game.Core
 
 			undoController.IsRunning = true;
 
-			_mower = mowerCreator.Create(_inputData.Value.Mower, UndoSystem);
+			_mowerObject = mowerManager.Create(_inputData.Value.Mower, UndoSystem);
 
-			levelManager.Init(_mower.Movement);
 			levelManager.SetLevel(_inputData.Value.Level);
 
-			cameraManager.Init(_mower.transform);
+			cameraManager.Init(_mowerObject.transform);
 
 			_levelDataRecorder = new LevelDataRecorder(UndoSystem);
 			_levelDataRecorder.StartRecording();
@@ -82,9 +82,9 @@ namespace Game.Core
 			levelManager.ClearTiles();
 			cameraManager.Clear();
 
-			if (_mower != null)
+			if (_mowerObject != null)
 			{
-				Destroy(_mower.gameObject);
+				Destroy(_mowerObject.gameObject);
 			}
 
 			_inputData = null;

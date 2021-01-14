@@ -24,47 +24,38 @@ namespace Game.Tiles
 
 		#region API
 
-		public BaseTileObject<T> GetPrefabAndInstantiate<T>(T tile) where T : Tile
+		public BaseTileObject GetPrefabAndInstantiate(Tile tile)
 		{
-			return GetPrefabAndInstantiate<T>();
-		}
-
-		public BaseTileObject<T> GetPrefabAndInstantiate<T>() where T : Tile
-		{
-			GameObject prefab;
-			Func<GameObject, BaseTileObject<T>> getComponentFunc;
-			if (typeof(T) == typeof(EmptyTileObject))
+			TileType tileType;
+			Type tileObjectType;
+			switch (tile)
 			{
-				prefab = tilePrefabs[TileType.Empty];
-				getComponentFunc = g => g.GetComponent<EmptyTileObject>() as BaseTileObject<T>;
-			}
-			else if (typeof(T) == typeof(StoneTileObject))
-			{
-				prefab = tilePrefabs[TileType.Empty];
-				getComponentFunc = g => g.GetComponent<StoneTileObject>() as BaseTileObject<T>;
-			}
-			else if (typeof(T) == typeof(WoodTileObject))
-			{
-				prefab = tilePrefabs[TileType.Empty];
-				getComponentFunc = g => g.GetComponent<WoodTileObject>() as BaseTileObject<T>;
-			}
-			else if (typeof(T) == typeof(WaterTileObject))
-			{
-				prefab = tilePrefabs[TileType.Empty];
-				getComponentFunc = g => g.GetComponent<WaterTileObject>() as BaseTileObject<T>;
-			}
-			else if (typeof(T) == typeof(GrassTileObject))
-			{
-				prefab = tilePrefabs[TileType.Empty];
-				getComponentFunc = g => g.GetComponent<GrassTileObject>() as BaseTileObject<T>;
-			}
-			else
-			{
-				throw new NotImplementedException();
+				case EmptyTile _:
+					tileType = TileType.Empty;
+					tileObjectType = typeof(EmptyTileObject);
+					break;
+				case StoneTile _:
+					tileType = TileType.Stone;
+					tileObjectType = typeof(StoneTileObject);
+					break;
+				case WoodTile _:
+					tileType = TileType.Wood;
+					tileObjectType = typeof(WoodTileObject);
+					break;
+				case WaterTile _:
+					tileType = TileType.Water;
+					tileObjectType = typeof(WaterTileObject);
+					break;
+				case GrassTile _:
+					tileType = TileType.Grass;
+					tileObjectType = typeof(GrassTileObject);
+					break;
+				default:
+					throw new NotImplementedException();
 			}
 
-			GameObject tileGameObject = Instantiate(prefab.gameObject);
-			return getComponentFunc(tileGameObject);
+			GameObject tileGameObject = Instantiate(tilePrefabs[tileType]);
+			return tileGameObject.GetComponent(tileObjectType) as BaseTileObject;
 		}
 
 		public TileType GetTileTypeForTile(Tile tile)

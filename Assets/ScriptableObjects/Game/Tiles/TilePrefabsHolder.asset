@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: TilePrefabsHolder
   m_EditorClassIdentifier: 
   serializationData:
-    SerializedFormat: 0
+    SerializedFormat: 2
     SerializedBytes: 
     ReferencedUnityObjects: []
     SerializedBytesString: 
@@ -24,8 +24,8 @@ MonoBehaviour:
   tilePrefabs:
     keys: 0000000001000000020000000300000004000000
     values:
-    - {fileID: 7594314150262590957, guid: 2cc9ff5eae6be474d94c774ee78ad7f8, type: 3}
-    - {fileID: 7032916919265020135, guid: 53ab8f14d0c34af46963e81b50305f7a, type: 3}
-    - {fileID: 289454246185063951, guid: 0a106eebd20a6fe44ac99547ddbd427d, type: 3}
-    - {fileID: 6465029212061170260, guid: a1b4c07f51da0fa44afc8edbe6145b31, type: 3}
-    - {fileID: 8124927811233534169, guid: 3186c35d8b9184440b6958bfd56b1dc8, type: 3}
+    - {fileID: 8723563144886214407, guid: 2cc9ff5eae6be474d94c774ee78ad7f8, type: 3}
+    - {fileID: 8723563144886214407, guid: 53ab8f14d0c34af46963e81b50305f7a, type: 3}
+    - {fileID: 8723563144886214407, guid: 0a106eebd20a6fe44ac99547ddbd427d, type: 3}
+    - {fileID: 8723563144886214407, guid: a1b4c07f51da0fa44afc8edbe6145b31, type: 3}
+    - {fileID: 8723563144886214407, guid: 3186c35d8b9184440b6958bfd56b1dc8, type: 3}

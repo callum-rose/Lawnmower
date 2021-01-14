@@ -2,13 +2,13 @@ using UnityEngine;
 
 namespace Game.Tiles
 {
-	internal class WaterTileObject : BaseTileObject<WaterTile>
+	internal class WaterTileObject : BaseTileObject
 	{
 		private WaterTile _data;
 
-		public override void Setup(WaterTile data)
+		public override void Bind(Tile data)
 		{
-			_data = data;
+			_data = (WaterTile)data;
 		}
 
 		public override void Dispose()

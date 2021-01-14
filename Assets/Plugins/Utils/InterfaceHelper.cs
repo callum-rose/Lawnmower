@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using UnityEditor;
 using UnityEngine;
 using Component = UnityEngine.Component;
 using Object = UnityEngine.Object;
@@ -22,13 +25,13 @@ namespace Game
 
             _allTypes = GetAllTypes();
 
-            foreach (var curInterface in _allTypes)
+            foreach (Type curInterface in _allTypes)
             {
                 //We're interested only in interfaces
                 if (!curInterface.IsInterface)
                     continue;
 
-                var typeName = curInterface.ToString().ToLower();
+                string typeName = curInterface.ToString().ToLower();
 
                 //Skip system interfaces
                 if (typeName.Contains("unity") || typeName.Contains("system.")
@@ -39,14 +42,14 @@ namespace Game
                      || typeName.Contains("editor") || typeName.Contains("debug"))
                     continue;
 
-                var typesInherited = GetTypesInheritedFromInterface(curInterface);
+                IList<Type> typesInherited = GetTypesInheritedFromInterface(curInterface);
 
                 if (typesInherited.Count <= 0)
                     continue;
 
-                var componentsList = new List<Type>();
+                List<Type> componentsList = new List<Type>();
 
-                foreach (var curType in typesInherited)
+                foreach (Type curType in typesInherited)
                 {
                     //Skip interfaces
                     if (curType.IsInterface)
@@ -66,8 +69,8 @@ namespace Game
 
         private static Type[] GetAllTypes()
         {
-            var res = new List<Type>();
-            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            List<Type> res = new List<Type>();
+            foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
                 res.AddRange(assembly.GetTypes());
             }
@@ -88,9 +91,9 @@ namespace Game
                 _allTypes = GetAllTypes();
             }
 
-            var res = new List<Type>();
+            List<Type> res = new List<Type>();
 
-            foreach (var curType in _allTypes)
+            foreach (Type curType in _allTypes)
             {
                 if (!(type.IsAssignableFrom(curType) && curType.IsSubclassOf(typeof(Component))))
                     continue;
@@ -104,28 +107,30 @@ namespace Game
 
         public static IList<T> FindObjects<T>(bool firstOnly = false) where T : class
         {
-            var resList = new List<T>();
+            List<T> resList = new List<T>();
 
-            var types = _interfaceToComponentMapping[typeof(T)];
+            List<Type> types = _interfaceToComponentMapping[typeof(T)];
 
-            if (null == types || types.Count <= 0)
+            if (null == types || types.Count == 0)
             {
                 Debug.LogError("No descendants found for type " + typeof(T));
                 return null;
             }
 
-            foreach (var curType in types)
+            foreach (Type curType in types)
             {
                 Object[] objects = firstOnly ? new[] { Object.FindObjectOfType(curType) } : Object.FindObjectsOfType(curType);
 
                 if (null == objects || objects.Length <= 0)
-                    continue;
-
-                var tList = new List<T>();
-
-                foreach (var curObj in objects)
                 {
-                    var curObjAsT = curObj as T;
+                    continue;
+                }
+
+                List<T> tList = new List<T>();
+
+                foreach (Object curObj in objects)
+                {
+                    T curObjAsT = curObj as T;
 
                     if (null == curObjAsT)
                     {
@@ -144,14 +149,14 @@ namespace Game
 
         public static T FindObject<T>() where T : class
         {
-            var list = FindObjects<T>();
+            IList<T> list = FindObjects<T>();
 
             return list[0];
         }
 
         public static IList<T> GetInterfaceComponents<T>(this Component component, bool firstOnly = false) where T : class
         {
-            var types = _interfaceToComponentMapping[typeof(T)];
+            List<Type> types = _interfaceToComponentMapping[typeof(T)];
 
             if (null == types || types.Count <= 0)
             {
@@ -159,9 +164,9 @@ namespace Game
                 return null;
             }
 
-            var resList = new List<T>();
+            List<T> resList = new List<T>();
 
-            foreach (var curType in types)
+            foreach (Type curType in types)
             {
                 //Optimization - don't get all objects if we need only one
                 Component[] components = firstOnly ?
@@ -171,11 +176,11 @@ namespace Game
                 if (null == components || components.Length <= 0)
                     continue;
 
-                var tList = new List<T>();
+                List<T> tList = new List<T>();
 
-                foreach (var curComp in components)
+                foreach (Component curComp in components)
                 {
-                    var curCompAsT = curComp as T;
+                    T curCompAsT = curComp as T;
 
                     if (null == curCompAsT)
                     {
@@ -194,7 +199,7 @@ namespace Game
 
         public static T GetInterfaceComponent<T>(this Component component) where T : class
         {
-            var list = GetInterfaceComponents<T>(component, true);
+            IList<T> list = GetInterfaceComponents<T>(component, true);
 
             return list[0];
         }

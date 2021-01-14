@@ -27,8 +27,8 @@ namespace Game.Tiles
         {
             //Tile newTile = _poolDict[data.Type].Get();
 
-            BaseTileObject<T> newTileObject = tilePrefabsManager.GetPrefabAndInstantiate(tile);
-            newTileObject.Setup(tile);
+            BaseTileObject newTileObject = tilePrefabsManager.GetPrefabAndInstantiate(tile);
+            newTileObject.Bind(tile);
             
             return newTileObject.gameObject;
         }

@@ -13,7 +13,6 @@ namespace Game.Levels.Editorr
 	[CreateAssetMenu(fileName = nameof(LevelSaver), menuName = SONames.GameDir + nameof(LevelSaver))]
 	internal class LevelSaver : ScriptableObject
 	{
-		[SerializeField, AssetsOnly] private LevelConverter levelConverter;
 		[SerializeField, FolderPath] private string savePath;
 		[SerializeField] private string fileName = "NewLevel";
 

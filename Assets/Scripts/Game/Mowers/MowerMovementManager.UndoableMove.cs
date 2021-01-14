@@ -7,35 +7,35 @@ namespace Game.Mowers
     {
         private class UndoableMove : IUndoable
         {
-            private readonly MowerMovementManager _movementController;
+            private readonly MowerMovementManager _movementManager;
             private readonly GridVector _targetPosition;
             private readonly GridVector _previousPosition;
 
-            public UndoableMove(MowerMovementManager movementController, GridVector targetPosition, GridVector previousPosition)
+            public UndoableMove(MowerMovementManager movementManager, GridVector targetPosition, GridVector previousPosition)
             {
-                _movementController = movementController;
+                _movementManager = movementManager;
                 _targetPosition = targetPosition;
                 _previousPosition = previousPosition;
             }
 
             public void Do()
             {
-                _movementController.Moved.Invoke(
-                    _movementController.mowerMover.CurrentPosition,
+                _movementManager.Moved.Invoke(
+                    _movementManager.MowerPosition,
                     _targetPosition,
                     (Xor)false);
 
-                _movementController.mowerMover.Move(_targetPosition);
+                _movementManager._mowerMover.Move(_targetPosition);
             }
 
             public void Undo()
             {
-                _movementController.Moved.Invoke(
-                    _movementController.mowerMover.CurrentPosition,
+                _movementManager.Moved.Invoke(
+                    _movementManager.MowerPosition,
                     _previousPosition,
                     (Xor)true);
 
-                _movementController.mowerMover.Move(_previousPosition);
+                _movementManager._mowerMover.Move(_previousPosition);
             }
         }
     }

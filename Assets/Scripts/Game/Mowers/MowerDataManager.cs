@@ -7,8 +7,8 @@ using Core;
 
 namespace Game.Mowers
 {
-	[CreateAssetMenu(fileName = nameof(MowerDataHolder), menuName = SONames.GameDir + nameof(MowerDataHolder))]
-	internal class MowerDataHolder : ScriptableObject
+	[CreateAssetMenu(fileName = nameof(MowerDataManager), menuName = SONames.GameDir + nameof(MowerDataManager))]
+	internal class MowerDataManager : ScriptableObject
 	{
 		[SerializeField, InlineEditor] private List<MowerData> mowerData;
 
@@ -22,11 +22,6 @@ namespace Game.Mowers
 			}
 
 			return mowerData.First(Match);
-		}
-
-		public MowerManager GetPrefab(Guid id)
-		{
-			return GetMowerData(id).Prefab;
 		}
 	}
 }

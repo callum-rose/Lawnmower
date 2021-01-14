@@ -24,42 +24,205 @@ MonoBehaviour:
     - Name: id
       Entry: 2
       Data: 8256fdfc0ed34892a0b20730d35495f6
+    - Name: newTiles
+      Entry: 7
+      Data: 0|Game.Tiles.Tile[,], Scripts
+    - Name: 
+      Entry: 12
+      Data: 16
+    - Name: ranks
+      Entry: 1
+      Data: 4|4
+    - Name: 
+      Entry: 7
+      Data: 1|Game.Tiles.GrassTile, Scripts
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 2|Game.Tiles.GrassTile, Scripts
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 3|Game.Tiles.GrassTile, Scripts
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 4|Game.Tiles.GrassTile, Scripts
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 5|Game.Tiles.GrassTile, Scripts
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 6|Game.Tiles.GrassTile, Scripts
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 7|Game.Tiles.GrassTile, Scripts
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 8|Game.Tiles.GrassTile, Scripts
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 9|Game.Tiles.GrassTile, Scripts
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 10|Game.Tiles.GrassTile, Scripts
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 11|Game.Tiles.GrassTile, Scripts
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 12|Game.Tiles.GrassTile, Scripts
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 13|Game.Tiles.GrassTile, Scripts
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 14|Game.Tiles.GrassTile, Scripts
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 15|Game.Tiles.GrassTile, Scripts
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 16|Game.Tiles.GrassTile, Scripts
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
   startPosition:
     x: 0
     y: 2
-  tiles:
+  ___tilesData: '[[{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
+    mscorlib]], Scripts","_value":2,"Value":2}},{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
+    mscorlib]], Scripts","_value":2,"Value":2}},{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
+    mscorlib]], Scripts","_value":2,"Value":2}},{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
+    mscorlib]], Scripts","_value":2,"Value":2}}],[{"$type":"Game.Tiles.GrassTile,
+    Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32, mscorlib]],
+    Scripts","_value":2,"Value":2}},{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
+    mscorlib]], Scripts","_value":3,"Value":3}},{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
+    mscorlib]], Scripts","_value":3,"Value":3}},{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
+    mscorlib]], Scripts","_value":2,"Value":2}}],[{"$type":"Game.Tiles.GrassTile,
+    Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32, mscorlib]],
+    Scripts","_value":2,"Value":2}},{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
+    mscorlib]], Scripts","_value":3,"Value":3}},{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
+    mscorlib]], Scripts","_value":3,"Value":3}},{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
+    mscorlib]], Scripts","_value":2,"Value":2}}],[{"$type":"Game.Tiles.GrassTile,
+    Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32, mscorlib]],
+    Scripts","_value":2,"Value":2}},{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
+    mscorlib]], Scripts","_value":2,"Value":2}},{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
+    mscorlib]], Scripts","_value":2,"Value":2}},{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
+    mscorlib]], Scripts","_value":2,"Value":2}}]]'
+  ___tiles:
     data:
     - type: 1
+      grassTileSetupData:
+        grassHeight: 0
       dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Scripts","grassHeight":2}'
     - type: 1
+      grassTileSetupData:
+        grassHeight: 0
       dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Scripts","grassHeight":2}'
     - type: 1
+      grassTileSetupData:
+        grassHeight: 0
       dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Scripts","grassHeight":2}'
     - type: 1
+      grassTileSetupData:
+        grassHeight: 0
       dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Scripts","grassHeight":2}'
     - type: 1
+      grassTileSetupData:
+        grassHeight: 0
       dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Scripts","grassHeight":2}'
     - type: 1
+      grassTileSetupData:
+        grassHeight: 0
       dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Scripts","grassHeight":3}'
     - type: 1
+      grassTileSetupData:
+        grassHeight: 0
       dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Scripts","grassHeight":3}'
     - type: 1
+      grassTileSetupData:
+        grassHeight: 0
       dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Scripts","grassHeight":2}'
     - type: 1
+      grassTileSetupData:
+        grassHeight: 0
       dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Scripts","grassHeight":2}'
     - type: 1
+      grassTileSetupData:
+        grassHeight: 0
       dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Scripts","grassHeight":3}'
     - type: 1
+      grassTileSetupData:
+        grassHeight: 0
       dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Scripts","grassHeight":3}'
     - type: 1
+      grassTileSetupData:
+        grassHeight: 0
       dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Scripts","grassHeight":2}'
     - type: 1
+      grassTileSetupData:
+        grassHeight: 0
       dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Scripts","grassHeight":2}'
     - type: 1
+      grassTileSetupData:
+        grassHeight: 0
       dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Scripts","grassHeight":2}'
     - type: 1
+      grassTileSetupData:
+        grassHeight: 0
       dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Scripts","grassHeight":2}'
     - type: 1
+      grassTileSetupData:
+        grassHeight: 0
       dataStr: '{"$type":"Game.Tiles.GrassTileSetupData, Scripts","grassHeight":2}'
     width: 4
     depth: 4

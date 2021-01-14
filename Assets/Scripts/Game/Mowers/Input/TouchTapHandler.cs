@@ -32,7 +32,7 @@ namespace Game.Mowers.Input
         {
             Gizmos.color = Color.blue;
 
-            Vector3 worldMowerPos = positioner.GetWorldPosition(_mowerPosition == null ? fakeMowerPos : _mowerPosition.MowerPosition);
+            Vector3 worldMowerPos = positioner.GetWorldPosition(_mowerPosition == null ? fakeMowerPos : _mowerPosition.CurrentPosition.Value);
 
             GridVector[] cardinalVectors = new GridVector[] { GridVector.Right, GridVector.Down, GridVector.Left, GridVector.Up };
 
@@ -77,7 +77,7 @@ namespace Game.Mowers.Input
             Vector3 tapWorldPos = screenToWorldConverter.GetWorldPoint(finger.ScreenPosition);
             GridVector gridPos = positioner.GetGridPosition(tapWorldPos);
 
-            GridVector mowerPos = _mowerPosition.MowerPosition;
+            GridVector mowerPos = _mowerPosition.CurrentPosition.Value;
 
             if (gridPos == mowerPos)
             {
@@ -107,12 +107,12 @@ namespace Game.Mowers.Input
                 return false;
             }
             
-            return Vector3.SqrMagnitude(tapWorldPos - positioner.GetWorldPosition(_mowerPosition.MowerPosition)) > maxDistanceFromMower * maxDistanceFromMower;
+            return Vector3.SqrMagnitude(tapWorldPos - positioner.GetWorldPosition(_mowerPosition.CurrentPosition.Value)) > maxDistanceFromMower * maxDistanceFromMower;
         }
 
         private bool IsWorldPositionWithinToleranceAngle(Vector3 position, out GridVector closestCardinalDirection)
         {
-            Vector3 mowerWorldPos = positioner.GetWorldPosition(_mowerPosition.MowerPosition);
+            Vector3 mowerWorldPos = positioner.GetWorldPosition(_mowerPosition.CurrentPosition.Value);
             Vector3 displacementFromMower = position - mowerWorldPos;
 
             GridVector gridDisplacement = positioner.GetGridPosition(displacementFromMower);
