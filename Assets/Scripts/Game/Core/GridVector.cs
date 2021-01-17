@@ -85,8 +85,7 @@ namespace Game.Core
 
 		public bool Equals(GridVector other)
 		{
-			return x == other.x &&
-			       y == other.y;
+			return x == other.x && y == other.y;
 		}
 
 		public override string ToString()

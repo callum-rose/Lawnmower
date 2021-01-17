@@ -1,6 +1,5 @@
 using Sirenix.OdinInspector;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using BalsamicBits.Extensions;
@@ -31,9 +30,10 @@ namespace Game.Tiles
 			switch (tile)
 			{
 				case EmptyTile _:
-					tileType = TileType.Empty;
-					tileObjectType = typeof(EmptyTileObject);
-					break;
+					return null;
+					// tileType = TileType.Empty;
+					// tileObjectType = typeof(EmptyTileObject);
+					// break;
 				case StoneTile _:
 					tileType = TileType.Stone;
 					tileObjectType = typeof(StoneTileObject);

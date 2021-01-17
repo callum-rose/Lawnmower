@@ -10,7 +10,7 @@ namespace Game.Mowers.Input
     {
         [SerializeField] private IMowerMovementGestureHandlerContainer[] _gestureHandlerContainers;
 
-        public event Action<GridVector> Moved;
+        public event Action<GridVector> MovedInDirection;
 
         private void OnEnable()
         {
@@ -30,7 +30,7 @@ namespace Game.Mowers.Input
 
         private void OnTouchGestureMoved(GridVector direction)
         {
-            Moved.Invoke(direction);
+            MovedInDirection.Invoke(direction);
         }
     }
 }

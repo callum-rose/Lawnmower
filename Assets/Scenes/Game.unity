@@ -265,8 +265,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mowerObjectCreator: {fileID: 83278716}
-  mowerMovementManager: {fileID: 11400000, guid: a68236ce6e199634094c1d5570d74ed7,
-    type: 2}
   mowerControls:
   - ObjectField: {fileID: 170081300}
     ResultType: 
@@ -275,6 +273,11 @@ MonoBehaviour:
   mowerPositionRequirers:
   - ObjectField: {fileID: 1028350308}
     ResultType: 
+  headlessMowerManager: {fileID: 0}
+  mowerCreatedEventChannel: {fileID: 11400000, guid: 12a07be353cc1b842a6e74de6d86c941,
+    type: 2}
+  mowerWillBeDestroyedEventChannel: {fileID: 11400000, guid: 89d00f52c0ad0d64ea569bd20538af21,
+    type: 2}
 --- !u!1 &57717351
 GameObject:
   m_ObjectHideFlags: 3
@@ -834,7 +837,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 4.5905e-41, y: -2.2115454e+19, z: 4.5905e-41, w: 9.403955e-38}
+  m_BoundingSphereOverride: {x: 0, y: 2.3509887e-38, z: 2.7107536e-20, w: 7.737127e+25}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ShadowRadius: 0
@@ -1631,7 +1634,7 @@ Camera:
   far clip plane: 34.45
   field of view: 60
   orthographic: 1
-  orthographic size: 3
+  orthographic size: 5
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -1654,7 +1657,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 534669902}
-  m_LocalRotation: {x: 0.3140207, y: 0.29840145, z: -0.10467353, w: 0.8952045}
+  m_LocalRotation: {x: 0.31402075, y: 0.29840147, z: -0.10467358, w: 0.8952044}
   m_LocalPosition: {x: -7.5, y: 9.5, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
@@ -1788,15 +1791,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f018ed166d79d4d4aba21e45748ad830, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cameraManager: {fileID: 753614662}
   mowerManager: {fileID: 57374275}
   levelManager: {fileID: 1701694278}
+  levelTraversalChecker: {fileID: 11400000, guid: 3c448be198e671746bdbe22256346721,
+    type: 2}
   levelDataManager: {fileID: 11400000, guid: aa70aff86d447fa4ea3762dc62345078, type: 2}
   undoSystemContainer:
     ObjectField: {fileID: 165245712}
     ResultType: 
   undoController: {fileID: 165245711}
-  dialogManager: {fileID: 11400000, guid: a230c2ec3c5d0b148a0f2a3b8c3e8a30, type: 2}
+  openDialogEventChannel: {fileID: 11400000, guid: 0611004ef216acb40ae7cf58c8128b48,
+    type: 2}
+  closeDialogEventChannel: {fileID: 11400000, guid: f34ff3e23ec36c247b8992dc19da2023,
+    type: 2}
 --- !u!1001 &581798740
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2044,7 +2051,7 @@ PrefabInstance:
         type: 3}
       propertyPath: unityEvent.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 11400000, guid: 2d6cb3c9bd233534f9588143e4605946,
+      objectReference: {fileID: 11400000, guid: bb700735cefe63048ab09831abb58fab,
         type: 2}
     - target: {fileID: 9200237905882389980, guid: 92f3ec301908e9840ae4d2c881aba10a,
         type: 3}
@@ -2059,7 +2066,7 @@ PrefabInstance:
     - target: {fileID: 9200237905882389980, guid: 92f3ec301908e9840ae4d2c881aba10a,
         type: 3}
       propertyPath: unityEvent.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: Core.BaseEventChannel, Assembly-CSharp
+      value: UI.Dialogs.PresetOpenDialogEventChannel, Scripts
       objectReference: {fileID: 0}
     - target: {fileID: 9200237905882389980, guid: 92f3ec301908e9840ae4d2c881aba10a,
         type: 3}
@@ -2438,8 +2445,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   targetGroupVCam: {fileID: 964599404}
   cameraTargetGroup: {fileID: 1945353389}
-  levelManager: {fileID: 1701694278}
+  levelManager: {fileID: 0}
   mouseTileSelector: {fileID: 120270601}
+  mowerCreatedEventChannel: {fileID: 11400000, guid: 12a07be353cc1b842a6e74de6d86c941,
+    type: 2}
+  tileCreatedEventChannel: {fileID: 11400000, guid: 95491f78af613584aba91dc576d106dc,
+    type: 2}
+  tileWillBeDestroyedEventChannel: {fileID: 11400000, guid: bf826475b5d2c464dacbf233e062bee4,
+    type: 2}
 --- !u!4 &753614663
 Transform:
   m_ObjectHideFlags: 0
@@ -2955,7 +2968,8 @@ MonoBehaviour:
   quitButtonResizer: {fileID: 1944904114}
   undoButtonResizer: {fileID: 307303290}
   buttonShrinkPause: 3
-  dialogManager: {fileID: 11400000, guid: a230c2ec3c5d0b148a0f2a3b8c3e8a30, type: 2}
+  openDialogEventChannel: {fileID: 11400000, guid: 0611004ef216acb40ae7cf58c8128b48,
+    type: 2}
 --- !u!1 &958338546
 GameObject:
   m_ObjectHideFlags: 0
@@ -3144,7 +3158,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 964599403}
-  m_LocalRotation: {x: 0.3140207, y: 0.29840145, z: -0.10467353, w: 0.8952045}
+  m_LocalRotation: {x: 0.31402075, y: 0.29840147, z: -0.10467358, w: 0.8952044}
   m_LocalPosition: {x: -7.5, y: 9.5, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -4567,16 +4581,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 1701694276}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4abb0045628010b45aa716cb32caf211, type: 3}
+  m_Script: {fileID: 11500000, guid: 9a470f5f389b4e47a2abb6d38e4acf7f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mowerMovementManager: {fileID: 11400000, guid: a68236ce6e199634094c1d5570d74ed7,
-    type: 2}
   levelFactory: {fileID: 2014382487}
-  traversalChecker: {fileID: 11400000, guid: 3c448be198e671746bdbe22256346721, type: 2}
-  tileInteractor: {fileID: 11400000, guid: 4185931dfdfd65f42a05487f3816bcf0, type: 2}
-  levelStateChecker: {fileID: 11400000, guid: 1f6b20944fa48e64da8645eca9673f35, type: 2}
-  positioner: {fileID: 2014382489}
+  headlessLevelManager: {fileID: 11400000, guid: 9130864bceac75a4bae05e3b72f6d680,
+    type: 2}
 --- !u!1 &1729836877
 GameObject:
   m_ObjectHideFlags: 0
@@ -5100,7 +5110,7 @@ MonoBehaviour:
     ObjectField: {fileID: 120270601}
     ResultType: 
   tileUiManager: {fileID: 2001342489}
-  levelManager: {fileID: 1701694278}
+  levelManager: {fileID: 0}
   undoSystemContainer:
     ObjectField: {fileID: 165245712}
     ResultType: 
@@ -5117,21 +5127,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gameManager: {fileID: 553937442}
-  levelManager: {fileID: 1701694278}
+  levelManager: {fileID: 0}
   tileSelector:
     ObjectField: {fileID: 120270601}
     ResultType: 
+  levelTraversalChecker: {fileID: 11400000, guid: dcda4670148b06946a2546a368d4b8e0,
+    type: 2}
   uiContainer: {fileID: 2001342488}
   gridRenderer: {fileID: 25880452}
   tileRenderer: {fileID: 25880451}
-  hasEditModes:
-  - ObjectField: {fileID: 11400000, guid: 4185931dfdfd65f42a05487f3816bcf0, type: 2}
-    ResultType: 
-  - ObjectField: {fileID: 11400000, guid: 3c448be198e671746bdbe22256346721, type: 2}
-    ResultType: 
+  hasEditModeContainers:
   - ObjectField: {fileID: 1701694278}
-    ResultType: 
+    ResultType: LevelManager
   - ObjectField: {fileID: 2001342491}
+    ResultType: EditorTileUpdator
+  - ObjectField: {fileID: 11400000, guid: dcda4670148b06946a2546a368d4b8e0, type: 2}
+    ResultType: 
+  - ObjectField: {fileID: 11400000, guid: 4185931dfdfd65f42a05487f3816bcf0, type: 2}
     ResultType: 
   mowerData: {fileID: 11400000, guid: 9d84f272dfc01484eb3161f5466cb403, type: 2}
   levelAsset: {fileID: 11400000, guid: 838755f9d2141f7439d4758da2743aed, type: 2}
@@ -5182,6 +5194,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tileFactory: {fileID: 2014382485}
   positioner: {fileID: 2014382489}
+  tileCreatedEventChannel: {fileID: 11400000, guid: 95491f78af613584aba91dc576d106dc,
+    type: 2}
+  tileWillBeDestroyedEventChannel: {fileID: 11400000, guid: bf826475b5d2c464dacbf233e062bee4,
+    type: 2}
 --- !u!4 &2014382488
 Transform:
   m_ObjectHideFlags: 0

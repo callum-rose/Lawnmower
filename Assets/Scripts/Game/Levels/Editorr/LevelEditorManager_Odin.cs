@@ -1,9 +1,11 @@
 #if UNITY_EDITOR
 
+using System.Linq;
 using Game.Core;
 using Game.Mowers;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using Utils;
 
 namespace Game.Levels.Editorr
 {
@@ -67,6 +69,36 @@ namespace Game.Levels.Editorr
 		{
 			levelSaver.Save_Editor(_editableLevel, levelManager.MowerPosition);
 		}
+
+		// private bool ValidateHasEditModeContainers(IHasEditModeContainer[] containers, ref string errorMessage)
+		// {
+		// 	IHasEditMode[] inspectorEditModes = containers.Select(c => c.Result).ToArray();
+		// 	IHasEditMode[] foundEditModes = InterfaceHelper.FindObjects<IHasEditMode>();
+		//
+		// 	foreach (IHasEditMode foundEditMode in foundEditModes)
+		// 	{
+		// 		if (!inspectorEditModes.Contains(foundEditMode))
+		// 		{
+		// 			return false;
+		// 		}
+		// 	}
+		//
+		// 	return true;
+		// }
+		//
+		// [Button]
+		// private void UpdateEditModes()
+		// {
+		// 	hasEditModeContainers = InterfaceHelper
+		// 		.FindObjects<IHasEditMode>()
+		// 		.Select(i =>
+		// 		{
+		// 			var newContainer = new IHasEditModeContainer();
+		// 			newContainer.Result = i;
+		// 			return newContainer;
+		// 		})
+		// 		.ToArray();
+		// }
 	}
 }
 #endif

@@ -6,7 +6,7 @@ using IUnified;
 
 namespace Game.Levels
 {
-    internal interface IReadOnlyLevelData : IEnumerable<Tile>
+    public interface IReadOnlyLevelData : IEnumerable<Tile>
     {
         Guid Id { get; }
         

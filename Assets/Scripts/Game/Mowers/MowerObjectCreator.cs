@@ -1,4 +1,5 @@
 using Game.Core;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Game.Mowers
@@ -8,13 +9,13 @@ namespace Game.Mowers
 		[SerializeField] private Transform container;
 		[SerializeField] private Positioner positioner;
 
-		public GameObject Create(MowerData mower, MowerMoverr mowerMoverr)
+		public MowerObject Create(MowerData mower, MowerMover mowerMover)
 		{
 			MowerObject newMower = Instantiate(mower.Prefab, container);
 			newMower.Init(positioner);
-			newMower.Bind(mowerMoverr);
+			newMower.Bind(mowerMover);
 
-			return newMower.gameObject;
+			return newMower;
 		}
 	}
 }

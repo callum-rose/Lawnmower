@@ -1,8 +1,5 @@
 using System;
-using System.Diagnostics;
-using Sirenix.OdinInspector;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
 
 namespace Game.Tiles
 {

@@ -4,6 +4,8 @@ using UnityEngine.Serialization;
 using Game.Levels;
 using Game.Tiles;
 using System.Linq;
+using Core.EventChannels;
+using Sirenix.OdinInspector;
 
 namespace Game.Cameras
 {
@@ -11,25 +13,34 @@ namespace Game.Cameras
     {
         [SerializeField, FormerlySerializedAs("virtualCamera")] private CinemachineVirtualCamera targetGroupVCam;
         [SerializeField] private CinemachineTargetGroup cameraTargetGroup;
-        [SerializeField] private LevelManager levelManager;
+        [SerializeField] private HeadlessLevelManager levelManager;
         [SerializeField] private MouseTileSelector mouseTileSelector;
+
+        [Title("Event Channels")] 
+        [SerializeField] private GameObjectEventChannel mowerCreatedEventChannel;
+        [SerializeField] private GameObjectEventChannel tileCreatedEventChannel;
+        [SerializeField] private GameObjectEventChannel tileWillBeDestroyedEventChannel;
 
         #region Unity
 
         private void Awake()
         {
-            // levelManager.TileAdded += LevelManager_TileAdded;
-            // levelManager.TileDestroyed += LevelManager_TileDestroyed;
-
             mouseTileSelector.Dragging += OnMouseDragging;
+
+            mowerCreatedEventChannel.EventRaised += OnMowerCreated;
+            
+            tileCreatedEventChannel.EventRaised += OnTileObjectCreated;
+            tileWillBeDestroyedEventChannel.EventRaised += OnTileObjectWillBeDestroyed;
         }
 
         private void OnDestroy()
         {
-            // levelManager.TileAdded -= LevelManager_TileAdded;
-            // levelManager.TileDestroyed -= LevelManager_TileDestroyed;
-
             mouseTileSelector.Dragging -= OnMouseDragging;
+            
+            mowerCreatedEventChannel.EventRaised -= OnMowerCreated;
+            
+            tileCreatedEventChannel.EventRaised -= OnTileObjectCreated;
+            tileWillBeDestroyedEventChannel.EventRaised -= OnTileObjectWillBeDestroyed;
         }
 
         #endregion
@@ -50,14 +61,19 @@ namespace Game.Cameras
 
         #region Events
 
-        private void LevelManager_TileAdded(Transform tileTransform)
+        private void OnMowerCreated(GameObject gameObject)
         {
-            cameraTargetGroup.AddMember(tileTransform, 1, LevelDimensions.TileSize * 0.5f);
+            
         }
-
-        private void LevelManager_TileDestroyed(Transform tileTransform)
+        
+        private void OnTileObjectCreated(GameObject gameObject)
         {
-            if (tileTransform == null)
+            cameraTargetGroup.AddMember(gameObject.transform, 1, LevelDimensions.TileSize * 0.5f);
+        }        
+        
+        private void OnTileObjectWillBeDestroyed(GameObject gameObject)
+        {
+            if (gameObject.transform == null)
             {
                 cameraTargetGroup.m_Targets = cameraTargetGroup.m_Targets
                     .Where(t => t.target != null)
@@ -65,7 +81,7 @@ namespace Game.Cameras
                 return;
             }
 
-            cameraTargetGroup.RemoveMember(tileTransform);
+            cameraTargetGroup.RemoveMember(gameObject.transform);
         }
 
         private void OnMouseDragging(bool isDragging)

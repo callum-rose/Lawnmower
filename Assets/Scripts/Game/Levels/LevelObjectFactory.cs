@@ -1,5 +1,9 @@
+using System;
+using System.Collections.Generic;
+using Core.EventChannels;
 using Game.Core;
 using Game.Tiles;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Game.Levels
@@ -8,6 +12,10 @@ namespace Game.Levels
     {
         [SerializeField] private TileObjectFactory tileFactory;
         [SerializeField] private Positioner positioner;
+        
+        [TitleGroup("Event Channels")]
+        [SerializeField] private GameObjectEventChannel tileCreatedEventChannel;
+        [SerializeField] private GameObjectEventChannel tileWillBeDestroyedEventChannel;
 
         #region API
 
@@ -35,14 +43,23 @@ namespace Game.Levels
         private GameObject BuildAt(GridVector position, Tile tile)
         {
             GameObject newTileObject = tileFactory.Create(tile);
+
+            if (!newTileObject)
+            {
+                return newTileObject;
+            }
+
             positioner.Position(newTileObject.transform, position);
 #if UNITY_EDITOR
-            gameObject.name = "Tile " + position;
+            newTileObject.name = "Tile " + position;
 #endif
+
+            tileCreatedEventChannel.Raise(newTileObject);
+
             return newTileObject;
         }
 
-        public void Destroy(GameObject[,] tileObjects)
+        public void Remove(IEnumerable<GameObject> tileObjects)
         {
             if (tileObjects == null)
             {
@@ -57,6 +74,8 @@ namespace Game.Levels
 
         public void Remove(GameObject tileObject)
         {
+            tileWillBeDestroyedEventChannel.Raise(tileObject);
+            
             tileFactory.Remove(tileObject);
         }
 

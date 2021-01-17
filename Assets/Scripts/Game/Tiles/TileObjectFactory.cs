@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using BalsamicBits.Extensions;
 using Pool;
 using UnityEngine.Serialization;
 
@@ -28,6 +27,12 @@ namespace Game.Tiles
             //Tile newTile = _poolDict[data.Type].Get();
 
             BaseTileObject newTileObject = tilePrefabsManager.GetPrefabAndInstantiate(tile);
+
+            if (newTileObject == null)
+            {
+                return null;
+            }
+            
             newTileObject.Bind(tile);
             
             return newTileObject.gameObject;

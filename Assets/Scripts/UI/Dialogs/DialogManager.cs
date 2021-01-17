@@ -1,6 +1,7 @@
 using Core;
 using Sirenix.OdinInspector;
 using System.Collections.Generic;
+using Core.EventChannels;
 using UI.Buttons;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -11,9 +12,11 @@ namespace UI.Dialogs
     internal class DialogManager : ScriptableObject
     {
         [SerializeField, AssetsOnly] private Dialog dialogPrefab;
+        [SerializeField, AssetsOnly] private OpenDialogEventChannel openDialogEventChannel;
+        [SerializeField, AssetsOnly] private CloseDialogEventChannel closeDialogEventChannel;
 
-        private static int _currentDialogId = 0;
-        private readonly static Dictionary<int, Dialog> _idToDialogDict = new Dictionary<int, Dialog>();
+        private int _currentDialogId = 0;
+        private readonly Dictionary<int, Dialog> _idToDialogDict = new Dictionary<int, Dialog>();
 
         private Transform _dialogContainer;
 
@@ -22,83 +25,40 @@ namespace UI.Dialogs
         private void OnEnable()
         {
             SceneManager.activeSceneChanged += SceneManager_sceneLoaded;
+            
+            openDialogEventChannel.EventRaised += Show;
+            closeDialogEventChannel.EventRaised += Close;
         }
 
         private void OnDisable()
         {
             SceneManager.activeSceneChanged -= SceneManager_sceneLoaded;
-        }
-
-        #endregion
-
-        #region API
-
-        /// <summary>
-        /// Return dialog ID
-        /// </summary>
-        /// <param name="header"></param>
-        /// <param name="body"></param>
-        /// <param name="buttonInfo"></param>
-        /// <returns>Dialog ID</returns>
-        public int Show(string header, string body, ButtonInfo buttonInfo)
-        {
-            _currentDialogId++;
             
-            Dialog dialog = Create();
-            dialog.Init(
-                _currentDialogId,
-                header, body,
-                new ButtonInfo(
-                    message: buttonInfo.Message,
-                    action: () =>
-                    {
-                        buttonInfo.Action();
-                        dialog.Close();
-                    }));
-
-            _idToDialogDict.Add(_currentDialogId, dialog);
-            return _currentDialogId;
-        }
-
-        public int Show(string header, string body, ButtonInfo cancelButtonInfo, ButtonInfo acceptButtonInfo)
-        {
-            _currentDialogId++;
-
-            Dialog dialog = Create();
-            dialog.Init(
-                _currentDialogId,
-                header, body,
-                new ButtonInfo(
-                    message: cancelButtonInfo.Message, 
-                    action: () =>
-                    {
-                        cancelButtonInfo.Action?.Invoke();
-                        dialog.Close();
-                    }),
-                new ButtonInfo(
-                    message: acceptButtonInfo.Message, 
-                    action: () =>
-                    {
-                        acceptButtonInfo.Action?.Invoke();
-                        dialog.Close();
-                    }));
-
-            dialog.Show();
-
-            _idToDialogDict.Add(_currentDialogId, dialog);
-            return _currentDialogId;
-        }
-
-        public void Close(int dialogId)
-        {
-            Dialog dialog = _idToDialogDict[dialogId];
-            dialog.Close();
+            openDialogEventChannel.EventRaised -= Show;
+            closeDialogEventChannel.EventRaised -= Close;
         }
 
         #endregion
 
         #region Events
 
+        private int Show(DialogInfo info)
+        {
+            _currentDialogId++;
+            
+            Dialog dialog = Create();
+            dialog.Init(_currentDialogId, info, () => Close(_currentDialogId));
+
+            _idToDialogDict.Add(_currentDialogId, dialog);
+            return _currentDialogId;
+        }
+
+        private void Close(int dialogId)
+        {
+            Dialog dialog = _idToDialogDict[dialogId];
+            dialog.Close();
+        }
+        
         private void OnDialogHidden(Dialog dialog)
         {
             DestroyDialog(dialog);

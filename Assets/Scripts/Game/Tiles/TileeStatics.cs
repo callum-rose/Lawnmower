@@ -5,6 +5,7 @@ namespace Game.Tiles
 		public static readonly Tile[] AllTileConfigurations =
 		{
 			new EmptyTile(),
+			new GrassTile(0),
 			new GrassTile(1),
 			new GrassTile(2),
 			new GrassTile(3),

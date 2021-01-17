@@ -1,5 +1,3 @@
-using UnityEngine;
-
 namespace Game.Tiles
 {
 	internal class StoneTileObject : BaseTileObject

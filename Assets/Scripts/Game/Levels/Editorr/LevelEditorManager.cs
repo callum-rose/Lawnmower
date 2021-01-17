@@ -1,8 +1,11 @@
+using System.Linq;
 using Game.Core;
 using Game.Mowers;
 using Game.Tiles;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.Serialization;
+using Utils;
 using R = Sirenix.OdinInspector.RequiredAttribute;
 
 namespace Game.Levels.Editorr
@@ -11,8 +14,9 @@ namespace Game.Levels.Editorr
     {
         [TitleGroup("Dependencies")]
         [SerializeField, R] private GameManager gameManager;
-        [SerializeField, R] private LevelManager levelManager;
+        [SerializeField, R] private HeadlessLevelManager levelManager;
         [SerializeField, R] private ITileSelectorContainer tileSelector;
+        [SerializeField, R] private EditModeLevelTraversalChecker levelTraversalChecker;
 
         [Space]
         [SerializeField, R] private GameObject uiContainer;
@@ -21,8 +25,9 @@ namespace Game.Levels.Editorr
         [SerializeField, R] private GizmoGridRenderer gridRenderer;
         [SerializeField, R] private GizmoSelectedTileRenderer tileRenderer;
 
-        [SerializeField, R, ListDrawerSettings, LabelWidth(0)]
-        private IHasEditModeContainer[] hasEditModes;
+        [FormerlySerializedAs("hasEditModes"),SerializeField, R, ListDrawerSettings, LabelWidth(0)]
+        //[ValidateInput(nameof(ValidateHasEditModeContainers))]
+        private IHasEditModeContainer[] hasEditModeContainers;
 
         public bool IsEditMode
         {
@@ -31,7 +36,7 @@ namespace Game.Levels.Editorr
             {
                 ___isEditMode = value;
 
-                foreach (IHasEditModeContainer e in hasEditModes)
+                foreach (IHasEditModeContainer e in hasEditModeContainers)
                 {
                     e.Result.IsEditMode = ___isEditMode;
                 }
@@ -79,7 +84,7 @@ namespace Game.Levels.Editorr
         }
 
         #endregion
-        
+
         #region Methods
 
         private void Begin(GameSetupPassThroughData data, bool isEdit)

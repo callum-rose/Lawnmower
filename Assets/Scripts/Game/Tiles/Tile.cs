@@ -1,23 +1,17 @@
 using System;
-using System.Collections.Generic;
 using Game.Core;
 using Game.UndoSystem;
 using Newtonsoft.Json;
-using UnityEngine;
 using UnityEngine.Assertions;
 
 namespace Game.Tiles
 {
 	[Serializable]
-	internal abstract class Tile
+	public abstract class Tile
 	{
-		// [SerializeField] private string data;
+		[JsonIgnore] public abstract bool IsComplete { get; }
 
-		[JsonIgnore]
-		public abstract bool IsComplete { get; }
-		
-		[JsonIgnore]
-		public virtual bool IsRuined => false;
+		[JsonIgnore] public virtual bool IsRuined => false;
 
 		public abstract bool IsTraversable(bool editMode);
 
@@ -27,15 +21,12 @@ namespace Game.Tiles
 		public event TraverseEvent TraversedAway;
 		public event TraverseEvent BumpedInto;
 
-		private readonly JsonSerializerSettings _serializerSettings = new JsonSerializerSettings()
+		public Tile Clone()
 		{
-			TypeNameHandling = TypeNameHandling.All,
-			NullValueHandling = NullValueHandling.Ignore
-		};
-
-		public virtual void Setup(object data)
-		{
-			Assert.IsNull(data);
+			JsonSerializerSettings jsonSerializerSettings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All };
+			string serializeObject = JsonConvert.SerializeObject(this, jsonSerializerSettings);
+			object deserializeObject = JsonConvert.DeserializeObject(serializeObject, jsonSerializerSettings);
+			return deserializeObject as Tile;
 		}
 
 		public virtual void TraverseOnto(GridVector fromDirection, Xor inversion)
@@ -52,28 +43,6 @@ namespace Game.Tiles
 		{
 			BumpedInto?.Invoke(fromDirection, inversion);
 		}
-
-		// public void OnBeforeSerialize()
-		// {
-		// 	// List<KeyValuePair<string, object>> keyValuePairs = OnSerialise();
-		// 	// data = JsonConvert.SerializeObject(keyValuePairs, _serializerSettings);
-		// }
-		//
-		// public void OnAfterDeserialize()
-		// {
-		// 	// List<KeyValuePair<string, object>> keyValuePairs =
-		// 	// 	JsonConvert.DeserializeObject<List<KeyValuePair<string, object>>>(data);
-		// 	// OnDeserialise(keyValuePairs);
-		// }
-
-		// protected virtual List<KeyValuePair<string, object>> OnSerialise()
-		// {
-		// 	return null;
-		// }
-		//
-		// protected virtual void OnDeserialise(List<KeyValuePair<string, object>> keyValuePairs)
-		// {
-		// }
 
 		public override string ToString()
 		{

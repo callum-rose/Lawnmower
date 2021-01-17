@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Game.Tiles;
+﻿using Game.Tiles;
 using UI.Buttons;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -22,7 +21,7 @@ namespace Game.Levels.Editorr
                 Button newButton = Instantiate(buttonPrefab, buttonContainer);
                 ButtonInfo info = new ButtonInfo(
                     tile.ToString(), 
-                    action: () => OnIconClicked(tile));
+                    action: () => OnIconClicked(tile.Clone()));
                 newButton.Init(info);
             }
         }

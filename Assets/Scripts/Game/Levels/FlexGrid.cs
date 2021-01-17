@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Game.Levels
@@ -19,7 +20,7 @@ namespace Game.Levels
 			get => GetElement(x, y, Offset, _internalGrid);
 			set
 			{
-				ExpandInternalGridToInclude(x, y);
+				ExpandToInclude(x, y);
 				SetElement(x, y, Offset, _internalGrid, value);
 			}
 		}
@@ -32,8 +33,8 @@ namespace Game.Levels
 
 		public FlexGrid(T[,] input, Func<T> defaultFactory) : this(defaultFactory)
 		{
-			ExpandInternalGridToInclude(0, 0);
-			ExpandInternalGridToInclude(GetArrayWidth(input) - 1, GetArrayHeight(input) - 1);
+			ExpandToInclude(0, 0);
+			ExpandToInclude(GetArrayWidth(input) - 1, GetArrayHeight(input) - 1);
 
 			for (int i = 0; i < GetArrayWidth(input); i++)
 			{
@@ -44,27 +45,32 @@ namespace Game.Levels
 			}
 		}
 
+		public bool PositionExists(int x, int y)
+		{
+			return Bounds.Contains(new Vector2Int(x, y));
+		}
+
 		public void ExpandUp()
 		{
-			ExpandInternalGridToInclude(Bounds.xMin, Bounds.yMax);
+			ExpandToInclude(Bounds.xMin, Bounds.yMax);
 		}
 		
 		public void ExpandRight()
 		{
-			ExpandInternalGridToInclude(Bounds.xMax, Bounds.yMin);
+			ExpandToInclude(Bounds.xMax, Bounds.yMin);
 		}
 		
 		public void ExpandDown()
 		{
-			ExpandInternalGridToInclude(Bounds.xMin, Bounds.yMin - 1);
+			ExpandToInclude(Bounds.xMin, Bounds.yMin - 1);
 		}
 		
 		public void ExpandLeft()
 		{
-			ExpandInternalGridToInclude(Bounds.xMin - 1, Bounds.yMin);
+			ExpandToInclude(Bounds.xMin - 1, Bounds.yMin);
 		}
 
-		private void ExpandInternalGridToInclude(int x, int y)
+		public void ExpandToInclude(int x, int y)
 		{
 			if (Bounds.Contains(new Vector2Int(x, y)))
 			{
@@ -159,7 +165,7 @@ namespace Game.Levels
 		
 		public IEnumerator<T> GetEnumerator()
 		{
-			return (_internalGrid.GetEnumerator() as IEnumerator<T>)!;
+			return _internalGrid.Cast<T>().GetEnumerator();
 		}
 
 		IEnumerator IEnumerable.GetEnumerator()

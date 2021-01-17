@@ -4,13 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Sirenix.OdinInspector;
-using BalsamicBits.Extensions;
 using Core;
 using Game.Core;
 using Game.Tiles;
 using Newtonsoft.Json;
 using Sirenix.Serialization;
-using Sirenix.Utilities;
 using UnityEngine.Serialization;
 using Utils;
 
@@ -76,12 +74,12 @@ namespace Game.Levels
 			return GetTile(position.x, position.y);
 		}
 
-		public static LevelData CreateFrom(EditableLevelData input)
+		public static LevelData CreateFrom(IReadOnlyLevelData input)
 		{
 			LevelData output = CreateInstance<LevelData>();
 
 			output.newTiles = new Tile[input.Width, input.Depth];
-			Loops.TwoD(input.Width, input.Depth, (x, y) => output.newTiles[x, y] = input.GetTile(x, y));
+			Loops.TwoD(input.Width, input.Depth, (x, y) => output.newTiles[x, y] = input.GetTile(x, y).Clone());
 
 			output.startPosition = input.StartPosition;
 

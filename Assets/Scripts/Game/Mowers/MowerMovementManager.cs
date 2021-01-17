@@ -13,30 +13,33 @@ namespace Game.Mowers
     [CreateAssetMenu(fileName = nameof(MowerMovementManager), menuName = SONames.GameDir + nameof(MowerMovementManager))]
     public partial class MowerMovementManager : ScriptableObject, IMowerRunnable
     {
-        [SerializeField] private LevelTraversalChecker traversalChecker;
-        [FormerlySerializedAs("levelInteractor")] [SerializeField] private TileInteractor tileInteractor;
+        [SerializeField] private TileInteractor tileInteractor;
 
         /// <summary>
         /// First parameter is the previous position, second is target position
         /// </summary>
+#pragma warning disable 67
         public event UndoableAction<GridVector, GridVector> Moved, Bumped;
-        
+#pragma warning restore 67
+
         public GridVector MowerPosition => _mowerMover.CurrentPosition.Value;
 
         public bool IsRunning { get; set; } = false;
         
-        private MowerMoverr _mowerMover;
+        private ILevelTraversalChecker _traversalChecker;
+
+        private MowerMover _mowerMover;
         private IMowerControls[] _mowerControls;
 
         private IUndoSystem _undoManager;
-
+        
         #region Unity
 
         private void OnDestroy()
         {
             foreach (IMowerControls mc in _mowerControls)
             {
-                mc.Moved -= OnInput;
+                mc.MovedInDirection -= OnInput;
             }
         }
 
@@ -44,15 +47,19 @@ namespace Game.Mowers
 
         #region API
 
-        public void Init(MowerMoverr mowerMover, IMowerControls[] controls, IUndoSystem undoManager)
+        internal void Construct(TileInteractor tileInteractor) => this.tileInteractor = tileInteractor;
+
+        public void Init(MowerMover mowerMover, IMowerControls[] controls, ILevelTraversalChecker traversalChecker, IUndoSystem undoManager)
         {
             _mowerMover = mowerMover;
-
+            
             _mowerControls = controls;
             foreach (IMowerControls mc in _mowerControls)
             {
-                mc.Moved += OnInput;
+                mc.MovedInDirection += OnInput;
             }
+
+            _traversalChecker = traversalChecker;
 
             _undoManager = undoManager;
         }
@@ -79,17 +86,17 @@ namespace Game.Mowers
             GridVector targetPosition = MowerPosition + direction;
 
             IUndoable action;
-            switch (traversalChecker.CanTraverseTo(targetPosition))
+            switch (_traversalChecker.CanTraverseTo(targetPosition))
             {
-                case LevelTraversalChecker.CheckValue.Yes:
+                case TileTraversalStatus.Yes:
                     action = new UndoableMove(this, targetPosition, MowerPosition);
                     break;
 
-                case LevelTraversalChecker.CheckValue.NonTraversableTile:
+                case TileTraversalStatus.NonTraversable:
                     action = new UndoableBump(this, targetPosition, MowerPosition);
                     break;
 
-                case LevelTraversalChecker.CheckValue.OutOfBounds:
+                case TileTraversalStatus.OutOfBounds:
                 default:
                     return;
             }

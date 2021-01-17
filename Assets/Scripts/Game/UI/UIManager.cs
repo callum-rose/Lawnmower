@@ -1,5 +1,7 @@
 ﻿using Core;
 using System.Collections;
+using Core.EventChannels;
+using Sirenix.OdinInspector;
 using UI.Buttons;
 using UI.Dialogs;
 using UnityEngine;
@@ -10,8 +12,10 @@ namespace Game.UI
 	{
 		[SerializeField] private ButtonResizer quitButtonResizer, undoButtonResizer;
         [SerializeField] private float buttonShrinkPause = 3;
-        [SerializeField] private DialogManager dialogManager;
-      
+
+        [TitleGroup("Event Channels")]
+        [SerializeField] private OpenDialogEventChannel openDialogEventChannel;
+        
         #region Unity
 
         private IEnumerator Start()
@@ -28,11 +32,13 @@ namespace Game.UI
 
         public void OnQuitButton()
         {
-            dialogManager.Show(
+            DialogInfo dialogInfo = new DialogInfo(
                 "Quit Level",
                 "Are you sure? You'll lose your progress",
                 new ButtonInfo("Play On"),
                 new ButtonInfo("Quit", action: () => ViewManager.Instance.Load(UnityScene.LevelSelect)));
+
+            openDialogEventChannel.Raise(dialogInfo);
         }
 
         #endregion

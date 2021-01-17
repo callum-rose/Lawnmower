@@ -1,5 +1,6 @@
 using System;
 using Core;
+using Core.EventChannels;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
@@ -29,6 +30,16 @@ namespace UI.Buttons
 		public IconType Icon => icon;
 		public Action Action => InvokeAll;
 
+		public void AppendAction(Action action)
+		{
+			Action tempAction = _action;
+			_action = () =>
+			{
+				tempAction?.Invoke();
+				action.Invoke();
+			};
+		}
+		
 		private void InvokeAll()
 		{
 			_action?.Invoke();

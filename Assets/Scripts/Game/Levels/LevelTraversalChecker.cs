@@ -1,33 +1,37 @@
+using System;
 using Core;
 using Game.Core;
-using Game.Tiles;
-using System;
 using Game.Levels.Editorr;
+using Game.Tiles;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Game.Levels
 {
-    [CreateAssetMenu(fileName = nameof(LevelTraversalChecker), menuName = SONames.GameDir + nameof(LevelTraversalChecker))]
-    internal class LevelTraversalChecker : BaseLevelTraversalChecker
-    {
-        #region API
+	[CreateAssetMenu(fileName = nameof(LevelTraversalChecker), menuName = SONames.GameDir + nameof(LevelTraversalChecker))]
+	internal class LevelTraversalChecker : ScriptableObject, ILevelTraversalChecker
+	{
+		private IReadOnlyLevelData _levelData;
 
-        public override CheckValue CanTraverseTo(GridVector position)
-        {
-            if (LevelData == null)
-            {
-                throw new NullReferenceException("Tiles object is null");
-            }
+		public void Init(IReadOnlyLevelData levelData)
+		{
+			_levelData = levelData;
+		}
 
-            if (position.x < 0 || position.y < 0 || position.x >= LevelData.Width || position.y >= LevelData.Depth)
-            {
-                return CheckValue.OutOfBounds;
-            }
+		public TileTraversalStatus CanTraverseTo(GridVector position)
+		{
+			if (_levelData == null)
+			{
+				throw new NullReferenceException("Tiles object is null");
+			}
 
-            Tile tile = LevelData.GetTile(position);
-            return tile.IsTraversable(IsEditMode) ? CheckValue.Yes : CheckValue.NonTraversableTile;
-        }
+			if (position.x < 0 || position.y < 0 || position.x >= _levelData.Width || position.y >= _levelData.Depth)
+			{
+				return TileTraversalStatus.OutOfBounds;
+			}
 
-        #endregion
-    }
+			Tile tile = _levelData.GetTile(position);
+			return tile.IsTraversable(false) ? TileTraversalStatus.Yes : TileTraversalStatus.NonTraversable;
+		}
+	}
 }

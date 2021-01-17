@@ -14,3 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dialogPrefab: {fileID: 1315737800036090693, guid: cd1910f542abf6640b9795ff9054ff39,
     type: 3}
+  openDialogEventChannel: {fileID: 11400000, guid: 0611004ef216acb40ae7cf58c8128b48,
+    type: 2}
+  closeDialogEventChannel: {fileID: 11400000, guid: f34ff3e23ec36c247b8992dc19da2023,
+    type: 2}

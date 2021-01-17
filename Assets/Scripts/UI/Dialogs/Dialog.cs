@@ -15,25 +15,23 @@ namespace UI.Dialogs
 
         public event Action<Dialog> Hidden;
 
+        private Action _closeCallback;
+
         public int Id { get; private set; }
 
-        public void Init(int id, string header, string body, ButtonInfo buttonInfo)
+        public void Init(int id, DialogInfo info, Action closeCallback)
         {
             Id = id;
 
-            SetText(header, body);
+            SetText(info.header, info.body);
 
-            CreateButton(buttonInfo);
-        }
+            CreateButton(info.button1, closeCallback);
+            if (!info.Button2.Equals(default))
+            {
+                CreateButton(info.button1, closeCallback);
+            }
 
-        public void Init(int id, string header, string body, ButtonInfo leftButtonInfo, ButtonInfo rightButtonInfo)
-        {
-            Id = id;
-
-            SetText(header, body);
-
-            CreateButton(leftButtonInfo);
-            CreateButton(rightButtonInfo);
+            _closeCallback = closeCallback;
         }
 
         public void Show()
@@ -52,9 +50,11 @@ namespace UI.Dialogs
             bodyText.text = body;
         }
 
-        private void CreateButton(ButtonInfo buttonInfo)
+        private void CreateButton(ButtonInfo buttonInfo, Action closeCallback)
         {
             Button newButton = Instantiate(buttonPrefab, buttonContainer);
+            buttonInfo.AppendAction(closeCallback);
+            
             newButton.Init(buttonInfo);
         }
     }

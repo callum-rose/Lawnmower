@@ -12,8 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 77e53c6d019425c4684d4a8c5a350cd9, type: 3}
   m_Name: LevelDataManager
   m_EditorClassIdentifier: 
+  unlockAllLevels: 0
   levelDatas:
-  - {fileID: 11400000, guid: 7aa3cc021886ad74380fb3752660a4b3, type: 2}
+  - {fileID: 0}
   - {fileID: 11400000, guid: f7f236141454ffb41b1bdae46560bc7b, type: 2}
   - {fileID: 11400000, guid: 882b8b70f8cc51844a86d54c20f4d05a, type: 2}
   - {fileID: 11400000, guid: 61a03ae1afe290541a2bea10b613836b, type: 2}

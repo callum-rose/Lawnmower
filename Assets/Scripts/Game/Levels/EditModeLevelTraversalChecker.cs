@@ -7,35 +7,41 @@ using UnityEngine;
 
 namespace Game.Levels
 {
-	[CreateAssetMenu(fileName = nameof(EditModeLevelTraversalChecker), menuName = SONames.GameDir + nameof(EditModeLevelTraversalChecker))]
-	internal class EditModeLevelTraversalChecker : BaseLevelTraversalChecker
+	[CreateAssetMenu(fileName = nameof(EditModeLevelTraversalChecker),
+		menuName = SONames.GameDir + nameof(EditModeLevelTraversalChecker))]
+	internal class EditModeLevelTraversalChecker : ScriptableObject, ILevelTraversalChecker, IHasEditMode
 	{
-		[SerializeField] private TileTraversalUpgrader tileTraversalUpgrader;
-		
-		#region API
+		[SerializeField] private LevelTraversalChecker standardTraversalChecker;
+		[SerializeField] private EditModeLevelTileUpgrader levelTileUpgrader;
 
-		public override CheckValue CanTraverseTo(GridVector position)
+		public bool IsEditMode { get; set; }
+
+		private IReadOnlyLevelData _levelData;
+
+		public void Init(IReadOnlyLevelData levelData)
 		{
-			if (LevelData == null)
+			_levelData = levelData;
+			standardTraversalChecker.Init(levelData);
+		}
+
+		public TileTraversalStatus CanTraverseTo(GridVector position)
+		{
+			if (_levelData == null)
 			{
 				throw new NullReferenceException("Tiles object is null");
 			}
 
-			if (position.x < 0 || position.y < 0 || position.x >= LevelData.Width || position.y >= LevelData.Depth)
+			if (!IsEditMode)
 			{
-				return CheckValue.OutOfBounds;
+				return standardTraversalChecker.CanTraverseTo(position);
 			}
-			
-			Tile tile = LevelData.GetTile(position);
-			// TileData tileData = levelConverter.ConvertTileToData(tile);
-			// if (tileTraversalUpgrader.CanUpgradeTile(tileData, out var newData))
-			// {
-			// 	
-			// }
-			
-			return tile.IsTraversable(IsEditMode) ? CheckValue.Yes : CheckValue.NonTraversableTile;
-		}
 
-		#endregion
+			if (levelTileUpgrader.UpgradeIfPossible(position))
+			{
+				return TileTraversalStatus.Yes;
+			}
+
+			return _levelData.GetTile(position).IsTraversable(false) ? TileTraversalStatus.Yes : TileTraversalStatus.NonTraversable;
+		}
 	}
 }

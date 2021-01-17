@@ -1,4 +1,6 @@
+using System.Linq;
 using Core;
+using Core.EventChannels;
 using Game.Core;
 using Game.Mowers;
 using Game.Tiles;
@@ -15,6 +17,9 @@ namespace Game.Levels
 
 		public UndoableAction LevelCompleted, LevelFailed;
 
+		private bool IsLevelComplete => _levelData.All(tile => tile.IsComplete);
+		private bool IsLevelRuined => _levelData.Any(tile => tile.IsRuined);
+		
 		private IReadOnlyLevelData _levelData;
 		private MowerMovementManager _mowerMovement;
 
@@ -43,56 +48,34 @@ namespace Game.Levels
 				_mowerMovement = null;
 			}
 		}
+		
+		#endregion
+		
+		#region Events
 
-		public void OnMowerMoved(GridVector prevPosition, GridVector targetPosition, Xor isInverted)
+		private void OnMowerMoved(GridVector prevPosition, GridVector targetPosition, Xor isInverted)
 		{
-			bool isLevelRuined = IsLevelRuined();
+			bool isLevelRuined = IsLevelRuined;
 			bool cachedWasLevelRuined = _wasLevelRuined;
 			_wasLevelRuined = isLevelRuined;
 			if (isLevelRuined || isInverted && cachedWasLevelRuined)
 			{
-				LevelFailed.Invoke(isInverted);
-				levelRuinedChannel.Raise(isInverted);
+				LevelFailed?.Invoke(isInverted);
+				if (levelRuinedChannel)
+				{
+					levelRuinedChannel.Raise(isInverted);
+				}
+
 				return;
 			}
 			
-			bool isLevelComplete = IsLevelComplete();
+			bool isLevelComplete = IsLevelComplete;
 			if (isLevelComplete || isInverted && _wasLevelCompleted)
 			{
-				LevelCompleted.Invoke(isInverted);
+				LevelCompleted?.Invoke(isInverted);
 			}
 
 			_wasLevelCompleted = isLevelComplete;
-		}
-
-		#endregion
-
-		#region Methods
-
-		private bool IsLevelComplete()
-		{
-			foreach (Tile tile in _levelData)
-			{
-				if (!tile.IsComplete)
-				{
-					return false;
-				}
-			}
-
-			return true;
-		}
-
-		private bool IsLevelRuined()
-		{
-			foreach (Tile tile in _levelData)
-			{
-				if (!tile.IsRuined)
-				{
-					return true;
-				}
-			}
-
-			return false;
 		}
 
 		#endregion

@@ -19,7 +19,7 @@ namespace Game.UndoSystem
             return inversion.IsTrue;
         }
 
-        public static explicit operator Xor(bool b)
+        public static implicit operator Xor(bool b)
         {
             return new Xor(b);
         }

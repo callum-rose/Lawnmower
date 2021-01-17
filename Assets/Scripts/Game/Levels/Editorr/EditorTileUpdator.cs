@@ -11,7 +11,7 @@ namespace Game.Levels.Editorr
     {
         [SerializeField, FormerlySerializedAs("tileSelector")] private ITileSelectorContainer tileSelectorContainer;
         [SerializeField] private EditorTileUiManager tileUiManager;
-        [SerializeField] private LevelManager levelManager;
+        [SerializeField] private HeadlessLevelManager levelManager;
         [SerializeField] private IUndoSystemContainer undoSystemContainer;
 
         public bool IsEditMode { get; set; }
@@ -40,13 +40,14 @@ namespace Game.Levels.Editorr
 
         private void OnTileSelected(GridVector position)
         {
+            if (!IsEditMode)
+            {
+                return;
+            }
+            
             // TODO
             throw new NotImplementedException();
             
-            // if (!IsEditMode)
-            // {
-            //     return;
-            // }
             //
             // ExpandLevel(ref position);
 

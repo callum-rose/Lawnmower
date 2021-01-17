@@ -10,8 +10,7 @@ namespace IUnified
     /// Derivatives should be decorated with [System.Serializable] attribute.
     /// </summary>
     [Serializable]
-    public abstract class IUnifiedContainer<TResult> : IUnifiedContainerBase
-        where TResult : class
+    public abstract class IUnifiedContainer<TResult> : IUnifiedContainerBase where TResult : class
     {
         public TResult Result
         {

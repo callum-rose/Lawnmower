@@ -7,201 +7,261 @@ using UnityEngine;
 using Component = UnityEngine.Component;
 using Object = UnityEngine.Object;
 
-namespace Game
+namespace Utils
 {
-    public static class InterfaceHelper
-    {
-        private static Dictionary<Type, List<Type>> _interfaceToComponentMapping;
-        private static Type[] _allTypes;
+	public static class InterfaceHelper
+	{
+		private static Dictionary<Type, List<Type>> _interfaceToComponentMapping;
+		private static Dictionary<Type, List<Type>> _interfaceToScriptableObjectMapping;
+		private static Type[] _allTypes;
 
-        static InterfaceHelper()
-        {
-            InitInterfaceToComponentMapping();
-        }
+		private static readonly string[] _typesToSkip =
+		{
+			"unity", "system.", "mono.", "icsharpcode.", "nsubstitute", "nunit.", "microsoft.", "boo.",
+			"serializ", "json", "log.", "logging", "test", "debug"
+		};
 
-        private static void InitInterfaceToComponentMapping()
-        {
-            _interfaceToComponentMapping = new Dictionary<Type, List<Type>>();
+		static InterfaceHelper()
+		{
+			InitInterfaceToComponentMapping();
+		}
 
-            _allTypes = GetAllTypes();
+		private static void InitInterfaceToComponentMapping()
+		{
+			_interfaceToComponentMapping = new Dictionary<Type, List<Type>>();
+			_interfaceToScriptableObjectMapping = new Dictionary<Type, List<Type>>();
 
-            foreach (Type curInterface in _allTypes)
-            {
-                //We're interested only in interfaces
-                if (!curInterface.IsInterface)
-                    continue;
+			_allTypes = GetAllTypes();
 
-                string typeName = curInterface.ToString().ToLower();
+			foreach (Type curInterface in _allTypes)
+			{
+				//We're interested only in interfaces
+				if (!curInterface.IsInterface)
+				{
+					continue;
+				}
+				
+				string typeName = curInterface.ToString().ToLower();
+				
+				//Skip system interfaces
+				if (_typesToSkip.Any(s => typeName.Contains(s)))
+				{
+					continue;
+				}
 
-                //Skip system interfaces
-                if (typeName.Contains("unity") || typeName.Contains("system.")
-                     || typeName.Contains("mono.") || typeName.Contains("mono.") || typeName.Contains("icsharpcode.")
-                     || typeName.Contains("nsubstitute") || typeName.Contains("nunit.") || typeName.Contains("microsoft.")
-                     || typeName.Contains("boo.") || typeName.Contains("serializ") || typeName.Contains("json")
-                     || typeName.Contains("log.") || typeName.Contains("logging") || typeName.Contains("test")
-                     || typeName.Contains("editor") || typeName.Contains("debug"))
-                    continue;
+				IList<Type> typesInherited = GetTypesInheritedFromInterface(curInterface);
 
-                IList<Type> typesInherited = GetTypesInheritedFromInterface(curInterface);
+				if (typesInherited.Count <= 0)
+				{
+					continue;
+				}
 
-                if (typesInherited.Count <= 0)
-                    continue;
+				HashSet<Type> componentsList = new HashSet<Type>();
+				HashSet<Type> scriptableObjectList = new HashSet<Type>();
 
-                List<Type> componentsList = new List<Type>();
+				foreach (Type curType in typesInherited)
+				{
+					//Skip interfaces
+					if (curType.IsInterface)
+					{
+						continue;
+					}
 
-                foreach (Type curType in typesInherited)
-                {
-                    //Skip interfaces
-                    if (curType.IsInterface)
-                        continue;
+					if (typeof(Component).IsAssignableFrom(curType))
+					{
+						componentsList.Add(curType);
+					}
+					else if (typeof(ScriptableObject).IsAssignableFrom(curType))
+					{
+						scriptableObjectList.Add(curType);
+					}
+				}
 
-                    //Ignore non-component classes
-                    if (!(typeof(Component) == curType || curType.IsSubclassOf(typeof(Component))))
-                        continue;
+				_interfaceToComponentMapping.Add(curInterface, componentsList.ToList());
+				_interfaceToScriptableObjectMapping.Add(curInterface, scriptableObjectList.ToList());
+			}
+		}
 
-                    if (!componentsList.Contains(curType))
-                        componentsList.Add(curType);
-                }
+		private static Type[] GetAllTypes()
+		{
+			List<Type> res = new List<Type>();
+			foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+			{
+				res.AddRange(assembly.GetTypes());
+			}
 
-                _interfaceToComponentMapping.Add(curInterface, componentsList);
-            }
-        }
+			return res.ToArray();
+		}
 
-        private static Type[] GetAllTypes()
-        {
-            List<Type> res = new List<Type>();
-            foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
-            {
-                res.AddRange(assembly.GetTypes());
-            }
+		private static IList<Type> GetTypesInheritedFromInterface(Type type)
+		{
+			//Caching
+			_allTypes ??= GetAllTypes();
 
-            return res.ToArray();
-        }
+			return _allTypes
+				.Where(curType => type.IsAssignableFrom(curType) &&
+				                  (typeof(Component).IsAssignableFrom(curType) ||
+				                   typeof(ScriptableObject).IsAssignableFrom(curType)))
+				.ToList();
+		}
 
-        private static IEnumerable<Type> GetTypesInheritedFromInterface<T>() where T : class
-        {
-            return GetTypesInheritedFromInterface(typeof(T));
-        }
+		public static T[] FindObjects<T>(bool firstOnly = false) where T : class
+		{
+			List<T> foundObjects = new List<T>();
 
-        private static IList<Type> GetTypesInheritedFromInterface(Type type)
-        {
-            //Caching
-            if (null == _allTypes)
-            {
-                _allTypes = GetAllTypes();
-            }
+			foundObjects.AddRange(FindComponents<T>(firstOnly));
+			foundObjects.AddRange(FindScriptableObjects<T>(firstOnly));
 
-            List<Type> res = new List<Type>();
+			if (foundObjects.Count == 0)
+			{
+				Debug.LogError("No descendants found for type " + typeof(T));
+				return null;
+			}
 
-            foreach (Type curType in _allTypes)
-            {
-                if (!(type.IsAssignableFrom(curType) && curType.IsSubclassOf(typeof(Component))))
-                    continue;
+			return foundObjects.ToArray();
+		}
 
-                res.Add(curType);
+		private static IList<T> FindComponents<T>(bool firstOnly = false) where T : class
+		{
+			List<T> resList = new List<T>();
 
-            }
+			List<Type> types = null;
+			if (_interfaceToComponentMapping.ContainsKey(typeof(T)))
+			{
+				types = _interfaceToComponentMapping[typeof(T)];
+			}
+			else
+			{
+				return new List<T>();
+			}
 
-            return res;
-        }
+			foreach (Type curType in types)
+			{
+				Object[] objects = firstOnly
+					? new[] { Object.FindObjectOfType(curType) }
+					: Object.FindObjectsOfType(curType);
 
-        public static IList<T> FindObjects<T>(bool firstOnly = false) where T : class
-        {
-            List<T> resList = new List<T>();
+				if (null == objects || objects.Length <= 0)
+				{
+					continue;
+				}
 
-            List<Type> types = _interfaceToComponentMapping[typeof(T)];
+				List<T> tList = new List<T>();
 
-            if (null == types || types.Count == 0)
-            {
-                Debug.LogError("No descendants found for type " + typeof(T));
-                return null;
-            }
+				foreach (Object curObj in objects)
+				{
+					T curObjAsT = curObj as T;
 
-            foreach (Type curType in types)
-            {
-                Object[] objects = firstOnly ? new[] { Object.FindObjectOfType(curType) } : Object.FindObjectsOfType(curType);
+					if (null == curObjAsT)
+					{
+						Debug.LogError("Unable to cast '" + curObj.GetType() + "' to '" + typeof(T) + "'");
+						continue;
+					}
 
-                if (null == objects || objects.Length <= 0)
-                {
-                    continue;
-                }
+					tList.Add(curObjAsT);
+				}
 
-                List<T> tList = new List<T>();
+				resList.AddRange(tList);
+			}
 
-                foreach (Object curObj in objects)
-                {
-                    T curObjAsT = curObj as T;
+			return resList;
+		}
 
-                    if (null == curObjAsT)
-                    {
-                        Debug.LogError("Unable to cast '" + curObj.GetType() + "' to '" + typeof(T) + "'");
-                        continue;
-                    }
+		private static IList<T> FindScriptableObjects<T>(bool firstOnly = false) where T : class
+		{
+			List<T> resList = new List<T>();
 
-                    tList.Add(curObjAsT);
-                }
+			List<Type> types = null;
+			if (_interfaceToScriptableObjectMapping.ContainsKey(typeof(T)))
+			{
+				types = _interfaceToScriptableObjectMapping[typeof(T)];
+			}
+			else
+			{
+				return new List<T>();
+			}
 
-                resList.AddRange(tList);
-            }
+			foreach (Type curType in types)
+			{
+#if UNITY_EDITOR
+				string[] paths = AssetDatabase.FindAssets("t:" + curType.Name).Select(AssetDatabase.GUIDToAssetPath)
+					.ToArray();
+				if (paths.Length == 0)
+				{
+					foreach (string path in paths)
+					{
+						if (!path.Contains("Resources"))
+						{
+							Debug.LogError("Found asset of type " + curType + " at " + path +
+							               ". This needs to be moved to a Resources folder to be found in a build");
+						}
+					}
+				}
+#endif
 
-            return resList;
-        }
+				Object[] objects = Resources.LoadAll(string.Empty, curType);
+				resList.AddRange(objects.OfType<T>());
+			}
 
-        public static T FindObject<T>() where T : class
-        {
-            IList<T> list = FindObjects<T>();
+			return resList;
+		}
 
-            return list[0];
-        }
+		public static T FindObject<T>() where T : class
+		{
+			IList<T> list = FindObjects<T>();
 
-        public static IList<T> GetInterfaceComponents<T>(this Component component, bool firstOnly = false) where T : class
-        {
-            List<Type> types = _interfaceToComponentMapping[typeof(T)];
+			return list[0];
+		}
 
-            if (null == types || types.Count <= 0)
-            {
-                Debug.LogError("No descendants found for type " + typeof(T));
-                return null;
-            }
+		public static IList<T> GetInterfaceComponents<T>(this Component component, bool firstOnly = false)
+			where T : class
+		{
+			List<Type> types = _interfaceToComponentMapping[typeof(T)];
 
-            List<T> resList = new List<T>();
+			if (null == types || types.Count <= 0)
+			{
+				Debug.LogError("No descendants found for type " + typeof(T));
+				return null;
+			}
 
-            foreach (Type curType in types)
-            {
-                //Optimization - don't get all objects if we need only one
-                Component[] components = firstOnly ?
-                    new[] { component.GetComponent(curType) }
-                    : component.GetComponents(curType);
+			List<T> resList = new List<T>();
 
-                if (null == components || components.Length <= 0)
-                    continue;
+			foreach (Type curType in types)
+			{
+				//Optimization - don't get all objects if we need only one
+				Component[] components = firstOnly
+					? new[] { component.GetComponent(curType) }
+					: component.GetComponents(curType);
 
-                List<T> tList = new List<T>();
+				if (null == components || components.Length <= 0)
+					continue;
 
-                foreach (Component curComp in components)
-                {
-                    T curCompAsT = curComp as T;
+				List<T> tList = new List<T>();
 
-                    if (null == curCompAsT)
-                    {
-                        Debug.LogError("Unable to cast '" + curComp.GetType() + "' to '" + typeof(T) + "'");
-                        continue;
-                    }
+				foreach (Component curComp in components)
+				{
+					T curCompAsT = curComp as T;
 
-                    tList.Add(curCompAsT);
-                }
+					if (null == curCompAsT)
+					{
+						Debug.LogError("Unable to cast '" + curComp.GetType() + "' to '" + typeof(T) + "'");
+						continue;
+					}
 
-                resList.AddRange(tList);
-            }
+					tList.Add(curCompAsT);
+				}
 
-            return resList;
-        }
+				resList.AddRange(tList);
+			}
 
-        public static T GetInterfaceComponent<T>(this Component component) where T : class
-        {
-            IList<T> list = GetInterfaceComponents<T>(component, true);
+			return resList;
+		}
 
-            return list[0];
-        }
-    }
+		public static T GetInterfaceComponent<T>(this Component component) where T : class
+		{
+			IList<T> list = GetInterfaceComponents<T>(component, true);
+
+			return list[0];
+		}
+	}
 }

@@ -7,6 +7,7 @@ using UI.Dialogs;
 using Game.UndoSystem;
 using Sirenix.OdinInspector;
 using System;
+using Core.EventChannels;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UI.Buttons;
@@ -16,19 +17,22 @@ namespace Game.Core
 {
 	internal class GameManager : BaseSceneManager
 	{
-		[SerializeField] private CameraManager cameraManager;
-		[FormerlySerializedAs("mowerObjectCreator")] [FormerlySerializedAs("mowerCreator")] [SerializeField] private MowerManager mowerManager;
+		[FormerlySerializedAs("mowerObjectCreator"), FormerlySerializedAs("mowerCreator"), SerializeField]
+		private MowerManager mowerManager;
+
 		[SerializeField] private LevelManager levelManager;
+		[SerializeField] private LevelTraversalChecker levelTraversalChecker;
 		[SerializeField, AssetsOnly] private LevelDataManager levelDataManager;
 		[SerializeField] private IUndoSystemContainer undoSystemContainer;
 		[SerializeField] private UndoController undoController;
-		[SerializeField, AssetsOnly] private DialogManager dialogManager;
+
+		[TitleGroup("Event Channels")] 
+		[SerializeField] private OpenDialogEventChannel openDialogEventChannel;
+		[SerializeField] private CloseDialogEventChannel closeDialogEventChannel;
 
 		private IUndoSystem UndoSystem => undoSystemContainer.Result;
 
 		private GameSetupPassThroughData? _inputData;
-
-		private GameObject _mowerObject;
 
 		private LevelDataRecorder _levelDataRecorder;
 
@@ -67,11 +71,9 @@ namespace Game.Core
 
 			undoController.IsRunning = true;
 
-			_mowerObject = mowerManager.Create(_inputData.Value.Mower, UndoSystem);
+			GameObject mowerObject = mowerManager.Init(_inputData.Value.Mower, levelTraversalChecker, UndoSystem);
 
-			levelManager.SetLevel(_inputData.Value.Level);
-
-			cameraManager.Init(_mowerObject.transform);
+			levelManager.Init(_inputData.Value.Level);
 
 			_levelDataRecorder = new LevelDataRecorder(UndoSystem);
 			_levelDataRecorder.StartRecording();
@@ -80,12 +82,7 @@ namespace Game.Core
 		public void End()
 		{
 			levelManager.ClearTiles();
-			cameraManager.Clear();
-
-			if (_mowerObject != null)
-			{
-				Destroy(_mowerObject.gameObject);
-			}
+			mowerManager.DestroyCurrent();
 
 			_inputData = null;
 
@@ -105,7 +102,7 @@ namespace Game.Core
 				_levelDataRecorder.StopRecording();
 				var recordedData = _levelDataRecorder.ExtractData();
 				PersistantData.Level.SaveLevelMetaData(_inputData.Value.Level.Id, recordedData);
-				
+
 				int levelIndex = levelDataManager.GetLevelIndex(_inputData.Value.Level);
 				levelDataManager.SetLevelCompleted(levelIndex);
 
@@ -119,10 +116,11 @@ namespace Game.Core
 						Begin(new GameSetupPassThroughData(cachedMower, nextLevel));
 					}
 
-					;
-
-					_levelCompletedDialogId = dialogManager.Show("Level Completed!", "Nice one",
+					DialogInfo dialogInfo = new DialogInfo(
+						"Level Completed!", 
+						"Nice one",
 						new ButtonInfo("Next Level", action: ButtonAction));
+					_levelCompletedDialogId = openDialogEventChannel.Raise(dialogInfo);
 				}
 				else
 				{
@@ -132,7 +130,7 @@ namespace Game.Core
 			}
 			else
 			{
-				dialogManager.Close(_levelCompletedDialogId);
+				closeDialogEventChannel.Raise(_levelCompletedDialogId);
 			}
 		}
 

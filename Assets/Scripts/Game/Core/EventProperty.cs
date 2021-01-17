@@ -36,5 +36,10 @@ namespace Game.Core
 			_value = _setter != null ? _setter(value) : value;
 			ValueChanged?.Invoke(InternalGet());
 		}
+		
+		public static implicit operator T(EventProperty<T> property)
+		{
+			return property.Value;
+		}
 	}
 }

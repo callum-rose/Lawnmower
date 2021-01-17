@@ -1,9 +1,7 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 using Game.Core;
 using Game.UndoSystem;
-using Newtonsoft.Json;
 
 namespace Game.Tiles
 {
@@ -13,8 +11,8 @@ namespace Game.Tiles
 		public const int MaxGrassHeight = 3;
 		private const int PerfectGrassHeight = 1;
 
-		public override bool IsComplete => GrassHeight.Value == PerfectGrassHeight;
-		public override bool IsRuined => GrassHeight.Value == 0;
+		public override bool IsComplete => _internalGrassHeight == PerfectGrassHeight;
+		public override bool IsRuined => _internalGrassHeight == 0;
 
 		public IListenableProperty<int> GrassHeight => _internalGrassHeight;
 
@@ -32,17 +30,7 @@ namespace Game.Tiles
 
 		#region API
 
-		public override void Setup(object data)
-		{
-			if (!(data is GrassTileSetupData grassData))
-			{
-				throw new ArgumentException($"Argument must be of type {nameof(GrassTileSetupData)}");
-			}
-
-			_internalGrassHeight.Value = grassData.grassHeight;
-		}
-
-		public override bool IsTraversable(bool editMode) => !editMode || GrassHeight.Value < MaxGrassHeight;
+		public override bool IsTraversable(bool editMode) => !editMode || _internalGrassHeight < MaxGrassHeight;
 
 		public override void TraverseOnto(GridVector fromDirection, Xor inverted)
 		{
@@ -54,7 +42,7 @@ namespace Game.Tiles
 			{
 				_internalGrassHeight.Value++;
 
-				if (_internalGrassHeight.Value > MaxGrassHeight)
+				if (_internalGrassHeight > MaxGrassHeight)
 				{
 					throw new InvalidOperationException("Grass height too high");
 				}

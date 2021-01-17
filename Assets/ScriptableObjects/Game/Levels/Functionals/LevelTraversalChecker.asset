@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 872a16b6aa244754a9786bd0860f36fc, type: 3}
+  m_Script: {fileID: 11500000, guid: 9cc51f089b164741b76d6b780894464d, type: 3}
   m_Name: LevelTraversalChecker
   m_EditorClassIdentifier: 
-  tilePrefabsHolder: {fileID: 11400000, guid: 95ea346046e72964f88d3643f2660dc9, type: 2}
+  tilePrefabsManager: {fileID: 11400000, guid: 95ea346046e72964f88d3643f2660dc9, type: 2}

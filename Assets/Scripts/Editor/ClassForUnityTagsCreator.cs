@@ -3,7 +3,6 @@ using Sirenix.OdinInspector;
 using Sirenix.OdinInspector.Editor;
 using System.Text;
 using UnityEditor;
-using UnityEngine;
 using System.IO;
 
 namespace Core

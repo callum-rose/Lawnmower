@@ -1,30 +1,58 @@
 using Game.Mowers.Input;
 using Game.UndoSystem;
 using System.Linq;
-using Core;
+using Core.EventChannels;
+using Game.Levels;
+using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.Serialization;
 using static Game.Levels.LevelDimensions;
 
 namespace Game.Mowers
 {
-	internal class MowerManager : MonoBehaviour
+	internal class MowerManager : MonoBehaviour, IMowerManager
 	{
-		[SerializeField] private MowerObjectCreator mowerObjectCreator;
-		[SerializeField] private MowerMovementManager mowerMovementManager;
+		[TitleGroup("Scene")] [SerializeField] private MowerObjectCreator mowerObjectCreator;
 		[SerializeField] private IMowerControlsContainer[] mowerControls;
 		[SerializeField] private IRequiresMowerPositionContainer[] mowerPositionRequirers;
 
-		public GameObject Create(MowerData mower, IUndoSystem undoManager)
+		[TitleGroup("Scene")] [SerializeField] private HeadlessMowerManager headlessMowerManager;
+
+		[TitleGroup("Event Channels")] [SerializeField]
+		private GameObjectEventChannel mowerCreatedEventChannel;
+
+		[SerializeField] private GameObjectEventChannel mowerWillBeDestroyedEventChannel;
+
+		private MowerObject _mowerObject;
+
+		public GameObject Init(MowerData mower, ILevelTraversalChecker levelTraversalChecker, IUndoSystem undoManager)
 		{
-			MowerMoverr mowerMoverr = new MowerMoverr();
+			MowerMover mowerMover = new MowerMover();
 
-			GameObject mowerObject = mowerObjectCreator.Create(mower, mowerMoverr);
+			_mowerObject = mowerObjectCreator.Create(mower, mowerMover);
 
-			InitMowerMovement(mowerMoverr, undoManager);
-			InitObjectsNeedingMowerPosition(mowerMoverr);
-			InitCollider(mowerObject);
+			IMowerControls[] controls = mowerControls.Select(c => c.Result).ToArray();
+			headlessMowerManager.InitMowerMovementManager(mowerMover, levelTraversalChecker, undoManager, controls);
+			
+			InitObjectsNeedingMowerPosition(mowerMover);
+			InitCollider(_mowerObject.gameObject);
 
-			return mowerObject;
+			mowerCreatedEventChannel.Raise(_mowerObject.gameObject);
+
+			return _mowerObject.gameObject;
+		}
+
+		public void DestroyCurrent()
+		{
+			if (_mowerObject == null)
+			{
+				return;
+			}
+
+			mowerWillBeDestroyedEventChannel.Raise(_mowerObject.gameObject);
+
+			_mowerObject.Dispose();
+			Destroy(_mowerObject);
 		}
 
 		private static void InitCollider(GameObject gameObject)
@@ -32,12 +60,6 @@ namespace Game.Mowers
 			SphereCollider collider = gameObject.AddComponent<SphereCollider>();
 			collider.radius = TileSize * 0.5f;
 			collider.center = new Vector3(0, TileSize * 0.5f, 0);
-		}
-
-		private void InitMowerMovement(MowerMoverr newMower, IUndoSystem undoManager)
-		{
-			IMowerControls[] controls = mowerControls.Select(c => c.Result).ToArray();
-			mowerMovementManager.Init(newMower, controls, undoManager);
 		}
 
 		private void InitObjectsNeedingMowerPosition(IMowerPosition position)

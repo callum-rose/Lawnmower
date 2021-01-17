@@ -6,11 +6,10 @@ namespace Game.Mowers.Input
 {
     public interface IMowerControls
     {
-        event Action<GridVector> Moved;
+        event Action<GridVector> MovedInDirection;
     }
 
     [Serializable]
     internal class IMowerControlsContainer : IUnifiedContainer<IMowerControls>
     { }
-
 }

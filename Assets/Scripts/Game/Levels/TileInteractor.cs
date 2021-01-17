@@ -21,6 +21,8 @@ namespace Game.Levels
         public void Init(MowerMovementManager mowerMovement)
         {
             _mowerMovement = mowerMovement;
+            _mowerMovement.Moved -= Interact;
+            _mowerMovement.Bumped -= Bump;
             _mowerMovement.Moved += Interact;
             _mowerMovement.Bumped += Bump;
         }

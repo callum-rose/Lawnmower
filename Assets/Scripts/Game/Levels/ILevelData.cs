@@ -1,6 +1,3 @@
-using Game.Core;
-using Game.Tiles;
-
 namespace Game.Levels
 {
 	// internal interface ILevelData : IReadOnlyLevelData

@@ -1,10 +1,6 @@
 #if UNITY_EDITOR
-using Sirenix.OdinInspector;
-using Sirenix.OdinInspector.Editor;
-using System.Text;
 using UnityEditor;
 using UnityEngine;
-using System.IO;
 using System.Collections.Generic;
 
 namespace Core

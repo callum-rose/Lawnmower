@@ -1,11 +1,10 @@
 using System;
-using Game.Core;
+using Game.Levels.EditorWindow;
 using Game.Tiles;
 using Sirenix.OdinInspector;
 using Sirenix.Utilities;
 using UnityEditor;
 using UnityEngine;
-using Utils;
 
 namespace Game.Levels
 {

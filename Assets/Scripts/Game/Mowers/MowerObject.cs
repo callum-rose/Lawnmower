@@ -1,20 +1,17 @@
 using UnityEngine;
-using System.Collections.Generic;
-using System.Linq;
 using Game.Core;
 using Game.Tiles;
 using Sirenix.OdinInspector;
-using Vector3 = UnityEngine.Vector3;
 
 namespace Game.Mowers
 {
-	public class MowerObject : MonoBehaviour, IDataObject<MowerMoverr>
+	public class MowerObject : MonoBehaviour, IDataObject<MowerMover>
 	{
 		[SerializeField, InlineEditor(Expanded = true)]
 		private MowerMoverData data;
 
 		private Positioner _positioner;
-		private MowerMoverr _mowerMover;
+		private MowerMover _mowerMover;
 
 		#region API
 
@@ -23,7 +20,7 @@ namespace Game.Mowers
 			_positioner = positioner;
 		}
 
-		public void Bind(MowerMoverr mowerMover)
+		public void Bind(MowerMover mowerMover)
 		{
 			_mowerMover = mowerMover;
 			
