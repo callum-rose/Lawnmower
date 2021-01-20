@@ -1,6 +1,5 @@
 using Core;
 using Exceptions;
-using Game.Cameras;
 using Game.Levels;
 using Game.Mowers;
 using UI.Dialogs;

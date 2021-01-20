@@ -6,7 +6,6 @@ using Game.UndoSystem;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Assertions;
-using UnityEngine.Serialization;
 
 namespace Game.Mowers
 {
@@ -35,8 +34,13 @@ namespace Game.Mowers
         
         #region Unity
 
-        private void OnDestroy()
+        private void OnDisable()
         {
+            if (_mowerControls == null)
+            {
+                return;
+            }
+            
             foreach (IMowerControls mc in _mowerControls)
             {
                 mc.MovedInDirection -= OnInput;

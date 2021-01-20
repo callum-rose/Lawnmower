@@ -1,11 +1,9 @@
 #if UNITY_EDITOR
 
-using System.Linq;
 using Game.Core;
 using Game.Mowers;
 using Sirenix.OdinInspector;
 using UnityEngine;
-using Utils;
 
 namespace Game.Levels.Editorr
 {

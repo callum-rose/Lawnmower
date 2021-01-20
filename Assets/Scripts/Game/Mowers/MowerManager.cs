@@ -5,7 +5,6 @@ using Core.EventChannels;
 using Game.Levels;
 using Sirenix.OdinInspector;
 using UnityEngine;
-using UnityEngine.Serialization;
 using static Game.Levels.LevelDimensions;
 
 namespace Game.Mowers
@@ -15,8 +14,7 @@ namespace Game.Mowers
 		[TitleGroup("Scene")] [SerializeField] private MowerObjectCreator mowerObjectCreator;
 		[SerializeField] private IMowerControlsContainer[] mowerControls;
 		[SerializeField] private IRequiresMowerPositionContainer[] mowerPositionRequirers;
-
-		[TitleGroup("Scene")] [SerializeField] private HeadlessMowerManager headlessMowerManager;
+		[SerializeField] private HeadlessMowerManager headlessMowerManager;
 
 		[TitleGroup("Event Channels")] [SerializeField]
 		private GameObjectEventChannel mowerCreatedEventChannel;

@@ -34,7 +34,9 @@ namespace Game.Tiles
 
 		[SerializeField] private bool askBeforeOverwrite = true;
 
-		[TitleGroup("Input")] [Button]
+#if UNITY_EDITOR
+		[TitleGroup("Input")]
+		[Button]
 		private void Generate()
 		{
 			highLut = GradientToTextureGenerator.GenerateLut(textureSize, highGradientLut, GetFullPath("high"),
@@ -42,6 +44,7 @@ namespace Game.Tiles
 			lowLut = GradientToTextureGenerator.GenerateLut(textureSize, lowGradientLut, GetFullPath("low"),
 				askBeforeOverwrite, false);
 		}
+#endif
 
 		#endregion
 

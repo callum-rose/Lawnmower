@@ -1,14 +1,11 @@
-using System.Collections;
+#if UNITY_EDITOR
 using System.Collections.Generic;
-using System.Linq;
 using Game.Core;
 using Game.Mowers;
 using Game.Mowers.Input;
 using Game.Tiles;
 using Game.UndoSystem;
 using Sirenix.OdinInspector;
-using Sirenix.Utilities.Editor;
-using Unity.EditorCoroutines.Editor;
 using UnityEditor;
 using UnityEngine;
 
@@ -22,7 +19,7 @@ namespace Game.Levels.EditorWindow
 		private EditorWindowMowerControls _editorWindowMowerControls = new EditorWindowMowerControls();
 
 		private MowerMovementManager _mowerMovementManager;
-		private IMowerPosition _mowerPosition;
+		internal IMowerPosition _mowerPosition;
 
 		private List<Object> _objectsMadeForGame = new List<Object>();
 
@@ -120,3 +117,4 @@ namespace Game.Levels.EditorWindow
 		}
 	}
 }
+#endif

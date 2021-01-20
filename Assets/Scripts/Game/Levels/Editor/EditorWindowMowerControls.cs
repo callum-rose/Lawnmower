@@ -1,11 +1,10 @@
+#if UNITY_EDITOR
 using System;
 using Game.Core;
 using Game.Mowers.Input;
-using Sirenix.OdinInspector;
 using Sirenix.OdinInspector.Editor;
 using Sirenix.Utilities;
 using Sirenix.Utilities.Editor;
-using UnityEditor;
 using UnityEngine;
 
 namespace Game.Levels.EditorWindow
@@ -78,3 +77,4 @@ namespace Game.Levels.EditorWindow
 		}
 	}
 }
+#endif

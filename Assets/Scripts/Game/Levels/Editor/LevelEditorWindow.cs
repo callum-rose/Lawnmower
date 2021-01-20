@@ -1,3 +1,5 @@
+#if UNITY_EDITOR
+
 using System;
 using System.IO;
 using Game.Core;
@@ -30,7 +32,7 @@ namespace Game.Levels.EditorWindow
 			SetLevel(levelData, null);
 		}
 
-		private EditableLevelData _editableLevel;
+		internal EditableLevelData _editableLevel;
 
 		[BoxGroup(SplitLeft), ShowInInspector, DisplayAsString, LabelText("Current Selection:")]
 		private string TileDataString => _currentTilePaint.ToString();
@@ -42,7 +44,7 @@ namespace Game.Levels.EditorWindow
 		private InspectorLevelDataWrapper _tiles;
 
 		[ShowInInspector, BoxGroup(SplitLeft), InlineProperty]
-		private GridVector StartPosition
+		internal GridVector StartPosition
 		{
 			get => _editableLevel != null ? _editableLevel.StartPosition : GridVector.Zero;
 			set
@@ -84,7 +86,7 @@ namespace Game.Levels.EditorWindow
 
 			_undoSystem = new UndoSystem.UndoSystem();
 
-			_tiles = new InspectorLevelDataWrapper(this);
+			_tiles = new InspectorLevelDataWrapper(this, false);
 			_tileTypeButtons = new TileTypeButtons(this);
 		}
 
@@ -93,7 +95,7 @@ namespace Game.Levels.EditorWindow
 			_editableLevel = EditableLevelData.CreateFrom(levelData);
 		}
 
-		private static Color GetColourForTile(Tile tileData)
+		internal static Color GetColourForTile(Tile tileData)
 		{
 			Color colour;
 			switch (tileData)
@@ -213,7 +215,7 @@ namespace Game.Levels.EditorWindow
 			_editableLevel.ExpandLeft();
 		}
 
-		private void OnTileClicked(int x, int y)
+		internal void OnTileClicked(int x, int y)
 		{
 			_tileClicked ??= SetTile;
 			_tileClicked.Invoke(x, y);
@@ -237,3 +239,4 @@ namespace Game.Levels.EditorWindow
 		}
 	}
 }
+#endif

@@ -21,10 +21,15 @@ namespace Game.Levels
 
 		[SerializeField, HideInInspector] private GridVector startPosition = new GridVector(1, 1);
 
-		[OdinSerialize,
-		 TableMatrix(SquareCells = true, DrawElementMethod = nameof(DrawColouredTileElement), HideColumnIndices = true,
-			 HideRowIndices = true)]
+		[OdinSerialize]
+#if UNITY_EDITOR
+		[TableMatrix(SquareCells = true, DrawElementMethod = nameof(DrawColouredTileElement), HideColumnIndices = true,
+			HideRowIndices = true)]
+#endif
 		internal Tile[,] newTiles;
+
+		// TODO
+		// [ShowInInspector] private InspectorLevelDataWrapper tilesWrapper = new InspectorLevelDataWrapper();
 
 		[ShowInInspector, PropertyOrder(1), MinValue(1), DelayedProperty]
 		public int Width => newTiles.GetLength(0);

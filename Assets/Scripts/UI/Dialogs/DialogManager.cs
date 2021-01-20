@@ -1,106 +1,113 @@
+using System;
 using Core;
 using Sirenix.OdinInspector;
 using System.Collections.Generic;
 using Core.EventChannels;
-using UI.Buttons;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace UI.Dialogs
 {
-    [CreateAssetMenu(fileName = nameof(DialogManager), menuName = SONames.GameDir + nameof(DialogManager))]
-    internal class DialogManager : ScriptableObject
-    {
-        [SerializeField, AssetsOnly] private Dialog dialogPrefab;
-        [SerializeField, AssetsOnly] private OpenDialogEventChannel openDialogEventChannel;
-        [SerializeField, AssetsOnly] private CloseDialogEventChannel closeDialogEventChannel;
+	[CreateAssetMenu(fileName = nameof(DialogManager), menuName = SONames.GameDir + nameof(DialogManager))]
+	internal class DialogManager : UnreferencedScriptableObject
+	{
+		[SerializeField, AssetsOnly] private Dialog dialogPrefab;
+		[SerializeField, AssetsOnly] private OpenDialogEventChannel openDialogEventChannel;
+		[SerializeField, AssetsOnly] private CloseDialogEventChannel closeDialogEventChannel;
 
-        private int _currentDialogId = 0;
-        private readonly Dictionary<int, Dialog> _idToDialogDict = new Dictionary<int, Dialog>();
+		private int _currentDialogId = 0;
+		private readonly Dictionary<int, Dialog> _idToDialogDict = new Dictionary<int, Dialog>();
 
-        private Transform _dialogContainer;
+		private Transform _dialogContainer;
 
-        #region Unity
+		#region Unity
+		
+		private void OnEnable()
+		{
+			if (!openDialogEventChannel)
+			{
+				return;
+			}
+			SceneManager.activeSceneChanged += SceneManager_sceneLoaded;
 
-        private void OnEnable()
-        {
-            SceneManager.activeSceneChanged += SceneManager_sceneLoaded;
-            
-            openDialogEventChannel.EventRaised += Show;
-            closeDialogEventChannel.EventRaised += Close;
-        }
+			openDialogEventChannel.EventRaised += Show;
+			closeDialogEventChannel.EventRaised += Close;
+			
+			FindDialogContainer();
+		}
 
-        private void OnDisable()
-        {
-            SceneManager.activeSceneChanged -= SceneManager_sceneLoaded;
-            
-            openDialogEventChannel.EventRaised -= Show;
-            closeDialogEventChannel.EventRaised -= Close;
-        }
+		private void OnDisable()
+		{
+			if (!openDialogEventChannel)
+			{
+				return;
+			}
+			SceneManager.activeSceneChanged -= SceneManager_sceneLoaded;
 
-        #endregion
+			openDialogEventChannel.EventRaised -= Show;
+			closeDialogEventChannel.EventRaised -= Close;
+		}
 
-        #region Events
+		#endregion
 
-        private int Show(DialogInfo info)
-        {
-            _currentDialogId++;
-            
-            Dialog dialog = Create();
-            dialog.Init(_currentDialogId, info, () => Close(_currentDialogId));
+		#region Events
 
-            _idToDialogDict.Add(_currentDialogId, dialog);
-            return _currentDialogId;
-        }
+		private int Show(DialogInfo info)
+		{
+			_currentDialogId++;
 
-        private void Close(int dialogId)
-        {
-            Dialog dialog = _idToDialogDict[dialogId];
-            dialog.Close();
-        }
-        
-        private void OnDialogHidden(Dialog dialog)
-        {
-            DestroyDialog(dialog);
-        }
+			Dialog dialog = Create();
+			dialog.Init(_currentDialogId, info, () => Close(_currentDialogId));
 
-        private void SceneManager_sceneLoaded(Scene sceneOut, Scene sceneIn)
-        {
-            GameObject containerObj =  GameObject.FindGameObjectWithTag(UnityTags.DialogCanvas);
-            _dialogContainer = containerObj.transform;
-        }
+			_idToDialogDict.Add(_currentDialogId, dialog);
+			return _currentDialogId;
+		}
 
-        #endregion
+		private void Close(int dialogId)
+		{
+			if (!_idToDialogDict.ContainsKey(dialogId))
+			{
+				Debug.LogError($"Tried to close dialog with id {dialogId} but it doesn't exist");
+				return;
+			}
 
-        #region Methods
+			Dialog dialog = _idToDialogDict[dialogId];
+			dialog.Close();
+		}
 
-        private Dialog Create()
-        {
-            Dialog dialog = Instantiate(dialogPrefab, _dialogContainer);
-            dialog.Hidden += OnDialogHidden;
-            return dialog;
-        }
+		private void OnDialogHidden(Dialog dialog)
+		{
+			DestroyDialog(dialog);
+		}
 
-        private void DestroyDialog(Dialog dialog)
-        {
-            _idToDialogDict.Remove(dialog.Id);
-            Destroy(dialog.gameObject);
-        }
+		private void SceneManager_sceneLoaded(Scene sceneOut, Scene sceneIn)
+		{
+			FindDialogContainer();
+		}
 
-        #endregion
+		#endregion
 
-        //private struct DialogInfo
-        //{
-        //    public DialogInfo(string header, string body, ButtonInfo buttonInfo) : this()
-        //    {
-        //        Header = header;
-        //        Body = body;
-        //        ButtonInfo = buttonInfo;
-        //    }
+		#region Methods
 
-        //    public string Header { get; }
-        //    public string Body { get; }
-        //    public ButtonInfo ButtonInfo { get; }
-        //}
-    }
+		private void FindDialogContainer()
+		{
+			GameObject containerObj = GameObject.FindGameObjectWithTag(UnityTags.DialogCanvas);
+			_dialogContainer = containerObj.transform;
+		}
+
+		private Dialog Create()
+		{
+			Dialog dialog = Instantiate(dialogPrefab, _dialogContainer);
+			dialog.Hidden += OnDialogHidden;
+			return dialog;
+		}
+
+		private void DestroyDialog(Dialog dialog)
+		{
+			_idToDialogDict.Remove(dialog.Id);
+			Destroy(dialog.gameObject);
+		}
+
+		#endregion
+	}
 }

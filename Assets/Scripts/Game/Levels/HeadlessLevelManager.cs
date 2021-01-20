@@ -2,18 +2,16 @@ using Game.Core;
 using Game.Mowers;
 using Game.UndoSystem;
 using System;
-using System.Diagnostics.CodeAnalysis;
 using Core;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Assertions;
-using UnityEngine.Serialization;
 using R = Sirenix.OdinInspector.RequiredAttribute;
 
 namespace Game.Levels
 {
 	[CreateAssetMenu(fileName = nameof(HeadlessLevelManager), menuName = SONames.GameDir + nameof(HeadlessLevelManager))]
-	internal class HeadlessLevelManager : ScriptableObject, ILevelManager
+	internal class HeadlessLevelManager : ScriptableObject, ILevelManager, IInitialisableScriptableObject
 	{
 		[TitleGroup("Assets")] 
 		[SerializeField, R] private MowerMovementManager mowerMovementManager;
@@ -35,7 +33,7 @@ namespace Game.Levels
 		
 		#region Unity
 
-		private void Awake()
+		private void OnEnable()
 		{
 			if (tileInteractor)
 			{
@@ -49,10 +47,13 @@ namespace Game.Levels
 			}
 		}
 
-		private void OnDestroy()
+		private void OnDisable()
 		{
-			levelStateChecker.LevelCompleted -= OnLevelCompleted;
-			levelStateChecker.LevelFailed -= OnLevelFailed;
+			if (levelStateChecker)
+			{
+				levelStateChecker.LevelCompleted -= OnLevelCompleted;
+				levelStateChecker.LevelFailed -= OnLevelFailed;
+			}
 		}
 
 		#endregion
@@ -69,7 +70,7 @@ namespace Game.Levels
 			this.tileInteractor = tileInteractor;
 			this.levelStateChecker = levelStateChecker;
 			
-			Awake();
+			OnEnable();
 		}
 		
 		public void Init(IReadOnlyLevelData level)
@@ -89,6 +90,15 @@ namespace Game.Levels
 			mowerMovementManager.IsRunning = true;
 		}
 
+		public void Reset()
+		{
+			if (levelStateChecker)
+			{
+				levelStateChecker.LevelCompleted -= OnLevelCompleted;
+				levelStateChecker.LevelFailed -= OnLevelFailed;
+			}
+		}
+
 		#endregion
 
 		#region Events
@@ -103,9 +113,6 @@ namespace Game.Levels
 
 		private void OnLevelFailed(Xor isUndo)
 		{
-			bool isLevelResuming = isUndo;
-			mowerMovementManager.IsRunning = isLevelResuming;
-			
 			LevelFailed?.Invoke(isUndo);
 		}
 

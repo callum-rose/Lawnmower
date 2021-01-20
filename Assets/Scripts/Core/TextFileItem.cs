@@ -45,17 +45,9 @@ namespace Core
 		public void Save(T value)
 		{
 			string jsonStr = JsonConvert.SerializeObject(value, Settings);
-
-			if (!Directory.Exists(_directory))
-			{
-				Directory.CreateDirectory(_directory);
-			}
-
-			if (!File.Exists(_fullPath))
-			{
-				File.Create(_fullPath);
-			}
-
+			
+			Directory.CreateDirectory(_directory);
+			
 			File.WriteAllText(_fullPath, jsonStr);
 		}
 

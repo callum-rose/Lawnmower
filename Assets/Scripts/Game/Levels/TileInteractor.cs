@@ -9,7 +9,7 @@ using UnityEngine;
 namespace Game.Levels
 {
     [CreateAssetMenu(fileName = nameof(TileInteractor), menuName = SONames.GameDir + nameof(TileInteractor))]
-    internal class TileInteractor : ScriptableObject, IHasEditMode
+    internal class TileInteractor : ScriptableObject, IHasEditMode, IInitialisableScriptableObject
     {
         private MowerMovementManager _mowerMovement;
         private IReadOnlyLevelData _levelData;
@@ -20,9 +20,9 @@ namespace Game.Levels
 
         public void Init(MowerMovementManager mowerMovement)
         {
+            Reset();
+            
             _mowerMovement = mowerMovement;
-            _mowerMovement.Moved -= Interact;
-            _mowerMovement.Bumped -= Bump;
             _mowerMovement.Moved += Interact;
             _mowerMovement.Bumped += Bump;
         }
@@ -30,6 +30,17 @@ namespace Game.Levels
         public void SetTiles(IReadOnlyLevelData levelData)
         {
             _levelData = levelData;
+        }
+
+        public void Reset()
+        {
+            if (!_mowerMovement)
+            {
+                return;
+            }
+
+            _mowerMovement.Moved -= Interact;
+            _mowerMovement.Bumped -= Bump;
         }
 
         #endregion

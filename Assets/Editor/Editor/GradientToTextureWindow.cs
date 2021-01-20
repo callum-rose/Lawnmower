@@ -1,3 +1,5 @@
+#if UNITY_EDITOR
+
 using System.IO;
 using Plugins.Utils;
 using Sirenix.OdinInspector;
@@ -39,3 +41,4 @@ namespace Editor
 		}
 	}
 }
+#endif

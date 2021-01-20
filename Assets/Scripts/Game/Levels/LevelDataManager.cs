@@ -2,6 +2,7 @@ using Core;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Game.Levels
 {
@@ -10,6 +11,7 @@ namespace Game.Levels
 	{
 		[ShowInInspector, PropertyOrder(5), TitleGroup("In Game Data")]
 		public int LevelsCompleted { get; private set; }
+
 		[SerializeField, PropertyOrder(5)] private bool unlockAllLevels;
 
 		[SerializeField]
@@ -29,6 +31,11 @@ namespace Game.Levels
 		private void Awake()
 		{
 			LevelsCompleted = PersistantData.Level.LevelsCompleted.Load();
+
+			if (levelDatas.Any(l => l == null))
+			{
+				Debug.LogError("Level is null in " + nameof(LevelDataManager));
+			}
 		}
 
 #if UNITY_EDITOR
@@ -50,7 +57,7 @@ namespace Game.Levels
 				return false;
 			}
 
-			level = levelDatas[index];
+			level = LevelData.CreateFrom(levelDatas[index]);
 			return true;
 		}
 

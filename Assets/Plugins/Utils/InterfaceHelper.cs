@@ -49,7 +49,7 @@ namespace Utils
 					continue;
 				}
 
-				IList<Type> typesInherited = GetTypesInheritedFromInterface(curInterface);
+				IList<Type> typesInherited = GetComponentsAndSOsImplementingInterface(curInterface);
 
 				if (typesInherited.Count <= 0)
 				{
@@ -93,7 +93,7 @@ namespace Utils
 			return res.ToArray();
 		}
 
-		private static IList<Type> GetTypesInheritedFromInterface(Type type)
+		public static IList<Type> GetComponentsAndSOsImplementingInterface(Type type)
 		{
 			//Caching
 			_allTypes ??= GetAllTypes();
@@ -210,6 +210,11 @@ namespace Utils
 		{
 			IList<T> list = FindObjects<T>();
 
+			if (list.Count == 0)
+			{
+				return default;
+			}
+			
 			return list[0];
 		}
 

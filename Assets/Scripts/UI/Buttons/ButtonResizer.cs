@@ -75,6 +75,8 @@ namespace UI.Buttons
 
         private void FitToContent_Internal(bool useIcon, bool useText, bool instant)
         {
+            Canvas.ForceUpdateCanvases();
+            
             float fittedWidth = layoutGroup.padding.left +
                 (useIcon ? icon.rectTransform.sizeDelta.x : 0) +
                 (useIcon && useText ? layoutGroup.spacing : 0) +

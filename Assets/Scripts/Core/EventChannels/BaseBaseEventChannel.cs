@@ -7,39 +7,45 @@ using UnityEngine;
 
 namespace Core.EventChannels
 {
-	public abstract class BaseBaseEventChannel : ScriptableObject
+	public abstract class BaseBaseEventChannel : ScriptableObject, IInitialisableScriptableObject
 	{
 		protected abstract bool ShouldBeSolo { get; }
 
 		private static readonly List<Type> initialisedTypes = new List<Type>();
-		
-		private void Awake()
+
+#if UNITY_EDITOR
+		protected virtual void Awake()
 		{
 			if (!ShouldBeSolo)
 			{
 				return;
 			}
-			
+
 			Type type = GetType();
-			
+
 			if (initialisedTypes.Contains(type))
 			{
-				IEnumerable<string> paths = AssetDatabase.FindAssets("t:" + type.Name).Select(AssetDatabase.GUIDToAssetPath);
+				IEnumerable<string> paths = AssetDatabase.FindAssets("t:" + type.Name)
+					.Select(AssetDatabase.GUIDToAssetPath);
 				int sum = paths.Count();
-				
-				StringBuilder sb = new StringBuilder($"Event Channel {type} should be solo but {sum} has / have been found:\n");
+
+				StringBuilder sb =
+					new StringBuilder($"Event Channel {type} should be solo but {sum} has / have been found:\n");
 				foreach (string path in paths)
 				{
 					sb.AppendLine(path);
 				}
-				
-				Debug.LogError(sb.ToString());
+
+				//Debug.LogError(sb.ToString());
 			}
-			
+
 			initialisedTypes.Add(type);
 		}
+#endif
+
+		public abstract void Reset();
 	}
-	
+
 	public abstract class BaseEventChannel : BaseBaseEventChannel
 	{
 		public event Action EventRaised;
@@ -47,6 +53,11 @@ namespace Core.EventChannels
 		public void Raise()
 		{
 			EventRaised?.Invoke();
+		}
+
+		public override void Reset()
+		{
+			EventRaised = null;
 		}
 	}
 
@@ -58,6 +69,11 @@ namespace Core.EventChannels
 		{
 			EventRaised?.Invoke(arg);
 		}
+
+		public override void Reset()
+		{
+			EventRaised = null;
+		}
 	}
 
 	public abstract class BaseReturnEventChannel<T, TReturn> : BaseBaseEventChannel
@@ -67,6 +83,11 @@ namespace Core.EventChannels
 		public TReturn Raise(T arg)
 		{
 			return EventRaised == null ? default : EventRaised.Invoke(arg);
+		}
+
+		public override void Reset()
+		{
+			EventRaised = null;
 		}
 	}
 
@@ -78,8 +99,13 @@ namespace Core.EventChannels
 		{
 			EventRaised?.Invoke(arg0, arg1);
 		}
+
+		public override void Reset()
+		{
+			EventRaised = null;
+		}
 	}
-	
+
 	public abstract class BaseReturnEventChannel<T0, T1, TReturn> : BaseBaseEventChannel
 	{
 		public event Func<T0, T1, TReturn> EventRaised;

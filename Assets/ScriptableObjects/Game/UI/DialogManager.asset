@@ -12,6 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f7193fe70ec35df47b1637fce0cff459, type: 3}
   m_Name: DialogManager
   m_EditorClassIdentifier: 
+  enableInAllScenes: 1
+  scenesToBeEnabledIn: 00000000
   dialogPrefab: {fileID: 1315737800036090693, guid: cd1910f542abf6640b9795ff9054ff39,
     type: 3}
   openDialogEventChannel: {fileID: 11400000, guid: 0611004ef216acb40ae7cf58c8128b48,

@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using System;
 using Game.Levels.EditorWindow;
 using Game.Tiles;
@@ -83,3 +84,4 @@ namespace Game.Levels
 		}
 	}
 }
+#endif

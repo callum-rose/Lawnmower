@@ -8,7 +8,7 @@ namespace UI.Dialogs
 	[CreateAssetMenu(fileName = nameof(PresetOpenDialogEventChannel), menuName = SONames.GameDir + nameof(PresetOpenDialogEventChannel))]
 	public class PresetOpenDialogEventChannel : ScriptableObject
 	{
-		[SerializeField] private OpenDialogEventChannel openDialogEventChannel;
+		[Required, SerializeField] private OpenDialogEventChannel openDialogEventChannel;
 		[SerializeField, InlineProperty, HideLabel] private DialogInfo dialogInfo;
 		
 		public void Raise()

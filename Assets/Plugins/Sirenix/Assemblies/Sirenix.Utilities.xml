@@ -735,14 +735,14 @@
             Gets the name of the directory. Always returns forward slash seperators as opposed to Path.GetDirectoryName().
             </summary>
         </member>
-        <member name="M:Sirenix.Utilities.PathUtilities.HasSubDirectory(System.IO.GameDirectoryInfo,System.IO.GameDirectoryInfo)">
+        <member name="M:Sirenix.Utilities.PathUtilities.HasSubDirectory(System.IO.DirectoryInfo,System.IO.DirectoryInfo)">
             <summary>
             Determines whether the directory has a given directory in its hierarchy of children.
             </summary>
             <param name="parentDir">The parent directory.</param>
             <param name="subDir">The sub directory.</param>
         </member>
-        <member name="M:Sirenix.Utilities.PathUtilities.FindParentDirectoryWithName(System.IO.GameDirectoryInfo,System.String)">
+        <member name="M:Sirenix.Utilities.PathUtilities.FindParentDirectoryWithName(System.IO.DirectoryInfo,System.String)">
             <summary>
             Finds a parent directory with a given name, or null if no such parent directory exists.
             </summary>

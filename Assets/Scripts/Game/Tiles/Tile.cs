@@ -2,7 +2,6 @@ using System;
 using Game.Core;
 using Game.UndoSystem;
 using Newtonsoft.Json;
-using UnityEngine.Assertions;
 
 namespace Game.Tiles
 {

@@ -23,12 +23,12 @@ namespace UI.Dialogs
         {
             Id = id;
 
-            SetText(info.header, info.body);
+            SetText(info.header, info.Body);
 
-            CreateButton(info.button1, closeCallback);
-            if (!info.Button2.Equals(default))
+            CreateButton(info.Button1, closeCallback);
+            if (!string.IsNullOrWhiteSpace(info.Button2.Message))
             {
-                CreateButton(info.button1, closeCallback);
+                CreateButton(info.Button2, closeCallback);
             }
 
             _closeCallback = closeCallback;

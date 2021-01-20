@@ -11,9 +11,9 @@ namespace UI.Dialogs
 		[TitleGroup("Dialog Info")] [SerializeField]
 		public string header;
 
-		[SerializeField] public string body;
-		[SerializeField] public ButtonInfo button1;
-		[SerializeField] public ButtonInfo button2;
+		[SerializeField] private string body;
+		[SerializeField] private ButtonInfo button1;
+		[SerializeField] private ButtonInfo button2;
 
 		public DialogInfo(string header, string body, ButtonInfo button1)
 		{

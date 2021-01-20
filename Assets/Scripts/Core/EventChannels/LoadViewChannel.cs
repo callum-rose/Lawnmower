@@ -8,14 +8,14 @@ namespace Core.EventChannels
 	{
 		[SerializeField] private UnityScene sceneToLoad;
 
-		protected override bool ShouldBeSolo => true;
+		protected override bool ShouldBeSolo => false;
 
-		private void Awake()
+		private void OnEnable()
 		{
 			EventRaised += LoadScene;
 		}
 		
-		private void OnDestroy()
+		private void OnDisable()
 		{
 			EventRaised -= LoadScene;
 		}

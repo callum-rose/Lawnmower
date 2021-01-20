@@ -1,5 +1,4 @@
 using System;
-using Core;
 using Core.EventChannels;
 using Sirenix.OdinInspector;
 using UnityEngine;

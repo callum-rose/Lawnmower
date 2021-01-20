@@ -1,5 +1,4 @@
 using Game.Core;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Game.Mowers

@@ -1,28 +1,34 @@
 #if UNITY_EDITOR
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
 namespace Core
 {
-	internal static class DummyInitScriptableObjects
+	internal static class EditorDummyInitScriptableObjects
 	{
-		//[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
+		//[RuntimeInitializeOnLoadMethod]
 		public static void Init()
 		{
-			Dictionary<ScriptableObject, ScriptableObjectMessages> messages =
-				new Dictionary<ScriptableObject, ScriptableObjectMessages>();
+			Dictionary<ScriptableObject, ScriptableObjectMessages> messages = new Dictionary<ScriptableObject, ScriptableObjectMessages>();
+
+			IList<Type> types = new []{ typeof(ScriptableObject) };//InterfaceHelper.GetComponentsAndSOsImplementingInterface(typeof(IInitialisableScriptableObject));
 			
-			Debug.Log("Init");
-			string[] scriptableObjectIds =
-				AssetDatabase.FindAssets("t:" + nameof(ScriptableObject), new[] { "Assets/ScriptableObjects" });
+			List<string> scriptableObjectIds = new List<string>();
+			foreach (Type type in types.Where(t => !t.IsAbstract))
+			{
+				scriptableObjectIds.AddRange(AssetDatabase.FindAssets("t:" + type.Name, new[] { "Assets/ScriptableObjects" }));
+			}
+
 			foreach (string id in scriptableObjectIds)
 			{
 				string path = AssetDatabase.GUIDToAssetPath(id);
 				ScriptableObject obj = AssetDatabase.LoadAssetAtPath<ScriptableObject>(path);
-
+				
 				if (obj == null)
 				{
 					Debug.LogError(path);
@@ -34,48 +40,46 @@ namespace Core
 				MethodInfo[] methods = obj.GetType().GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 				foreach (MethodInfo method in methods)
 				{
-					if (method.Name == "Awake")
+					switch (method.Name)
 					{
-						messages[obj].awake = method;
-					}
-
-					if (method.Name == "OnEnable")
-					{
-						messages[obj].onEnable = method;
+						case "Awake":
+							messages[obj].Awake = method;
+							break;
+						case "OnEnable":
+							messages[obj].OnEnable = method;
+							break;		
+						case "OnDisable":
+							messages[obj].OnDisable = method;
+							break;	
+						case "OnDestroy":
+							messages[obj].OnDestroy = method;
+							break;
 					}
 				}
 			}
 
-			foreach (KeyValuePair<ScriptableObject, ScriptableObjectMessages> kv in messages)
+			void FireMessageForAll(Func<ScriptableObjectMessages, MethodInfo> methodGetter)
 			{
-				MethodInfo method = kv.Value.awake;
-				if (method == null)
-                {
-					continue;
-                }
-
-				ScriptableObject obj = kv.Key;
-				method.Invoke(obj, null);
-			}
-
-			return;
-			
-			foreach (KeyValuePair<ScriptableObject, ScriptableObjectMessages> kv in messages)
-			{
-				MethodInfo method = kv.Value.onEnable;
-				if (method == null)
+				foreach (KeyValuePair<ScriptableObject, ScriptableObjectMessages> kv in messages)
 				{
-					continue;
+					MethodInfo method = methodGetter.Invoke(kv.Value);
+					ScriptableObject obj = kv.Key;
+					method?.Invoke(obj, null);
 				}
-
-				ScriptableObject obj = kv.Key;
-				method.Invoke(obj, null);
 			}
+
+			FireMessageForAll(s => s.OnDisable);
+			FireMessageForAll(s => s.OnDestroy);
+			FireMessageForAll(s => s.Awake);
+			FireMessageForAll(s => s.OnEnable);
 		}
 
 		private class ScriptableObjectMessages
 		{
-			public MethodInfo awake, onEnable;
+			public MethodInfo Awake;
+			public MethodInfo OnEnable;
+			public MethodInfo OnDisable;
+			public MethodInfo OnDestroy;
 		}
 	}
 }
