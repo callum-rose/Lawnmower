@@ -59,6 +59,7 @@ namespace Game.Levels.EditorWindow
 			HeadlessLevelManager levelManager = CreateInstance<HeadlessLevelManager>();
 			HeadlessMowerManager mowerManager = CreateInstance<HeadlessMowerManager>();
 
+			tileInteractor.Construct(_mowerMovementManager);
 			_mowerMovementManager.Construct(tileInteractor);
 			levelManager.Construct(_mowerMovementManager, levelTraversalChecker, tileInteractor, levelStateChecker);
 			mowerManager.Construct(_mowerMovementManager, new IMowerControls[] { _editorWindowMowerControls });

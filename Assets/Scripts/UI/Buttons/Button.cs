@@ -20,6 +20,9 @@ namespace UI.Buttons
         [SerializeField] private Color pointerEnterTint = new Color(0.9f, 0.9f, 0.9f);
         [SerializeField] private Color pointerDownTint = new Color(0.9f, 0.9f, 0.9f);
 
+        [Header("Shadow")]
+        [SerializeField] private Image shadowImage;
+
         [Header("Action")]
         [SerializeField] public UnityEvent unityEvent;
 

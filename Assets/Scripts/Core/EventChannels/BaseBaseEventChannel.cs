@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Core.EventChannels
 {
-	public abstract class BaseBaseEventChannel : ScriptableObject, IInitialisableScriptableObject
+	public abstract class BaseBaseEventChannel : ScriptableObject
 	{
 		protected abstract bool ShouldBeSolo { get; }
 
@@ -42,8 +42,6 @@ namespace Core.EventChannels
 			initialisedTypes.Add(type);
 		}
 #endif
-
-		public abstract void Reset();
 	}
 
 	public abstract class BaseEventChannel : BaseBaseEventChannel
@@ -53,11 +51,6 @@ namespace Core.EventChannels
 		public void Raise()
 		{
 			EventRaised?.Invoke();
-		}
-
-		public override void Reset()
-		{
-			EventRaised = null;
 		}
 	}
 
@@ -69,11 +62,6 @@ namespace Core.EventChannels
 		{
 			EventRaised?.Invoke(arg);
 		}
-
-		public override void Reset()
-		{
-			EventRaised = null;
-		}
 	}
 
 	public abstract class BaseReturnEventChannel<T, TReturn> : BaseBaseEventChannel
@@ -84,11 +72,6 @@ namespace Core.EventChannels
 		{
 			return EventRaised == null ? default : EventRaised.Invoke(arg);
 		}
-
-		public override void Reset()
-		{
-			EventRaised = null;
-		}
 	}
 
 	public abstract class BaseEventChannel<T0, T1> : BaseBaseEventChannel
@@ -98,11 +81,6 @@ namespace Core.EventChannels
 		public void Raise(T0 arg0, T1 arg1)
 		{
 			EventRaised?.Invoke(arg0, arg1);
-		}
-
-		public override void Reset()
-		{
-			EventRaised = null;
 		}
 	}
 

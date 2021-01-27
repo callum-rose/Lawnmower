@@ -12,23 +12,24 @@ namespace Game.Mowers
 		[FormerlySerializedAs("mowerDataHolder")] [SerializeField]
 		private MowerDataManager mowerDataManager;
 
-		[ShowInInspector, ReadOnly]
+		[ShowInInspector, ValidateInput(nameof(SetCurrent))]
 		public Guid CurrentId { get; private set; }
 
 		private void Awake()
 		{
-			CurrentId = PersistantData.Mower.CurrentId.Load();
+			CurrentId = new Guid();//PersistantData.Mower.CurrentId.Load())PersistantData.Mower.CurrentId.Load();
 		}
 
 		public MowerData GetCurrent()
 		{
 			return mowerDataManager.GetMowerData(CurrentId);
 		}
-
-		public void SetCurrent(Guid id)
+		
+		public bool SetCurrent(Guid id)
 		{
 			CurrentId = id;
 			PersistantData.Mower.CurrentId.Save(CurrentId);
+			return true;
 		}
 	}
 }

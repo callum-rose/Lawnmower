@@ -11,7 +11,7 @@ using R = Sirenix.OdinInspector.RequiredAttribute;
 namespace Game.Levels
 {
 	[CreateAssetMenu(fileName = nameof(HeadlessLevelManager), menuName = SONames.GameDir + nameof(HeadlessLevelManager))]
-	internal class HeadlessLevelManager : ScriptableObject, ILevelManager, IInitialisableScriptableObject
+	internal class HeadlessLevelManager : ScriptableObject, ILevelManager, IUnreferencedScriptableObject
 	{
 		[TitleGroup("Assets")] 
 		[SerializeField, R] private MowerMovementManager mowerMovementManager;
@@ -35,11 +35,6 @@ namespace Game.Levels
 
 		private void OnEnable()
 		{
-			if (tileInteractor)
-			{
-				tileInteractor.Init(mowerMovementManager);
-			}
-
 			if (levelStateChecker)
 			{
 				levelStateChecker.LevelCompleted += OnLevelCompleted;

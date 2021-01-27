@@ -1,3 +1,4 @@
+using System;
 using Core;
 using Game.Core;
 using Game.Levels.Editorr;
@@ -9,38 +10,48 @@ using UnityEngine;
 namespace Game.Levels
 {
     [CreateAssetMenu(fileName = nameof(TileInteractor), menuName = SONames.GameDir + nameof(TileInteractor))]
-    internal class TileInteractor : ScriptableObject, IHasEditMode, IInitialisableScriptableObject
+    internal class TileInteractor : ScriptableObject, IHasEditMode, IUnreferencedScriptableObject
     {
-        private MowerMovementManager _mowerMovement;
+       [SerializeField] private MowerMovementManager mowerMovement;
+       
         private IReadOnlyLevelData _levelData;
 
         public bool IsEditMode { get; set; }
 
-        #region API
+        #region Unity
 
-        public void Init(MowerMovementManager mowerMovement)
+        public void OnEnable()
         {
-            Reset();
-            
-            _mowerMovement = mowerMovement;
-            _mowerMovement.Moved += Interact;
-            _mowerMovement.Bumped += Bump;
+            if (mowerMovement)
+            {
+                mowerMovement.Moved += Interact;
+                mowerMovement.Bumped += Bump;
+            }
         }
 
+        public void OnDisable()
+        {
+            if (mowerMovement)
+            {
+                mowerMovement.Moved -= Interact;
+                mowerMovement.Bumped -= Bump;
+            }
+        }
+
+        #endregion
+
+        #region API
+
+        internal void Construct(MowerMovementManager mowerMovement)
+        {
+            this.mowerMovement = mowerMovement;
+            
+            OnEnable();
+        }
+        
         public void SetTiles(IReadOnlyLevelData levelData)
         {
             _levelData = levelData;
-        }
-
-        public void Reset()
-        {
-            if (!_mowerMovement)
-            {
-                return;
-            }
-
-            _mowerMovement.Moved -= Interact;
-            _mowerMovement.Bumped -= Bump;
         }
 
         #endregion

@@ -83,7 +83,7 @@ namespace Game.Tiles
 				}
 				else
 				{
-					grassParticlesEventChannel.Raise(transform.position, _tileData.GrassHeight.Value);
+					grassParticlesEventChannel.Raise(transform.position, _tileData.GrassHeight.Value + 1);
 				}
 			}
 

@@ -9,7 +9,7 @@ using UnityEngine.SceneManagement;
 namespace UI.Dialogs
 {
 	[CreateAssetMenu(fileName = nameof(DialogManager), menuName = SONames.GameDir + nameof(DialogManager))]
-	internal class DialogManager : UnreferencedScriptableObject
+	internal class DialogManager : ScriptableObject
 	{
 		[SerializeField, AssetsOnly] private Dialog dialogPrefab;
 		[SerializeField, AssetsOnly] private OpenDialogEventChannel openDialogEventChannel;
@@ -21,7 +21,12 @@ namespace UI.Dialogs
 		private Transform _dialogContainer;
 
 		#region Unity
-		
+
+		private void Awake()
+		{
+			
+		}
+
 		private void OnEnable()
 		{
 			if (!openDialogEventChannel)

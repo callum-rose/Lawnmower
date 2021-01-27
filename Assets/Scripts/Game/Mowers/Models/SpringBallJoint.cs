@@ -11,6 +11,8 @@ namespace Game.Mowers.Models
 		[SerializeField, Range(0, 1)] private float damping;
 		[SerializeField] private Quaternion targetRotation;
 
+		
+		
 		private Vector3 _lastSourcePosition;
 
 		private void Start()

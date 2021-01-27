@@ -6,11 +6,30 @@ using System.Linq;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Core
 {
 	internal static class EditorDummyInitScriptableObjects
 	{
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]
+		public static void LoadSoReferencerPrefab()
+		{
+			ScriptableObjectReferencer[] referencers = Resources.LoadAll<ScriptableObjectReferencer>("");
+
+			if (referencers.Length == 0)
+			{
+				Debug.LogError($"No prefabs of type {nameof(ScriptableObjectReferencer)} in Resources");
+			}
+			else if (referencers.Length != 1)
+			{
+				Debug.LogError($"Too many prefabs of type {nameof(ScriptableObjectReferencer)} in Resources");
+			}
+
+			Object obj = Object.Instantiate(referencers[0]);
+			Object.DontDestroyOnLoad(obj);
+		}
+
 		//[RuntimeInitializeOnLoadMethod]
 		public static void Init()
 		{

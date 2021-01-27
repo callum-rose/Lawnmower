@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7ca74ce90323c6948b7d8a1740f7f60d, type: 3}
   m_Name: CurrentMowerManager
   m_EditorClassIdentifier: 
-  mowerDataHolder: {fileID: 11400000, guid: ef4300adc7f2ec04989ccb1603983d8d, type: 2}
+  mowerDataManager: {fileID: 11400000, guid: ef4300adc7f2ec04989ccb1603983d8d, type: 2}

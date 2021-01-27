@@ -392,6 +392,7 @@ MonoBehaviour:
   backgroundImage: {fileID: 4396474349899805723}
   pointerEnterTint: {r: 0.9, g: 0.9, b: 0.9, a: 1}
   pointerDownTint: {r: 0.9, g: 0.9, b: 0.9, a: 1}
+  shadowImage: {fileID: 0}
   unityEvent:
     m_PersistentCalls:
       m_Calls: []

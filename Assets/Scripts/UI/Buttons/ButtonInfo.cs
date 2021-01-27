@@ -10,6 +10,7 @@ namespace UI.Buttons
 	{
 		[SerializeField] private string message;
 		[SerializeField] private IconType icon;
+		[SerializeField] private Color? colour;
 
 		[SerializeField, InfoBox("This button will just close the dialog", InfoMessageType.Info, nameof(ChannelNull))]
 		private BaseEventChannel channel;
@@ -18,15 +19,17 @@ namespace UI.Buttons
 		
 		private Action _action;
 
-		public ButtonInfo(string message = null, IconType icon = IconType.None, Action action = null) : this()
+		public ButtonInfo(string message = null, IconType icon = IconType.None, Color? colour = null, Action action = null) : this()
 		{
 			this.message = message;
 			this.icon = icon;
+			this.colour = colour;
 			_action = action;
 		}
 
 		public string Message => message;
 		public IconType Icon => icon;
+		public Color Colour => colour ?? Color.white;
 		public Action Action => InvokeAll;
 
 		public void AppendAction(Action action)

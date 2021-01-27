@@ -12,3 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e88c558de2e67db4d92905011ded473a, type: 3}
   m_Name: TileInteractor
   m_EditorClassIdentifier: 
+  mowerMovement: {fileID: 11400000, guid: a68236ce6e199634094c1d5570d74ed7, type: 2}

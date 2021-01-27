@@ -6,7 +6,7 @@ using UnityEngine;
 namespace Game.Tiles
 {
 	[CreateAssetMenu(fileName = nameof(PositionalParticlesManager), menuName = SONames.GameDir + nameof(PositionalParticlesManager))]
-	internal sealed class PositionalParticlesManager : BaseParticlesManager, IInitialisableScriptableObject
+	internal sealed class PositionalParticlesManager : BaseParticlesManager, IUnreferencedScriptableObject
 	{
 		[SerializeField, AssetsOnly] private Vector3EventChannel particlesEventChannel;
 
@@ -18,11 +18,6 @@ namespace Game.Tiles
 		private void OnDisable()
 		{
 			particlesEventChannel.EventRaised -= Play;
-		}
-
-		public void Reset()
-		{
-			OnDisable();
 		}
 
 		private void Play(Vector3 position)

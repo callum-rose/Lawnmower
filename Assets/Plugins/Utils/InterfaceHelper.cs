@@ -105,6 +105,11 @@ namespace Utils
 				.ToList();
 		}
 
+		public static IList<Type> GetComponentsAndSOsImplementingInterface<T>() where T : class
+		{
+			return GetComponentsAndSOsImplementingInterface(typeof(T));
+		}
+
 		public static T[] FindObjects<T>(bool firstOnly = false) where T : class
 		{
 			List<T> foundObjects = new List<T>();
