@@ -16,14 +16,13 @@ namespace Game.Mowers
 		[SerializeField] private IRequiresMowerPositionContainer[] mowerPositionRequirers;
 		[SerializeField] private HeadlessMowerManager headlessMowerManager;
 
-		[TitleGroup("Event Channels")] [SerializeField]
-		private GameObjectEventChannel mowerCreatedEventChannel;
-
+		[TitleGroup("Event Channels")] 
+		[SerializeField] private GameObjectEventChannel mowerCreatedEventChannel;
 		[SerializeField] private GameObjectEventChannel mowerWillBeDestroyedEventChannel;
 
 		private MowerObject _mowerObject;
 
-		public GameObject Init(MowerData mower, ILevelTraversalChecker levelTraversalChecker, IUndoSystem undoManager)
+		public void Init(MowerData mower, ILevelTraversalChecker levelTraversalChecker, IUndoSystem undoManager)
 		{
 			MowerMover mowerMover = new MowerMover();
 
@@ -36,12 +35,12 @@ namespace Game.Mowers
 			InitCollider(_mowerObject.gameObject);
 
 			mowerCreatedEventChannel.Raise(_mowerObject.gameObject);
-
-			return _mowerObject.gameObject;
 		}
 
-		public void DestroyCurrent()
+		public void Clear()
 		{
+			headlessMowerManager.Clear();
+			
 			if (_mowerObject == null)
 			{
 				return;
@@ -50,7 +49,7 @@ namespace Game.Mowers
 			mowerWillBeDestroyedEventChannel.Raise(_mowerObject.gameObject);
 
 			_mowerObject.Dispose();
-			Destroy(_mowerObject);
+			Destroy(_mowerObject.gameObject);
 		}
 
 		private static void InitCollider(GameObject gameObject)

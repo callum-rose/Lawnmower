@@ -8,8 +8,9 @@ using UnityEngine.SceneManagement;
 
 namespace UI.Dialogs
 {
+	[UnreferencedScriptableObject]
 	[CreateAssetMenu(fileName = nameof(DialogManager), menuName = SONames.GameDir + nameof(DialogManager))]
-	internal class DialogManager : ScriptableObject, IUnreferencedScriptableObject
+	internal class DialogManager : ScriptableObject
 	{
 		[SerializeField, AssetsOnly] private Dialog dialogPrefab;
 		[SerializeField, AssetsOnly] private OpenDialogEventChannel openDialogEventChannel;
@@ -92,6 +93,12 @@ namespace UI.Dialogs
 		private void FindDialogContainer()
 		{
 			GameObject containerObj = GameObject.FindGameObjectWithTag(UnityTags.DialogCanvas);
+
+			if (!containerObj)
+			{
+				return;
+			}
+			
 			_dialogContainer = containerObj.transform;
 		}
 

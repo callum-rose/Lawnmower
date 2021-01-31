@@ -1,4 +1,3 @@
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Game.Tiles
@@ -6,7 +5,7 @@ namespace Game.Tiles
 	[RequireComponent(typeof(ParticleSystemRenderer))]
 	internal class GrassParticlesColourer : MonoBehaviour
 	{
-		[SerializeField] private GrassMaterialDataHolder grassMaterialDataHolder;
+		[SerializeField] private GrassParticlesMaterialDataHolder grassMaterialDataHolder;
 
 		[SerializeField, Range(1, GrassTile.MaxGrassHeight)]
 		private int debugGrassheight = 3;

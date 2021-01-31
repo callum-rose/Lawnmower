@@ -9,8 +9,9 @@ using UnityEngine;
 
 namespace Game.Levels
 {
+    [UnreferencedScriptableObject]
     [CreateAssetMenu(fileName = nameof(TileInteractor), menuName = SONames.GameDir + nameof(TileInteractor))]
-    internal class TileInteractor : ScriptableObject, IHasEditMode, IUnreferencedScriptableObject
+    internal class TileInteractor : ScriptableObject, IHasEditMode
     {
        [SerializeField] private MowerMovementManager mowerMovement;
        

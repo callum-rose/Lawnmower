@@ -1,6 +1,7 @@
 ﻿using Game.Levels;
 using Sirenix.OdinInspector;
 using System;
+using System.Collections.Generic;
 using BalsamicBits.Extensions;
 using UnityEngine;
 
@@ -12,7 +13,7 @@ namespace LevelSelect
 		[SerializeField, AssetsOnly] private LevelTile levelTilePrefab;
 		[SerializeField] private Transform tileContainer;
 
-		public event Action<LevelData> LevelSelected;
+		public event Action<IReadOnlyLevelData> LevelSelected;
 
 		private void Awake()
 		{
@@ -21,35 +22,29 @@ namespace LevelSelect
 
 		private void Start()
 		{
-			for (int i = 0; i < levelDataManager.LevelCount; i++)
+			IList<LevelInfo> list = levelDataManager.GetAllLevels();
+			for (int i = 0; i < list.Count; i++)
 			{
+				LevelInfo levelInfo = list[i];
+				
 				LevelTile newTile = Instantiate(levelTilePrefab, tileContainer);
-				newTile.Setup(GetLevelNumber(i), levelDataManager.IsLevelLocked(i));
+				newTile.Setup(GetLevelNumberFor(i), levelInfo.Locked);
 
-				int tempI = i;
-				newTile.Clicked += () => OnTileClicked(tempI);
+				newTile.Clicked += () => OnTileClicked(levelInfo);
 			}
 		}
 
-		private void OnTileClicked(int index)
+		private void OnTileClicked(LevelInfo levelInfo)
 		{
-			if (levelDataManager.IsLevelLocked(index))
+			if (levelInfo.Locked)
 			{
-				Debug.Log("Level index " + index + " is not unlocked");
-				return;
-			}
-
-			LevelData level;
-			if (!levelDataManager.TryGetLevel(index, out level))
-			{
-				Debug.LogError("Level with index " + index + " does not exist");
 				return;
 			}
 			
-			LevelSelected.Invoke(level);
+			LevelSelected!.Invoke(levelInfo.LevelData);
 		}
 
-		private static int GetLevelNumber(int levelIndex)
+		private static int GetLevelNumberFor(int levelIndex)
 		{
 			return levelIndex + 1;
 		}

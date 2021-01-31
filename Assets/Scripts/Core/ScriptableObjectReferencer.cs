@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Core.EventChannels;
+using System.Reflection;
+using BalsamicBits.Extensions;
 using Sirenix.OdinInspector;
 using UnityEditor;
 using UnityEngine;
@@ -12,42 +13,52 @@ namespace Core
 	public class ScriptableObjectReferencer : MonoBehaviour
 	{
 		[SerializeField] private List<ScriptableObject> scriptableObjects;
-		
+
 #if UNITY_EDITOR
 
 		[MenuItem("Callum/Update Scriptable Objects Referencers")]
+		[InitializeOnLoadMethod]
 		public static void UpdateAll()
 		{
-			var all = Resources.LoadAll<ScriptableObjectReferencer>("");
+			ScriptableObjectReferencer[] all = Resources
+				.LoadAll<UnityEngine.Object>("")
+				.Where(o => o is GameObject g && g.GetComponent<ScriptableObjectReferencer>() != null)
+				.Select(o => (o as GameObject)!.GetComponent<ScriptableObjectReferencer>())
+				.ToArray();
 
 			if (all.Length == 0)
 			{
 				Debug.LogError($"Need one {nameof(ScriptableObjectReferencer)} in the Resources folder");
 				return;
 			}
-			
+
 			if (all.Length > 1)
 			{
-				Debug.LogError($"Need only one {nameof(ScriptableObjectReferencer)} in the Resources folder. Found {all.Length}");
+				Debug.LogError(
+					$"Need only one {nameof(ScriptableObjectReferencer)} in the Resources folder. Found {all.Length}");
 				return;
 			}
-			
-			foreach (var sor in all)
-			{
-				sor.FindAllUnreferencedSOs();
-			}
+
+			AssetDatabase
+				.FindAssets("t:" + nameof(GameObject))
+				.Select(AssetDatabase.GUIDToAssetPath)
+				.Select(path => AssetDatabase.LoadAssetAtPath<GameObject>(path))
+				.First(g => g.GetComponent<ScriptableObjectReferencer>() != null)
+				.GetComponent<ScriptableObjectReferencer>()
+				.FindAllUnreferencedSOs();
 			
 			AssetDatabase.SaveAssets();
 			AssetDatabase.Refresh();
+
+			Debug.Log("Updated " + nameof(ScriptableObjectReferencer));
 		}
-		
+
 		[Button]
 		private void FindAllUnreferencedSOs()
 		{
 			scriptableObjects = new List<ScriptableObject>();
-			
-			IList<Type> types =
-				InterfaceHelper.GetComponentsAndSOsImplementingInterface<IUnreferencedScriptableObject>();
+
+			IEnumerable<Type> types = AttributeHelper.GetTypesWithAttribute<UnreferencedScriptableObjectAttribute>(Assembly.GetExecutingAssembly());
 
 			foreach (Type type in types)
 			{
@@ -55,7 +66,7 @@ namespace Core
 				{
 					continue;
 				}
-				
+
 				if (!typeof(ScriptableObject).IsAssignableFrom(type))
 				{
 					continue;
@@ -65,7 +76,7 @@ namespace Core
 					.FindAssets($"t:{type.Name}", new[] { "Assets/ScriptableObjects" })
 					.Select(AssetDatabase.GUIDToAssetPath)
 					.Select(AssetDatabase.LoadAssetAtPath<ScriptableObject>);
-				
+
 				scriptableObjects.AddRange(foundSOs);
 			}
 		}

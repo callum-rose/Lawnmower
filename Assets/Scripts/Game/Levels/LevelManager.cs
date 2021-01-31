@@ -45,15 +45,20 @@ namespace Game.Levels
 
 		public void Init(IReadOnlyLevelData level)
 		{
-			ClearTiles();
+			Clear();
 			
 			headlessLevelManager.Init(level);
 			
 			_tileObjects = levelFactory.Build(level);
 		}
 		
-		public void ClearTiles()
+		public void Clear()
 		{
+			if (headlessLevelManager)
+			{
+				headlessLevelManager.Clear();
+			}
+
 			if (_tileObjects == null)
 			{
 				return;

@@ -13,6 +13,8 @@ namespace Game.Levels
 {
 	internal class InspectorLevelDataWrapperDrawer : OdinValueDrawer<InspectorLevelDataWrapper>
 	{
+		private Vector2 _scrollPos;
+		
 		protected override void DrawPropertyLayout(GUIContent label)
 		{
 			InspectorLevelDataWrapper inspectorLevelDataWrapper = ValueEntry.SmartValue; 
@@ -24,10 +26,15 @@ namespace Game.Levels
 			const float axisIndicesSize = 30;
 			float cellSize = (guiWidth - axisIndicesSize) / levelData.Width;
 
-			Rect inspectorRect =
-				GUILayoutUtility.GetAspectRect((levelData.Width * cellSize + axisIndicesSize) /
-				                               (levelData.Depth * cellSize + axisIndicesSize));
+			Rect inspectorRect = GUILayoutUtility.GetRect(guiWidth, levelData.Depth * cellSize + axisIndicesSize);
+				//GUILayoutUtility.GetAspectRect((levelData.Width * cellSize + axisIndicesSize) / (levelData.Depth * cellSize + axisIndicesSize));
 
+			bool needsToScroll = inspectorRect.height > levelEditorWindow.position.height;
+			if (needsToScroll)
+			{
+				_scrollPos = GUILayout.BeginScrollView(_scrollPos);
+			}
+			
 			if (!inspectorLevelDataWrapper.ViewOnly)
 			{
 				SubdivideRect(inspectorRect, new Vector2(axisIndicesSize, inspectorRect.height - axisIndicesSize),
@@ -40,6 +47,11 @@ namespace Game.Levels
 			{
 				DrawLevelGrid(levelData, inspectorRect, cellSize, levelEditorWindow,
 					inspectorLevelDataWrapper.ViewOnly);
+			}
+
+			if (needsToScroll)
+			{
+				GUILayout.EndScrollView();
 			}
 		}
 

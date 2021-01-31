@@ -68,10 +68,27 @@ namespace Game.Mowers
             _undoManager = undoManager;
         }
 
+        public void Clear()
+        {
+            _mowerMover = null;
+
+            if (_mowerControls != null)
+            {
+                foreach (IMowerControls mc in _mowerControls)
+                {
+                    mc.MovedInDirection -= OnInput;
+                }
+            }
+
+            _traversalChecker = null;
+
+            _undoManager = null;
+        }
+
         [Button(Expanded = true)]
         public void SetPosition(GridVector position)
         {
-            _mowerMover.Move(position);
+            _mowerMover.Move(position, true);
         }
 
         #endregion

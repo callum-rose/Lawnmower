@@ -11,7 +11,7 @@ namespace Game.Tiles
 		internal struct ChannelSetup
 		{
 			[ShowInInspector, HideLabel, DisplayAsString, PropertyOrder(1)]
-			private string Desciption => "In: " + inDirection.ToString() + " --> Out: " + outDirection.ToString();
+			private string Desciption => "In: " + inDirection + " --> Out: " + outDirection;
 
 			// [
 			// 	//ValueDropdown(nameof(CardinalDirections), HideChildProperties = true), 
@@ -32,7 +32,7 @@ namespace Game.Tiles
 			[ValueDropdown(nameof(Angles), HideChildProperties = true), PropertyOrder(2)]
 			public float angle;
 
-			private static readonly float[] Angles = new float[] {0, 90, 180, 270};
+			private static readonly float[] Angles = {0, 90, 180, 270};
 
 			public ChannelSetup(GridVector inDirection, GridVector outDirection)
 			{

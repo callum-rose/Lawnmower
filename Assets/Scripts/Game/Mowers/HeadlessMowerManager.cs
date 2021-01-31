@@ -32,5 +32,10 @@ namespace Game.Mowers
 		{
 			mowerMovementManager.Init(newMower, controls, levelTraversalChecker, undoManager);
 		}
+
+		public void Clear()
+		{
+			mowerMovementManager.Clear();
+		}
 	}
 }

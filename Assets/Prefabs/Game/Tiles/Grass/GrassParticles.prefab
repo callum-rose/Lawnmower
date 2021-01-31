@@ -4770,7 +4770,7 @@ ParticleSystemRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 30f1cfd116411ba48bc4c83fb63ab5b4, type: 2}
+  - {fileID: 2100000, guid: faafe16e55e22214d8eeb7f23c502d2d, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -4828,7 +4828,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 35dec9fd65b282348a0c83183d00ef1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  grassMaterialDataHolder: {fileID: 11400000, guid: c92d3eef2163f0944b4d5adb753e0567,
+  grassMaterialDataHolder: {fileID: 11400000, guid: 1b8e819aa57900542b79912c776556f1,
     type: 2}
   debugGrassheight: 1
 --- !u!114 &1562819157120678317

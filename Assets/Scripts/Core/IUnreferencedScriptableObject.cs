@@ -1,6 +1,9 @@
+using System;
+
 namespace Core
 {
-	public interface IUnreferencedScriptableObject
+	[AttributeUsage(AttributeTargets.Class)]
+	public sealed class UnreferencedScriptableObjectAttribute : Attribute
 	{
 	}
 }

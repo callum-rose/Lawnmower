@@ -1,58 +1,97 @@
 using System;
-using System.Collections.Generic;
-using BalsamicBits.Extensions;
 using Core;
+using Core.EventChannels;
 using Sirenix.OdinInspector;
-using Unity.Collections;
 using UnityEngine;
 using ReadOnly = Sirenix.OdinInspector.ReadOnlyAttribute;
 
 namespace Game.Tiles
 {
+	[UnreferencedScriptableObject]
 	[CreateAssetMenu(fileName = nameof(GrassShaderManager), menuName = SONames.GameDir + nameof(GrassShaderManager))]
-	internal class GrassShaderManager : ScriptableObject, IUnreferencedScriptableObject
+	internal partial class GrassShaderManager : ScriptableObject
 	{
-		[SerializeField, InlineProperty, HideLabel] private ShaderProperty<float> windNoiseScale;
-		[SerializeField, InlineProperty, HideLabel] private ShaderProperty<Vector2> windNoiseVelocity;
-		[SerializeField, InlineProperty, HideLabel] private ShaderProperty<float> bendNoiseScale;
+		[TitleGroup("Wind")]
+		[SerializeField]
+		private ShaderProperty<float> windNoiseScale;
+
+		[SerializeField]
+		private ShaderProperty<Vector2> windNoiseVelocity;
+
+		[TitleGroup("Bend")]
+		[SerializeField]
+		private ShaderProperty<float> bendNoiseScale;
+
+		[TitleGroup("Mower Wind")]
+		[SerializeField]
+		private ShaderProperty<Vector3> mowerPosition;
+
+		[SerializeField]
+		private ShaderProperty<float> mowerWindSize;
+
+		[SerializeField]
+		private ShaderProperty<float> mowerWindZoneWidth;
+
+		[SerializeField]
+		private ShaderProperty<float> mowerWindFlutterSpeed;
+
+		[TitleGroup("Event Channels")]
+		[SerializeField] private Vector3EventChannel mowerObjectMovedEventChannel;
+		
+		private ShaderPropertyBase[] _allProperties;
+
+		private void OnEnable()
+		{
+			mowerObjectMovedEventChannel.EventRaised += OnMowerObjectMoved;
+			
+			GroupProperties();
+
+			SetIds();
+			SetGlobals();
+		}
+
+		private void OnDisable()
+		{
+			mowerObjectMovedEventChannel.EventRaised -= OnMowerObjectMoved;
+		}
 
 		private void OnValidate()
 		{
+			GroupProperties();
+			
 			SetGlobals();
+		}
+
+		private void OnMowerObjectMoved(Vector3 position)
+		{
+			mowerPosition.SetAndApply(position);
 		}
 
 		private void SetGlobals()
 		{
-			Shader.SetGlobalFloat(windNoiseScale.Id, windNoiseScale);
-			Shader.SetGlobalVector(windNoiseVelocity.Id, windNoiseVelocity.Value);
-			Shader.SetGlobalFloat(bendNoiseScale.Id, bendNoiseScale);
+			foreach (ShaderPropertyBase property in _allProperties)
+			{
+				property.Apply();
+			}
 		}
 
-		[Serializable]
-		private class ShaderProperty<T>
+		[Button]
+		private void SetIds()
 		{
-			[BoxGroup("$name"), SerializeField, OnValueChanged(nameof(SetId))]
-			private string name;
-			[BoxGroup("$name"), SerializeField]
-			private T value;
-			[BoxGroup("$name"), SerializeField, ReadOnly]
-			private int id;
-
-			public string Name => name;
-
-			public T Value => value;
-
-			public int Id => id;
-			
-			private void SetId(string name)
+			foreach (ShaderPropertyBase property in _allProperties)
 			{
-				id = Shader.PropertyToID(name);
+				property.SetId();
 			}
+		}
 
-			public static implicit operator T(ShaderProperty<T> shaderProperty)
+		private void GroupProperties()
+		{
+			_allProperties = new ShaderPropertyBase[]
 			{
-				return shaderProperty.Value;
-			}
+				windNoiseScale, windNoiseVelocity,
+				bendNoiseScale,
+				mowerPosition, mowerWindSize, mowerWindZoneWidth, mowerWindFlutterSpeed
+			};
 		}
 	}
 }

@@ -180,7 +180,7 @@ namespace Game.Levels
 			Loops.TwoD(input.Width, input.Depth, (x, y) => output.SetTile(x, y, input.GetTile(x, y).Clone()));
 
 			output.StartPosition = input.StartPosition;
-
+			
 			return output;
 		}
 

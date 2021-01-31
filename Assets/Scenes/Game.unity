@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 170076734}
-  m_IndirectSpecularColor: {r: 0.15931535, g: 0.51015896, b: 0.499295, a: 1}
+  m_IndirectSpecularColor: {r: 0.0016624476, g: 0.33423665, b: 0.33423665, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -1805,6 +1805,8 @@ MonoBehaviour:
   openDialogEventChannel: {fileID: 11400000, guid: 0611004ef216acb40ae7cf58c8128b48,
     type: 2}
   closeDialogEventChannel: {fileID: 11400000, guid: f34ff3e23ec36c247b8992dc19da2023,
+    type: 2}
+  levelStartedEventChannel: {fileID: 11400000, guid: 6893d8a204369ee449b9d7778103aad6,
     type: 2}
 --- !u!1001 &581798740
 PrefabInstance:

@@ -1,7 +1,7 @@
 using System;
-using UnityEngine;
 using Newtonsoft.Json;
 using Sirenix.OdinInspector;
+using UnityEngine;
 
 namespace Game.Tiles
 {

@@ -16,10 +16,15 @@ namespace Game.Tiles
 		 ListDrawerSettings(Expanded = true, NumberOfItemsPerPage = 4)]
 		private ChannelSetup[] channels;
 
-		private static readonly GridVector[] CardinalDirections =
-			new[] {GridVector.Up, GridVector.Right, GridVector.Down, GridVector.Left};
+		private static readonly GridVector[] cardinalDirections =
+		{
+			GridVector.Up,
+			GridVector.Right,
+			GridVector.Down,
+			GridVector.Left
+		};
 
-		private static readonly int CardinalDirectionCount = CardinalDirections.Length;
+		private static readonly int cardinalDirectionCount = cardinalDirections.Length;
 
 		private Dictionary<GridVector, Dictionary<GridVector, ChannelSetup>> _setupSearchTree;
 
@@ -48,15 +53,15 @@ namespace Game.Tiles
 
 		private void SetupChannelSearchTree()
 		{
-			_setupSearchTree = new Dictionary<GridVector, Dictionary<GridVector, ChannelSetup>>(CardinalDirectionCount);
-			for (int i = 0; i < CardinalDirectionCount; i++)
+			_setupSearchTree = new Dictionary<GridVector, Dictionary<GridVector, ChannelSetup>>(cardinalDirectionCount);
+			for (int i = 0; i < cardinalDirectionCount; i++)
 			{
-				GridVector cardinalDirectionIn = CardinalDirections[i];
+				GridVector cardinalDirectionIn = cardinalDirections[i];
 				Dictionary<GridVector, ChannelSetup> subTree =
-					new Dictionary<GridVector, ChannelSetup>(CardinalDirectionCount);
-				for (int j = 0; j < CardinalDirectionCount; j++)
+					new Dictionary<GridVector, ChannelSetup>(cardinalDirectionCount);
+				for (int j = 0; j < cardinalDirectionCount; j++)
 				{
-					GridVector cardinalDirectionOut = CardinalDirections[j];
+					GridVector cardinalDirectionOut = cardinalDirections[j];
 					ChannelSetup relevantChannel = channels.First(c =>
 						c.inDirection == cardinalDirectionIn && c.outDirection == cardinalDirectionOut);
 					subTree.Add(cardinalDirectionOut, relevantChannel);
@@ -71,12 +76,12 @@ namespace Game.Tiles
 			if (channels == null || channels.Length == 0)
 			{
 				channels = new ChannelSetup[16];
-				for (int i = 0; i < CardinalDirectionCount; i++)
+				for (int i = 0; i < cardinalDirectionCount; i++)
 				{
-					for (int j = 0; j < CardinalDirectionCount; j++)
+					for (int j = 0; j < cardinalDirectionCount; j++)
 					{
-						channels[i * CardinalDirectionCount + j] =
-							new ChannelSetup(CardinalDirections[i], CardinalDirections[j]);
+						channels[i * cardinalDirectionCount + j] =
+							new ChannelSetup(cardinalDirections[i], cardinalDirections[j]);
 					}
 				}
 			}

@@ -46,6 +46,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   data: {fileID: 11400000, guid: 2cbea1bbd515ac541bc1f84a7dbf3614, type: 2}
+  movedEventChannel: {fileID: 11400000, guid: ea3df77c7ddc40947afc66b8918e7953, type: 2}
 --- !u!114 &2600328572595455804
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -59,6 +60,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   data: {fileID: 11400000, guid: 2cbea1bbd515ac541bc1f84a7dbf3614, type: 2}
+  movedEventChannel: {fileID: 0}
 --- !u!114 &4294696418991189797
 MonoBehaviour:
   m_ObjectHideFlags: 0

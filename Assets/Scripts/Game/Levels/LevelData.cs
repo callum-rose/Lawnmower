@@ -17,7 +17,7 @@ namespace Game.Levels
 	[CreateAssetMenu(fileName = "LevelData", menuName = SONames.GameDir + "Level Data")]
 	internal partial class LevelData : SerializedScriptableObject, IReadOnlyLevelData
 	{
-		[SerializeField] private Guid id;
+		[OdinSerialize] private Guid id;
 
 		[SerializeField, HideInInspector] private GridVector startPosition = new GridVector(1, 1);
 
@@ -27,10 +27,7 @@ namespace Game.Levels
 			HideRowIndices = true)]
 #endif
 		internal Tile[,] newTiles;
-
-		// TODO
-		// [ShowInInspector] private InspectorLevelDataWrapper tilesWrapper = new InspectorLevelDataWrapper();
-
+		
 		[ShowInInspector, PropertyOrder(1), MinValue(1), DelayedProperty]
 		public int Width => newTiles.GetLength(0);
 
@@ -41,15 +38,12 @@ namespace Game.Levels
 		public GridVector StartPosition => startPosition;
 
 		// keep just in case Odin serialiser messes up
-		[FormerlySerializedAs("tilesData")] [SerializeField, TextArea(8, 12)]
-		private string ___tilesData;
-
-		[FormerlySerializedAs("tiles")] [SerializeField]
-		private Serialised2dArray<TileData> ___tiles;
+		[FormerlySerializedAs("___tilesData"), SerializeField, TextArea(8, 12)]
+		private string tilesData;
 
 		public Guid Id => id;
 
-		private readonly JsonSerializerSettings _jsonSettings = new JsonSerializerSettings
+		private static readonly JsonSerializerSettings jsonSettings = new JsonSerializerSettings
 		{
 			TypeNameHandling = TypeNameHandling.Auto,
 			NullValueHandling = NullValueHandling.Ignore
@@ -88,7 +82,7 @@ namespace Game.Levels
 
 			output.startPosition = input.StartPosition;
 
-			output.id = Guid.NewGuid();
+			output.id = input.Id;
 
 			return output;
 		}
@@ -107,30 +101,12 @@ namespace Game.Levels
 
 		protected override void OnBeforeSerialize()
 		{
-			___tilesData = JsonConvert.SerializeObject(newTiles, _jsonSettings);
+			tilesData = JsonConvert.SerializeObject(newTiles, jsonSettings);
 		}
 
 		protected override void OnAfterDeserialize()
 		{
-			if (string.IsNullOrEmpty(___tilesData))
-			{
-				// TODO
-				RecreateDataFromArchived();
-			}
-			else
-			{
-				___tilesData = ___tilesData.Replace("Tilee", "Tile");
-				newTiles = JsonConvert.DeserializeObject<Tile[,]>(___tilesData, _jsonSettings);
-				___tilesData = null;
-			}
-		}
-
-		[Button]
-		private void RecreateDataFromArchived()
-		{
-			newTiles = new Tile[___tiles.Width, ___tiles.Depth];
-			Loops.TwoD(___tiles.Width, ___tiles.Depth,
-				(x, y) => newTiles[x, y] = TEMP_TileDataToTileeConverter.GetTilee(___tiles[x, y]));
+			newTiles = JsonConvert.DeserializeObject<Tile[,]>(tilesData, jsonSettings);
 		}
 	}
 }

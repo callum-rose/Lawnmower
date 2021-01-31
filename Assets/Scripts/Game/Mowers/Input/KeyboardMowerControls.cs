@@ -12,19 +12,19 @@ namespace Game.Mowers.Input
         {
             if (UnityEngine.Input.GetKeyDown(KeyCode.D) || UnityEngine.Input.GetKeyDown(KeyCode.RightArrow))
             {
-                MovedInDirection.Invoke(GridVector.Right);
+                MovedInDirection?.Invoke(GridVector.Right);
             }
             else if (UnityEngine.Input.GetKeyDown(KeyCode.A) || UnityEngine.Input.GetKeyDown(KeyCode.LeftArrow))
             {
-                MovedInDirection.Invoke(GridVector.Left);
+                MovedInDirection?.Invoke(GridVector.Left);
             }
             else if (UnityEngine.Input.GetKeyDown(KeyCode.W) || UnityEngine.Input.GetKeyDown(KeyCode.UpArrow))
             {
-                MovedInDirection.Invoke(GridVector.Up);
+                MovedInDirection?.Invoke(GridVector.Up);
             }
             else if (UnityEngine.Input.GetKeyDown(KeyCode.S) || UnityEngine.Input.GetKeyDown(KeyCode.DownArrow))
             {
-                MovedInDirection.Invoke(GridVector.Down);
+                MovedInDirection?.Invoke(GridVector.Down);
             }
         }
     }

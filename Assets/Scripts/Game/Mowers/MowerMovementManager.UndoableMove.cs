@@ -25,7 +25,7 @@ namespace Game.Mowers
                     _targetPosition,
                     (Xor)false);
 
-                _movementManager._mowerMover.Move(_targetPosition);
+                _movementManager._mowerMover.Move(_targetPosition, false);
             }
 
             public void Undo()
@@ -35,7 +35,7 @@ namespace Game.Mowers
                     _previousPosition,
                     (Xor)true);
 
-                _movementManager._mowerMover.Move(_previousPosition);
+                _movementManager._mowerMover.Move(_previousPosition, true);
             }
         }
     }

@@ -1,5 +1,5 @@
-using Game.Core;
 using System;
+using Game.Core;
 using UnityEngine;
 using UnityEngine.EventSystems;
 

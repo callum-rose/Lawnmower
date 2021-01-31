@@ -5,8 +5,9 @@ using UnityEngine;
 
 namespace Game.Tiles
 {
+	[UnreferencedScriptableObject]
 	[CreateAssetMenu(fileName = nameof(GrassParticlesManager), menuName = SONames.GameDir + nameof(GrassParticlesManager))]
-	internal sealed class GrassParticlesManager : BaseParticlesManager, IUnreferencedScriptableObject
+	internal sealed class GrassParticlesManager : BaseParticlesManager
 	{
 		[SerializeField, AssetsOnly] private Vector3AndIntEventChannel particlesEventChannel;
 

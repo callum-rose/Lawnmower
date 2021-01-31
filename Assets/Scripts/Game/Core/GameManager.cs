@@ -28,6 +28,7 @@ namespace Game.Core
 		[TitleGroup("Event Channels")] 
 		[SerializeField] private OpenDialogEventChannel openDialogEventChannel;
 		[SerializeField] private CloseDialogEventChannel closeDialogEventChannel;
+		[SerializeField] private LevelDataEventChannel levelStartedEventChannel;
 
 		private IUndoSystem UndoSystem => undoSystemContainer.Result;
 
@@ -70,18 +71,21 @@ namespace Game.Core
 
 			undoController.IsRunning = true;
 
-			GameObject mowerObject = mowerManager.Init(_inputData.Value.Mower, levelTraversalChecker, UndoSystem);
+			mowerManager.Init(_inputData.Value.Mower, levelTraversalChecker, UndoSystem);
 
 			levelManager.Init(_inputData.Value.Level);
 
 			_levelDataRecorder = new LevelDataRecorder(UndoSystem);
 			_levelDataRecorder.StartRecording();
+			
+			levelStartedEventChannel.Raise(_inputData.Value.Level);
 		}
 
 		public void End()
 		{
-			levelManager.ClearTiles();
-			mowerManager.DestroyCurrent();
+			levelManager.Clear();
+
+			mowerManager.Clear();
 
 			_inputData = null;
 
@@ -102,17 +106,15 @@ namespace Game.Core
 				var recordedData = _levelDataRecorder.ExtractData();
 				PersistantData.Level.SaveLevelMetaData(_inputData.Value.Level.Id, recordedData);
 
-				int levelIndex = levelDataManager.GetLevelIndex(_inputData.Value.Level);
-				levelDataManager.SetLevelCompleted(levelIndex);
+				levelDataManager.SetLevelCompleted(_inputData.Value.Level);
 
-				int nextLevelIndex = levelIndex + 1;
-				if (levelDataManager.TryGetLevel(nextLevelIndex, out LevelData nextLevel))
+				if (levelDataManager.GetLevelAfter(_inputData.Value.Level, out LevelInfo nextLevelInfo))
 				{
 					MowerData cachedMower = _inputData.Value.Mower;
 
 					void ButtonAction()
 					{
-						Begin(new GameSetupPassThroughData(cachedMower, nextLevel));
+						Begin(new GameSetupPassThroughData(cachedMower, nextLevelInfo.LevelData));
 					}
 
 					DialogInfo dialogInfo = new DialogInfo(

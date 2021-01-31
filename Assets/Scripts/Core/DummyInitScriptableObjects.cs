@@ -1,5 +1,3 @@
-#if UNITY_EDITOR
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,11 +10,13 @@ namespace Core
 {
 	internal static class EditorDummyInitScriptableObjects
 	{
-		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
 		public static void LoadSoReferencerPrefab()
 		{
-			ScriptableObjectReferencer[] referencers = Resources.LoadAll<ScriptableObjectReferencer>("");
+			Debug.Log("Hello");
 
+			ScriptableObjectReferencer[] referencers = Resources.LoadAll<ScriptableObjectReferencer>("");
+			
 			if (referencers.Length == 0)
 			{
 				Debug.LogError($"No prefabs of type {nameof(ScriptableObjectReferencer)} in Resources");
@@ -30,33 +30,42 @@ namespace Core
 			Object.DontDestroyOnLoad(obj);
 		}
 
+#if UNITY_EDITOR
+
 		//[RuntimeInitializeOnLoadMethod]
 		public static void Init()
 		{
-			Dictionary<ScriptableObject, ScriptableObjectMessages> messages = new Dictionary<ScriptableObject, ScriptableObjectMessages>();
+			Dictionary<ScriptableObject, ScriptableObjectMessages> messages =
+				new Dictionary<ScriptableObject, ScriptableObjectMessages>();
 
-			IList<Type> types = new []{ typeof(ScriptableObject) };//InterfaceHelper.GetComponentsAndSOsImplementingInterface(typeof(IInitialisableScriptableObject));
-			
+			IList<Type>
+				types = new[]
+				{
+					typeof(ScriptableObject)
+				}; //InterfaceHelper.GetComponentsAndSOsImplementingInterface(typeof(IInitialisableScriptableObject));
+
 			List<string> scriptableObjectIds = new List<string>();
 			foreach (Type type in types.Where(t => !t.IsAbstract))
 			{
-				scriptableObjectIds.AddRange(AssetDatabase.FindAssets("t:" + type.Name, new[] { "Assets/ScriptableObjects" }));
+				scriptableObjectIds.AddRange(AssetDatabase.FindAssets("t:" + type.Name,
+					new[] { "Assets/ScriptableObjects" }));
 			}
 
 			foreach (string id in scriptableObjectIds)
 			{
 				string path = AssetDatabase.GUIDToAssetPath(id);
 				ScriptableObject obj = AssetDatabase.LoadAssetAtPath<ScriptableObject>(path);
-				
+
 				if (obj == null)
 				{
 					Debug.LogError(path);
 					continue;
 				}
-				
+
 				messages.Add(obj, new ScriptableObjectMessages());
-				
-				MethodInfo[] methods = obj.GetType().GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+				MethodInfo[] methods = obj.GetType()
+					.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 				foreach (MethodInfo method in methods)
 				{
 					switch (method.Name)
@@ -66,10 +75,10 @@ namespace Core
 							break;
 						case "OnEnable":
 							messages[obj].OnEnable = method;
-							break;		
+							break;
 						case "OnDisable":
 							messages[obj].OnDisable = method;
-							break;	
+							break;
 						case "OnDestroy":
 							messages[obj].OnDestroy = method;
 							break;
@@ -100,7 +109,7 @@ namespace Core
 			public MethodInfo OnDisable;
 			public MethodInfo OnDestroy;
 		}
-	}
-}
 
 #endif
+	}
+}

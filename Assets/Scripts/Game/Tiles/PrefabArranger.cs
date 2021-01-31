@@ -2,7 +2,9 @@ using System;
 using System.Linq;
 using BalsamicBits.Extensions;
 using Sirenix.OdinInspector;
+using UnityEditor;
 using UnityEngine;
+using Utils;
 using Random = UnityEngine.Random;
 
 namespace Game.Tiles
@@ -83,12 +85,12 @@ namespace Game.Tiles
 			}
 
 			transforms = new Transform[resolution.x * resolution.y];
-			Utils.Loops.TwoD(resolution.x, resolution.y, (x, z) =>
+			Loops.TwoD(resolution.x, resolution.y, (x, z) =>
 			{
 				int index = GetWeightedRandomPrefabIndex();
 
 				Transform newTransform =
-					(UnityEditor.PrefabUtility.InstantiatePrefab(prefabs[index].prefab, transform) as GameObject)
+					(PrefabUtility.InstantiatePrefab(prefabs[index].prefab, transform) as GameObject)
 					.transform;
 
 				Arrange(newTransform, x, z);
@@ -100,7 +102,7 @@ namespace Game.Tiles
 		[Button]
 		private void ReArrange()
 		{
-			Utils.Loops.TwoD(resolution.x, resolution.y, (x, z) =>
+			Loops.TwoD(resolution.x, resolution.y, (x, z) =>
 			{
 				Transform transform = transforms[x + resolution.x * z];
 				Arrange(transform, x, z);

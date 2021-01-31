@@ -27,7 +27,7 @@ namespace LevelSelect
 
 		#region Events
 
-		private void OnLevelSelected(LevelData level)
+		private void OnLevelSelected(IReadOnlyLevelData level)
 		{
 			MowerData currentMower = currentMowerManager.GetCurrent();
 			GameSetupPassThroughData data = new GameSetupPassThroughData(currentMower, level);

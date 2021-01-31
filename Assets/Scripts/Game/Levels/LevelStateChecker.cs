@@ -6,19 +6,21 @@ using Game.Mowers;
 using Game.UndoSystem;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.Serialization;
 
 namespace Game.Levels
 {
 	[CreateAssetMenu(fileName = nameof(LevelStateChecker), menuName = SONames.GameDir + nameof(LevelStateChecker))]
-	internal class LevelStateChecker : ScriptableObject
+	internal partial class LevelStateChecker : ScriptableObject
 	{
-		[SerializeField] private UndoableEventChannel levelRuinedChannel;
+		[FormerlySerializedAs("levelRuinedChannel"), SerializeField]
+		private UndoableEventChannel levelFailedChannel;
 
 		public UndoableAction LevelCompleted, LevelFailed;
 
 		private bool IsLevelComplete => _levelData.All(tile => tile.IsComplete);
 		private bool IsLevelRuined => _levelData.Any(tile => tile.IsRuined);
-		
+
 		private IReadOnlyLevelData _levelData;
 		private MowerMovementManager _mowerMovement;
 
@@ -47,9 +49,9 @@ namespace Game.Levels
 				_mowerMovement = null;
 			}
 		}
-		
+
 		#endregion
-		
+
 		#region Events
 
 		private void OnMowerMoved(GridVector prevPosition, GridVector targetPosition, Xor isInverted)
@@ -60,14 +62,14 @@ namespace Game.Levels
 			if (isLevelRuined || isInverted && cachedWasLevelRuined)
 			{
 				LevelFailed?.Invoke(isInverted);
-				if (levelRuinedChannel)
+				if (levelFailedChannel)
 				{
-					levelRuinedChannel.Raise(isInverted);
+					levelFailedChannel.Raise(isInverted);
 				}
 
 				return;
 			}
-			
+
 			bool isLevelComplete = IsLevelComplete;
 			if (isLevelComplete || isInverted && _wasLevelCompleted)
 			{

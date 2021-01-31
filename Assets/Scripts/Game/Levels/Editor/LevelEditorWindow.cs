@@ -65,6 +65,14 @@ namespace Game.Levels.EditorWindow
 
 		private TileClickedEvent _tileClicked;
 
+		[MenuItem("Callum/Level Editor")]
+		public static void OpenWindow()
+		{
+			LevelEditorWindow window = GetWindow<LevelEditorWindow>();
+			window.Show();
+			window.Initialize();
+		}
+
 		public static void OpenWindow(LevelData levelData)
 		{
 			LevelEditorWindow window = GetWindow<LevelEditorWindow>();

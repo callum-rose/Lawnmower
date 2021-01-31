@@ -1,4 +1,5 @@
 using Game.Core;
+using Game.UndoSystem;
 
 namespace Game.Mowers
 {
@@ -13,9 +14,9 @@ namespace Game.Mowers
 			_internalPosition = new EventProperty<GridVector>();
 		}
 
-		public void Move(GridVector toPosition)
+		public void Move(GridVector toPosition, Xor isInverted)
 		{
-			_internalPosition.Value = toPosition;
+			_internalPosition.SetValue(toPosition, isInverted);
 		}
 
 		public void Bump(GridVector toPosition)

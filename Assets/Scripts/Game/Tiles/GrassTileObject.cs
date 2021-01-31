@@ -7,7 +7,7 @@ using UnityEngine;
 namespace Game.Tiles
 {
 	[RequireComponent(typeof(IAppearanceSetter))]
-	internal partial class GrassTileObject : BaseTileObject
+	internal class GrassTileObject : BaseTileObject
 	{
 		[SerializeField] private DirtAppearanceSetter dirtAppearanceSetter;
 		[SerializeField, AssetsOnly] private Vector3AndIntEventChannel grassParticlesEventChannel;
@@ -64,7 +64,7 @@ namespace Game.Tiles
 
 		#region Events
 
-		private void OnGrassHeightValueChanged(int grassHeight)
+		private void OnGrassHeightValueChanged(int grassHeight, Xor _)
 		{
 			SetAppearance(grassHeight);
 		}

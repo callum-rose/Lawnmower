@@ -3,6 +3,7 @@ using Sirenix.OdinInspector;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 
 namespace Game.Levels
 {
@@ -49,38 +50,72 @@ namespace Game.Levels
 
 		#region API
 
-		public bool TryGetLevel(int index, out LevelData level)
+		public IList<LevelInfo> GetAllLevels()
 		{
-			if (index < 0 || index >= levelDatas.Length)
+			List<LevelInfo> result = new List<LevelInfo>(levelDatas.Length);
+
+			for (int i = 0; i < levelDatas.Length; i++)
 			{
-				level = null;
-				return false;
+				result.Add(GetInfoForLevelAt(i));
 			}
 
-			level = LevelData.CreateFrom(levelDatas[index]);
-			return true;
+			return result;
 		}
 
-		public bool IsLevelLocked(int index) => index > LevelsCompleted;
-
-		public int GetLevelIndex(IReadOnlyLevelData level)
+		public bool GetLevelAfter(IReadOnlyLevelData level, out LevelInfo levelInfo)
 		{
 			for (int i = 0; i < levelDatas.Length; i++)
 			{
-				if (levelDatas[i].Id == level.Id)
+				bool isIndexOfInputLevel = levelDatas[i].Id == level.Id;
+				if (!isIndexOfInputLevel)
 				{
-					return i;
+					continue;
 				}
+
+				levelInfo = GetInfoForLevelAt(i + 1);
+				return !levelInfo.Equals(default);
 			}
 
-			throw new System.Exception("Level index not found");
+			levelInfo = default;
+			return false;
 		}
 
-		public void SetLevelCompleted(int index)
+		public void SetLevelCompleted(IReadOnlyLevelData level)
 		{
-			LevelsCompleted = index + 1;
-			PersistantData.Level.LevelsCompleted.Save(LevelsCompleted);
+			for (int i = 0; i < levelDatas.Length; i++)
+			{
+				bool isIndexOfInputLevel = levelDatas[i].Id == level.Id;
+				if (!isIndexOfInputLevel)
+				{
+					continue;
+				}
+
+				LevelsCompleted = i;
+					
+				PersistantData.Level.LevelsCompleted.Save(LevelsCompleted);
+					
+				return;
+			}
 		}
+
+		#endregion
+
+		#region Methods
+
+		private LevelInfo GetInfoForLevelAt(int index)
+		{
+			if (index < levelDatas.Length)
+			{
+				LevelData clonedLevel = LevelData.CreateFrom(levelDatas[index]);
+				return new LevelInfo(clonedLevel, IsLevelLocked(index));
+			}
+			else
+			{
+				return default;
+			}
+		}
+
+		private bool IsLevelLocked(int index) => index > LevelsCompleted;
 
 		#endregion
 	}

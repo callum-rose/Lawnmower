@@ -68,8 +68,7 @@ namespace Game.Levels.EditorWindow
 			levelTraversalChecker.IsEditMode = editMode;
 
 			levelTraversalChecker.Init(_editableLevel);
-			tileUpgrader.Init(_editableLevel);
-			levelStateChecker.Init(_editableLevel, _mowerMovementManager);
+			tileUpgrader.Init(_editableLevel, _undoSystem);
 			_mowerPosition = mowerManager.Init(levelTraversalChecker, _undoSystem);
 
 			_editableLevel.StartPosition = new GridVector(x, y);

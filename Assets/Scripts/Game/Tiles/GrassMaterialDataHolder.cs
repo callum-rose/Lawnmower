@@ -1,10 +1,11 @@
+using System;
+using System.Collections.Generic;
 using Core;
 using Sirenix.OdinInspector;
 using Sirenix.Serialization;
-using System;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
+using Random = UnityEngine.Random;
 
 namespace Game.Tiles
 {
@@ -35,7 +36,7 @@ namespace Game.Tiles
 		public Color VaryColour(Color input)
 		{
 			float GetRandomChannelOffset() =>
-				UnityEngine.Random.Range(-colourChannelMaxVariation, colourChannelMaxVariation);
+				Random.Range(-colourChannelMaxVariation, colourChannelMaxVariation);
 
 			return input + new Color(GetRandomChannelOffset(), GetRandomChannelOffset(), GetRandomChannelOffset());
 		}

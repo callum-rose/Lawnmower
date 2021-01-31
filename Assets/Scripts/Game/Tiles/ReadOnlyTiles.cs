@@ -1,6 +1,6 @@
-using Game.Core;
 using System.Collections;
 using System.Collections.Generic;
+using Game.Core;
 
 namespace Game.Tiles
 {

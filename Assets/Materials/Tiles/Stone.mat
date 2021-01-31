@@ -20,7 +20,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Rock
+  m_Name: Stone
   m_Shader: {fileID: 4800000, guid: 2075b59c7e9508e46879aa8bf7da31c6, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4

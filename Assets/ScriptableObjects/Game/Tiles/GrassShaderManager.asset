@@ -15,12 +15,23 @@ MonoBehaviour:
   windNoiseScale:
     name: WindNoiseScale
     value: 0.1
-    id: 1428
   windNoiseVelocity:
     name: WindNoiseVelocity
-    value: {x: 0.25, y: 0}
-    id: 1425
+    value: {x: 0.5, y: 0}
   bendNoiseScale:
     name: BendNoiseScale
     value: 1
-    id: 1426
+  mowerPosition:
+    name: MowerPosition
+    value: {x: 2.5, y: 0, z: 1.5}
+  mowerWindSize:
+    name: MowerWindSize
+    value: 0.008
+  mowerWindZoneWidth:
+    name: MowerWindZoneWidth
+    value: 0.6
+  mowerWindFlutterSpeed:
+    name: MowerWindFlutterSpeed
+    value: 1
+  mowerObjectMovedEventChannel: {fileID: 11400000, guid: ea3df77c7ddc40947afc66b8918e7953,
+    type: 2}

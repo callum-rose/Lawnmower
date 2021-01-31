@@ -1,4 +1,5 @@
 using Sirenix.OdinInspector;
+using UnityEditor;
 using UnityEngine;
 
 namespace Game.Tiles
@@ -52,7 +53,7 @@ namespace Game.Tiles
 		private void SetPropertyBlock()
 		{
 #if UNITY_EDITOR
-			if (!UnityEditor.EditorApplication.isPlaying)
+			if (!EditorApplication.isPlaying)
 			{
 				_propertyBlock ??= new MaterialPropertyBlock();
 				_renderers ??= GetComponentsInChildren<Renderer>();
