@@ -13,7 +13,7 @@ namespace Game.Tiles
 		[SerializeField, AssetsOnly] private Vector3AndIntEventChannel grassParticlesEventChannel;
 		[SerializeField, AssetsOnly] private Vector3EventChannel dirtParticlesEventChannel;
 
-		[SerializeField, Range(0, GrassTile.MaxGrassHeight)]
+		[SerializeField, Range(0, GrassTile.MaxGrassHeight), OnValueChanged(nameof(OnDisplayGrassHeightChanged))]
 		private int displayGrassHeight;
 
 		private GrassTile _tileData;
@@ -27,10 +27,6 @@ namespace Game.Tiles
 		private void Awake()
 		{
 			_appearanceSetter = GetComponent<IAppearanceSetter>();
-		}
-
-		private void OnValidate()
-		{
 			SetAppearance(displayGrassHeight);
 		}
 
@@ -124,6 +120,11 @@ namespace Game.Tiles
 			}
 
 			_appearanceSetter.SetAppearance(grassHeight);
+		}
+		
+		private void OnDisplayGrassHeightChanged(int _)
+		{
+			SetAppearance(displayGrassHeight);
 		}
 
 		#endregion

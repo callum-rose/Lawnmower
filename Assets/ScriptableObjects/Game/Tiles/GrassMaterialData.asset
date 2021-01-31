@@ -24,7 +24,7 @@ MonoBehaviour:
     - Name: grassColours
       Entry: 7
       Data: 0|System.Collections.Generic.Dictionary`2[[System.Int32, mscorlib],[Game.Tiles.GrassMaterialDataHolder+GrassData,
-        Assembly-CSharp]], mscorlib
+        Scripts]], mscorlib
     - Name: comparer
       Entry: 7
       Data: 1|System.Collections.Generic.GenericEqualityComparer`1[[System.Int32,
@@ -43,7 +43,7 @@ MonoBehaviour:
       Data: 3
     - Name: $v
       Entry: 7
-      Data: Game.Tiles.GrassMaterialDataHolder+GrassData, Assembly-CSharp
+      Data: Game.Tiles.GrassMaterialDataHolder+GrassData, Scripts
     - Name: baseColour
       Entry: 7
       Data: UnityEngine.Color, UnityEngine.CoreModule
@@ -106,7 +106,7 @@ MonoBehaviour:
       Data: 2
     - Name: $v
       Entry: 7
-      Data: Game.Tiles.GrassMaterialDataHolder+GrassData, Assembly-CSharp
+      Data: Game.Tiles.GrassMaterialDataHolder+GrassData, Scripts
     - Name: baseColour
       Entry: 7
       Data: UnityEngine.Color, UnityEngine.CoreModule
@@ -169,7 +169,7 @@ MonoBehaviour:
       Data: 1
     - Name: $v
       Entry: 7
-      Data: Game.Tiles.GrassMaterialDataHolder+GrassData, Assembly-CSharp
+      Data: Game.Tiles.GrassMaterialDataHolder+GrassData, Scripts
     - Name: baseColour
       Entry: 7
       Data: UnityEngine.Color, UnityEngine.CoreModule
@@ -232,7 +232,7 @@ MonoBehaviour:
       Data: 0
     - Name: $v
       Entry: 7
-      Data: Game.Tiles.GrassMaterialDataHolder+GrassData, Assembly-CSharp
+      Data: Game.Tiles.GrassMaterialDataHolder+GrassData, Scripts
     - Name: baseColour
       Entry: 7
       Data: UnityEngine.Color, UnityEngine.CoreModule
@@ -293,4 +293,10 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
+  grassMaterials:
+    keys: 010000000200000003000000
+    values:
+    - {fileID: 2100000, guid: 30f1cfd116411ba48bc4c83fb63ab5b4, type: 2}
+    - {fileID: 2100000, guid: 1aacdddcd7b654a43842458afae7246b, type: 2}
+    - {fileID: 2100000, guid: f110a092dbe9ee641b51d53bc25ff9fe, type: 2}
   colourChannelMaxVariation: 0.08

@@ -12,6 +12,8 @@ namespace Game.Tiles
             mediumContainer.SetActive(grassHeight == 2);
             smallContainer.SetActive(grassHeight== 1);
             ruinedContainer.SetActive(grassHeight == 0);
+            
+            Debug.Log("Grass set to " + grassHeight);
         }
     }
 }

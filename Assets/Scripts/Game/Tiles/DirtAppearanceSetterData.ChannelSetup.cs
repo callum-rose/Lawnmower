@@ -39,7 +39,7 @@ namespace Game.Tiles
 				this.inDirection = inDirection;
 				this.outDirection = outDirection;
 
-				type = DirtAppearanceSetter.ChannelType.None;
+				type = DirtAppearanceSetter.ChannelType.Straight;
 				angle = 0;
 			}
 		}

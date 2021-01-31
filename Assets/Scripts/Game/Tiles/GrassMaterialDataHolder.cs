@@ -8,35 +8,55 @@ using UnityEngine.Serialization;
 
 namespace Game.Tiles
 {
-    [CreateAssetMenu(fileName = nameof(GrassMaterialDataHolder), menuName = SONames.GameDir + nameof(GrassMaterialDataHolder))]
-    internal class GrassMaterialDataHolder : SerializedScriptableObject
-    {
-        [OdinSerialize] private Dictionary<int, GrassData> grassColours;
-        [SerializeField] private float colourChannelMaxVariation = 0.1f;
+	[CreateAssetMenu(fileName = nameof(GrassMaterialDataHolder),
+		menuName = SONames.GameDir + nameof(GrassMaterialDataHolder))]
+	internal class GrassMaterialDataHolder : SerializedScriptableObject
+	{
+		[SerializeField] private SerialisedDictionary<int, Material> grassMaterials;
+		
+		[FoldoutGroup("Legacy"), OdinSerialize]
+		private Dictionary<int, GrassData> grassColours;
+		
+		[FoldoutGroup("Legacy"), SerializeField]
+		private float colourChannelMaxVariation = 0.1f;
 
-        public GrassData GetDataForHeight(int height)
-        {
-            return grassColours[height];
-        }
+		public Material GetMaterialForHeight(int height)
+		{
+			return !grassMaterials.ContainsKey(height) ? null : grassMaterials[height];
+		}		
+		
+		#region Legacy
+		
+		public GrassData GetDataForHeight(int height)
+		{
+			return grassColours[height];
+		}
 
-        public Color VaryColour(Color input)
-        {
-            float GetRandomChannelOffset() => UnityEngine.Random.Range(-colourChannelMaxVariation, colourChannelMaxVariation);
-            return input + new Color(GetRandomChannelOffset(), GetRandomChannelOffset(), GetRandomChannelOffset());
-        }
+		public Color VaryColour(Color input)
+		{
+			float GetRandomChannelOffset() =>
+				UnityEngine.Random.Range(-colourChannelMaxVariation, colourChannelMaxVariation);
 
-        [Serializable]
-        public struct GrassData
-        {
-            [SerializeField, FormerlySerializedAs("@base"), FormerlySerializedAs("base")] private Color baseColour;
-            [SerializeField, FormerlySerializedAs("tip")] private Color tipColour;
+			return input + new Color(GetRandomChannelOffset(), GetRandomChannelOffset(), GetRandomChannelOffset());
+		}
 
-            [SerializeField] private Vector2 colourFadeYRange;
+		[Serializable]
+		public struct GrassData
+		{
+			[SerializeField, FormerlySerializedAs("@base"), FormerlySerializedAs("base")]
+			private Color baseColour;
 
-            public Color BaseColour => baseColour;
-            public Color TipColour => tipColour;
+			[SerializeField, FormerlySerializedAs("tip")]
+			private Color tipColour;
 
-            public Vector2 ColourFadeYRange => colourFadeYRange;
-        }
-    }
+			[SerializeField] private Vector2 colourFadeYRange;
+
+			public Color BaseColour => baseColour;
+			public Color TipColour => tipColour;
+
+			public Vector2 ColourFadeYRange => colourFadeYRange;
+		}
+		
+		#endregion
+	}
 }

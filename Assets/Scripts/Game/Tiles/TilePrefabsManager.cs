@@ -10,7 +10,7 @@ namespace Game.Tiles
 	[CreateAssetMenu(fileName = nameof(TilePrefabsManager), menuName = SONames.GameDir + nameof(TilePrefabsManager))]
 	internal partial class TilePrefabsManager : SerializedScriptableObject
 	{
-		[SerializeField] private SerializedDictionary<TileType, GameObject> tilePrefabs;
+		[SerializeField] private SerialisedDictionary<TileType, GameObject> tilePrefabs;
 
 		#region Unity
 
@@ -78,7 +78,7 @@ namespace Game.Tiles
 		[Button("Update Dictionary Keys")]
 		private void UpdateDict()
 		{
-			tilePrefabs ??= new SerializedDictionary<TileType, GameObject>();
+			tilePrefabs ??= new SerialisedDictionary<TileType, GameObject>();
 
 			foreach (TileType t in EnumExtensions.GetValues<TileType>())
 			{
