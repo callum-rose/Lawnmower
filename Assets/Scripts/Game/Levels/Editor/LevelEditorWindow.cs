@@ -46,9 +46,14 @@ namespace Game.Levels.EditorWindow
 		[ShowInInspector, BoxGroup(SplitLeft), InlineProperty]
 		internal GridVector StartPosition
 		{
-			get => _editableLevel != null ? _editableLevel.StartPosition : GridVector.Zero;
+			get => _editableLevel?.StartPosition ?? GridVector.Zero;
 			set
 			{
+				if (_editableLevel == null)
+				{
+					return;
+				}
+
 				_editableLevel.StartPosition = value;
 				_editableLevel.ValidateStartPos();
 			}

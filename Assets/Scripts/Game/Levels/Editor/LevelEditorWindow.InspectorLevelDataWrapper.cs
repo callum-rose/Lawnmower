@@ -7,52 +7,57 @@ using Sirenix.OdinInspector.Editor;
 using Sirenix.Utilities;
 using Sirenix.Utilities.Editor;
 using UnityEditor;
+using UnityEditor.PackageManager;
 using UnityEngine;
 
 namespace Game.Levels
 {
 	internal class InspectorLevelDataWrapperDrawer : OdinValueDrawer<InspectorLevelDataWrapper>
 	{
+		private float _scale = 1;
 		private Vector2 _scrollPos;
-		
+
 		protected override void DrawPropertyLayout(GUIContent label)
 		{
-			InspectorLevelDataWrapper inspectorLevelDataWrapper = ValueEntry.SmartValue; 
+			InspectorLevelDataWrapper inspectorLevelDataWrapper = ValueEntry.SmartValue;
 			LevelEditorWindow levelEditorWindow = inspectorLevelDataWrapper.Window;
 			EditableLevelData levelData = levelEditorWindow._editableLevel;
 
 			float guiWidth = GUILayoutUtility.GetAspectRect(Mathf.Infinity).width;
 
 			const float axisIndicesSize = 30;
-			float cellSize = (guiWidth - axisIndicesSize) / levelData.Width;
 
-			Rect inspectorRect = GUILayoutUtility.GetRect(guiWidth, levelData.Depth * cellSize + axisIndicesSize);
-				//GUILayoutUtility.GetAspectRect((levelData.Width * cellSize + axisIndicesSize) / (levelData.Depth * cellSize + axisIndicesSize));
+			Rect inspectorRect = GUILayoutUtility.GetRect(
+				guiWidth, guiWidth,
+				0f, 99999f,
+				GUILayoutOptions.ExpandHeight(true));
+			Rect groupRect = inspectorRect.AlignCenter(inspectorRect.width * _scale, inspectorRect.height * _scale);
 
-			bool needsToScroll = inspectorRect.height > levelEditorWindow.position.height;
-			if (needsToScroll)
+			_scrollPos = GUI.BeginScrollView(inspectorRect, _scrollPos, groupRect.Padding(_scale));
 			{
-				_scrollPos = GUILayout.BeginScrollView(_scrollPos);
-			}
-			
-			if (!inspectorLevelDataWrapper.ViewOnly)
-			{
-				SubdivideRect(inspectorRect, new Vector2(axisIndicesSize, inspectorRect.height - axisIndicesSize),
-					out Rect yAxisRect, out Rect levelRect, out Rect _, out Rect xAxisRect);
+				float cellSize = (groupRect.width - axisIndicesSize) / levelData.Width;
 
-				DrawAxisLabels(levelData, xAxisRect, yAxisRect);
-				DrawLevelGrid(levelData, levelRect, cellSize, levelEditorWindow, inspectorLevelDataWrapper.ViewOnly);
-			}
-			else
-			{
-				DrawLevelGrid(levelData, inspectorRect, cellSize, levelEditorWindow,
-					inspectorLevelDataWrapper.ViewOnly);
-			}
+				if (!inspectorLevelDataWrapper.ViewOnly)
+				{
+					SubdivideRect(groupRect, new Vector2(axisIndicesSize, groupRect.height - axisIndicesSize),
+						out Rect yAxisRect, out Rect levelRect, out Rect _, out Rect xAxisRect);
 
-			if (needsToScroll)
-			{
-				GUILayout.EndScrollView();
+					DrawAxisLabels(levelData, xAxisRect, yAxisRect);
+					DrawLevelGrid(levelData, levelRect, cellSize, levelEditorWindow,
+						inspectorLevelDataWrapper.ViewOnly);
+				}
+				else
+				{
+					DrawLevelGrid(levelData, groupRect, cellSize, levelEditorWindow,
+						inspectorLevelDataWrapper.ViewOnly);
+				}
+
+				if (Event.current.isScrollWheel)
+				{
+					_scale *= Mathf.Exp(-Event.current.delta.y / 100f);
+				}
 			}
+			GUI.EndScrollView();
 		}
 
 		private static void DrawMower(Rect rect)

@@ -177,7 +177,12 @@ namespace Game.Levels
 		{
 			EditableLevelData output = new EditableLevelData();
 
-			Loops.TwoD(input.Width, input.Depth, (x, y) => output.SetTile(x, y, input.GetTile(x, y).Clone()));
+			Loops.TwoD(input.Width, input.Depth, (x, y) =>
+			{
+				Tile tile = input.GetTile(x, y);
+				Tile clone = tile?.Clone() ?? new EmptyTile();
+				output.SetTile(x, y, clone);
+			});
 
 			output.StartPosition = input.StartPosition;
 			

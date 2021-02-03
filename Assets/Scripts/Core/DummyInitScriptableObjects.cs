@@ -13,8 +13,8 @@ namespace Core
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
 		public static void LoadSoReferencerPrefab()
 		{
-			Debug.Log("Hello");
-
+			Resources.UnloadUnusedAssets();
+		
 			ScriptableObjectReferencer[] referencers = Resources.LoadAll<ScriptableObjectReferencer>("");
 			
 			if (referencers.Length == 0)

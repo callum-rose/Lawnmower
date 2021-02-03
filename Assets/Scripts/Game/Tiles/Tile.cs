@@ -15,14 +15,16 @@ namespace Game.Tiles
 		public abstract bool IsTraversable(bool editMode);
 
 		public delegate void TraverseEvent(GridVector direction, Xor isInverted);
-
+		
 		public event TraverseEvent TraversedOnto;
 		public event TraverseEvent TraversedAway;
 		public event TraverseEvent BumpedInto;
 
+		private static readonly JsonSerializerSettings jsonSerializerSettings = new JsonSerializerSettings
+			{ TypeNameHandling = TypeNameHandling.All };
+
 		public Tile Clone()
 		{
-			JsonSerializerSettings jsonSerializerSettings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All };
 			string serializeObject = JsonConvert.SerializeObject(this, jsonSerializerSettings);
 			object deserializeObject = JsonConvert.DeserializeObject(serializeObject, jsonSerializerSettings);
 			return deserializeObject as Tile;
