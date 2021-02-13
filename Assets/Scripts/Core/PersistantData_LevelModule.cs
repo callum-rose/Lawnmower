@@ -8,28 +8,21 @@ namespace Core
 {
 	internal static partial class PersistantData
 	{
-		[Serializable]
-		public class LevelModule
+		public static class LevelModule
 		{
-			[ShowInInspector]
-			public IPersistentDataItem<int> LevelsCompleted { get; } = new PlayerPrefsItem<int>("levelsCompleted", 0);
+			public static readonly IPersistentDataItem<bool> TutorialCompleted = new PlayerPrefsItem<bool>("tutorialCompleted", false);		
+			public static readonly IPersistentDataItem<int> LevelsCompleted = new PlayerPrefsItem<int>("levelsCompleted", 0);
 
 			private const string Folder = "level_meta_data";
 			
-			private Dictionary<Guid, IPersistentDataItem<MetaData>> _levelMetaData =
-				new Dictionary<Guid, IPersistentDataItem<MetaData>>();
+			private static Dictionary<Guid, IPersistentDataItem<MetaData>> _levelMetaData = new Dictionary<Guid, IPersistentDataItem<MetaData>>();
 
-			public LevelModule(bool lazy)
+			static LevelModule()
 			{
-				if (lazy)
-				{
-					return;
-				}
-
 				InitAllMetaDataFiles();
 			}
 
-			private void InitAllMetaDataFiles()
+			private static void InitAllMetaDataFiles()
 			{
 				string directory = TextFileItem.GetDirectoryPath(Folder);
 
@@ -56,13 +49,13 @@ namespace Core
 
 			#region API
 
-			public void SaveLevelMetaData(Guid id, MetaData data)
+			public static void SaveLevelMetaData(Guid id, MetaData data)
 			{
 				IPersistentDataItem<MetaData> saveItem = GetPersistentDataItem(id);
 				saveItem.Save(data);
 			}
 
-			public MetaData GetLevelMetaData(Guid id)
+			public static MetaData GetLevelMetaData(Guid id)
 			{
 				IPersistentDataItem<MetaData> saveItem = GetPersistentDataItem(id);
 				return saveItem.Load();
@@ -72,7 +65,7 @@ namespace Core
 
 			#region Methods
 
-			private IPersistentDataItem<MetaData> GetPersistentDataItem(Guid id)
+			private static IPersistentDataItem<MetaData> GetPersistentDataItem(Guid id)
 			{
 				if (_levelMetaData.TryGetValue(id, out IPersistentDataItem<MetaData> saveItem))
 				{
@@ -84,7 +77,7 @@ namespace Core
 				return saveItem;
 			}
 
-			private IPersistentDataItem<MetaData> CreateSaveItem(Guid id)
+			private static IPersistentDataItem<MetaData> CreateSaveItem(Guid id)
 			{
 				IPersistentDataItem<MetaData> saveItem = new TextFileItem<MetaData>(Folder, "metadata_" + id, null);
 				_levelMetaData.Add(id, saveItem);

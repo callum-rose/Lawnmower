@@ -31,7 +31,7 @@ namespace Game.Levels
 
 		private void Awake()
 		{
-			LevelsCompleted = PersistantData.Level.LevelsCompleted.Load();
+			LevelsCompleted = PersistantData.LevelModule.LevelsCompleted.Load();
 
 			if (levelDatas.Any(l => l == null))
 			{
@@ -50,6 +50,11 @@ namespace Game.Levels
 
 		#region API
 
+		public LevelInfo GetLevel(int index)
+		{
+			return GetInfoForLevelAt(index);
+		}
+		
 		public IList<LevelInfo> GetAllLevels()
 		{
 			List<LevelInfo> result = new List<LevelInfo>(levelDatas.Length);
@@ -92,7 +97,7 @@ namespace Game.Levels
 
 				LevelsCompleted = i;
 					
-				PersistantData.Level.LevelsCompleted.Save(LevelsCompleted);
+				PersistantData.LevelModule.LevelsCompleted.Save(LevelsCompleted);
 					
 				return;
 			}

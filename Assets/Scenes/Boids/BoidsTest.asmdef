@@ -1,0 +1,16 @@
+{
+    "name": "BoidsTest",
+    "rootNamespace": "",
+    "references": [
+        "GUID:3aa9d4cbe4acac0459209e4656723ee8"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

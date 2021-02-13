@@ -104,7 +104,7 @@ namespace Game.Core
 
 				_levelDataRecorder.StopRecording();
 				var recordedData = _levelDataRecorder.ExtractData();
-				PersistantData.Level.SaveLevelMetaData(_inputData.Value.Level.Id, recordedData);
+				PersistantData.LevelModule.SaveLevelMetaData(_inputData.Value.Level.Id, recordedData);
 
 				levelDataManager.SetLevelCompleted(_inputData.Value.Level);
 

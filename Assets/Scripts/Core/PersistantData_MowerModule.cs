@@ -5,11 +5,9 @@ namespace Core
 {
 	internal static partial class PersistantData
 	{
-		[Serializable]
-		public class MowerModule
+		public static class MowerModule
 		{
-			[ShowInInspector]
-			public IPersistentDataItem<Guid> CurrentId { get; } = new PlayerPrefsItem<Guid>("mowerId", Guid.Empty);
+			public static readonly IPersistentDataItem<Guid> CurrentId = new PlayerPrefsItem<Guid>("mowerId", Guid.Empty);
 		}
 	}
 }

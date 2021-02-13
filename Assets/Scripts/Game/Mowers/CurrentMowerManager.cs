@@ -28,7 +28,7 @@ namespace Game.Mowers
 		public bool SetCurrent(Guid id)
 		{
 			CurrentId = id;
-			PersistantData.Mower.CurrentId.Save(CurrentId);
+			PersistantData.MowerModule.CurrentId.Save(CurrentId);
 			return true;
 		}
 	}
