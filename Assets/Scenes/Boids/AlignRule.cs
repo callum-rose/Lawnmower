@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
+
 
 internal class AlignRule : IBoidRule
 {

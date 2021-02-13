@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using BalsamicBits.Extensions;
 using Sirenix.OdinInspector;
@@ -19,23 +18,32 @@ public class BoidsManager : MonoBehaviour
 	[SerializeField] private AnimationCurve avoidEffectByDistance;
 	[SerializeField] private AnimationCurve alignEffectByDistance;
 	[SerializeField] private AnimationCurve cohesionEffectByDistance;
+	[SerializeField] private AnimationCurve boundsEffectByDistance;
 	[SerializeField] private Bounds bounds = new Bounds(Vector3.zero, Vector3.one * 20);
-	[SerializeField] private float boundsForceStrength = 1;
 	[SerializeField] private Vector2 speedRange = new Vector2(1, 2);
 
 	[SerializeField] private int jobCount;
 
 	private List<Boid> _boids;
 	private Dictionary<Boid, Transform> _boidTransforms;
-	
-	private AvoidRule _avoidRule;
-	private AlignRule _alignRule;
-	private CohesionRule _cohesionRule;
-	private BoundsRule _boundsRule;
+
+	private NativeArray<Boid.Data> _boidsData;
+	private NativeArray<Vector3> _avoidResultAccelerations;
+	private NativeArray<Vector3> _boundsResultAccelerations;
+	private NativeArray<Vector3> _alignResultAccelerations;
+	private NativeArray<Vector3> _cohesionResultAccelerations;
+	private TransformAccessArray _transformAccessArray;
+
+	private JobHandle _jobHandle;
 
 	private void Awake()
 	{
 		Init();
+	}
+
+	private void OnDestroy()
+	{
+		Clear();
 	}
 
 	private void OnDrawGizmos()
@@ -44,47 +52,22 @@ public class BoidsManager : MonoBehaviour
 		Gizmos.DrawWireCube(bounds.center, bounds.extents * 2);
 	}
 
-	private void OnValidate()
-	{
-		_avoidRule?.Update(avoidEffectByDistance);
-		_alignRule?.Update(alignEffectByDistance);
-		_cohesionRule?.Update(cohesionEffectByDistance);
-		_boundsRule?.Update(bounds, boundsForceStrength);
-	}
-
 	[Button]
 	private void Init()
 	{
-		DestroyBoids();
-		
-		_avoidRule = new AvoidRule(avoidEffectByDistance);
-		_alignRule = new AlignRule(alignEffectByDistance);
-		_cohesionRule = new CohesionRule(cohesionEffectByDistance);
-		_boundsRule = new BoundsRule(bounds, boundsForceStrength);
-
-		IBoidRule[] boidRules = { _avoidRule, _alignRule, _cohesionRule, _boundsRule };
-
-		VelocityPostProcessor velocityProcessor = new VelocityPostProcessor(speedRange.x, speedRange.y);
+		Clear();
 
 		_boids = new List<Boid>(count);
 		for (int i = 0; i < count; i++)
 		{
 			Boid boid = new Boid(
 				new Vector3(
-					Random.Range(bounds.min.x, bounds.max.x), 
+					Random.Range(bounds.min.x, bounds.max.x),
 					Random.Range(bounds.min.y, bounds.max.y),
 					Random.Range(bounds.min.z, bounds.max.z)),
-				Random.onUnitSphere * Random.Range(speedRange.x, speedRange.y),
-				boidRules,
-				velocityProcessor);
+				Random.onUnitSphere * Random.Range(speedRange.x, speedRange.y));
 
 			_boids.Add(boid);
-		}
-
-		foreach (Boid boid in _boids)
-		{
-			IEnumerable<Boid> otherBoids = _boids.Where(b => b != boid);
-			boid.SetOtherBoids(otherBoids);
 		}
 
 		_boidTransforms = new Dictionary<Boid, Transform>(_boids.Count);
@@ -93,55 +76,104 @@ public class BoidsManager : MonoBehaviour
 			Transform newTransform = Instantiate(boidPrefab);
 			_boidTransforms.Add(boid, newTransform);
 		}
+
+		_boidsData = _boids.Select(b => b.Info).ToNativeArray(Allocator.Persistent);
+		_avoidResultAccelerations = new NativeArray<Vector3>(_boids.Count, Allocator.Persistent);
+		_boundsResultAccelerations = new NativeArray<Vector3>(_boids.Count, Allocator.Persistent);
+		_alignResultAccelerations = new NativeArray<Vector3>(_boids.Count, Allocator.Persistent);
+		_cohesionResultAccelerations = new NativeArray<Vector3>(_boids.Count, Allocator.Persistent);
+		_transformAccessArray = new TransformAccessArray(_boidTransforms.Values.ToArray(), jobCount);
 	}
 
-	private void DestroyBoids()
+	private void Clear()
 	{
 		if (_boids == null)
 		{
 			return;
 		}
 
-		foreach (Boid boid in _boids)
+		foreach (Transform transform in _boidTransforms.Values.ToArray())
 		{
-			Destroy(_boidTransforms[boid].gameObject);
+			Destroy(transform.gameObject);
 		}
 
 		_boids.Clear();
 		_boidTransforms.Clear();
+
+		_boidsData.Dispose();
+		_avoidResultAccelerations.Dispose();
+		_alignResultAccelerations.Dispose();
+		_cohesionResultAccelerations.Dispose();
+		_boundsResultAccelerations.Dispose();
+		_transformAccessArray.Dispose();
 	}
 
 	private void Update()
 	{
-		StartCoroutine(TickRoutine());
+		JobHandle avoidHandle = ScheduleAvoidRuleJob();
+		JobHandle boundsHandle = ScheduleBoundsRuleJob();
+		JobHandle cohesionHandle = ScheduleCohesionRuleJob();
+		JobHandle alignHandle = ScheduleAlignRuleJob();
+
+		JobHandle combinedHandle = JobHandle.CombineDependencies(
+			JobHandle.CombineDependencies(avoidHandle, boundsHandle),
+			JobHandle.CombineDependencies(cohesionHandle, alignHandle));
+
+		SetTransformsJob transformsJob = new SetTransformsJob(
+			_boidsData,
+			_alignResultAccelerations,
+			_avoidResultAccelerations,
+			_cohesionResultAccelerations,
+			_boundsResultAccelerations,
+			speedRange,
+			Time.deltaTime);
+
+		_jobHandle = transformsJob.Schedule(_transformAccessArray, combinedHandle);
 	}
 
-	private IEnumerator TickRoutine()
+	private void LateUpdate()
 	{
-		foreach (Boid boid in _boids)
-		{
-			boid.Tick(Time.deltaTime);
+		_jobHandle.Complete();
+	}
 
-			// Transform boidTransform = _boidTransforms[boid];
-			//
-			// boidTransform.position = boid.Position;
-			// boidTransform.forward = boid.Velocity;
-		}
-
-		NativeArray<Boid.Data> boidData = _boids.Select(b => b.Info).ToNativeArray(Allocator.TempJob);
-		SetTransformsJob transformsJob = new SetTransformsJob
-		{
-			BoidData = boidData
-		};
+	private JobHandle ScheduleAlignRuleJob()
+	{
+		AlignJob alignJob = new AlignJob(
+			_boidsData,
+			_alignResultAccelerations,
+			(LinearAnimationCurve) alignEffectByDistance);
 		
-		TransformAccessArray transformAccessArray = new TransformAccessArray(_boidTransforms.Values.ToArray(), jobCount);
-		JobHandle jobHandle = transformsJob.Schedule(transformAccessArray);
+		return alignJob.Schedule(_boidsData.Length, jobCount);
+	}
 
-		yield return new WaitForEndOfFrame();
+	private JobHandle ScheduleCohesionRuleJob()
+	{
+		CohesionJob cohesionJob = new CohesionJob(
+			_boidsData,
+			_cohesionResultAccelerations,
+			(LinearAnimationCurve) cohesionEffectByDistance);
 		
-		jobHandle.Complete();
+		return cohesionJob.Schedule(_boidsData.Length, jobCount);
+	}
 
-		boidData.Dispose();
-		transformAccessArray.Dispose();
+	private JobHandle ScheduleAvoidRuleJob()
+	{
+		AvoidJob avoidJob = new AvoidJob(
+			_boidsData,
+			_avoidResultAccelerations,
+			(LinearAnimationCurve) avoidEffectByDistance);
+		
+		return avoidJob.Schedule(_boidsData.Length, jobCount);
+	}
+
+	private JobHandle ScheduleBoundsRuleJob()
+	{
+		BoundsJob boundsJob = new BoundsJob(
+			bounds,
+			_boidsData,
+			_boundsResultAccelerations,
+			(LinearAnimationCurve) boundsEffectByDistance);
+		
+		return boundsJob.Schedule(_boidsData.Length, jobCount);
 	}
 }

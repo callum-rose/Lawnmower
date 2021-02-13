@@ -269,7 +269,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 60
+  field of view: 43.3
   orthographic: 0
   orthographic size: 5
   m_Depth: -1
@@ -294,13 +294,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2080833865}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: -10}
+  m_LocalRotation: {x: 0.22569324, y: -0.244991, z: 0.058756042, w: 0.9410578}
+  m_LocalPosition: {x: 14.31, y: 15.2, z: -34}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 26.973, y: -29.184, z: 0}
 --- !u!114 &2080833869
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -313,7 +313,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85211fda851e76e4c85019176f7a9e45, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  count: 100
+  count: 1500
   boidPrefab: {fileID: 1774184444629407628, guid: 3652c0c3fe0b8c7459572ab0f28ef0d7,
     type: 3}
   avoidEffectByDistance:
@@ -321,18 +321,18 @@ MonoBehaviour:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 2
-      inSlope: -1
-      outSlope: -1
+      value: 4
+      inSlope: -4
+      outSlope: -4
       tangentMode: 34
       weightedMode: 0
       inWeight: 0
       outWeight: 0.33333334
     - serializedVersion: 3
-      time: 2
+      time: 1
       value: 0
-      inSlope: -1
-      outSlope: -1
+      inSlope: -4
+      outSlope: -4
       tangentMode: 34
       weightedMode: 0
       inWeight: 0.33333334
@@ -345,18 +345,18 @@ MonoBehaviour:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0.2
-      inSlope: -0.04
-      outSlope: -0.04
+      value: 4
+      inSlope: -2
+      outSlope: -2
       tangentMode: 34
       weightedMode: 0
       inWeight: 0
       outWeight: 0.33333334
     - serializedVersion: 3
-      time: 5
+      time: 2
       value: 0
-      inSlope: -0.04
-      outSlope: -0.04
+      inSlope: -2
+      outSlope: -2
       tangentMode: 34
       weightedMode: 0
       inWeight: 0.33333334
@@ -369,18 +369,42 @@ MonoBehaviour:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 2
-      inSlope: -0.2
-      outSlope: -0.2
+      value: 0.5
+      inSlope: 0
+      outSlope: 0
       tangentMode: 34
       weightedMode: 0
       inWeight: 0
       outWeight: 0.33333334
     - serializedVersion: 3
       time: 10
+      value: 0.5
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  boundsEffectByDistance:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
       value: 0
-      inSlope: -0.2
-      outSlope: -0.2
+      inSlope: 10
+      outSlope: 10
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 10
+      inSlope: 10
+      outSlope: 10
       tangentMode: 34
       weightedMode: 0
       inWeight: 0.33333334
@@ -391,8 +415,8 @@ MonoBehaviour:
   bounds:
     m_Center: {x: 0, y: 0, z: 0}
     m_Extent: {x: 10, y: 10, z: 10}
-  boundsForceStrength: 10
-  speedRange: {x: 1, y: 4}
+  speedRange: {x: 0.1, y: 0.1}
+  jobCount: 10
 --- !u!114 &2080833870
 MonoBehaviour:
   m_ObjectHideFlags: 0
