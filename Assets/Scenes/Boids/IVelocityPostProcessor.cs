@@ -1,6 +1,9 @@
 using UnityEngine;
 
-internal interface IVelocityPostProcessor
+namespace Scenes.Boids
 {
-	Vector3 Process(Vector3 input);
+	internal interface IVelocityPostProcessor
+	{
+		Vector3 Process(Vector3 input);
+	}
 }

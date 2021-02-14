@@ -1,60 +1,71 @@
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
+using Unity.Mathematics;
 using UnityEngine;
 
-[BurstCompile]
-internal struct CohesionJob : IJobParallelFor
+namespace Scenes.Boids
 {
-	[ReadOnly]
-	private NativeArray<Boid.Data> _allBoids;
-
-	[WriteOnly]
-	private NativeArray<Vector3> _resultAccelerations;
-
-	[ReadOnly]
-	private LinearAnimationCurve _effectByDistance;
-
-	public CohesionJob(NativeArray<Boid.Data> allBoids, NativeArray<Vector3> resultAccelerations, LinearAnimationCurve effectByDistance)
+	[BurstCompile]
+	internal struct CohesionJob : IJobParallelFor
 	{
-		_allBoids = allBoids;
-		_resultAccelerations = resultAccelerations;
-		_effectByDistance = effectByDistance;
-	}
+		[ReadOnly]
+		private NativeArray<Boid.Data> _allBoids;
 
-	public void Execute(int index)
-	{
-		Boid.Data boid = _allBoids[index];
+		[WriteOnly]
+		private NativeArray<Vector3> _resultAccelerations;
 
-		Vector3 weightedSumPosition = Vector3.zero;
-		float sumWeight = 0;
-		for (int i = 0; i < _allBoids.Length; i++)
+		[ReadOnly]
+		private LinearAnimationCurve _effectByDistance;
+
+		public CohesionJob(NativeArray<Boid.Data> allBoids, NativeArray<Vector3> resultAccelerations, LinearAnimationCurve effectByDistance)
 		{
-			if (i == index)
+			_allBoids = allBoids;
+			_resultAccelerations = resultAccelerations;
+			_effectByDistance = effectByDistance;
+		}
+
+		public void Execute(int index)
+		{
+			Boid.Data boid = _allBoids[index];
+
+			Vector3 weightedSumPosition = Vector3.zero;
+			float sumWeight = 0;
+			for (int i = 0; i < _allBoids.Length; i++)
 			{
-				// skip self
-				continue;
+				if (i == index)
+				{
+					// skip self
+					continue;
+				}
+
+				Boid.Data otherBoid = _allBoids[i];
+
+				float distanceSqr = math.distancesq(boid.Position, otherBoid.Position);
+
+				if (distanceSqr > 2 * 2)
+				{
+					continue;
+				}
+				
+				float distance = math.sqrt(distanceSqr);
+				float weight = _effectByDistance.Evaluate(distance);
+
+				weightedSumPosition += otherBoid.Position * weight;
+				sumWeight += weight;
 			}
 
-			Boid.Data otherBoid = _allBoids[i];
+			if (sumWeight == 0)
+			{
+				_resultAccelerations[index] = Vector3.zero;
+				return;
+			}
 
-			float distance = boid.DistanceFrom(otherBoid);
-			float weight = _effectByDistance.Evaluate(distance);
+			Vector3 weightedCenter = weightedSumPosition / sumWeight;
+			float distanceToCenter = Vector3.Distance(boid.Position, weightedCenter);
 
-			weightedSumPosition += otherBoid.Position * weight;
-			sumWeight += weight;
+			float effect = _effectByDistance.Evaluate(distanceToCenter);
+			_resultAccelerations[index] = (weightedCenter - boid.Position) * effect;
 		}
-
-		if (sumWeight == 0)
-		{
-			_resultAccelerations[index] = Vector3.zero;
-			return;
-		}
-
-		Vector3 weightedCenter = weightedSumPosition / sumWeight;
-		float distanceToCenter = Vector3.Distance(boid.Position, weightedCenter);
-
-		float effect = _effectByDistance.Evaluate(distanceToCenter);
-		_resultAccelerations[index] = (weightedCenter - boid.Position) * effect;
 	}
 }

@@ -313,7 +313,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85211fda851e76e4c85019176f7a9e45, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  count: 1500
+  count: 500
   boidPrefab: {fileID: 1774184444629407628, guid: 3652c0c3fe0b8c7459572ab0f28ef0d7,
     type: 3}
   avoidEffectByDistance:
@@ -321,9 +321,9 @@ MonoBehaviour:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 4
-      inSlope: -4
-      outSlope: -4
+      value: 60
+      inSlope: -60
+      outSlope: -60
       tangentMode: 34
       weightedMode: 0
       inWeight: 0
@@ -331,8 +331,8 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 1
       value: 0
-      inSlope: -4
-      outSlope: -4
+      inSlope: -60
+      outSlope: -60
       tangentMode: 34
       weightedMode: 0
       inWeight: 0.33333334
@@ -345,9 +345,9 @@ MonoBehaviour:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 4
-      inSlope: -2
-      outSlope: -2
+      value: 5
+      inSlope: -2.5
+      outSlope: -2.5
       tangentMode: 34
       weightedMode: 0
       inWeight: 0
@@ -355,8 +355,8 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 2
       value: 0
-      inSlope: -2
-      outSlope: -2
+      inSlope: -2.5
+      outSlope: -2.5
       tangentMode: 34
       weightedMode: 0
       inWeight: 0.33333334
@@ -369,9 +369,9 @@ MonoBehaviour:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0.5
-      inSlope: 0
-      outSlope: 0
+      value: 1
+      inSlope: -0.05
+      outSlope: -0.05
       tangentMode: 34
       weightedMode: 0
       inWeight: 0
@@ -379,8 +379,8 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 10
       value: 0.5
-      inSlope: 0
-      outSlope: 0
+      inSlope: -0.05
+      outSlope: -0.05
       tangentMode: 34
       weightedMode: 0
       inWeight: 0.33333334
@@ -394,17 +394,17 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 0
       value: 0
-      inSlope: 10
-      outSlope: 10
+      inSlope: 500
+      outSlope: 500
       tangentMode: 34
       weightedMode: 0
       inWeight: 0
       outWeight: 0.33333334
     - serializedVersion: 3
-      time: 1
-      value: 10
-      inSlope: 10
-      outSlope: 10
+      time: 0.1
+      value: 50
+      inSlope: 500
+      outSlope: 500
       tangentMode: 34
       weightedMode: 0
       inWeight: 0.33333334
@@ -415,7 +415,8 @@ MonoBehaviour:
   bounds:
     m_Center: {x: 0, y: 0, z: 0}
     m_Extent: {x: 10, y: 10, z: 10}
-  speedRange: {x: 0.1, y: 0.1}
+  speedRange: {x: 2, y: 5}
+  drag: 0.01
   jobCount: 10
 --- !u!114 &2080833870
 MonoBehaviour:
