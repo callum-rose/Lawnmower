@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a99372f605dd5ac408ad6a7dcd66f8e3, type: 3}
   m_Name: MowerMovementManager
   m_EditorClassIdentifier: 
-  traversalChecker: {fileID: 11400000, guid: 3c448be198e671746bdbe22256346721, type: 2}
-  tileInteractor: {fileID: 11400000, guid: 4185931dfdfd65f42a05487f3816bcf0, type: 2}
+  mowerInputEventChannel: {fileID: 11400000, guid: 493087ea426ec094fa4aa264e865b8fe,
+    type: 2}

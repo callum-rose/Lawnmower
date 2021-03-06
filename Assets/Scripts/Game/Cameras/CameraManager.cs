@@ -5,6 +5,7 @@ using Game.Levels;
 using Game.Tiles;
 using System.Linq;
 using Core.EventChannels;
+using Game.Core;
 using Sirenix.OdinInspector;
 
 namespace Game.Cameras
@@ -18,7 +19,7 @@ namespace Game.Cameras
 
         [Title("Event Channels")] 
         [SerializeField] private GameObjectEventChannel mowerCreatedEventChannel;
-        [SerializeField] private GameObjectEventChannel tileCreatedEventChannel;
+        [SerializeField] private TileObjectEventChannel tileCreatedEventChannel;
         [SerializeField] private GameObjectEventChannel tileWillBeDestroyedEventChannel;
 
         #region Unity
@@ -66,7 +67,7 @@ namespace Game.Cameras
             
         }
         
-        private void OnTileObjectCreated(GameObject gameObject)
+        private void OnTileObjectCreated(GameObject gameObject, GridVector _)
         {
             cameraTargetGroup.AddMember(gameObject.transform, 1, LevelDimensions.TileSize * 0.5f);
         }        

@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 2600328572595455800}
   - component: {fileID: 6682515571242675335}
-  - component: {fileID: 2600328572595455804}
   - component: {fileID: 4294696418991189797}
   m_Layer: 0
   m_Name: MowerBase
@@ -47,20 +46,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   data: {fileID: 11400000, guid: 2cbea1bbd515ac541bc1f84a7dbf3614, type: 2}
   movedEventChannel: {fileID: 11400000, guid: ea3df77c7ddc40947afc66b8918e7953, type: 2}
---- !u!114 &2600328572595455804
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2600328572595455747}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c18e875a8cf4e3e4285050466237a316, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  data: {fileID: 11400000, guid: 2cbea1bbd515ac541bc1f84a7dbf3614, type: 2}
-  movedEventChannel: {fileID: 0}
 --- !u!114 &4294696418991189797
 MonoBehaviour:
   m_ObjectHideFlags: 0

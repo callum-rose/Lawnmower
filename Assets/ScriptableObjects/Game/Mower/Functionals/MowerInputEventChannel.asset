@@ -9,6 +9,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dd88a402efaf4de0b142bfd76d122039, type: 3}
-  m_Name: TileObjectCreatedEventChannel
+  m_Script: {fileID: 11500000, guid: fe68e231846a4f95a67ce6f36437b3fa, type: 3}
+  m_Name: MowerInputEventChannel
   m_EditorClassIdentifier: 

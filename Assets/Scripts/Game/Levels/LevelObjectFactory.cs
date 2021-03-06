@@ -13,7 +13,7 @@ namespace Game.Levels
         [SerializeField] private Positioner positioner;
         
         [TitleGroup("Event Channels")]
-        [SerializeField] private GameObjectEventChannel tileCreatedEventChannel;
+        [SerializeField] private TileObjectEventChannel tileCreatedEventChannel;
         [SerializeField] private GameObjectEventChannel tileWillBeDestroyedEventChannel;
 
         #region API
@@ -53,7 +53,7 @@ namespace Game.Levels
             newTileObject.name = "Tile " + position;
 #endif
 
-            tileCreatedEventChannel.Raise(newTileObject);
+            tileCreatedEventChannel.Raise(newTileObject, position);
 
             return newTileObject;
         }
@@ -71,7 +71,7 @@ namespace Game.Levels
             }
         }
 
-        public void Remove(GameObject tileObject)
+        private void Remove(GameObject tileObject)
         {
             tileWillBeDestroyedEventChannel.Raise(tileObject);
             

@@ -16,7 +16,9 @@ namespace Game.Tutorial
 		
 		private void Awake()
 		{
-			if (!PersistantData.LevelModule.TutorialCompleted.Load())
+			bool isTutorialIncomplete = !PersistantData.LevelModule.TutorialCompleted.Load();
+			
+			if (isTutorialIncomplete)
 			{
 				Guid mowerId = PersistantData.MowerModule.CurrentId.Load();
 				MowerData mowerData = mowerDataManager.GetMowerData(mowerId);

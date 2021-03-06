@@ -3,7 +3,9 @@ guid: a99372f605dd5ac408ad6a7dcd66f8e3
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - mowerInputEventChannel: {fileID: 11400000, guid: 493087ea426ec094fa4aa264e865b8fe,
+      type: 2}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

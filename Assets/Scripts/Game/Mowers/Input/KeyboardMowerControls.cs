@@ -6,25 +6,25 @@ namespace Game.Mowers.Input
 {
     internal class KeyboardMowerControls : MonoBehaviour, IMowerControls
     {
-        public event Action<GridVector> MovedInDirection;
-
+        [SerializeField] private MowerInputEventChannel mowerInputEventChannel;
+         
         private void Update()
         {
             if (UnityEngine.Input.GetKeyDown(KeyCode.D) || UnityEngine.Input.GetKeyDown(KeyCode.RightArrow))
             {
-                MovedInDirection?.Invoke(GridVector.Right);
+                mowerInputEventChannel.Raise(GridVector.Right);
             }
             else if (UnityEngine.Input.GetKeyDown(KeyCode.A) || UnityEngine.Input.GetKeyDown(KeyCode.LeftArrow))
             {
-                MovedInDirection?.Invoke(GridVector.Left);
+                mowerInputEventChannel.Raise(GridVector.Left);
             }
             else if (UnityEngine.Input.GetKeyDown(KeyCode.W) || UnityEngine.Input.GetKeyDown(KeyCode.UpArrow))
             {
-                MovedInDirection?.Invoke(GridVector.Up);
+                mowerInputEventChannel.Raise(GridVector.Up);
             }
             else if (UnityEngine.Input.GetKeyDown(KeyCode.S) || UnityEngine.Input.GetKeyDown(KeyCode.DownArrow))
             {
-                MovedInDirection?.Invoke(GridVector.Down);
+                mowerInputEventChannel.Raise(GridVector.Down);
             }
         }
     }

@@ -11,13 +11,14 @@ namespace Game.Mowers
 {
 	internal class MowerManager : MonoBehaviour, IMowerManager
 	{
-		[TitleGroup("Scene")] [SerializeField] private MowerObjectCreator mowerObjectCreator;
-		[SerializeField] private IMowerControlsContainer[] mowerControls;
+		[TitleGroup("Scene")]
+		[SerializeField] private MowerObjectCreator mowerObjectCreator;
 		[SerializeField] private IRequiresMowerPositionContainer[] mowerPositionRequirers;
 		[SerializeField] private HeadlessMowerManager headlessMowerManager;
 
-		[TitleGroup("Event Channels")] 
+		[TitleGroup("Event Channels")]
 		[SerializeField] private GameObjectEventChannel mowerCreatedEventChannel;
+
 		[SerializeField] private GameObjectEventChannel mowerWillBeDestroyedEventChannel;
 
 		private MowerObject _mowerObject;
@@ -28,9 +29,8 @@ namespace Game.Mowers
 
 			_mowerObject = mowerObjectCreator.Create(mower, mowerMover);
 
-			IMowerControls[] controls = mowerControls.Select(c => c.Result).ToArray();
-			headlessMowerManager.InitMowerMovementManager(mowerMover, levelTraversalChecker, undoManager, controls);
-			
+			headlessMowerManager.InitMowerMovementManager(mowerMover, levelTraversalChecker, undoManager);
+
 			InitObjectsNeedingMowerPosition(mowerMover);
 			InitCollider(_mowerObject.gameObject);
 
@@ -40,7 +40,7 @@ namespace Game.Mowers
 		public void Clear()
 		{
 			headlessMowerManager.Clear();
-			
+
 			if (_mowerObject == null)
 			{
 				return;

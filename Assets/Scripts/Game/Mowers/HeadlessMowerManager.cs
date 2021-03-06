@@ -1,6 +1,5 @@
 using Core;
 using Game.Levels;
-using Game.Mowers.Input;
 using Game.UndoSystem;
 using UnityEngine;
 
@@ -11,26 +10,23 @@ namespace Game.Mowers
 	{
 		[SerializeField] private MowerMovementManager mowerMovementManager;
 		
-		private IMowerControls[] _mowerControls;
-
-		public void Construct(MowerMovementManager mowerMovementManager, IMowerControls[] mowerControls)
+		public void Construct(MowerMovementManager mowerMovementManager)
 		{
 			this.mowerMovementManager = mowerMovementManager;
-			_mowerControls = mowerControls;
 		}
 
 		public IMowerPosition Init(ILevelTraversalChecker levelTraversalChecker, IUndoSystem undoManager)
 		{
 			MowerMover mowerMover = new MowerMover();
-			InitMowerMovementManager(mowerMover, levelTraversalChecker, undoManager, _mowerControls);
+			InitMowerMovementManager(mowerMover, levelTraversalChecker, undoManager);
 
 			return mowerMover;
 		}
 
 		public void InitMowerMovementManager(MowerMover newMower, ILevelTraversalChecker levelTraversalChecker,
-			IUndoSystem undoManager, IMowerControls[] controls)
+			IUndoSystem undoManager)
 		{
-			mowerMovementManager.Init(newMower, controls, levelTraversalChecker, undoManager);
+			mowerMovementManager.Init(newMower, levelTraversalChecker, undoManager);
 		}
 
 		public void Clear()

@@ -12,9 +12,6 @@ namespace Scenes.Boids
 		[ReadOnly]
 		private NativeArray<Boid.Data> _allBoids;
 
-		[ReadOnly]
-		private readonly NativeArray<float> _boidDistances;
-
 		[WriteOnly]
 		private NativeArray<Vector3> _resultAccelerations;
 

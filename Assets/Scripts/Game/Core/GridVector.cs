@@ -7,7 +7,7 @@ namespace Game.Core
 	[Serializable]
 	public struct GridVector : IEquatable<GridVector>
 	{
-		[HorizontalGroup] public int x, y;
+		[HorizontalGroup(LabelWidth = 20)] public int x, y;
 
 		public float Magnitude => ((Vector2Int) this).magnitude;
 

@@ -69,11 +69,11 @@ namespace Game.Levels.EditorWindow
 	
 	internal class EditorWindowMowerControls : IMowerControls
 	{
-		public event Action<GridVector> MovedInDirection;
+		public MowerInputEventChannel mowerInputEventChannel;
 
 		public void Move(GridVector direction)
 		{
-			MovedInDirection?.Invoke(direction);
+			mowerInputEventChannel.Raise(direction);
 		}
 	}
 }

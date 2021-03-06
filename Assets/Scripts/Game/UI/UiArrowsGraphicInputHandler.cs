@@ -1,23 +1,40 @@
 using System;
+using BalsamicBits.Extensions;
+using DG.Tweening;
+using Game.Tutorial;
+using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 using UnityEngine.UIElements;
 
 namespace Game.UI
 {
-	internal class UiArrowsGraphicInputHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
+	internal class UiArrowsGraphicInputHandler : MonoBehaviour, IPointerClickHandler, IBeginDragHandler, IDragHandler,
+		IEndDragHandler
 	{
 		[SerializeField] private Camera camera;
-		[SerializeField] private UiArrowsCameraRaycaster raycaster;
-		
+		[SerializeField] private UiArrowsManager raycaster;
+		[SerializeField] private bool isDraggable;
+		[SerializeField, Min(0)] private float padding;
+		[SerializeField, Min(0)] private float dragTransformScaleFactor = 1.2f;
+
 		private Canvas _parentCanvas;
+		private CanvasScaler _rootCanvasScaler;
+
+		private Vector3 _initialScale;
+		private Tween _dragScaleUpTween;
+		private Vector2 _preDragPosition;
 
 		private void Awake()
 		{
 			_parentCanvas = GetComponentInParent<Canvas>();
+			_rootCanvasScaler = _parentCanvas.rootCanvas.GetComponent<CanvasScaler>();
+
+			_initialScale = transform.localScale;
 		}
 
-		public void OnPointerDown(PointerEventData eventData)
+		public void OnPointerClick(PointerEventData eventData)
 		{
 			if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(transform as RectTransform,
 				eventData.pressPosition, camera, out Vector2 localPoint))
@@ -26,11 +43,62 @@ namespace Game.UI
 			}
 
 			Rect rect = RectTransformUtility.PixelAdjustRect(transform as RectTransform, _parentCanvas);
-			raycaster.Raycast(new Vector2(localPoint.x / rect.width, localPoint.y / rect.height));
+			raycaster.Input(new Vector2((localPoint.x) / rect.width + 0.5f, localPoint.y / rect.height + 0.5f));
 		}
 
-		public void OnPointerUp(PointerEventData eventData)
+		public void OnBeginDrag(PointerEventData eventData)
 		{
+			if (!isDraggable)
+			{
+				return;
+			}
+
+			_preDragPosition = ((RectTransform) transform).anchoredPosition;
+
+			_dragScaleUpTween?.Kill();
+			_dragScaleUpTween = transform
+				.DOScale(_initialScale * dragTransformScaleFactor, 0.25f)
+				.OnComplete(() => _dragScaleUpTween = null);
+		}
+
+		public void OnDrag(PointerEventData eventData)
+		{
+			if (!isDraggable)
+			{
+				return;
+			}
+
+			RectTransform rectTransform = ((RectTransform) transform);
+
+			Vector2 delta = eventData.position - eventData.pressPosition;
+			rectTransform.anchoredPosition = (_preDragPosition + delta).SetY(rectTransform.anchoredPosition.y);
+
+			float minX = padding + rectTransform.sizeDelta.x * 0.5f;
+			if (rectTransform.anchoredPosition.x < minX)
+			{
+				rectTransform.anchoredPosition = rectTransform.anchoredPosition.SetX(minX);
+			}
+			else
+			{
+				float maxX = _rootCanvasScaler.referenceResolution.x - rectTransform.sizeDelta.x * 0.5f - padding;
+				if (rectTransform.anchoredPosition.x > maxX)
+				{
+					rectTransform.anchoredPosition = rectTransform.anchoredPosition.SetX(maxX);
+				}
+			}
+		}
+
+		public void OnEndDrag(PointerEventData eventData)
+		{
+			if (!isDraggable)
+			{
+				return;
+			}
+
+			_dragScaleUpTween?.Kill();
+			_dragScaleUpTween = transform
+				.DOScale(_initialScale, 0.25f)
+				.OnComplete(() => _dragScaleUpTween = null);
 		}
 	}
 }

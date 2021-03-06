@@ -17,7 +17,7 @@ namespace Game.Levels
 		[TitleGroup("Assets")] 
 		[SerializeField, R] private MowerMovementManager mowerMovementManager;
 		[SerializeField, R] private ILevelTraversalCheckerContainer levelTraversalCheckerContainer;
-		[SerializeField, R] private TileInteractor tileInteractor;
+		[SerializeField, R] private LevelTileInteractor tileInteractor;
 		[SerializeField, R] private LevelStateChecker levelStateChecker;
 
 		public event Action LevelChanged;
@@ -58,7 +58,7 @@ namespace Game.Levels
 
 		internal void Construct(MowerMovementManager mowerMovementManager,
 			ILevelTraversalChecker levelTraversalChecker,
-			TileInteractor tileInteractor,
+			LevelTileInteractor tileInteractor,
 			LevelStateChecker levelStateChecker)
 		{
 			this.mowerMovementManager = mowerMovementManager;

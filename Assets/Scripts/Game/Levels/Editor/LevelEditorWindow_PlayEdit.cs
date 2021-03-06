@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Game.Core;
 using Game.Mowers;
-using Game.Mowers.Input;
 using Game.Tiles;
 using Game.UndoSystem;
 using Sirenix.OdinInspector;
@@ -40,6 +39,8 @@ namespace Game.Levels.EditorWindow
 
 		private void Begin(bool editMode, int x, int y)
 		{
+			_editorWindowMowerControls.mowerInputEventChannel = _mowerInputEventChannel;
+			
 			_isEditMode = editMode;
 
 			if (!_isEditMode)
@@ -48,7 +49,7 @@ namespace Game.Levels.EditorWindow
 				_editableLevel = EditableLevelData.CreateFrom(_editableLevel);
 			}
 			
-			TileInteractor tileInteractor = CreateInstance<TileInteractor>();
+			LevelTileInteractor tileInteractor = CreateInstance<LevelTileInteractor>();
 			_mowerMovementManager = CreateInstance<MowerMovementManager>();
 			EditModeLevelTraversalChecker levelTraversalChecker =
 				AssetDatabase.LoadAssetAtPath<EditModeLevelTraversalChecker>(
@@ -59,10 +60,10 @@ namespace Game.Levels.EditorWindow
 			HeadlessLevelManager levelManager = CreateInstance<HeadlessLevelManager>();
 			HeadlessMowerManager mowerManager = CreateInstance<HeadlessMowerManager>();
 
+			_mowerMovementManager.Construct(_mowerInputEventChannel);
 			tileInteractor.Construct(_mowerMovementManager);
-			_mowerMovementManager.Construct(tileInteractor);
 			levelManager.Construct(_mowerMovementManager, levelTraversalChecker, tileInteractor, levelStateChecker);
-			mowerManager.Construct(_mowerMovementManager, new IMowerControls[] { _editorWindowMowerControls });
+			mowerManager.Construct(_mowerMovementManager);
 
 			tileInteractor.IsEditMode = editMode;
 			levelTraversalChecker.IsEditMode = editMode;

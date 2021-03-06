@@ -15,6 +15,8 @@ namespace Game.Levels.Editorr
 		private const string TabBuildEmpty = "BuildEmpty";
 		private const string Save = "Save";
 
+		[SerializeField, TitleGroup(Build)] private bool autoBuild;
+
 		[SerializeField] [AssetsOnly] [TitleGroup(Build)]
 		private MowerData mowerData;
 

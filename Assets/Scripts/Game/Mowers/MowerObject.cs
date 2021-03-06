@@ -12,12 +12,6 @@ namespace Game.Mowers
 {
 	public class MowerObject : MonoBehaviour, IDataObject<MowerMover>
 	{
-		[SerializeField, InlineEditor(Expanded = true)]
-		private MowerMoverData data;
-
-		[TitleGroup("Event Channels")]
-		[SerializeField] private Vector3EventChannel movedEventChannel;
-
 		private Positioner _positioner;
 		private MowerMover _mowerMover;
 
@@ -40,31 +34,13 @@ namespace Game.Mowers
 
 		public void Dispose()
 		{
-			_mowerMover.CurrentPosition.ValueChanged -= PositionChanged;
+			
 		}
 
 		#endregion
 
 		#region Methods
-
-		private void PositionChanged(GridVector position, Xor isInverted)
-		{
-			Vector3 worldPosition = _positioner.GetWorldPosition(position);
-
-			_tween?.Kill();
-			
-			if (!isInverted)
-			{
-				_tween = transform
-					.DOMove(worldPosition, 0.1f).OnUpdate(() => movedEventChannel.Raise(transform.position))
-					.OnComplete(() => _tween = null);
-			}
-			else
-			{
-				transform.position = worldPosition;
-				movedEventChannel.Raise(worldPosition);
-			}
-		}
+		
 
 		#endregion
 	}

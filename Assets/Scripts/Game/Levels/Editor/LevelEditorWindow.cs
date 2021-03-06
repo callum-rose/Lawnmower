@@ -3,6 +3,7 @@
 using System;
 using System.IO;
 using Game.Core;
+using Game.Mowers.Input;
 using Game.Tiles;
 using Game.UndoSystem;
 using Sirenix.OdinInspector;
@@ -70,6 +71,8 @@ namespace Game.Levels.EditorWindow
 
 		private TileClickedEvent _tileClicked;
 
+		private MowerInputEventChannel _mowerInputEventChannel;
+
 		[MenuItem("Callum/Level Editor")]
 		public static void OpenWindow()
 		{
@@ -101,6 +104,8 @@ namespace Game.Levels.EditorWindow
 
 			_tiles = new InspectorLevelDataWrapper(this, false);
 			_tileTypeButtons = new TileTypeButtons(this);
+
+			_mowerInputEventChannel = CreateInstance<MowerInputEventChannel>();
 		}
 
 		private void MakeEditableVersionOfLevel(IReadOnlyLevelData levelData)

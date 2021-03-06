@@ -1,3 +1,4 @@
+using System;
 using Game.Core;
 using Game.Mowers;
 using Game.Tiles;
@@ -51,6 +52,14 @@ namespace Game.Levels.Editorr
             tileSelector.Result.Selected += TileSelector_Clicked;
 
             levelManager.LevelChanged += LevelManager_LevelChanged;
+        }
+
+        private void OnEnable()
+        {
+            if (autoBuild)
+            {
+                BuildSelectedLevel();
+            }
         }
 
         private void OnDestroy()

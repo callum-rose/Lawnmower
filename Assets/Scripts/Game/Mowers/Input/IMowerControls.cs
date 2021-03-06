@@ -6,7 +6,7 @@ namespace Game.Mowers.Input
 {
     public interface IMowerControls
     {
-        event Action<GridVector> MovedInDirection;
+        // event Action<GridVector> MovedInDirection;
     }
 
     [Serializable]

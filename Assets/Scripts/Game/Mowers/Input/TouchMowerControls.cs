@@ -9,9 +9,8 @@ namespace Game.Mowers.Input
     class TouchMowerControls : MonoBehaviour, IMowerControls
     {
         [SerializeField] private IMowerMovementGestureHandlerContainer[] _gestureHandlerContainers;
-
-        public event Action<GridVector> MovedInDirection;
-
+        [SerializeField] private MowerInputEventChannel mowerInputEventChannel;
+         
         private void OnEnable()
         {
             foreach (IMowerMovementGestureHandler gh in _gestureHandlerContainers.Select(c => c.Result))
@@ -30,7 +29,7 @@ namespace Game.Mowers.Input
 
         private void OnTouchGestureMoved(GridVector direction)
         {
-            MovedInDirection.Invoke(direction);
+            mowerInputEventChannel.Raise(direction);
         }
     }
 }
