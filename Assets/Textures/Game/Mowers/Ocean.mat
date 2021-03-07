@@ -21,16 +21,22 @@ Material:
     m_TexEnvs: []
     m_Floats:
     - _AlphaCutoff: 0.5
-    - _Banding: 10
-    - _Float0: 20.51
+    - _Banding: 17.5
+    - _Float0: 0
+    - _IntersectionNoiseAmplitude: 0.04
+    - _IntersectionNoiseScale: 2
+    - _IntersectionSize: 0.88
     - _TessEdgeLength: 16
     - _TessMax: 25
     - _TessMaxDisp: 25
     - _TessMin: 10
     - _TessPhongStrength: 0.5
     - _TessValue: 16
+    - _TimeScale: 0.12
     m_Colors:
     - _CloseColour: {r: 0.1568628, g: 0.4901961, b: 0.4901961, a: 1}
     - _EmissionColor: {r: 1, g: 1, b: 1, a: 1}
     - _FarColour: {r: 0.1098039, g: 0.2039216, b: 0.3019608, a: 1}
+    - _IntersectionColour: {r: 0.7349235, g: 0.9811321, b: 0.9811321, a: 1}
+    - _IntersectionNoiseVelocity: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []

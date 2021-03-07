@@ -19,3 +19,6 @@ MonoBehaviour:
     ResultType: 
   tileInteractor: {fileID: 11400000, guid: 4185931dfdfd65f42a05487f3816bcf0, type: 2}
   levelStateChecker: {fileID: 11400000, guid: 1f6b20944fa48e64da8645eca9673f35, type: 2}
+  levelStartedEventChannelContainer:
+    ObjectField: {fileID: 11400000, guid: 6893d8a204369ee449b9d7778103aad6, type: 2}
+    ResultType: 

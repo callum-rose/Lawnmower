@@ -28,7 +28,6 @@ namespace Game.Core
 		[TitleGroup("Event Channels")] 
 		[SerializeField] private OpenDialogEventChannel openDialogEventChannel;
 		[SerializeField] private CloseDialogEventChannel closeDialogEventChannel;
-		[SerializeField] private LevelDataEventChannel levelStartedEventChannel;
 
 		private IUndoSystem UndoSystem => undoSystemContainer.Result;
 
@@ -77,8 +76,6 @@ namespace Game.Core
 
 			_levelDataRecorder = new LevelDataRecorder(UndoSystem);
 			_levelDataRecorder.StartRecording();
-			
-			levelStartedEventChannel.Raise(_inputData.Value.Level);
 		}
 
 		public void End()

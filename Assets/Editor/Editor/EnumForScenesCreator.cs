@@ -18,7 +18,10 @@ namespace Core
 
         protected override IList<KeyValuePair<string, int?>> GetValues()
         {
-            var values = new List<KeyValuePair<string, int?>>();
+            List<KeyValuePair<string, int?>> values = new List<KeyValuePair<string, int?>>();
+            
+            values.Add(new KeyValuePair<string, int?>("None", -1));
+            
             for (int i = 0; i < EditorBuildSettings.scenes.Length; i++)
             {
                 EditorBuildSettingsScene scene = EditorBuildSettings.scenes[i];

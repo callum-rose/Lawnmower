@@ -1,12 +1,8 @@
-using System;
 using BalsamicBits.Extensions;
 using DG.Tweening;
-using Game.Tutorial;
-using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using UnityEngine.UIElements;
 
 namespace Game.UI
 {

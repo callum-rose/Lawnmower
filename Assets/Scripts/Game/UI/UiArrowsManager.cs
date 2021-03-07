@@ -1,11 +1,7 @@
-using System.Collections.Generic;
 using Core;
 using DG.Tweening;
 using Game.Core;
 using Game.Mowers.Input;
-using Game.Tutorial;
-using Sirenix.OdinInspector;
-using Sirenix.Serialization;
 using UnityEngine;
 using UnityLayers = Core.UnityLayers;
 

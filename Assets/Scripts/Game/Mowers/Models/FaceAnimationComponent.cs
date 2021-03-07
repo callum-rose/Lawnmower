@@ -1,7 +1,7 @@
-using System;
 using System.Collections;
 using BalsamicBits.Extensions;
 using Game.Core;
+using Game.Mowers.Input;
 using Game.UndoSystem;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -9,16 +9,17 @@ using Random = UnityEngine.Random;
 
 namespace Game.Mowers.Models
 {
-	internal class FaceAnimationComponent : MonoBehaviour
+	internal class FaceAnimationComponent : MonoBehaviour, INeedMowerPosition
 	{
-		[SerializeField] private MowerMovementManager mowerMovementManager;
-
 		[SerializeField] private Material material;
+		
+		[TitleGroup("Textures")]
 		[SerializeField] private Texture idleFace;
 		[SerializeField] private Texture mouthOpenFace;
 		[SerializeField] private Texture blinkFace;
 		[SerializeField] private Texture[] lookAroundFaces;
 
+		[TitleGroup("Parameters")]
 		[SerializeField] private float durationBeforeLookAround = 3f;
 		[SerializeField, Range(0, 1)] private float blinkToLookAroundRatio = 0.33f;
 		[SerializeField] private float blinkDuration = 0.2f;
@@ -27,23 +28,48 @@ namespace Game.Mowers.Models
 		private static readonly int decalTex = Shader.PropertyToID("_DecalTex");
 
 		private Coroutine _currentRoutine;
+		private IMowerPosition _mowerPosition;
+
+		#region Unity
 
 		private void OnEnable()
 		{
-			mowerMovementManager.Moved += MowerMovementManagerOnMoved;
-
 			_currentRoutine = StartCoroutine(LookAroundRoutine());
 		}
 
-		private void OnDisable()
+		#endregion
+
+		#region API
+
+		void INeedMowerPosition.Set(IMowerPosition mowerPosition)
 		{
-			mowerMovementManager.Moved -= MowerMovementManagerOnMoved;
+			_mowerPosition = mowerPosition;
+			_mowerPosition.CurrentPosition.ValueChangedFromTo += MowerMovementManagerOnMoved;
 		}
+
+		void INeedMowerPosition.Clear()
+		{
+			_mowerPosition.CurrentPosition.ValueChangedFromTo -= MowerMovementManagerOnMoved;
+			_mowerPosition = null;
+		}
+
+		#endregion
+
+		#region Events
 
 		private void MowerMovementManagerOnMoved(GridVector from, GridVector to, Xor inverted)
 		{
+			if (inverted)
+			{
+				return;
+			}
+			
 			Animate();
 		}
+
+		#endregion
+
+		#region Methods
 
 		private void Animate()
 		{
@@ -56,15 +82,13 @@ namespace Game.Mowers.Models
 
 			_currentRoutine = this.Timer(
 				0.25f,
-				() =>
-				{
-					SetFace(idleFace);
-					_currentRoutine = StartCoroutine(LookAroundRoutine());
-				});
+				() => _currentRoutine = StartCoroutine(LookAroundRoutine()));
 		}
 
 		private IEnumerator LookAroundRoutine()
 		{
+			SetFace(idleFace);
+
 			yield return new WaitForSeconds(durationBeforeLookAround);
 
 			while (true)
@@ -84,6 +108,12 @@ namespace Game.Mowers.Models
 
 				yield return new WaitForSeconds(randomDuration);
 			}
+
+			Texture GetRandomLookFace()
+			{
+				int index = Random.Range(0, lookAroundFaces.Length - 1);
+				return lookAroundFaces[index];
+			}
 		}
 
 		private void SetFace(Texture texture)
@@ -91,10 +121,6 @@ namespace Game.Mowers.Models
 			material.SetTexture(decalTex, texture);
 		}
 
-		private Texture GetRandomLookFace()
-		{
-			int index = Random.Range(0, lookAroundFaces.Length - 1);
-			return lookAroundFaces[index];
-		}
+		#endregion
 	}
 }

@@ -38,7 +38,7 @@ namespace Game.Tiles
 		{
 			_tileData = (GrassTile)tileData;
 
-			_tileData.GrassHeight.ValueChanged += OnGrassHeightValueChanged;
+			_tileData.GrassHeight.ValueChangedFromTo += OnGrassHeightValueChanged;
 			SetAppearance(_tileData.GrassHeight.Value);
 
 			_tileData.TraversedOnto += OnTraversedOnto;
@@ -53,7 +53,7 @@ namespace Game.Tiles
 				return;
 			}
 			
-			_tileData.GrassHeight.ValueChanged -= OnGrassHeightValueChanged;
+			_tileData.GrassHeight.ValueChangedFromTo -= OnGrassHeightValueChanged;
 			
 			_tileData.TraversedOnto -= OnTraversedOnto;
 			_tileData.TraversedAway -= OnTraversedAway;
@@ -64,7 +64,7 @@ namespace Game.Tiles
 
 		#region Events
 
-		private void OnGrassHeightValueChanged(int grassHeight, Xor _)
+		private void OnGrassHeightValueChanged(int prevGrassHeight, int grassHeight, Xor _)
 		{
 			SetAppearance(grassHeight);
 		}

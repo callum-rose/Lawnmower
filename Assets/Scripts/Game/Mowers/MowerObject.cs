@@ -1,47 +1,42 @@
-using Core.EventChannels;
-using DG.Tweening;
-using DG.Tweening.Core;
-using DG.Tweening.Plugins.Options;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Game.Core;
+using Game.Mowers.Input;
 using Game.Tiles;
-using Game.UndoSystem;
-using Sirenix.OdinInspector;
 
 namespace Game.Mowers
 {
 	public class MowerObject : MonoBehaviour, IDataObject<MowerMover>
 	{
-		private Positioner _positioner;
-		private MowerMover _mowerMover;
+		[SerializeField] private INeedMowerPositionContainer[] needMowerPositionContainers;
+		[SerializeField] private INeedPositionerContainer[] needPositionerContainers;
 
-		private Tween _tween;
-
-		#region API
+		private IEnumerable<INeedMowerPosition> NeedMowerPositions => needMowerPositionContainers.Select(n => n.Result);
+		private IEnumerable<INeedPositioner> NeedPositioners => needPositionerContainers.Select(n => n.Result);
 
 		public void Init(Positioner positioner)
 		{
-			_positioner = positioner;
+			foreach (INeedPositioner needPositioner in NeedPositioners)
+			{
+				needPositioner.Set(positioner);
+			}
 		}
 
 		public void Bind(MowerMover mowerMover)
 		{
-			_mowerMover = mowerMover;
-
-			_mowerMover.CurrentPosition.ValueChanged += PositionChanged;
-			PositionChanged(_mowerMover.CurrentPosition.Value, true);
+			foreach (INeedMowerPosition needMowerPosition in NeedMowerPositions)
+			{
+				needMowerPosition.Set(mowerMover);
+			}
 		}
 
 		public void Dispose()
 		{
-			
+			foreach (INeedMowerPosition needMowerPosition in NeedMowerPositions)
+			{
+				needMowerPosition.Clear();
+			}
 		}
-
-		#endregion
-
-		#region Methods
-		
-
-		#endregion
 	}
 }

@@ -19,6 +19,11 @@ namespace Game.Levels
 		[SerializeField, R] private ILevelTraversalCheckerContainer levelTraversalCheckerContainer;
 		[SerializeField, R] private LevelTileInteractor tileInteractor;
 		[SerializeField, R] private LevelStateChecker levelStateChecker;
+		
+		[TitleGroup("Event Channels")]
+		[SerializeField] private ILevelDataEventChannelTransmitterContainer levelStartedEventChannelContainer;
+
+		private ILevelDataEventChannelTransmitter LevelStartedEventChannel => levelStartedEventChannelContainer.Result;
 
 		public event Action LevelChanged;
 		public event UndoableAction LevelCompleted;
@@ -82,6 +87,7 @@ namespace Game.Levels
 			levelStateChecker.Init(Level, mowerMovementManager);
 
 			LevelChanged?.Invoke();
+			LevelStartedEventChannel.Raise(level);
 
 			mowerMovementManager.IsRunning = true;
 		}

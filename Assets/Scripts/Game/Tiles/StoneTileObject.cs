@@ -11,9 +11,7 @@ namespace Game.Tiles
 		{
 			_data = (StoneTile)data;
 			
-			Random.InitState(transform.position.GetHashCode());
-			int randomDirection = Random.Range(0, 4);
-			transform.rotation *= Quaternion.AngleAxis(randomDirection * 90, Vector3.up);
+			transform.rotation *= Quaternion.AngleAxis(_data.Direction * 90, Vector3.up);
 		}
 
 		public override void Dispose()

@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Game.Mowers.Input
 {
-    internal class TouchTapHandler : MonoBehaviour, IMowerMovementGestureHandler, IRequiresMowerPosition
+    internal class TouchTapHandler : MonoBehaviour, IMowerMovementGestureHandler, INeedMowerPosition
     {
         [SerializeField] private ScreenToWorldPointConverter screenToWorldConverter;
         [SerializeField] private Positioner positioner;
@@ -67,9 +67,14 @@ namespace Game.Mowers.Input
 
         #region API
 
-        public void Init(IMowerPosition mowerPosition)
+        void INeedMowerPosition.Set(IMowerPosition mowerPosition)
         {
             _mowerPosition = mowerPosition;
+        }
+
+        void INeedMowerPosition.Clear()
+        {
+            _mowerPosition = null;
         }
 
         public void OnFingerMove(LeanFinger finger)

@@ -7,7 +7,7 @@ namespace Game.Core
 	[Serializable]
 	public sealed class EventProperty<T> : IListenableProperty<T>
 	{
-		public event UndoableAction<T> ValueChanged;
+		public event UndoableAction<T, T> ValueChangedFromTo;
 
 		public T Value => InternalGet();
 
@@ -26,8 +26,11 @@ namespace Game.Core
 
 		public void SetValue(T value, Xor isInverted)
 		{
+			T prevValue = InternalGet();
+			
 			_value = value;
-			ValueChanged?.Invoke(InternalGet(), isInverted);
+			
+			ValueChangedFromTo?.Invoke(prevValue, InternalGet(), isInverted);
 		}
 		
 		private T InternalGet()

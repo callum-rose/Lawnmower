@@ -1,6 +1,6 @@
 namespace Game.Tiles
 {
-	internal static class TileeStatics
+	internal static class TileStatics
 	{
 		public static readonly Tile[] AllTileConfigurations =
 		{

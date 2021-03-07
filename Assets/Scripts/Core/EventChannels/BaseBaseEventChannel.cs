@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using JetBrains.Annotations;
 using UnityEditor;
 using UnityEngine;
 
@@ -44,90 +45,107 @@ namespace Core.EventChannels
 #endif
 	}
 
-	public abstract class BaseEventChannel : BaseBaseEventChannel
+	public abstract class BaseEventChannel : BaseBaseEventChannel, IEventChannelTransmitter, IEventChannelListener
 	{
 		public event Action EventRaised;
 
-		public void Raise()
+		public virtual void Raise()
 		{
 			EventRaised?.Invoke();
 		}
 	}
 
-	public abstract class BaseEventChannel<T> : BaseBaseEventChannel
+	public interface IEventChannelTransmitter
+	{
+		void Raise();
+	}
+
+	public interface IEventChannelListener
+	{
+		event Action EventRaised;
+	}
+
+	public abstract class BaseEventChannel<T> : BaseBaseEventChannel, IEventChannelTransmitter<T>,
+		IEventChannelListener<T>
 	{
 		public event Action<T> EventRaised;
 
-		public void Raise(T arg)
+		public virtual void Raise(T arg)
 		{
 			EventRaised?.Invoke(arg);
 		}
 	}
 
-	public abstract class BaseReturnEventChannel<T, TReturn> : BaseBaseEventChannel
+	public interface IEventChannelTransmitter<in T>
+	{
+		void Raise(T arg);
+	}
+
+	public interface IEventChannelListener<out T>
+	{
+		event Action<T> EventRaised;
+	}
+
+	public abstract class BaseReturnEventChannel<T, TReturn> : BaseBaseEventChannel,
+		IReturnEventChannelTransmitter<T, TReturn>, IReturnEventChannelListener<T, TReturn>
 	{
 		public event Func<T, TReturn> EventRaised;
 
-		public TReturn Raise(T arg)
+		public virtual TReturn Raise(T arg)
 		{
 			return EventRaised == null ? default : EventRaised.Invoke(arg);
 		}
 	}
 
-	public abstract class BaseEventChannel<T0, T1> : BaseBaseEventChannel
+	public interface IReturnEventChannelTransmitter<in T, out TReturn>
+	{
+		TReturn Raise(T arg);
+	}
+
+	public interface IReturnEventChannelListener<out T, in TReturn>
+	{
+		event Func<T, TReturn> EventRaised;
+	}
+
+	public abstract class BaseEventChannel<T0, T1> : BaseBaseEventChannel, IEventChannelTransmitter<T0, T1>,
+		IEventChannelListener<T0, T1>
 	{
 		public event Action<T0, T1> EventRaised;
 
-		public void Raise(T0 arg0, T1 arg1)
+		public virtual void Raise(T0 arg0, T1 arg1)
 		{
 			EventRaised?.Invoke(arg0, arg1);
 		}
 	}
 
-	public abstract class BaseReturnEventChannel<T0, T1, TReturn> : BaseBaseEventChannel
+	public interface IEventChannelTransmitter<in T0, in T1>
+	{
+		void Raise(T0 arg0, T1 arg1);
+	}
+
+	public interface IEventChannelListener<out T0, out T1>
+	{
+		event Action<T0, T1> EventRaised;
+	}
+
+	public abstract class BaseReturnEventChannel<T0, T1, TReturn> : BaseBaseEventChannel,
+		IReturnEventChannelTransmitter<T0, T1, TReturn>, IReturnEventChannelListener<T0, T1, TReturn>
 	{
 		public event Func<T0, T1, TReturn> EventRaised;
 
-		public TReturn Raise(T0 arg0, T1 arg1)
+		public virtual TReturn Raise(T0 arg0, T1 arg1)
 		{
 			return EventRaised == null ? default : EventRaised.Invoke(arg0, arg1);
 		}
 	}
 
-	// public abstract class BaseBaseEventChannel : ScriptableObject
-	// {
-	// 	// protected abstract Delegate EventDelegate { get; }
-	// 	//
-	// 	// private string EventSubscribersStr
-	// 	// {
-	// 	// 	get
-	// 	// 	{
-	// 	// 		if (EventDelegate == null)
-	// 	// 		{
-	// 	// 			return "Event has no listeners";
-	// 	// 		}
-	// 	//
-	// 	// 		Delegate[] list = EventDelegate.GetInvocationList();
-	// 	// 		StringBuilder sb = new StringBuilder("Listeners:\n");
-	// 	// 		for (int index = 0; index < list.Length; index++)
-	// 	// 		{
-	// 	// 			Delegate d = list[index];
-	// 	// 			sb.Append(d.Method.DeclaringType + "." + d.Method.GetFullName());
-	// 	//
-	// 	// 			if (typeof(Object).IsAssignableFrom(d.Method.DeclaringType))
-	// 	// 			{
-	// 	// 				Object obj = d.Target as Object;
-	// 	// 				sb.Append(" \"" + obj.name + "\"");
-	// 	// 			}
-	// 	//
-	// 	// 			if (index != list.Length - 1)
-	// 	// 			{
-	// 	// 				sb.Append("\n");
-	// 	// 			}
-	// 	// 		}
-	// 	//
-	// 	// 		return sb.ToString();
-	// 	// 	}
-	// 	// }
-	// }
+	public interface IReturnEventChannelTransmitter<in T0, in T1, out TReturn>
+	{
+		TReturn Raise(T0 arg0, T1 arg1);
+	}
+
+	public interface IReturnEventChannelListener<out T0, out T1, in TReturn>
+	{
+		event Func<T0, T1, TReturn> EventRaised;
+	}
 }

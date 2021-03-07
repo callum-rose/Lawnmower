@@ -1,4 +1,3 @@
-using System;
 using Game.Core;
 using Game.Mowers;
 using Game.Tiles;
@@ -10,102 +9,106 @@ using R = Sirenix.OdinInspector.RequiredAttribute;
 
 namespace Game.Levels.Editorr
 {
-    public partial class LevelEditorManager : MonoBehaviour, IHasEditMode
-    {
-        [TitleGroup("Dependencies")]
-        [SerializeField, R] private GameManager gameManager;
-        [SerializeField, R] private HeadlessLevelManager levelManager;
-        [SerializeField, R] private ITileSelectorContainer tileSelector;
-        [SerializeField, R] private EditModeLevelTraversalChecker levelTraversalChecker;
+	public partial class LevelEditorManager : MonoBehaviour, IHasEditMode
+	{
+		[TitleGroup("Dependencies")]
+		[SerializeField, R] private GameManager gameManager;
 
-        [Space]
-        [SerializeField, R] private GameObject uiContainer;
+		[SerializeField, R] private HeadlessLevelManager levelManager;
+		[SerializeField, R] private ITileSelectorContainer tileSelector;
+		[SerializeField, R] private EditModeLevelTraversalChecker levelTraversalChecker;
 
-        [Space]
-        [SerializeField, R] private GizmoGridRenderer gridRenderer;
-        [SerializeField, R] private GizmoSelectedTileRenderer tileRenderer;
+		[Space]
+		[SerializeField, R] private GameObject uiContainer;
 
-        [FormerlySerializedAs("hasEditModes"),SerializeField, R, ListDrawerSettings, LabelWidth(0)]
-        //[ValidateInput(nameof(ValidateHasEditModeContainers))]
-        private IHasEditModeContainer[] hasEditModeContainers;
+		[Space]
+		[SerializeField, R] private GizmoGridRenderer gridRenderer;
 
-        public bool IsEditMode
-        {
-            get => ___isEditMode;
-            set
-            {
-                ___isEditMode = value;
+		[SerializeField, R] private GizmoSelectedTileRenderer tileRenderer;
 
-                foreach (IHasEditModeContainer e in hasEditModeContainers)
-                {
-                    e.Result.IsEditMode = ___isEditMode;
-                }
-            }
-        }
+		[FormerlySerializedAs("hasEditModes"), SerializeField, R, ListDrawerSettings, LabelWidth(0)]
+		//[ValidateInput(nameof(ValidateHasEditModeContainers))]
+		private IHasEditModeContainer[] hasEditModeContainers;
 
-        private bool ___isEditMode;
+		public bool IsEditMode
+		{
+			get => ___isEditMode;
+			set
+			{
+				___isEditMode = value;
 
-        #region Unity
+				foreach (IHasEditModeContainer e in hasEditModeContainers)
+				{
+					e.Result.IsEditMode = ___isEditMode;
+				}
+			}
+		}
 
-        private void Awake()
-        {
-            tileSelector.Result.Selected += TileSelector_Clicked;
+		private bool ___isEditMode;
 
-            levelManager.LevelChanged += LevelManager_LevelChanged;
-        }
+		#region Unity
 
-        private void OnEnable()
-        {
-            if (autoBuild)
-            {
-                BuildSelectedLevel();
-            }
-        }
+		private void Awake()
+		{
+			tileSelector.Result.Selected += TileSelector_Clicked;
 
-        private void OnDestroy()
-        {
-            if (tileSelector.Result != null)
-            {
-                tileSelector.Result.Selected -= TileSelector_Clicked;
-            }
+			levelManager.LevelChanged += LevelManager_LevelChanged;
+		}
 
-            if (levelManager != null)
-            {
-                levelManager.LevelChanged -= LevelManager_LevelChanged;
-            }
-        }
+		private void OnEnable()
+		{
+#if UNITY_EDITOR
+			if (autoBuild)
+			{
+				BuildSelectedLevel();
+			}
+#endif
+		}
 
-        #endregion
+		private void OnDestroy()
+		{
+			if (tileSelector.Result != null)
+			{
+				tileSelector.Result.Selected -= TileSelector_Clicked;
+			}
 
-        #region Events
+			if (levelManager != null)
+			{
+				levelManager.LevelChanged -= LevelManager_LevelChanged;
+			}
+		}
 
-        private void TileSelector_Clicked(GridVector position)
-        {
-            tileRenderer.X = position.x;
-            tileRenderer.Y = position.y;
-        }
+		#endregion
 
-        private void LevelManager_LevelChanged()
-        {
-            gridRenderer.Width = levelManager.Level.Width;
-            gridRenderer.Depth = levelManager.Level.Depth;
-        }
+		#region Events
 
-        #endregion
+		private void TileSelector_Clicked(GridVector position)
+		{
+			tileRenderer.X = position.x;
+			tileRenderer.Y = position.y;
+		}
 
-        #region Methods
+		private void LevelManager_LevelChanged()
+		{
+			gridRenderer.Width = levelManager.Level.Width;
+			gridRenderer.Depth = levelManager.Level.Depth;
+		}
 
-        private void Begin(GameSetupPassThroughData data, bool isEdit)
-        {
-            gameManager.Begin(data);
+		#endregion
 
-            uiContainer.SetActive(isEdit);
+		#region Methods
 
-            IsEditMode = isEdit;
+		private void Begin(GameSetupPassThroughData data, bool isEdit)
+		{
+			gameManager.Begin(data);
 
-            InterfaceHelper.FindObject<IMowerRunnable>().IsRunning = !isEdit;
-        }
+			uiContainer.SetActive(isEdit);
 
-        #endregion
-    }
+			IsEditMode = isEdit;
+
+			InterfaceHelper.FindObject<IMowerRunnable>().IsRunning = !isEdit;
+		}
+
+		#endregion
+	}
 }

@@ -5,28 +5,31 @@ using UnityEngine;
 
 namespace Game.Mowers.Input
 {
-    internal class TouchDragHandler : MonoBehaviour, IMowerMovementGestureHandler, IRequiresMowerPosition
-    {
-        [SerializeField] private ScreenToWorldPointConverter screenToWorldConverter;
-        [SerializeField] private Positioner positioner;
+	internal class TouchDragHandler : MonoBehaviour, IMowerMovementGestureHandler, INeedMowerPosition
+	{
+		[SerializeField] private ScreenToWorldPointConverter screenToWorldConverter;
+		[SerializeField] private Positioner positioner;
 
-        public event Action<GridVector> Move;
+		public event Action<GridVector> Move;
 
-        private IMowerPosition _mowerPosition;
+		private IMowerPosition _mowerPosition;
 
-        public void Init(IMowerPosition mowerPosition)
-        {
-            _mowerPosition = mowerPosition;
-        }
+		void INeedMowerPosition.Set(IMowerPosition mowerPosition)
+		{
+			_mowerPosition = mowerPosition;
+		}
 
-        public void OnFingerUpdate(LeanFinger finger)
-        {
+		void INeedMowerPosition.Clear()
+		{
+			_mowerPosition = null;
+		}
 
-        }
+		public void OnFingerUpdate(LeanFinger finger)
+		{
+		}
 
-        public void OnFingerUp(LeanFinger finger)
-        {
-
-        }
-    }
+		public void OnFingerUp(LeanFinger finger)
+		{
+		}
+	}
 }

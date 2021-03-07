@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c170a0d445e163e449b60f30f040a857, type: 3}
   m_Name: ViewManager
   m_EditorClassIdentifier: 
-  sceneToOpen: 1
+  sceneToOpen: 0
   gameSetupPassThroughData:
     mower: {fileID: 11400000, guid: 9d84f272dfc01484eb3161f5466cb403, type: 2}
     levelDataContainer:
       ObjectField: {fileID: 11400000, guid: 838755f9d2141f7439d4758da2743aed, type: 2}
       ResultType: 
+    isTutorial: 0

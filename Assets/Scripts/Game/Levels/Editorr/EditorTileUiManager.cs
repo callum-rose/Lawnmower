@@ -16,7 +16,7 @@ namespace Game.Levels.Editorr
 
         private void Start()
         {
-            foreach (Tile tile in TileeStatics.AllTileConfigurations)
+            foreach (Tile tile in TileStatics.AllTileConfigurations)
             {
                 Button newButton = Instantiate(buttonPrefab, buttonContainer);
                 ButtonInfo info = new ButtonInfo(

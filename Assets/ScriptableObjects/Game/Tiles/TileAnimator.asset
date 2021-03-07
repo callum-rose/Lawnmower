@@ -13,7 +13,10 @@ MonoBehaviour:
   m_Name: TileAnimator
   m_EditorClassIdentifier: 
   positionOffset: {x: 0, y: -2, z: 0}
-  animDuration: 0.5
-  timeOffsetPerUnitDistance: 0.2
+  perTileAnimDuration: 0.5
+  maxDelay: 1
+  levelStartedEventChannelContainer:
+    ObjectField: {fileID: 11400000, guid: 6893d8a204369ee449b9d7778103aad6, type: 2}
+    ResultType: 
   tileObjectCreatedEventChannel: {fileID: 11400000, guid: 125155f780e7ea846a0e46c85c75f398,
     type: 2}

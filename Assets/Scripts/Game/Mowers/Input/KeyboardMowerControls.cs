@@ -1,5 +1,4 @@
 using Game.Core;
-using System;
 using UnityEngine;
 
 namespace Game.Mowers.Input

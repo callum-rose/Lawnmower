@@ -23,7 +23,7 @@ namespace Game.Levels
 			get
 			{
 				List<string> ret = new List<string> { NoneStr };
-				ret.AddRange(TileeStatics.AllTileConfigurations.Select(t => t.ToString()));
+				ret.AddRange(TileStatics.AllTileConfigurations.Select(t => t.ToString()));
 				return ret;
 			}
 		}
@@ -37,7 +37,7 @@ namespace Game.Levels
 				return false;
 			}
 
-			tileToUpgradeTo = TileeStatics.AllTileConfigurations.First(t => t.ToString().Equals(upgradeTo)).Clone();
+			tileToUpgradeTo = TileStatics.AllTileConfigurations.First(t => t.ToString().Equals(upgradeTo)).Clone();
 			return true;
 		}
 	}

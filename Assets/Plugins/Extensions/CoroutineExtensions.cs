@@ -19,5 +19,18 @@ namespace BalsamicBits.Extensions
 		{
 			return monoBehaviour.StartCoroutine(Timer(duration, callback));
 		}
+
+		public static void Stop(this Coroutine coroutine, MonoBehaviour monoBehaviour)
+		{
+			if (coroutine != null)
+			{
+				monoBehaviour.StopCoroutine(coroutine);
+			}
+		}
+
+		public static Coroutine Start(this IEnumerator enumerator, MonoBehaviour monoBehaviour)
+		{
+			return monoBehaviour.StartCoroutine(enumerator);
+		}
 	}
 }

@@ -7,7 +7,6 @@ using Sirenix.OdinInspector.Editor;
 using Sirenix.Utilities;
 using Sirenix.Utilities.Editor;
 using UnityEditor;
-using UnityEditor.PackageManager;
 using UnityEngine;
 
 namespace Game.Levels
@@ -121,6 +120,19 @@ namespace Game.Levels
 			Color tileColour = LevelEditorWindow.GetColourForTile(tileData);
 
 			EditorGUI.DrawRect(cellRect.Padding(1), tileColour);
+			
+			switch (tileData)
+			{
+				case StoneTile stoneTile:
+				{
+					GUIStyle guiStyle = new GUIStyle {
+						alignment = TextAnchor.MiddleCenter,
+						border = new RectOffset(1, 1, 1, 1)
+					};
+					EditorGUI.LabelField(cellRect, stoneTile.Direction.ToString(), guiStyle);
+					break;
+				}
+			}
 		}
 
 		private static void DrawStartPositionBanner(float cellSize, Rect cellRect)

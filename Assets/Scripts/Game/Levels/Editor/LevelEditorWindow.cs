@@ -242,15 +242,26 @@ namespace Game.Levels.EditorWindow
 
 		private void SetTile(int x, int y)
 		{
-			Tile currentTile = _editableLevel.GetTile(x, y);
-
 			void Set_Local(Tile tile)
 			{
 				_editableLevel.SetTile(x, y, tile);
 			}
 
+
+			Tile currentTile = _editableLevel.GetTile(x, y);
+			Tile cloneTile = _currentTilePaint.Clone();
+			
+			if (currentTile is StoneTile && cloneTile is StoneTile)
+			{
+				StoneTile newStoneTile = currentTile.Clone() as StoneTile;
+				newStoneTile.Direction++;
+				newStoneTile.Direction %= 4;
+
+				cloneTile = newStoneTile;
+			}
+			
 			IUndoable undoable = new Undoable(
-				() => Set_Local(_currentTilePaint.Clone()),
+				() => Set_Local(cloneTile),
 				() => Set_Local(currentTile));
 
 			_undoSystem.Do(undoable);

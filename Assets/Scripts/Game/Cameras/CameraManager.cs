@@ -12,23 +12,32 @@ namespace Game.Cameras
 {
     internal class CameraManager : MonoBehaviour
     {
-        [SerializeField, FormerlySerializedAs("virtualCamera")] private CinemachineVirtualCamera targetGroupVCam;
-        [SerializeField] private CinemachineTargetGroup cameraTargetGroup;
-        [SerializeField] private HeadlessLevelManager levelManager;
+        [TitleGroup("Level Camera")]
+        [SerializeField] private CinemachineTargetGroup levelTargetGroup;
         [SerializeField] private MouseTileSelector mouseTileSelector;
+        [SerializeField] private float tileWeight = 1;
+        [SerializeField] private float mowerWeight = 10;
+        
+        [TitleGroup("Mower Camera")]
+        [SerializeField] private CinemachineVirtualCamera mowerVCam;
 
-        [Title("Event Channels")] 
-        [SerializeField] private GameObjectEventChannel mowerCreatedEventChannel;
+        [TitleGroup("Event Channels")] 
+        [SerializeField] private IGameObjectEventChannelListenerContainer mowerCreatedEventChannelContainer;
+        [SerializeField] private IGameObjectEventChannelListenerContainer mowerWillBeDestroyedEventChannelContainer;
         [SerializeField] private TileObjectEventChannel tileCreatedEventChannel;
         [SerializeField] private GameObjectEventChannel tileWillBeDestroyedEventChannel;
 
+        private IGameObjectEventChannelListener MowerCreatedEventChannel => mowerCreatedEventChannelContainer.Result;
+        private IGameObjectEventChannelListener MowerWillBeDestroyedEventChannel => mowerWillBeDestroyedEventChannelContainer.Result;
+        
         #region Unity
 
         private void Awake()
         {
             mouseTileSelector.Dragging += OnMouseDragging;
 
-            mowerCreatedEventChannel.EventRaised += OnMowerCreated;
+            MowerCreatedEventChannel.EventRaised += OnMowerCreated;
+            MowerWillBeDestroyedEventChannel.EventRaised += OnMowerWillBeDestroyed;
             
             tileCreatedEventChannel.EventRaised += OnTileObjectCreated;
             tileWillBeDestroyedEventChannel.EventRaised += OnTileObjectWillBeDestroyed;
@@ -38,24 +47,11 @@ namespace Game.Cameras
         {
             mouseTileSelector.Dragging -= OnMouseDragging;
             
-            mowerCreatedEventChannel.EventRaised -= OnMowerCreated;
-            
+            MowerCreatedEventChannel.EventRaised -= OnMowerCreated;
+            MowerWillBeDestroyedEventChannel.EventRaised -= OnMowerWillBeDestroyed;
+
             tileCreatedEventChannel.EventRaised -= OnTileObjectCreated;
             tileWillBeDestroyedEventChannel.EventRaised -= OnTileObjectWillBeDestroyed;
-        }
-
-        #endregion
-
-        #region API
-
-        public void Init(Transform mowerTransform)
-        {
-            //virtualCamera.Follow = virtualCamera.LookAt = mowerTransform;
-        }
-
-        public void Clear()
-        {
-            Init(null);
         }
 
         #endregion
@@ -64,25 +60,30 @@ namespace Game.Cameras
 
         private void OnMowerCreated(GameObject gameObject)
         {
-            
+            mowerVCam.Follow = mowerVCam.LookAt = gameObject.transform;
+        }
+        
+        private void OnMowerWillBeDestroyed(GameObject gameObject)
+        {
+            mowerVCam.Follow = mowerVCam.LookAt = null;
         }
         
         private void OnTileObjectCreated(GameObject gameObject, GridVector _)
         {
-            cameraTargetGroup.AddMember(gameObject.transform, 1, LevelDimensions.TileSize * 0.5f);
+            levelTargetGroup.AddMember(gameObject.transform, tileWeight, LevelDimensions.TileSize * 0.5f);
         }        
         
         private void OnTileObjectWillBeDestroyed(GameObject gameObject)
         {
             if (gameObject.transform == null)
             {
-                cameraTargetGroup.m_Targets = cameraTargetGroup.m_Targets
+                levelTargetGroup.m_Targets = levelTargetGroup.m_Targets
                     .Where(t => t.target != null)
                     .ToArray();
                 return;
             }
 
-            cameraTargetGroup.RemoveMember(gameObject.transform);
+            levelTargetGroup.RemoveMember(gameObject.transform);
         }
 
         private void OnMouseDragging(bool isDragging)

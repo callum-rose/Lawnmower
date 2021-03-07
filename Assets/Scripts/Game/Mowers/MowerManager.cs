@@ -13,14 +13,16 @@ namespace Game.Mowers
 	{
 		[TitleGroup("Scene")]
 		[SerializeField] private MowerObjectCreator mowerObjectCreator;
-		[SerializeField] private IRequiresMowerPositionContainer[] mowerPositionRequirers;
+		[SerializeField] private INeedMowerPositionContainer[] mowerPositionRequirers;
 		[SerializeField] private HeadlessMowerManager headlessMowerManager;
 
 		[TitleGroup("Event Channels")]
-		[SerializeField] private GameObjectEventChannel mowerCreatedEventChannel;
+		[SerializeField] private IGameObjectEventChannelTransmitterContainer mowerCreatedEventChannelContainer;
+		[SerializeField] private IGameObjectEventChannelTransmitterContainer mowerWillBeDestroyedEventChannelContainer;
 
-		[SerializeField] private GameObjectEventChannel mowerWillBeDestroyedEventChannel;
-
+		private IGameObjectEventChannelTransmitter MowerCreatedEventChannel => mowerCreatedEventChannelContainer.Result;
+		private IGameObjectEventChannelTransmitter MowerWillBeDestroyedEventChannel => mowerWillBeDestroyedEventChannelContainer.Result;
+		
 		private MowerObject _mowerObject;
 
 		public void Init(MowerData mower, ILevelTraversalChecker levelTraversalChecker, IUndoSystem undoManager)
@@ -34,7 +36,7 @@ namespace Game.Mowers
 			InitObjectsNeedingMowerPosition(mowerMover);
 			InitCollider(_mowerObject.gameObject);
 
-			mowerCreatedEventChannel.Raise(_mowerObject.gameObject);
+			MowerCreatedEventChannel.Raise(_mowerObject.gameObject);
 		}
 
 		public void Clear()
@@ -46,7 +48,7 @@ namespace Game.Mowers
 				return;
 			}
 
-			mowerWillBeDestroyedEventChannel.Raise(_mowerObject.gameObject);
+			MowerWillBeDestroyedEventChannel.Raise(_mowerObject.gameObject);
 
 			_mowerObject.Dispose();
 			Destroy(_mowerObject.gameObject);
@@ -61,9 +63,9 @@ namespace Game.Mowers
 
 		private void InitObjectsNeedingMowerPosition(IMowerPosition position)
 		{
-			foreach (IRequiresMowerPosition mpr in mowerPositionRequirers.Select(c => c.Result))
+			foreach (INeedMowerPosition mpr in mowerPositionRequirers.Select(c => c.Result))
 			{
-				mpr.Init(position);
+				mpr.Set(position);
 			}
 		}
 	}

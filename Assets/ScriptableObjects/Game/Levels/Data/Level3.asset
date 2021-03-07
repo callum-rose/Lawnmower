@@ -23,7 +23,7 @@ MonoBehaviour:
     SerializationNodes:
     - Name: id
       Entry: 2
-      Data: 0ab7afca172e491c8dacd4d3d889b773
+      Data: 00000000000000000000000000000000
     - Name: newTiles
       Entry: 7
       Data: 0|Game.Tiles.Tile[,], Scripts
@@ -71,7 +71,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 7|Game.Tiles.StoneTile, Scripts
+      Data: 7|Game.Tiles.EmptyTile, Scripts
     - Name: 
       Entry: 8
       Data: 
@@ -161,13 +161,13 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 22|Game.Tiles.StoneTile, Scripts
+      Data: 22|Game.Tiles.EmptyTile, Scripts
     - Name: 
       Entry: 8
       Data: 
     - Name: 
       Entry: 7
-      Data: 23|Game.Tiles.StoneTile, Scripts
+      Data: 23|Game.Tiles.EmptyTile, Scripts
     - Name: 
       Entry: 8
       Data: 
@@ -239,7 +239,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 35|Game.Tiles.StoneTile, Scripts
+      Data: 35|Game.Tiles.EmptyTile, Scripts
     - Name: 
       Entry: 8
       Data: 
@@ -281,7 +281,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 42|Game.Tiles.StoneTile, Scripts
+      Data: 42|Game.Tiles.EmptyTile, Scripts
     - Name: 
       Entry: 8
       Data: 
@@ -323,7 +323,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 49|Game.Tiles.StoneTile, Scripts
+      Data: 49|Game.Tiles.EmptyTile, Scripts
     - Name: 
       Entry: 8
       Data: 
@@ -336,58 +336,81 @@ MonoBehaviour:
   startPosition:
     x: 0
     y: 5
-  ___tilesData: '[[{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
-    mscorlib]], Scripts","_value":2,"Value":2}},{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
-    mscorlib]], Scripts","_value":2,"Value":2}},{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
-    mscorlib]], Scripts","_value":2,"Value":2}},{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
-    mscorlib]], Scripts","_value":2,"Value":2}},{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
-    mscorlib]], Scripts","_value":2,"Value":2}},{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
-    mscorlib]], Scripts","_value":1,"Value":1}},{"$type":"Game.Tiles.StoneTile, Scripts"}],[{"$type":"Game.Tiles.GrassTile,
+  tilesData: '[[{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
+    mscorlib]], Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.GrassTile,
     Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32, mscorlib]],
-    Scripts","_value":2,"Value":2}},{"$type":"Game.Tiles.StoneTile, Scripts"},{"$type":"Game.Tiles.GrassTile,
+    Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.GrassTile,
     Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32, mscorlib]],
-    Scripts","_value":2,"Value":2}},{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
-    mscorlib]], Scripts","_value":2,"Value":2}},{"$type":"Game.Tiles.StoneTile, Scripts"},{"$type":"Game.Tiles.GrassTile,
+    Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.GrassTile,
     Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32, mscorlib]],
-    Scripts","_value":2,"Value":2}},{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
-    mscorlib]], Scripts","_value":2,"Value":2}}],[{"$type":"Game.Tiles.GrassTile,
+    Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.GrassTile,
     Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32, mscorlib]],
-    Scripts","_value":2,"Value":2}},{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
-    mscorlib]], Scripts","_value":2,"Value":2}},{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
-    mscorlib]], Scripts","_value":2,"Value":2}},{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
-    mscorlib]], Scripts","_value":2,"Value":2}},{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
-    mscorlib]], Scripts","_value":2,"Value":2}},{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
-    mscorlib]], Scripts","_value":2,"Value":2}},{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
-    mscorlib]], Scripts","_value":2,"Value":2}}],[{"$type":"Game.Tiles.StoneTile,
-    Scripts"},{"$type":"Game.Tiles.StoneTile, Scripts"},{"$type":"Game.Tiles.GrassTile,
+    Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.GrassTile,
     Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32, mscorlib]],
-    Scripts","_value":2,"Value":2}},{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
-    mscorlib]], Scripts","_value":2,"Value":2}},{"$type":"Game.Tiles.StoneTile, Scripts"},{"$type":"Game.Tiles.GrassTile,
+    Scripts","_value":1,"Value":1,"RawValue":1}},{"$type":"Game.Tiles.EmptyTile,
+    Scripts"}],[{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
+    mscorlib]], Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.StoneTile,
+    Scripts","Direction":0},{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
+    mscorlib]], Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.GrassTile,
     Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32, mscorlib]],
-    Scripts","_value":2,"Value":2}},{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
-    mscorlib]], Scripts","_value":2,"Value":2}}],[{"$type":"Game.Tiles.GrassTile,
+    Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.StoneTile,
+    Scripts","Direction":2},{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
+    mscorlib]], Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.GrassTile,
     Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32, mscorlib]],
-    Scripts","_value":2,"Value":2}},{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
-    mscorlib]], Scripts","_value":2,"Value":2}},{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
-    mscorlib]], Scripts","_value":2,"Value":2}},{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
-    mscorlib]], Scripts","_value":2,"Value":2}},{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
-    mscorlib]], Scripts","_value":2,"Value":2}},{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
-    mscorlib]], Scripts","_value":2,"Value":2}},{"$type":"Game.Tiles.StoneTile, Scripts"}],[{"$type":"Game.Tiles.GrassTile,
+    Scripts","_value":2,"Value":2,"RawValue":2}}],[{"$type":"Game.Tiles.GrassTile,
     Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32, mscorlib]],
-    Scripts","_value":2,"Value":2}},{"$type":"Game.Tiles.StoneTile, Scripts"},{"$type":"Game.Tiles.GrassTile,
+    Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.GrassTile,
     Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32, mscorlib]],
-    Scripts","_value":2,"Value":2}},{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
-    mscorlib]], Scripts","_value":2,"Value":2}},{"$type":"Game.Tiles.StoneTile, Scripts"},{"$type":"Game.Tiles.GrassTile,
+    Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.GrassTile,
     Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32, mscorlib]],
-    Scripts","_value":2,"Value":2}},{"$type":"Game.Tiles.StoneTile, Scripts"}],[{"$type":"Game.Tiles.GrassTile,
+    Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.GrassTile,
     Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32, mscorlib]],
-    Scripts","_value":2,"Value":2}},{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
-    mscorlib]], Scripts","_value":2,"Value":2}},{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
-    mscorlib]], Scripts","_value":2,"Value":2}},{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
-    mscorlib]], Scripts","_value":2,"Value":2}},{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
-    mscorlib]], Scripts","_value":2,"Value":2}},{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
-    mscorlib]], Scripts","_value":2,"Value":2}},{"$type":"Game.Tiles.StoneTile, Scripts"}]]'
-  ___tiles:
-    data: []
-    width: 0
-    depth: 0
+    Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.GrassTile,
+    Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32, mscorlib]],
+    Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.GrassTile,
+    Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32, mscorlib]],
+    Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.GrassTile,
+    Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32, mscorlib]],
+    Scripts","_value":2,"Value":2,"RawValue":2}}],[{"$type":"Game.Tiles.EmptyTile,
+    Scripts"},{"$type":"Game.Tiles.EmptyTile, Scripts"},{"$type":"Game.Tiles.GrassTile,
+    Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32, mscorlib]],
+    Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.GrassTile,
+    Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32, mscorlib]],
+    Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.StoneTile,
+    Scripts","Direction":0},{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
+    mscorlib]], Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.GrassTile,
+    Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32, mscorlib]],
+    Scripts","_value":2,"Value":2,"RawValue":2}}],[{"$type":"Game.Tiles.GrassTile,
+    Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32, mscorlib]],
+    Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.GrassTile,
+    Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32, mscorlib]],
+    Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.GrassTile,
+    Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32, mscorlib]],
+    Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.GrassTile,
+    Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32, mscorlib]],
+    Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.GrassTile,
+    Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32, mscorlib]],
+    Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.GrassTile,
+    Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32, mscorlib]],
+    Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.EmptyTile,
+    Scripts"}],[{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
+    mscorlib]], Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.StoneTile,
+    Scripts","Direction":1},{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
+    mscorlib]], Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.GrassTile,
+    Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32, mscorlib]],
+    Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.StoneTile,
+    Scripts","Direction":3},{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
+    mscorlib]], Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.EmptyTile,
+    Scripts"}],[{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
+    mscorlib]], Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.GrassTile,
+    Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32, mscorlib]],
+    Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.GrassTile,
+    Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32, mscorlib]],
+    Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.GrassTile,
+    Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32, mscorlib]],
+    Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.GrassTile,
+    Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32, mscorlib]],
+    Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.GrassTile,
+    Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32, mscorlib]],
+    Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.EmptyTile,
+    Scripts"}]]'
