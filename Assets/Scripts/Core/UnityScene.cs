@@ -2,12 +2,11 @@
 
 namespace Core
 {
-	public enum UnityScene
-	{
-		None = -1,
-		Setup = 0,
-		MainMenu = 1,
-		LevelSelect = 2,
-		Game = 3,
-	}
+public enum UnityScene
+{
+None = -1,
+MainMenu = 0,
+LevelSelect = 1,
+Game = 2,
+}
 }

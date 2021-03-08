@@ -1182,7 +1182,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a79441f348de89743a2939f4d699eac1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_RenderShadows: 1
+  m_RenderShadows: 0
   m_RequiresDepthTextureOption: 2
   m_RequiresOpaqueTextureOption: 2
   m_CameraType: 1
@@ -6686,8 +6686,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a79441f348de89743a2939f4d699eac1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_RenderShadows: 1
-  m_RequiresDepthTextureOption: 2
+  m_RenderShadows: 0
+  m_RequiresDepthTextureOption: 1
   m_RequiresOpaqueTextureOption: 2
   m_CameraType: 0
   m_Cameras:
@@ -7122,8 +7122,8 @@ MonoBehaviour:
   m_StreamingVersion: 20170927
   m_Priority: 10
   m_StandbyUpdate: 2
-  m_Weight0: 0
-  m_Weight1: 1
+  m_Weight0: 1
+  m_Weight1: 0
   m_Weight2: 0.5
   m_Weight3: 0.5
   m_Weight4: 0.5
@@ -7167,6 +7167,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  initialIndex: 0
 --- !u!1 &750791489
 GameObject:
   m_ObjectHideFlags: 0
@@ -8314,7 +8315,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   TapThreshold: 1
   SwipeThreshold: 100
-  ReferenceDpi: 96
+  ReferenceDpi: 120
   GuiLayers:
     serializedVersion: 2
     m_Bits: 32
@@ -10357,11 +10358,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: ArrowsContainer
-      objectReference: {fileID: 0}
-    - target: {fileID: 2576570993714188291, guid: 07bf993209eaf6b459da13f94a3dd7d0,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2576570993832657956, guid: 07bf993209eaf6b459da13f94a3dd7d0,
         type: 3}

@@ -228,6 +228,7 @@ Shader "Grass"
 				float _TessMaxDisp;
 			#endif
 			CBUFFER_END
+			sampler2D BakedNoiseTex;
 			float WindNoiseScale;
 			float2 WindNoiseVelocity;
 			float BendNoiseScale;
@@ -239,35 +240,7 @@ Shader "Grass"
 			sampler2D _AOMap2;
 
 
-			float3 mod2D289( float3 x ) { return x - floor( x * ( 1.0 / 289.0 ) ) * 289.0; }
-			float2 mod2D289( float2 x ) { return x - floor( x * ( 1.0 / 289.0 ) ) * 289.0; }
-			float3 permute( float3 x ) { return mod2D289( ( ( x * 34.0 ) + 1.0 ) * x ); }
-			float snoise( float2 v )
-			{
-				const float4 C = float4( 0.211324865405187, 0.366025403784439, -0.577350269189626, 0.024390243902439 );
-				float2 i = floor( v + dot( v, C.yy ) );
-				float2 x0 = v - i + dot( i, C.xx );
-				float2 i1;
-				i1 = ( x0.x > x0.y ) ? float2( 1.0, 0.0 ) : float2( 0.0, 1.0 );
-				float4 x12 = x0.xyxy + C.xxzz;
-				x12.xy -= i1;
-				i = mod2D289( i );
-				float3 p = permute( permute( i.y + float3( 0.0, i1.y, 1.0 ) ) + i.x + float3( 0.0, i1.x, 1.0 ) );
-				float3 m = max( 0.5 - float3( dot( x0, x0 ), dot( x12.xy, x12.xy ), dot( x12.zw, x12.zw ) ), 0.0 );
-				m = m * m;
-				m = m * m;
-				float3 x = 2.0 * frac( p * C.www ) - 1.0;
-				float3 h = abs( x ) - 0.5;
-				float3 ox = floor( x + 0.5 );
-				float3 a0 = x - ox;
-				m *= 1.79284291400159 - 0.85373472095314 * ( a0 * a0 + h * h );
-				float3 g;
-				g.x = a0.x * x0.x + h.x * x0.y;
-				g.yz = a0.yz * x12.xz + h.yz * x12.yw;
-				return 130.0 * dot( m, g );
-			}
-			
-			
+						
 			VertexOutput VertexFunction ( VertexInput v  )
 			{
 				VertexOutput o = (VertexOutput)0;
@@ -275,27 +248,35 @@ Shader "Grass"
 				UNITY_TRANSFER_INSTANCE_ID(v, o);
 				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
-				float2 texCoord50_g1 = v.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 texCoord50_g18 = v.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
 				float3 ase_worldPos = mul(GetObjectToWorldMatrix(), v.vertex).xyz;
-				float2 temp_output_8_0_g1 = ( ( texCoord50_g1.x * float2( 10,10 ) ) + ( (ase_worldPos).xz * WindNoiseScale ) + ( WindNoiseVelocity * _TimeParameters.x ) );
-				float simplePerlin2D3_g1 = snoise( temp_output_8_0_g1 );
-				float simplePerlin2D12_g1 = snoise( ( float2( 10,10 ) + temp_output_8_0_g1 ) );
-				float3 appendResult14_g1 = (float3(simplePerlin2D3_g1 , 0.0 , simplePerlin2D12_g1));
-				float2 texCoord54_g1 = v.ase_texcoord1.xy * float2( 1,1 ) + float2( 0,0 );
-				float simplePerlin2D63_g1 = snoise( texCoord54_g1*BendNoiseScale );
-				float simplePerlin2D64_g1 = snoise( ( texCoord54_g1 + float2( 10,10 ) )*BendNoiseScale );
-				float2 appendResult66_g1 = (float2(simplePerlin2D63_g1 , simplePerlin2D64_g1));
-				float2 break59_g1 = ( appendResult66_g1 * _BendOffsetMagnitude );
-				float3 appendResult55_g1 = (float3(break59_g1.x , 0.0 , break59_g1.y));
-				float3 temp_output_76_0_g1 = ( ase_worldPos - MowerPosition );
-				float3 break91_g1 = temp_output_76_0_g1;
-				float3 appendResult92_g1 = (float3(break91_g1.x , 0.0 , break91_g1.z));
-				float3 break3_g2 = appendResult92_g1;
-				float temp_output_114_0_g1 = ( ( ( break3_g2.x * break3_g2.x ) + ( break3_g2.y * break3_g2.y ) + ( break3_g2.z * break3_g2.z ) ) / MowerWindZoneWidth );
-				float temp_output_78_0_g1 = exp( ( 0.0 - ( temp_output_114_0_g1 * temp_output_114_0_g1 ) ) );
-				float mulTime105_g1 = _TimeParameters.x * MowerWindFlutterSpeed;
-				float simplePerlin2D116_g1 = snoise( ( (temp_output_76_0_g1).xz + mulTime105_g1 ) );
-				float2 texCoord47_g1 = v.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 temp_output_8_0_g18 = ( ( texCoord50_g18.x * float2( 10,10 ) ) + ( (ase_worldPos).xz * WindNoiseScale ) + ( WindNoiseVelocity * _TimeParameters.x ) );
+				float4 temp_cast_0 = ( 0 * -1 );
+				float4 break13_g20 = (temp_cast_0 + (tex2Dlod( BakedNoiseTex, float4( ( temp_output_8_0_g18 * 1.0 * 0.15 ), 0, 0.0) ) - float4( 0,0,0,0 )) * (float4( 1,0,0,0 ) - temp_cast_0) / (float4( 1,1,1,1 ) - float4( 0,0,0,0 )));
+				float2 temp_output_13_0_g18 = ( float2( 10,10 ) + temp_output_8_0_g18 );
+				float4 temp_cast_1 = ( 0 * -1 );
+				float4 break13_g21 = (temp_cast_1 + (tex2Dlod( BakedNoiseTex, float4( ( temp_output_13_0_g18 * 1.0 * 0.15 ), 0, 0.0) ) - float4( 0,0,0,0 )) * (float4( 1,0,0,0 ) - temp_cast_1) / (float4( 1,1,1,1 ) - float4( 0,0,0,0 )));
+				float3 appendResult14_g18 = (float3(break13_g20.r , 0.0 , break13_g21.r));
+				float2 texCoord54_g18 = v.ase_texcoord1.xy * float2( 1,1 ) + float2( 0,0 );
+				float4 temp_cast_2 = ( 0 * -1 );
+				float4 break13_g22 = (temp_cast_2 + (tex2Dlod( BakedNoiseTex, float4( ( texCoord54_g18 * BendNoiseScale * 0.15 ), 0, 0.0) ) - float4( 0,0,0,0 )) * (float4( 1,0,0,0 ) - temp_cast_2) / (float4( 1,1,1,1 ) - float4( 0,0,0,0 )));
+				float2 temp_output_65_0_g18 = ( texCoord54_g18 + float2( 10,10 ) );
+				float4 temp_cast_3 = ( 0 * -1 );
+				float4 break13_g24 = (temp_cast_3 + (tex2Dlod( BakedNoiseTex, float4( ( temp_output_65_0_g18 * BendNoiseScale * 0.15 ), 0, 0.0) ) - float4( 0,0,0,0 )) * (float4( 1,0,0,0 ) - temp_cast_3) / (float4( 1,1,1,1 ) - float4( 0,0,0,0 )));
+				float2 appendResult66_g18 = (float2(break13_g22.r , break13_g24.r));
+				float2 break59_g18 = ( appendResult66_g18 * _BendOffsetMagnitude );
+				float3 appendResult55_g18 = (float3(break59_g18.x , 0.0 , break59_g18.y));
+				float3 temp_output_76_0_g18 = ( ase_worldPos - MowerPosition );
+				float3 break91_g18 = temp_output_76_0_g18;
+				float3 appendResult92_g18 = (float3(break91_g18.x , 0.0 , break91_g18.z));
+				float3 break3_g19 = appendResult92_g18;
+				float temp_output_114_0_g18 = ( ( ( break3_g19.x * break3_g19.x ) + ( break3_g19.y * break3_g19.y ) + ( break3_g19.z * break3_g19.z ) ) / MowerWindZoneWidth );
+				float temp_output_78_0_g18 = exp( ( 0.0 - ( temp_output_114_0_g18 * temp_output_114_0_g18 ) ) );
+				float mulTime105_g18 = _TimeParameters.x * MowerWindFlutterSpeed;
+				float2 temp_output_117_0_g18 = ( (temp_output_76_0_g18).xz + mulTime105_g18 );
+				float4 temp_cast_4 = ( 0 * -1 );
+				float4 break13_g23 = (temp_cast_4 + (tex2Dlod( BakedNoiseTex, float4( ( temp_output_117_0_g18 * 1.0 * 0.15 ), 0, 0.0) ) - float4( 0,0,0,0 )) * (float4( 1,0,0,0 ) - temp_cast_4) / (float4( 1,1,1,1 ) - float4( 0,0,0,0 )));
+				float2 texCoord47_g18 = v.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
 				
 				float3 ase_worldNormal = TransformObjectToWorldNormal(v.ase_normal);
 				o.ase_texcoord4.xyz = ase_worldNormal;
@@ -310,7 +291,7 @@ Shader "Grass"
 				#else
 					float3 defaultVertexValue = float3(0, 0, 0);
 				#endif
-				float3 vertexValue = ( ( ( appendResult14_g1 * _WindOffsetMagnitude ) + appendResult55_g1 + ( ( float3(0,-0.001,0) * temp_output_78_0_g1 ) + ( appendResult92_g1 * temp_output_78_0_g1 * MowerWindSize * (0.5 + (simplePerlin2D116_g1 - -1.0) * (1.0 - 0.5) / (1.0 - -1.0)) ) ) ) * ( texCoord47_g1.y * texCoord47_g1.y ) );
+				float3 vertexValue = ( ( ( appendResult14_g18 * _WindOffsetMagnitude ) + appendResult55_g18 + ( ( float3(0,-0.001,0) * temp_output_78_0_g18 ) + ( appendResult92_g18 * temp_output_78_0_g18 * MowerWindSize * (0.5 + (break13_g23.r - -1.0) * (1.0 - 0.5) / (1.0 - -1.0)) ) ) ) * ( texCoord47_g18.y * texCoord47_g18.y ) );
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
 					v.vertex.xyz = vertexValue;
 				#else
@@ -439,22 +420,22 @@ Shader "Grass"
 				#endif
 				float2 uv_MainTex2 = IN.ase_texcoord3.xy * _MainTex2_ST.xy + _MainTex2_ST.zw;
 				float3 ase_worldNormal = IN.ase_texcoord4.xyz;
-				float dotResult24_g1 = dot( _MainLightPosition.xyz , ase_worldNormal );
-				float clampResult8_g1 = clamp( (( 1.0 - _DiffuseAmount2 ) + (dotResult24_g1 - -1.0) * (1.0 - ( 1.0 - _DiffuseAmount2 )) / (1.0 - -1.0)) , 0.0 , 1.0 );
-				float smoothstepResult20_g1 = smoothstep( _HighlightCutoff2 , ( _HighlightCutoff2 + _BoundarySmoothness2 ) , dotResult24_g1);
-				float temp_output_28_0_g1 = ( 0.0 - _ShadowCutoff2 );
-				float smoothstepResult31_g1 = smoothstep( temp_output_28_0_g1 , ( temp_output_28_0_g1 - _BoundarySmoothness2 ) , dotResult24_g1);
+				float dotResult24_g17 = dot( _MainLightPosition.xyz , ase_worldNormal );
+				float clampResult8_g17 = clamp( (( 1.0 - _DiffuseAmount2 ) + (dotResult24_g17 - -1.0) * (1.0 - ( 1.0 - _DiffuseAmount2 )) / (1.0 - -1.0)) , 0.0 , 1.0 );
+				float smoothstepResult20_g17 = smoothstep( _HighlightCutoff2 , ( _HighlightCutoff2 + _BoundarySmoothness2 ) , dotResult24_g17);
+				float temp_output_28_0_g17 = ( 0.0 - _ShadowCutoff2 );
+				float smoothstepResult31_g17 = smoothstep( temp_output_28_0_g17 , ( temp_output_28_0_g17 - _BoundarySmoothness2 ) , dotResult24_g17);
 				float2 uv2_AOMap2 = IN.ase_texcoord3.zw * _AOMap2_ST.xy + _AOMap2_ST.zw;
 				float4 temp_cast_3 = (( 1.0 - _AOStrength2 )).xxxx;
 				#ifdef _USEAO2_ON
-				float4 staticSwitch21_g1 = (temp_cast_3 + (tex2D( _AOMap2, uv2_AOMap2 ) - float4( 0,0,0,0 )) * (float4( 1,1,1,0 ) - temp_cast_3) / (float4( 1,1,1,0 ) - float4( 0,0,0,0 )));
+				float4 staticSwitch21_g17 = (temp_cast_3 + (tex2D( _AOMap2, uv2_AOMap2 ) - float4( 0,0,0,0 )) * (float4( 1,1,1,0 ) - temp_cast_3) / (float4( 1,1,1,0 ) - float4( 0,0,0,0 )));
 				#else
-				float4 staticSwitch21_g1 = float4( float3(1,1,1) , 0.0 );
+				float4 staticSwitch21_g17 = float4( float3(1,1,1) , 0.0 );
 				#endif
 				
 				float3 BakedAlbedo = 0;
 				float3 BakedEmission = 0;
-				float3 Color = ( ( ( ( tex2D( _MainTex2, uv_MainTex2 ) * _Tint2 * clampResult8_g1 ) + float4( ( smoothstepResult20_g1 * _Highlight2 ) , 0.0 ) ) - float4( ( smoothstepResult31_g1 * _Shadow2 ) , 0.0 ) ) * staticSwitch21_g1 ).rgb;
+				float3 Color = ( ( ( ( tex2D( _MainTex2, uv_MainTex2 ) * _Tint2 * clampResult8_g17 ) + float4( ( smoothstepResult20_g17 * _Highlight2 ) , 0.0 ) ) - float4( ( smoothstepResult31_g17 * _Shadow2 ) , 0.0 ) ) * staticSwitch21_g17 ).rgb;
 				float Alpha = 1;
 				float AlphaClipThreshold = 0.5;
 				float AlphaClipThresholdShadow = 0.5;
@@ -551,6 +532,7 @@ Shader "Grass"
 				float _TessMaxDisp;
 			#endif
 			CBUFFER_END
+			sampler2D BakedNoiseTex;
 			float WindNoiseScale;
 			float2 WindNoiseVelocity;
 			float BendNoiseScale;
@@ -560,35 +542,7 @@ Shader "Grass"
 			float MowerWindFlutterSpeed;
 
 
-			float3 mod2D289( float3 x ) { return x - floor( x * ( 1.0 / 289.0 ) ) * 289.0; }
-			float2 mod2D289( float2 x ) { return x - floor( x * ( 1.0 / 289.0 ) ) * 289.0; }
-			float3 permute( float3 x ) { return mod2D289( ( ( x * 34.0 ) + 1.0 ) * x ); }
-			float snoise( float2 v )
-			{
-				const float4 C = float4( 0.211324865405187, 0.366025403784439, -0.577350269189626, 0.024390243902439 );
-				float2 i = floor( v + dot( v, C.yy ) );
-				float2 x0 = v - i + dot( i, C.xx );
-				float2 i1;
-				i1 = ( x0.x > x0.y ) ? float2( 1.0, 0.0 ) : float2( 0.0, 1.0 );
-				float4 x12 = x0.xyxy + C.xxzz;
-				x12.xy -= i1;
-				i = mod2D289( i );
-				float3 p = permute( permute( i.y + float3( 0.0, i1.y, 1.0 ) ) + i.x + float3( 0.0, i1.x, 1.0 ) );
-				float3 m = max( 0.5 - float3( dot( x0, x0 ), dot( x12.xy, x12.xy ), dot( x12.zw, x12.zw ) ), 0.0 );
-				m = m * m;
-				m = m * m;
-				float3 x = 2.0 * frac( p * C.www ) - 1.0;
-				float3 h = abs( x ) - 0.5;
-				float3 ox = floor( x + 0.5 );
-				float3 a0 = x - ox;
-				m *= 1.79284291400159 - 0.85373472095314 * ( a0 * a0 + h * h );
-				float3 g;
-				g.x = a0.x * x0.x + h.x * x0.y;
-				g.yz = a0.yz * x12.xz + h.yz * x12.yw;
-				return 130.0 * dot( m, g );
-			}
 			
-
 			VertexOutput VertexFunction( VertexInput v  )
 			{
 				VertexOutput o = (VertexOutput)0;
@@ -596,34 +550,42 @@ Shader "Grass"
 				UNITY_TRANSFER_INSTANCE_ID(v, o);
 				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
-				float2 texCoord50_g1 = v.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 texCoord50_g18 = v.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
 				float3 ase_worldPos = mul(GetObjectToWorldMatrix(), v.vertex).xyz;
-				float2 temp_output_8_0_g1 = ( ( texCoord50_g1.x * float2( 10,10 ) ) + ( (ase_worldPos).xz * WindNoiseScale ) + ( WindNoiseVelocity * _TimeParameters.x ) );
-				float simplePerlin2D3_g1 = snoise( temp_output_8_0_g1 );
-				float simplePerlin2D12_g1 = snoise( ( float2( 10,10 ) + temp_output_8_0_g1 ) );
-				float3 appendResult14_g1 = (float3(simplePerlin2D3_g1 , 0.0 , simplePerlin2D12_g1));
-				float2 texCoord54_g1 = v.ase_texcoord1.xy * float2( 1,1 ) + float2( 0,0 );
-				float simplePerlin2D63_g1 = snoise( texCoord54_g1*BendNoiseScale );
-				float simplePerlin2D64_g1 = snoise( ( texCoord54_g1 + float2( 10,10 ) )*BendNoiseScale );
-				float2 appendResult66_g1 = (float2(simplePerlin2D63_g1 , simplePerlin2D64_g1));
-				float2 break59_g1 = ( appendResult66_g1 * _BendOffsetMagnitude );
-				float3 appendResult55_g1 = (float3(break59_g1.x , 0.0 , break59_g1.y));
-				float3 temp_output_76_0_g1 = ( ase_worldPos - MowerPosition );
-				float3 break91_g1 = temp_output_76_0_g1;
-				float3 appendResult92_g1 = (float3(break91_g1.x , 0.0 , break91_g1.z));
-				float3 break3_g2 = appendResult92_g1;
-				float temp_output_114_0_g1 = ( ( ( break3_g2.x * break3_g2.x ) + ( break3_g2.y * break3_g2.y ) + ( break3_g2.z * break3_g2.z ) ) / MowerWindZoneWidth );
-				float temp_output_78_0_g1 = exp( ( 0.0 - ( temp_output_114_0_g1 * temp_output_114_0_g1 ) ) );
-				float mulTime105_g1 = _TimeParameters.x * MowerWindFlutterSpeed;
-				float simplePerlin2D116_g1 = snoise( ( (temp_output_76_0_g1).xz + mulTime105_g1 ) );
-				float2 texCoord47_g1 = v.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 temp_output_8_0_g18 = ( ( texCoord50_g18.x * float2( 10,10 ) ) + ( (ase_worldPos).xz * WindNoiseScale ) + ( WindNoiseVelocity * _TimeParameters.x ) );
+				float4 temp_cast_0 = ( 0 * -1 );
+				float4 break13_g20 = (temp_cast_0 + (tex2Dlod( BakedNoiseTex, float4( ( temp_output_8_0_g18 * 1.0 * 0.15 ), 0, 0.0) ) - float4( 0,0,0,0 )) * (float4( 1,0,0,0 ) - temp_cast_0) / (float4( 1,1,1,1 ) - float4( 0,0,0,0 )));
+				float2 temp_output_13_0_g18 = ( float2( 10,10 ) + temp_output_8_0_g18 );
+				float4 temp_cast_1 = ( 0 * -1 );
+				float4 break13_g21 = (temp_cast_1 + (tex2Dlod( BakedNoiseTex, float4( ( temp_output_13_0_g18 * 1.0 * 0.15 ), 0, 0.0) ) - float4( 0,0,0,0 )) * (float4( 1,0,0,0 ) - temp_cast_1) / (float4( 1,1,1,1 ) - float4( 0,0,0,0 )));
+				float3 appendResult14_g18 = (float3(break13_g20.r , 0.0 , break13_g21.r));
+				float2 texCoord54_g18 = v.ase_texcoord1.xy * float2( 1,1 ) + float2( 0,0 );
+				float4 temp_cast_2 = ( 0 * -1 );
+				float4 break13_g22 = (temp_cast_2 + (tex2Dlod( BakedNoiseTex, float4( ( texCoord54_g18 * BendNoiseScale * 0.15 ), 0, 0.0) ) - float4( 0,0,0,0 )) * (float4( 1,0,0,0 ) - temp_cast_2) / (float4( 1,1,1,1 ) - float4( 0,0,0,0 )));
+				float2 temp_output_65_0_g18 = ( texCoord54_g18 + float2( 10,10 ) );
+				float4 temp_cast_3 = ( 0 * -1 );
+				float4 break13_g24 = (temp_cast_3 + (tex2Dlod( BakedNoiseTex, float4( ( temp_output_65_0_g18 * BendNoiseScale * 0.15 ), 0, 0.0) ) - float4( 0,0,0,0 )) * (float4( 1,0,0,0 ) - temp_cast_3) / (float4( 1,1,1,1 ) - float4( 0,0,0,0 )));
+				float2 appendResult66_g18 = (float2(break13_g22.r , break13_g24.r));
+				float2 break59_g18 = ( appendResult66_g18 * _BendOffsetMagnitude );
+				float3 appendResult55_g18 = (float3(break59_g18.x , 0.0 , break59_g18.y));
+				float3 temp_output_76_0_g18 = ( ase_worldPos - MowerPosition );
+				float3 break91_g18 = temp_output_76_0_g18;
+				float3 appendResult92_g18 = (float3(break91_g18.x , 0.0 , break91_g18.z));
+				float3 break3_g19 = appendResult92_g18;
+				float temp_output_114_0_g18 = ( ( ( break3_g19.x * break3_g19.x ) + ( break3_g19.y * break3_g19.y ) + ( break3_g19.z * break3_g19.z ) ) / MowerWindZoneWidth );
+				float temp_output_78_0_g18 = exp( ( 0.0 - ( temp_output_114_0_g18 * temp_output_114_0_g18 ) ) );
+				float mulTime105_g18 = _TimeParameters.x * MowerWindFlutterSpeed;
+				float2 temp_output_117_0_g18 = ( (temp_output_76_0_g18).xz + mulTime105_g18 );
+				float4 temp_cast_4 = ( 0 * -1 );
+				float4 break13_g23 = (temp_cast_4 + (tex2Dlod( BakedNoiseTex, float4( ( temp_output_117_0_g18 * 1.0 * 0.15 ), 0, 0.0) ) - float4( 0,0,0,0 )) * (float4( 1,0,0,0 ) - temp_cast_4) / (float4( 1,1,1,1 ) - float4( 0,0,0,0 )));
+				float2 texCoord47_g18 = v.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
 				
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
 					float3 defaultVertexValue = v.vertex.xyz;
 				#else
 					float3 defaultVertexValue = float3(0, 0, 0);
 				#endif
-				float3 vertexValue = ( ( ( appendResult14_g1 * _WindOffsetMagnitude ) + appendResult55_g1 + ( ( float3(0,-0.001,0) * temp_output_78_0_g1 ) + ( appendResult92_g1 * temp_output_78_0_g1 * MowerWindSize * (0.5 + (simplePerlin2D116_g1 - -1.0) * (1.0 - 0.5) / (1.0 - -1.0)) ) ) ) * ( texCoord47_g1.y * texCoord47_g1.y ) );
+				float3 vertexValue = ( ( ( appendResult14_g18 * _WindOffsetMagnitude ) + appendResult55_g18 + ( ( float3(0,-0.001,0) * temp_output_78_0_g18 ) + ( appendResult92_g18 * temp_output_78_0_g18 * MowerWindSize * (0.5 + (break13_g23.r - -1.0) * (1.0 - 0.5) / (1.0 - -1.0)) ) ) ) * ( texCoord47_g18.y * texCoord47_g18.y ) );
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
 					v.vertex.xyz = vertexValue;
 				#else
@@ -773,15 +735,15 @@ Shader "Grass"
 }
 /*ASEBEGIN
 Version=18500
--1920;12;1920;1017;992.0149;466.459;1;True;True
-Node;AmplifyShaderEditor.FunctionNode;5;-220,-83.5;Inherit;False;Toon;0;;1;a4a352ddda5e97a438bc3f7dc43e6fb7;0;1;40;COLOR;0,0,0,0;False;1;COLOR;0
-Node;AmplifyShaderEditor.FunctionNode;84;-283.0149,11.54099;Inherit;False;Grass Vertex Offset New;12;;1;875d573184573524baee39a5588c350f;0;0;1;FLOAT3;0
+-1920;2.4;1920;1029;992.0149;463.459;1;True;True
+Node;AmplifyShaderEditor.FunctionNode;94;-220,-83.5;Inherit;False;Toon;0;;17;a4a352ddda5e97a438bc3f7dc43e6fb7;0;1;40;COLOR;0,0,0,0;False;1;COLOR;0
+Node;AmplifyShaderEditor.FunctionNode;95;-282.0149,11.54099;Inherit;True;Grass Vertex Offset New;12;;18;875d573184573524baee39a5588c350f;0;0;1;FLOAT3;0
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;0;0,0;Float;False;False;-1;2;UnityEditor.ShaderGraph.PBRMasterGUI;0;3;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;ExtraPrePass;0;0;ExtraPrePass;5;False;False;False;False;False;False;False;False;True;0;False;-1;True;0;False;-1;False;False;False;False;False;False;False;False;True;3;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;0;0;True;1;1;False;-1;0;False;-1;0;1;False;-1;0;False;-1;False;False;False;False;False;False;False;False;True;0;False;-1;True;True;True;True;True;0;False;-1;False;False;False;True;False;255;False;-1;255;False;-1;255;False;-1;7;False;-1;1;False;-1;1;False;-1;1;False;-1;7;False;-1;1;False;-1;1;False;-1;1;False;-1;True;1;False;-1;True;3;False;-1;True;True;0;False;-1;0;False;-1;True;0;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;2;0,0;Float;False;False;-1;2;UnityEditor.ShaderGraph.PBRMasterGUI;0;3;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;ShadowCaster;0;2;ShadowCaster;0;False;False;False;False;False;False;False;False;True;0;False;-1;True;0;False;-1;False;False;False;False;False;False;False;False;True;3;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;0;0;False;False;False;False;False;False;False;False;True;0;False;-1;False;False;False;False;False;False;True;1;False;-1;True;3;False;-1;False;True;1;LightMode=ShadowCaster;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;3;0,0;Float;False;False;-1;2;UnityEditor.ShaderGraph.PBRMasterGUI;0;3;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;DepthOnly;0;3;DepthOnly;0;False;False;False;False;False;False;False;False;True;0;False;-1;True;0;False;-1;False;False;False;False;False;False;False;False;True;3;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;0;0;False;False;False;False;False;False;False;False;True;0;False;-1;False;True;False;False;False;False;0;False;-1;False;False;False;False;True;1;False;-1;False;False;True;1;LightMode=DepthOnly;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;4;0,0;Float;False;False;-1;2;UnityEditor.ShaderGraph.PBRMasterGUI;0;3;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;Meta;0;4;Meta;0;False;False;False;False;False;False;False;False;True;0;False;-1;True;0;False;-1;False;False;False;False;False;False;False;False;True;3;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;0;0;False;False;False;False;False;False;False;False;False;True;2;False;-1;False;False;False;False;False;False;False;False;True;1;LightMode=Meta;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;1;25,-83;Float;False;True;-1;2;UnityEditor.ShaderGraph.PBRMasterGUI;0;3;Grass;2992e84f91cbeb14eab234972e07ea9d;True;Forward;0;1;Forward;8;False;False;False;False;False;False;False;False;True;0;False;-1;True;0;False;-1;False;False;False;False;False;False;False;False;True;3;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;0;0;True;1;1;False;-1;0;False;-1;1;1;False;-1;0;False;-1;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;-1;False;False;False;True;False;255;False;-1;255;False;-1;255;False;-1;7;False;-1;1;False;-1;1;False;-1;1;False;-1;7;False;-1;1;False;-1;1;False;-1;1;False;-1;True;1;False;-1;True;3;False;-1;True;True;0;False;-1;0;False;-1;True;1;LightMode=UniversalForward;False;0;Hidden/InternalErrorShader;0;0;Standard;22;Surface;0;  Blend;0;Two Sided;1;Cast Shadows;0;  Use Shadow Threshold;0;Receive Shadows;0;GPU Instancing;1;LOD CrossFade;0;Built-in Fog;0;DOTS Instancing;0;Meta Pass;0;Extra Pre Pass;0;Tessellation;0;  Phong;0;  Strength;0.5,False,-1;  Type;0;  Tess;16,False,-1;  Min;10,False,-1;  Max;25,False,-1;  Edge Length;16,False,-1;  Max Displacement;25,False,-1;Vertex Position,InvertActionOnDeselection;1;0;5;False;True;False;True;False;False;;False;0
-WireConnection;1;2;5;0
-WireConnection;1;5;84;0
+WireConnection;1;2;94;0
+WireConnection;1;5;95;0
 ASEEND*/
-//CHKSM=3A1D4C18B195FBB320D7FC9411CB9EFD4E0FDFE7
+//CHKSM=ADFFE1B5B3F6BC58B74EA66778BB84A2B5C67A10

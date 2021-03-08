@@ -12,6 +12,7 @@ namespace Game.Cameras
 	{
 		[SerializeField] private float duration;
 		[SerializeField] private AnimationCurve mixCurve;
+		[SerializeField] private int initialIndex = 0;
 
 		private CinemachineMixingCamera _mixingCamera;
 
@@ -20,6 +21,12 @@ namespace Game.Cameras
 		private void Awake()
 		{
 			_mixingCamera = GetComponent<CinemachineMixingCamera>();
+			
+			for (int i = 0; i < _mixingCamera.ChildCameras.Length; i++)
+			{
+				float weight = i == initialIndex ? 1 : 0;
+				_mixingCamera.SetWeight(i, weight);
+			}
 		}
 
 		[Button("Debug Animate To")]

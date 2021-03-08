@@ -64,16 +64,11 @@ namespace Game.Tiles
 
 		#region Events
 
-		private void OnGrassHeightValueChanged(int prevGrassHeight, int grassHeight, Xor _)
-		{
-			SetAppearance(grassHeight);
-		}
-
-		private void OnTraversedOnto(GridVector fromDirection, Xor isInverted)
-		{
+		private void OnGrassHeightValueChanged(int prevGrassHeight, int grassHeight, Xor isInverted)
+		{			
 			if (!isInverted)
 			{
-				if (_tileData.IsRuined)
+				if (prevGrassHeight < GrassTile.PerfectGrassHeight)
 				{
 					dirtParticlesEventChannel.Raise(transform.position);
 				}
@@ -82,9 +77,13 @@ namespace Game.Tiles
 					grassParticlesEventChannel.Raise(transform.position, _tileData.GrassHeight.Value + 1);
 				}
 			}
+			
+			SetAppearance(grassHeight);
+		}
 
+		private void OnTraversedOnto(GridVector fromDirection, Xor isInverted)
+		{
 			dirtAppearanceSetter.Set(fromDirection);
-			SetAppearance(_tileData.GrassHeight.Value);
 			
 			_lastTraverseOntoDirection = fromDirection;
 		}

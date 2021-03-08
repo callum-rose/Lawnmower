@@ -9,7 +9,7 @@ namespace Game.Tiles
 	internal class GrassTile : Tile
 	{
 		public const int MaxGrassHeight = 3;
-		private const int PerfectGrassHeight = 1;
+		public const int PerfectGrassHeight = 1;
 
 		public override bool IsComplete => _internalGrassHeight == PerfectGrassHeight;
 		public override bool IsRuined => _internalGrassHeight <= 0;

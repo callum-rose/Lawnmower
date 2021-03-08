@@ -8,7 +8,7 @@ namespace Game.Tiles
 {
 	[UnreferencedScriptableObject]
 	[CreateAssetMenu(fileName = nameof(GrassShaderManager), menuName = SONames.GameDir + nameof(GrassShaderManager))]
-	internal partial class GrassShaderManager : ScriptableObject
+	internal class GrassShaderManager : ScriptableObject
 	{
 		[TitleGroup("Wind")]
 		[SerializeField]

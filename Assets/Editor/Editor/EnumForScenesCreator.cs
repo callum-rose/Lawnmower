@@ -21,10 +21,17 @@ namespace Core
             List<KeyValuePair<string, int?>> values = new List<KeyValuePair<string, int?>>();
             
             values.Add(new KeyValuePair<string, int?>("None", -1));
-            
+
+            int sceneIndex = 0;
             for (int i = 0; i < EditorBuildSettings.scenes.Length; i++)
             {
                 EditorBuildSettingsScene scene = EditorBuildSettings.scenes[i];
+
+                if (!scene.enabled)
+                {
+                    continue;
+                }
+                
                 string name = AssetDatabase.LoadAssetAtPath<SceneAsset>(AssetDatabase.GUIDToAssetPath(scene.guid.ToString())).name;
 
                 if (string.IsNullOrEmpty(name))
@@ -32,7 +39,9 @@ namespace Core
                     continue;
                 }
 
-                values.Add(new KeyValuePair<string, int?>(name, i));
+                values.Add(new KeyValuePair<string, int?>(name, sceneIndex));
+                
+                sceneIndex++;
             }
 
             return values;

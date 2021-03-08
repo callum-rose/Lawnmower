@@ -23,7 +23,7 @@ MonoBehaviour:
     value: 1
   mowerPosition:
     name: MowerPosition
-    value: {x: 2.5, y: 0, z: 1.5}
+    value: {x: 0.5, y: 0, z: 4.5}
   mowerWindSize:
     name: MowerWindSize
     value: 0.008
