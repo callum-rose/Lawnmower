@@ -1,5 +1,9 @@
+using System;
 using BalsamicBits.Extensions;
 using DG.Tweening;
+using Game.Core;
+using Game.Mowers.Input;
+using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -11,10 +15,27 @@ namespace Game.UI
 	{
 		[SerializeField] private Camera camera;
 		[SerializeField] private UiArrowsManager raycaster;
+
+		[TitleGroup("Colour")]
+		[SerializeField] private RawImage image;
+
+		[SerializeField] private Color beingUsedColour;
+		[SerializeField] private Color notBeingUsedColour;
+		[SerializeField] private float colourChangeDuration;
+
+		[TitleGroup("Dragging")]
 		[SerializeField] private bool isDraggable;
+
 		[SerializeField, Min(0)] private float padding;
 		[SerializeField, Min(0)] private float dragTransformScaleFactor = 1.2f;
 
+		[TitleGroup("Event Channels")]
+		[SerializeField] private IMowerInputEventChannelListenerContainer mowerInputEventChannelContainer;
+
+		private IMowerInputEventChannelListener MowerInputEventChannelListener =>
+			mowerInputEventChannelContainer.Result;
+
+		private RectTransform _rectTransform;
 		private Canvas _parentCanvas;
 		private CanvasScaler _rootCanvasScaler;
 
@@ -22,24 +43,45 @@ namespace Game.UI
 		private Tween _dragScaleUpTween;
 		private Vector2 _preDragPosition;
 
+		private int _lastInputFrame;
+		private bool _isBeingUsed;
+
 		private void Awake()
 		{
+			_rectTransform = transform as RectTransform;
+
 			_parentCanvas = GetComponentInParent<Canvas>();
 			_rootCanvasScaler = _parentCanvas.rootCanvas.GetComponent<CanvasScaler>();
 
 			_initialScale = transform.localScale;
+
+			MowerInputEventChannelListener.EventRaised += MowerInputEventChannelOnEventRaised;
+		}
+
+		private void OnEnable()
+		{
+			_isBeingUsed = true;
+			SetBeingUsedAppearance(true);
+		}
+
+		private void OnDestroy()
+		{
+			MowerInputEventChannelListener.EventRaised -= MowerInputEventChannelOnEventRaised;
 		}
 
 		public void OnPointerClick(PointerEventData eventData)
 		{
-			if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(transform as RectTransform,
+			if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(_rectTransform,
 				eventData.pressPosition, camera, out Vector2 localPoint))
 			{
 				return;
 			}
 
-			Rect rect = RectTransformUtility.PixelAdjustRect(transform as RectTransform, _parentCanvas);
-			raycaster.Input(new Vector2((localPoint.x) / rect.width + 0.5f, localPoint.y / rect.height + 0.5f));
+			_lastInputFrame = Time.frameCount;
+
+			Rect rect = RectTransformUtility.PixelAdjustRect(_rectTransform, _parentCanvas);
+			Vector2 pivot = _rectTransform.pivot;
+			raycaster.Input(new Vector2(localPoint.x / rect.width + pivot.x, localPoint.y / rect.height + pivot.y));
 		}
 
 		public void OnBeginDrag(PointerEventData eventData)
@@ -95,6 +137,26 @@ namespace Game.UI
 			_dragScaleUpTween = transform
 				.DOScale(_initialScale, 0.25f)
 				.OnComplete(() => _dragScaleUpTween = null);
+		}
+
+		private void MowerInputEventChannelOnEventRaised(GridVector _)
+		{
+			SetBeingUsedAppearance();
+		}
+
+		private void SetBeingUsedAppearance(bool force = false)
+		{
+			bool lastLocalInputWasThisFrame = Time.frameCount == _lastInputFrame;
+			
+			if (!force && lastLocalInputWasThisFrame == _isBeingUsed)
+			{
+				return;
+			}
+
+			image.DOKill();
+			image.DOColor(lastLocalInputWasThisFrame ? beingUsedColour : notBeingUsedColour, colourChangeDuration);
+
+			_isBeingUsed = lastLocalInputWasThisFrame;
 		}
 	}
 }

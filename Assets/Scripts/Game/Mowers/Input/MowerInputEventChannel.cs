@@ -1,12 +1,14 @@
+using System;
 using Core;
 using Core.EventChannels;
 using Game.Core;
+using IUnified;
 using UnityEngine;
 
 namespace Game.Mowers.Input
 {
 	[CreateAssetMenu(fileName = nameof(MowerInputEventChannel), menuName = SONames.GameDir + nameof(MowerInputEventChannel))]
-	public class MowerInputEventChannel : BaseEventChannel<GridVector>
+	public class MowerInputEventChannel : BaseEventChannel<GridVector>, IMowerInputEventChannelListener, IMowerInputEventChannelTransmitter
 	{
 		public bool IsBlocked { get; set; }
 		
@@ -22,4 +24,14 @@ namespace Game.Mowers.Input
 			base.Raise(vector);
 		}
 	}
+	
+	public interface IMowerInputEventChannelListener : IEventChannelListener<GridVector> { }
+	
+	public interface IMowerInputEventChannelTransmitter : IEventChannelTransmitter<GridVector> { }
+	
+	[Serializable]
+	public class IMowerInputEventChannelListenerContainer : IUnifiedContainer<IMowerInputEventChannelListener> { }
+	
+	[Serializable]
+	public class IMowerInputEventChannelTransmitterContainer : IUnifiedContainer<IMowerInputEventChannelTransmitter> { }
 }

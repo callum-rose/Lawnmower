@@ -134,7 +134,7 @@ Material:
     - _VertexOffsetMaxOffset: 0.0008
     - _VertexOffsetNoiseSize: 0
     - _WindNoiseSize: 1.28
-    - _WindOffsetMagnitude: 0.000697
+    - _WindOffsetMagnitude: 0.00148
     - _WorkflowMode: 1
     - _ZWrite: 1
     m_Colors:

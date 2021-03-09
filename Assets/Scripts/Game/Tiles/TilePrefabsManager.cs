@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using BalsamicBits.Extensions;
 using Core;
 using Sirenix.OdinInspector;
@@ -10,13 +12,15 @@ namespace Game.Tiles
 	[CreateAssetMenu(fileName = nameof(TilePrefabsManager), menuName = SONames.GameDir + nameof(TilePrefabsManager))]
 	internal partial class TilePrefabsManager : SerializedScriptableObject
 	{
-		[SerializeField] private SerialisedDictionary<TileType, GameObject> tilePrefabs;
+		[SerializeField] private Dictionary<Type, GameObject> tilePrefabs;
 
 		#region Unity
 
 		private void Awake()
 		{
+#if UNITY_EDITOR
 			UpdateDict();
+#endif
 		}
 
 		#endregion
@@ -25,50 +29,39 @@ namespace Game.Tiles
 
 		public BaseTileObject GetPrefabAndInstantiate(Tile tile)
 		{
-			TileType tileType;
 			Type tileObjectType;
 			switch (tile)
 			{
-				case EmptyTile _:
-					return null;
-					// tileType = TileType.Empty;
-					// tileObjectType = typeof(EmptyTileObject);
-					// break;
 				case StoneTile _:
-					tileType = TileType.Stone;
 					tileObjectType = typeof(StoneTileObject);
 					break;
 				case WoodTile _:
-					tileType = TileType.Wood;
 					tileObjectType = typeof(WoodTileObject);
 					break;
 				case WaterTile _:
-					tileType = TileType.Water;
 					tileObjectType = typeof(WaterTileObject);
 					break;
 				case GrassTile _:
-					tileType = TileType.Grass;
 					tileObjectType = typeof(GrassTileObject);
 					break;
 				default:
-					throw new NotImplementedException();
+				case EmptyTile _:
+					return null;
 			}
 
-			GameObject tileGameObject = Instantiate(tilePrefabs[tileType]);
-			return tileGameObject.GetComponent(tileObjectType) as BaseTileObject;
-		}
-
-		public TileType GetTileTypeForTile(Tile tile)
-		{
-			foreach (var kv in tilePrefabs)
+			if (!tilePrefabs.TryGetValue(tileObjectType, out GameObject prefab))
 			{
-				if (kv.Value.GetType() == tile.GetType())
-				{
-					return kv.Key;
-				}
+				Debug.LogError($"Prefab isn't set for {tileObjectType}");
+				return null;
 			}
 
-			throw new Exception($"{nameof(TileType)} not found for tile of type {tile.GetType()}");
+			if (prefab == null)
+			{
+				return null;
+			}
+			
+			GameObject tileGameObject = Instantiate(prefab);
+			return tileGameObject.GetComponent(tileObjectType) as BaseTileObject;
 		}
 
 		#endregion
@@ -78,19 +71,21 @@ namespace Game.Tiles
 		[Button("Update Dictionary Keys")]
 		private void UpdateDict()
 		{
-			tilePrefabs ??= new SerialisedDictionary<TileType, GameObject>();
+			tilePrefabs ??= new SerialisedDictionary<Type, GameObject>();
 
-			foreach (TileType t in EnumExtensions.GetValues<TileType>())
+			Type[] types = Assembly.GetAssembly(typeof(BaseTileObject)).GetTypes();
+			foreach (Type type in types
+				.Where(t => t.IsSubclassOf(typeof(BaseTileObject))))
 			{
-				if (!tilePrefabs.ContainsKey(t))
+				if (!tilePrefabs.ContainsKey(type))
 				{
-					tilePrefabs.Add(t, null);
+					tilePrefabs.Add(type, null);
 				}
 			}
 
-			foreach (TileType key in tilePrefabs.Keys.ToArray())
+			foreach (Type key in tilePrefabs.Keys.ToArray())
 			{
-				if (!Enum.IsDefined(typeof(TileType), key))
+				if (!key.IsSubclassOf(typeof(BaseTileObject)))
 				{
 					tilePrefabs.Remove(key);
 				}

@@ -2,7 +2,8 @@ fileFormatVersion: 2
 guid: 2fc9c69e369387544b81891480252f02
 ShaderImporter:
   externalObjects: {}
-  defaultTextures: []
+  defaultTextures:
+  - BakedNoiseTex: {fileID: 2800000, guid: 8898c1d9dc40825448e76546e0933eb2, type: 3}
   nonModifiableTextures: []
   preprocessorOverride: 0
   userData: 

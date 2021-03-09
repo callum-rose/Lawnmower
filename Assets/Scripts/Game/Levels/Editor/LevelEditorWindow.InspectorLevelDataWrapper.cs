@@ -188,7 +188,7 @@ namespace Game.Levels
 
 		private static int GetLevelY(int levelDepth, int levelYMin, int j)
 		{
-			return (levelDepth - 1 - (j - levelYMin)) + levelYMin;
+			return levelDepth - 1 - (j - levelYMin) + levelYMin;
 		}
 
 		/// <summary>

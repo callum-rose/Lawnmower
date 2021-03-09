@@ -15,16 +15,122 @@ MonoBehaviour:
   serializationData:
     SerializedFormat: 2
     SerializedBytes: 
-    ReferencedUnityObjects: []
+    ReferencedUnityObjects:
+    - {fileID: 8723563144886214407, guid: 53ab8f14d0c34af46963e81b50305f7a, type: 3}
+    - {fileID: 8723563144886214407, guid: 0a106eebd20a6fe44ac99547ddbd427d, type: 3}
+    - {fileID: 8723563144886214407, guid: 3186c35d8b9184440b6958bfd56b1dc8, type: 3}
     SerializedBytesString: 
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
-    SerializationNodes: []
-  tilePrefabs:
-    keys: 01000000020000000300000004000000
-    values:
-    - {fileID: 8723563144886214407, guid: 53ab8f14d0c34af46963e81b50305f7a, type: 3}
-    - {fileID: 8723563144886214407, guid: 0a106eebd20a6fe44ac99547ddbd427d, type: 3}
-    - {fileID: 8723563144886214407, guid: a1b4c07f51da0fa44afc8edbe6145b31, type: 3}
-    - {fileID: 8723563144886214407, guid: 3186c35d8b9184440b6958bfd56b1dc8, type: 3}
+    SerializationNodes:
+    - Name: tilePrefabs
+      Entry: 7
+      Data: 0|Core.SerialisedDictionary`2[[System.Type, mscorlib],[UnityEngine.GameObject,
+        UnityEngine.CoreModule]], Scripts
+    - Name: comparer
+      Entry: 7
+      Data: 1|System.Collections.Generic.ObjectEqualityComparer`1[[System.Type, mscorlib]],
+        mscorlib
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 12
+      Data: 5
+    - Name: 
+      Entry: 7
+      Data: 
+    - Name: $k
+      Entry: 7
+      Data: 2|System.RuntimeType, mscorlib
+    - Name: 
+      Entry: 1
+      Data: Game.Tiles.EmptyTileObject, Scripts
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: $v
+      Entry: 6
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 
+    - Name: $k
+      Entry: 7
+      Data: 3|System.RuntimeType, mscorlib
+    - Name: 
+      Entry: 1
+      Data: Game.Tiles.GrassTileObject, Scripts
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: $v
+      Entry: 10
+      Data: 0
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 
+    - Name: $k
+      Entry: 7
+      Data: 4|System.RuntimeType, mscorlib
+    - Name: 
+      Entry: 1
+      Data: Game.Tiles.StoneTileObject, Scripts
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: $v
+      Entry: 10
+      Data: 1
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 
+    - Name: $k
+      Entry: 7
+      Data: 5|System.RuntimeType, mscorlib
+    - Name: 
+      Entry: 1
+      Data: Game.Tiles.WaterTileObject, Scripts
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: $v
+      Entry: 6
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 
+    - Name: $k
+      Entry: 7
+      Data: 6|System.RuntimeType, mscorlib
+    - Name: 
+      Entry: 1
+      Data: Game.Tiles.WoodTileObject, Scripts
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: $v
+      Entry: 10
+      Data: 2
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 

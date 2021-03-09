@@ -14,6 +14,7 @@ namespace Game.Mowers.Models
 		[SerializeField, ValueDropdown(nameof(ShaderPropertyNames), HideChildProperties = true), Required]
 		private string texturePropertyName;
 
+		[SerializeField] private Vector2 baseOffset;
 		[SerializeField] private Vector2 offset;
 
 		private List<string> ShaderPropertyNames =>
@@ -47,7 +48,7 @@ namespace Game.Mowers.Models
 			_texturePropertyId ??= Shader.PropertyToID(texturePropertyName);
 #endif
 			
-			material.SetTextureOffset(_texturePropertyId.Value, offset);
+			material.SetTextureOffset(_texturePropertyId.Value, offset + baseOffset);
 		}
 	}
 }
