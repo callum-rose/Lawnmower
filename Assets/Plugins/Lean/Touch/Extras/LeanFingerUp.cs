@@ -89,7 +89,7 @@ namespace Lean.Touch
 
 			if (onPosition != null)
 			{
-				var position = ScreenDepth.Convert(finger.StartScreenPosition, gameObject);
+				Vector3 position = ScreenDepth.Convert(finger.StartScreenPosition, gameObject);
 
 				onPosition.Invoke(position);
 			}
@@ -124,8 +124,8 @@ namespace Lean.Touch.Inspector
 
 			EditorGUILayout.Separator();
 
-			var usedA = Any(t => t.OnFinger.GetPersistentEventCount() > 0);
-			var usedB = Any(t => t.OnPosition.GetPersistentEventCount() > 0);
+			bool usedA = Any(t => t.OnFinger.GetPersistentEventCount() > 0);
+			bool usedB = Any(t => t.OnPosition.GetPersistentEventCount() > 0);
 
 			EditorGUI.BeginDisabledGroup(usedA && usedB);
 			showUnusedEvents = EditorGUILayout.Foldout(showUnusedEvents, "Show Unused Events");

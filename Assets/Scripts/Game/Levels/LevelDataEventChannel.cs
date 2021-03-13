@@ -7,7 +7,7 @@ using UnityEngine;
 namespace Game.Levels
 {
 	[CreateAssetMenu(fileName = nameof(LevelDataEventChannel),
-		menuName = SONames.GameDir + nameof(LevelDataEventChannel))]
+		menuName = SoNames.GameDir + nameof(LevelDataEventChannel))]
 	internal sealed class LevelDataEventChannel : BaseEventChannel<IReadOnlyLevelData>, ILevelDataEventChannelListener,
 		ILevelDataEventChannelTransmitter
 	{

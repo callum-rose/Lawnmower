@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Core;
@@ -8,7 +9,7 @@ using UnityEngine;
 namespace Game.Tiles
 {
 	[CreateAssetMenu(fileName = nameof(DirtAppearanceSetterData),
-		menuName = SONames.GameDir + nameof(DirtAppearanceSetterData))]
+		menuName = SoNames.GameDir + nameof(DirtAppearanceSetterData))]
 	internal partial class DirtAppearanceSetterData : SerializedScriptableObject
 	{
 		// TODO split all this data out into a scriptable object
@@ -48,7 +49,30 @@ namespace Game.Tiles
 			SetupChannelSearchTree();
 #endif
 
-			return _setupSearchTree[inDirection][outDirection];
+			try
+			{
+				return _setupSearchTree[inDirection][outDirection];
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine(e);
+				throw;
+			}
+		}
+
+		private void Test()
+		{
+			if (false)
+			{
+				// hundreds of lines
+				//.
+				//.
+				//.
+			}
+			else
+			{
+				// tiny thing
+			}
 		}
 
 		private void SetupChannelSearchTree()

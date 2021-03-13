@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Game.Levels
 {
-	[CreateAssetMenu(fileName = nameof(EditModeLevelTileUpgrader), menuName = SONames.GameDir + nameof(EditModeLevelTileUpgrader))]
+	[CreateAssetMenu(fileName = nameof(EditModeLevelTileUpgrader), menuName = SoNames.GameDir + nameof(EditModeLevelTileUpgrader))]
 	internal class EditModeLevelTileUpgrader : ScriptableObject
 	{
 		[SerializeField, ListDrawerSettings(Expanded = true)] private TileUpgradePair[] tileUpgradePairs;

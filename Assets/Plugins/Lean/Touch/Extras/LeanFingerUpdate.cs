@@ -104,27 +104,27 @@ namespace Lean.Touch
 
 		private void HandleFingerUpdate(LeanFinger finger)
 		{
-			if (IgnoreStartedOverGui == true && finger.StartedOverGui == true)
+			if (IgnoreStartedOverGui && finger.StartedOverGui)
 			{
 				return;
 			}
 
-			if (IgnoreIsOverGui == true && finger.IsOverGui == true)
+			if (IgnoreIsOverGui && finger.IsOverGui)
 			{
 				return;
 			}
 
-			if (IgnoreIfStatic == true && finger.ScreenDelta.magnitude <= 0.0f)
+			if (IgnoreIfStatic && finger.ScreenDelta.magnitude <= 0.0f)
 			{
 				return;
 			}
 
-			if (IgnoreIfDown == true && finger.Down == true)
+			if (IgnoreIfDown && finger.Down)
 			{
 				return;
 			}
 
-			if (IgnoreIfUp == true && finger.Up == true)
+			if (IgnoreIfUp && finger.Up)
 			{
 				return;
 			}
@@ -139,7 +139,7 @@ namespace Lean.Touch
 				onFinger.Invoke(finger);
 			}
 
-			var finalDelta = finger.ScreenDelta;
+			Vector2 finalDelta = finger.ScreenDelta;
 
 			switch (Coordinate)
 			{
@@ -159,8 +159,8 @@ namespace Lean.Touch
 				onDistance.Invoke(finalDelta.magnitude);
 			}
 
-			var worldFrom = ScreenDepth.Convert(finger.LastScreenPosition, gameObject);
-			var worldTo   = ScreenDepth.Convert(finger.    ScreenPosition, gameObject);
+			Vector3 worldFrom = ScreenDepth.Convert(finger.LastScreenPosition, gameObject);
+			Vector3 worldTo   = ScreenDepth.Convert(finger.    ScreenPosition, gameObject);
 
 			if (onWorldFrom != null)
 			{
@@ -207,13 +207,13 @@ namespace Lean.Touch.Inspector
 
 			EditorGUILayout.Separator();
 
-			var usedA = Any(t => t.OnFinger.GetPersistentEventCount() > 0);
-			var usedB = Any(t => t.OnDelta.GetPersistentEventCount() > 0);
-			var usedC = Any(t => t.OnDistance.GetPersistentEventCount() > 0);
-			var usedD = Any(t => t.OnWorldFrom.GetPersistentEventCount() > 0);
-			var usedE = Any(t => t.OnWorldTo.GetPersistentEventCount() > 0);
-			var usedF = Any(t => t.OnWorldDelta.GetPersistentEventCount() > 0);
-			var usedG = Any(t => t.OnWorldFromTo.GetPersistentEventCount() > 0);
+			bool usedA = Any(t => t.OnFinger.GetPersistentEventCount() > 0);
+			bool usedB = Any(t => t.OnDelta.GetPersistentEventCount() > 0);
+			bool usedC = Any(t => t.OnDistance.GetPersistentEventCount() > 0);
+			bool usedD = Any(t => t.OnWorldFrom.GetPersistentEventCount() > 0);
+			bool usedE = Any(t => t.OnWorldTo.GetPersistentEventCount() > 0);
+			bool usedF = Any(t => t.OnWorldDelta.GetPersistentEventCount() > 0);
+			bool usedG = Any(t => t.OnWorldFromTo.GetPersistentEventCount() > 0);
 
 			EditorGUI.BeginDisabledGroup(usedA && usedB && usedC && usedD && usedE && usedF && usedG);
 				showUnusedEvents = EditorGUILayout.Foldout(showUnusedEvents, "Show Unused Events");
@@ -221,48 +221,48 @@ namespace Lean.Touch.Inspector
 
 			EditorGUILayout.Separator();
 
-			if (usedA == true || showUnusedEvents == true)
+			if (usedA || showUnusedEvents)
 			{
 				Draw("onFinger");
 			}
 
-			if (usedB == true || usedC == true || showUnusedEvents == true)
+			if (usedB || usedC || showUnusedEvents)
 			{
 				Draw("Coordinate", "The coordinate space of the OnDelta values.");
 				Draw("Multiplier", "The delta values will be multiplied by this when output.");
 			}
 
-			if (usedB == true || showUnusedEvents == true)
+			if (usedB || showUnusedEvents)
 			{
 				Draw("onDelta");
 			}
 
-			if (usedC == true || showUnusedEvents == true)
+			if (usedC || showUnusedEvents)
 			{
 				Draw("onDistance");
 			}
 
-			if (usedD == true || usedE == true || usedF == true || usedG == true || showUnusedEvents == true)
+			if (usedD || usedE || usedF || usedG || showUnusedEvents)
 			{
 				Draw("ScreenDepth");
 			}
 
-			if (usedD == true || showUnusedEvents == true)
+			if (usedD || showUnusedEvents)
 			{
 				Draw("onWorldFrom");
 			}
 
-			if (usedE == true || showUnusedEvents == true)
+			if (usedE || showUnusedEvents)
 			{
 				Draw("onWorldTo");
 			}
 
-			if (usedF == true || showUnusedEvents == true)
+			if (usedF || showUnusedEvents)
 			{
 				Draw("onWorldDelta");
 			}
 
-			if (usedG == true || showUnusedEvents == true)
+			if (usedG || showUnusedEvents)
 			{
 				Draw("onWorldFromTo");
 			}

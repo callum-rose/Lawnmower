@@ -31,9 +31,9 @@ namespace Lean.Touch
 		{
 			if (cachedRenderer == null) cachedRenderer = GetComponent<Renderer>();
 
-			if (AutoGetDefaultColor == true)
+			if (AutoGetDefaultColor)
 			{
-				var material0 = cachedRenderer.sharedMaterial;
+				Material material0 = cachedRenderer.sharedMaterial;
 
 				if (material0 != null)
 				{
@@ -41,7 +41,7 @@ namespace Lean.Touch
 				}
 			}
 
-			if (CloneMaterials == true)
+			if (CloneMaterials)
 			{
 				cachedRenderer.sharedMaterials = cachedRenderer.materials;
 			}
@@ -61,9 +61,9 @@ namespace Lean.Touch
 		{
 			if (cachedRenderer == null) cachedRenderer = GetComponent<Renderer>();
 
-			var materials = cachedRenderer.sharedMaterials;
+			Material[] materials = cachedRenderer.sharedMaterials;
 
-			for (var i = materials.Length - 1; i >= 0; i--)
+			for (int i = materials.Length - 1; i >= 0; i--)
 			{
 				materials[i].color = color;
 			}

@@ -6,7 +6,7 @@ using UnityEngine;
 namespace Game.Tiles
 {
 	[UnreferencedScriptableObject]
-	[CreateAssetMenu(fileName = nameof(PositionalParticlesManager), menuName = SONames.GameDir + nameof(PositionalParticlesManager))]
+	[CreateAssetMenu(fileName = nameof(PositionalParticlesManager), menuName = SoNames.GameDir + nameof(PositionalParticlesManager))]
 	internal sealed class PositionalParticlesManager : BaseParticlesManager
 	{
 		[SerializeField, AssetsOnly] private Vector3EventChannel particlesEventChannel;

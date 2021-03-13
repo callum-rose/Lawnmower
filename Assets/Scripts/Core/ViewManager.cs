@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 
 namespace Core
 {
-	[CreateAssetMenu(fileName = nameof(ViewManager), menuName = SONames.GameDir + nameof(ViewManager))]
+	[CreateAssetMenu(fileName = nameof(ViewManager), menuName = SoNames.GameDir + nameof(ViewManager))]
 	public partial class ViewManager : Singleton<ViewManager>
 	{
 		private UnityScene CurrentScene { get; set; } = UnityScene.None;

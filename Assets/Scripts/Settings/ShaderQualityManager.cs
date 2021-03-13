@@ -7,7 +7,7 @@ namespace Settings
 {
 	[UnreferencedScriptableObject]
 	[CreateAssetMenu(fileName = nameof(ShaderQualityManager),
-		menuName = SONames.SettingsDir + nameof(ShaderQualityManager))]
+		menuName = SoNames.SettingsDir + nameof(ShaderQualityManager))]
 	internal class ShaderQualityManager : ScriptableObject
 	{
 		[SerializeField] private string graphicsSettingsLowShaderKeyword = "_GRAPHICSSETTINGS_LOW";
@@ -21,9 +21,8 @@ namespace Settings
 
 		private void OnEnable()
 		{
-			GraphicsSettingEventChannel.EventRaised += OnGraphicsSettingsChanged;
-			
 			OnGraphicsSettingsChanged(defaultQualitySetting);
+			GraphicsSettingEventChannel.EventRaised += OnGraphicsSettingsChanged;
 		}
 
 		private void OnDisable()

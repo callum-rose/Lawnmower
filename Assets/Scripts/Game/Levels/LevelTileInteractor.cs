@@ -9,7 +9,7 @@ using UnityEngine;
 namespace Game.Levels
 {
     [UnreferencedScriptableObject]
-    [CreateAssetMenu(fileName = nameof(LevelTileInteractor), menuName = SONames.GameDir + nameof(LevelTileInteractor))]
+    [CreateAssetMenu(fileName = nameof(LevelTileInteractor), menuName = SoNames.GameDir + nameof(LevelTileInteractor))]
     internal class LevelTileInteractor : ScriptableObject, IHasEditMode
     {
        [SerializeField] private MowerMovementManager mowerMovement;

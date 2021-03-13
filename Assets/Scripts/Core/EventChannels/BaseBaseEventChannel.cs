@@ -10,10 +10,12 @@ namespace Core.EventChannels
 {
 	public abstract class BaseBaseEventChannel : ScriptableObject
 	{
-		protected abstract bool ShouldBeSolo { get; }
+		protected virtual bool ShouldBeSolo => false;
+
+		protected virtual bool PushLastDataOnSubscribe => false;
 
 		private static readonly List<Type> initialisedTypes = new List<Type>();
-
+		
 #if UNITY_EDITOR
 		protected virtual void Awake()
 		{
@@ -49,6 +51,8 @@ namespace Core.EventChannels
 	{
 		public event Action EventRaised;
 
+		protected sealed override bool PushLastDataOnSubscribe => false;
+
 		public virtual void Raise()
 		{
 			EventRaised?.Invoke();
@@ -68,11 +72,32 @@ namespace Core.EventChannels
 	public abstract class BaseEventChannel<T> : BaseBaseEventChannel, IEventChannelTransmitter<T>,
 		IEventChannelListener<T>
 	{
-		public event Action<T> EventRaised;
+		public event Action<T> EventRaised
+		{
+			add
+			{
+				if (PushLastDataOnSubscribe && _lastArgSet)
+				{
+					value.Invoke(_lastArg);
+				}
+				
+				EventRaisedInternal += value;
+			}
+
+			remove => EventRaisedInternal -= value;
+		}
+
+		private event Action<T> EventRaisedInternal;
+
+		private T _lastArg;
+		private bool _lastArgSet = false;
 
 		public virtual void Raise(T arg)
 		{
-			EventRaised?.Invoke(arg);
+			EventRaisedInternal?.Invoke(arg);
+			
+			_lastArg = arg;
+			_lastArgSet = true;
 		}
 	}
 
@@ -89,11 +114,29 @@ namespace Core.EventChannels
 	public abstract class BaseReturnEventChannel<T, TReturn> : BaseBaseEventChannel,
 		IReturnEventChannelTransmitter<T, TReturn>, IReturnEventChannelListener<T, TReturn>
 	{
-		public event Func<T, TReturn> EventRaised;
+		public event Func<T, TReturn> EventRaised
+		{
+			add
+			{
+				if (EventRaisedInternal != null && EventRaisedInternal.GetInvocationList().Length > 0)
+				{
+					Debug.LogError($"There can only be one listener subscribed to an instance of {nameof(BaseReturnEventChannel<T, TReturn>)}");
+					return;
+				}
 
+				EventRaisedInternal += value;
+			}
+
+			remove => EventRaisedInternal -= value;
+		}
+
+		protected sealed override bool PushLastDataOnSubscribe => false;
+
+		private event Func<T, TReturn> EventRaisedInternal;
+		
 		public virtual TReturn Raise(T arg)
 		{
-			return EventRaised == null ? default : EventRaised.Invoke(arg);
+			return EventRaisedInternal == null ? default : EventRaisedInternal.Invoke(arg);
 		}
 	}
 
@@ -110,11 +153,35 @@ namespace Core.EventChannels
 	public abstract class BaseEventChannel<T0, T1> : BaseBaseEventChannel, IEventChannelTransmitter<T0, T1>,
 		IEventChannelListener<T0, T1>
 	{
-		public event Action<T0, T1> EventRaised;
+		public event Action<T0, T1> EventRaised
+		{
+			add
+			{
+				if (PushLastDataOnSubscribe && _lastArgSet)
+				{
+					value.Invoke(_lastArg0, _lastArg1);
+				}
+				
+				EventRaisedInternal += value;
+			}
+
+			remove => EventRaisedInternal -= value;
+		}
+
+		private event Action<T0, T1> EventRaisedInternal;
+
+		private T0 _lastArg0;
+		private T1 _lastArg1;
+		private bool _lastArgSet = false;
 
 		public virtual void Raise(T0 arg0, T1 arg1)
 		{
-			EventRaised?.Invoke(arg0, arg1);
+			EventRaisedInternal?.Invoke(arg0, arg1);
+
+			_lastArg0 = arg0;
+			_lastArg1 = arg1;
+
+			_lastArgSet = true;
 		}
 	}
 
@@ -131,11 +198,29 @@ namespace Core.EventChannels
 	public abstract class BaseReturnEventChannel<T0, T1, TReturn> : BaseBaseEventChannel,
 		IReturnEventChannelTransmitter<T0, T1, TReturn>, IReturnEventChannelListener<T0, T1, TReturn>
 	{
-		public event Func<T0, T1, TReturn> EventRaised;
+		public event Func<T0, T1, TReturn> EventRaised
+		{
+			add
+			{
+				if (EventRaisedInternal != null && EventRaisedInternal.GetInvocationList().Length > 0)
+				{
+					Debug.LogError($"There can only be one listener subscribed to an instance of {nameof(BaseReturnEventChannel<T0, T1, TReturn>)}");
+					return;
+				}
+
+				EventRaisedInternal += value;
+			}
+
+			remove => EventRaisedInternal -= value;
+		}
+
+		protected sealed override bool PushLastDataOnSubscribe => false;
+
+		private event Func<T0, T1, TReturn> EventRaisedInternal;
 
 		public virtual TReturn Raise(T0 arg0, T1 arg1)
 		{
-			return EventRaised == null ? default : EventRaised.Invoke(arg0, arg1);
+			return EventRaisedInternal == null ? default : EventRaisedInternal.Invoke(arg0, arg1);
 		}
 	}
 

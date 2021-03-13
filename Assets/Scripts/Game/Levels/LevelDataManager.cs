@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace Game.Levels
 {
-	[CreateAssetMenu(fileName = nameof(LevelDataManager), menuName = SONames.GameDir + nameof(LevelDataManager))]
+	[CreateAssetMenu(fileName = nameof(LevelDataManager), menuName = SoNames.GameDir + nameof(LevelDataManager))]
 	internal partial class LevelDataManager : ScriptableObject
 	{
 		[ShowInInspector, PropertyOrder(5), TitleGroup("In Game Data")]

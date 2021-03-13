@@ -23,9 +23,9 @@ namespace Lean.Touch
 
 		protected virtual void Awake()
 		{
-			if (AutoGetDefaultColor == true)
+			if (AutoGetDefaultColor)
 			{
-				var graphic = GetComponent<Graphic>();
+				Graphic graphic = GetComponent<Graphic>();
 
 				DefaultColor = graphic.color;
 			}
@@ -43,7 +43,7 @@ namespace Lean.Touch
 
 		private void ChangeColor(Color color)
 		{
-			var graphic = GetComponent<Graphic>();
+			Graphic graphic = GetComponent<Graphic>();
 
 			graphic.color = color;
 		}

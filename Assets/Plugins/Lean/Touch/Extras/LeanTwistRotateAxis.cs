@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Lean.Touch
@@ -57,10 +58,10 @@ namespace Lean.Touch
 		protected virtual void Update()
 		{
 			// Get the fingers we want to use
-			var fingers = Use.GetFingers();
+			List<LeanFinger> fingers = Use.GetFingers();
 
 			// Calculate the rotation values based on these fingers
-			var twistDegrees = LeanGesture.GetTwistDegrees(fingers) * Sensitivity;
+			float twistDegrees = LeanGesture.GetTwistDegrees(fingers) * Sensitivity;
 
 			// Perform rotation
 			transform.Rotate(Axis, twistDegrees, Space);

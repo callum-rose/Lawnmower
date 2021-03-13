@@ -8,7 +8,7 @@ using UnityEngine.SceneManagement;
 namespace UI.Dialogs
 {
 	[UnreferencedScriptableObject]
-	[CreateAssetMenu(fileName = nameof(DialogManager), menuName = SONames.GameDir + nameof(DialogManager))]
+	[CreateAssetMenu(fileName = nameof(DialogManager), menuName = SoNames.GameDir + nameof(DialogManager))]
 	internal class DialogManager : ScriptableObject
 	{
 		[SerializeField, AssetsOnly] private Dialog dialogPrefab;

@@ -64,7 +64,7 @@ namespace Lean.Touch
 		protected override void TrySelect(LeanFinger finger, Component component, Vector3 worldPosition)
 		{
 			// Stores the selectable we will search for
-			var selectable = default(LeanSelectable);
+			LeanSelectable selectable = default(LeanSelectable);
 
 			// Was a component found?
 			if (component != null)
@@ -101,7 +101,7 @@ namespace Lean.Touch
 			if (selectable != null && selectable.isActiveAndEnabled)
 			{
 				if (selectable.HideWithFinger)
-					foreach (var otherSelectable in LeanSelectable.Instances)
+					foreach (LeanSelectable otherSelectable in LeanSelectable.Instances)
 						if (otherSelectable.HideWithFinger && otherSelectable.IsSelected)
 							return;
 

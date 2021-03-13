@@ -10,7 +10,7 @@ using UnityEngine.Serialization;
 
 namespace Game.Levels
 {
-	[CreateAssetMenu(fileName = nameof(LevelStateChecker), menuName = SONames.GameDir + nameof(LevelStateChecker))]
+	[CreateAssetMenu(fileName = nameof(LevelStateChecker), menuName = SoNames.GameDir + nameof(LevelStateChecker))]
 	internal partial class LevelStateChecker : ScriptableObject
 	{
 		[FormerlySerializedAs("levelRuinedChannel"), SerializeField]

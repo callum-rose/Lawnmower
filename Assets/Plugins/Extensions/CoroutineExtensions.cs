@@ -14,10 +14,25 @@ namespace BalsamicBits.Extensions
 			
 			callback?.Invoke();
 		}
-		
+
 		public static Coroutine Timer(this MonoBehaviour monoBehaviour, float duration, Action callback = null)
 		{
 			return monoBehaviour.StartCoroutine(Timer(duration, callback));
+		}
+
+		public static IEnumerator WaitForFrames(int frames, Action callback = null)
+		{
+			for (int i = 0; i < frames; i++)
+			{
+				yield return null;
+			}
+			
+			callback?.Invoke();
+		}
+
+		public static Coroutine WaitForFrames(this MonoBehaviour monoBehaviour, int frames, Action callback = null)
+		{
+			return monoBehaviour.StartCoroutine(WaitForFrames(frames, callback));
 		}
 
 		public static void Stop(this Coroutine coroutine, MonoBehaviour monoBehaviour)

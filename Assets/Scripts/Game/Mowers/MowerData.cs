@@ -5,7 +5,7 @@ using Core;
 
 namespace Game.Mowers
 {
-    [CreateAssetMenu(fileName = "Mower", menuName = SONames.GameDir + "Mower")]
+    [CreateAssetMenu(fileName = "Mower", menuName = SoNames.GameDir + "Mower")]
     public class MowerData : SerializedScriptableObject
     {
         [SerializeField] private Guid id;

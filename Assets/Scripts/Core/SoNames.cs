@@ -1,0 +1,12 @@
+namespace Core
+{
+    internal static class SoNames
+    {
+        public const string Dir = "ScriptableObjects/";
+        public const string CoreDir = Dir + "Core/";
+        public const string GameDir = Dir + "Game/";
+        public const string MainMenuDir = Dir + "MainMenu/";
+        public const string UIDir = Dir + "UI/";
+        public const string SettingsDir = Dir + "Settings/";
+    }
+}

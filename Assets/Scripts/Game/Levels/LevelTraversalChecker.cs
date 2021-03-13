@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Game.Levels
 {
-	[CreateAssetMenu(fileName = nameof(LevelTraversalChecker), menuName = SONames.GameDir + nameof(LevelTraversalChecker))]
+	[CreateAssetMenu(fileName = nameof(LevelTraversalChecker), menuName = SoNames.GameDir + nameof(LevelTraversalChecker))]
 	internal class LevelTraversalChecker : ScriptableObject, ILevelTraversalChecker
 	{
 		private IReadOnlyLevelData _levelData;

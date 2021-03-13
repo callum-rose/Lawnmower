@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using Sirenix.OdinInspector;
+using Sirenix.Utilities;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -34,6 +37,21 @@ namespace Lean.Touch
 		public float Dampening = -1.0f;
 
 		public UnityEvent<float> Scale; 
+		
+		[TitleGroup("Custom Stuff")]
+		[SerializeField, Min(1)] private float pinchStartThresholdFactor;
+
+		[ShowInInspector, ReadOnly] private float PinchStartThresholdFactorUpper => 1 * pinchStartThresholdFactor;
+		[ShowInInspector, ReadOnly] private float PinchStartThresholdFactorLower => 1 / pinchStartThresholdFactor;
+
+		[ShowInInspector, ReadOnly]
+		private bool _isPotentiallyPinching;
+
+		[ShowInInspector, ReadOnly]
+		private bool _isPinching;
+
+		[ShowInInspector, ReadOnly]
+		private float _cumulativePinchScale = 1;
 
 		[HideInInspector]
 		[SerializeField]
@@ -72,48 +90,69 @@ namespace Lean.Touch
 		protected virtual void Update()
 		{
 			// Store
-			var oldScale = transform.localPosition;
+			Vector3 oldScale = transform.localPosition;
 
 			// Get the fingers we want to use
-			var fingers = Use.GetFingers();
+			List<LeanFinger> fingers = Use.GetFingers();
 
-			// Calculate pinch scale, and make sure it's valid
-			var pinchScale = LeanGesture.GetPinchScale(fingers);
-
-			if (pinchScale != 1.0f)
+			if (fingers.IsNullOrEmpty())
 			{
+				_isPinching = false;
+				_isPotentiallyPinching = false;
+				_cumulativePinchScale = 1;
+			}
+			
+			// Calculate pinch scale, and make sure it's valid
+			float pinchScale = LeanGesture.GetPinchScale(fingers);
+			
+			if (_isPotentiallyPinching || Mathf.Abs(pinchScale - 1.0f) > Mathf.Epsilon)
+			{
+				_isPotentiallyPinching = true;
+				
 				pinchScale = Mathf.Pow(pinchScale, Sensitivity);
 
-				// Perform the translation if this is a relative scale
-				if (Relative == true)
+				_cumulativePinchScale *= pinchScale;
+
+				bool SurpassedThreshold() => _cumulativePinchScale >= PinchStartThresholdFactorUpper || _cumulativePinchScale <= PinchStartThresholdFactorLower;
+				if (_isPinching || SurpassedThreshold())
 				{
-					var pinchScreenCenter = LeanGesture.GetScreenCenter(fingers);
-
-					if (transform is RectTransform)
+					if (!_isPinching)
 					{
-						TranslateUI(pinchScale, pinchScreenCenter);
+						pinchScale *= _cumulativePinchScale / pinchScale;
+						_isPinching = true;
 					}
-					else
+					
+					// Perform the translation if this is a relative scale
+					if (Relative)
 					{
-						Translate(pinchScale, pinchScreenCenter);
+						Vector2 pinchScreenCenter = LeanGesture.GetScreenCenter(fingers);
+
+						if (transform is RectTransform)
+						{
+							TranslateUI(pinchScale, pinchScreenCenter);
+						}
+						else
+						{
+							Translate(pinchScale, pinchScreenCenter);
+						}
 					}
+
+					transform.localScale *= pinchScale;
+
+					if (Scale != null)
+					{
+						Scale.Invoke(pinchScale);
+					}
+
+					remainingScale += transform.localPosition - oldScale;
 				}
-
-				transform.localScale *= pinchScale;
-
-				if (Scale != null)
-                {
-					Scale.Invoke(transform.localScale.x);
-				}
-
-				remainingScale += transform.localPosition - oldScale;
 			}
 
 			// Get t value
-			var factor = LeanTouch.GetDampenFactor(Dampening, Time.deltaTime);
+			float factor = LeanTouch.GetDampenFactor(Dampening, Time.deltaTime);
 
 			// Dampen remainingDelta
-			var newRemainingScale = Vector3.Lerp(remainingScale, Vector3.zero, factor);
+			Vector3 newRemainingScale = Vector3.Lerp(remainingScale, Vector3.zero, factor);
 
 			// Shift this transform by the change in delta
 			transform.localPosition = oldScale + remainingScale - newRemainingScale;
@@ -124,11 +163,11 @@ namespace Lean.Touch
 
 		protected virtual void TranslateUI(float pinchScale, Vector2 pinchScreenCenter)
 		{
-			var camera = Camera;
+			Camera camera = Camera;
 
 			if (camera == null)
 			{
-				var canvas = transform.GetComponentInParent<Canvas>();
+				Canvas canvas = transform.GetComponentInParent<Canvas>();
 
 				if (canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay)
 				{
@@ -137,16 +176,16 @@ namespace Lean.Touch
 			}
 
 			// Screen position of the transform
-			var screenPoint = RectTransformUtility.WorldToScreenPoint(camera, transform.position);
+			Vector2 screenPoint = RectTransformUtility.WorldToScreenPoint(camera, transform.position);
 
 			// Push the screen position away from the reference point based on the scale
 			screenPoint.x = pinchScreenCenter.x + (screenPoint.x - pinchScreenCenter.x) * pinchScale;
 			screenPoint.y = pinchScreenCenter.y + (screenPoint.y - pinchScreenCenter.y) * pinchScale;
 
 			// Convert back to world space
-			var worldPoint = default(Vector3);
+			Vector3 worldPoint = default(Vector3);
 
-			if (RectTransformUtility.ScreenPointToWorldPointInRectangle(transform.parent as RectTransform, screenPoint, camera, out worldPoint) == true)
+			if (RectTransformUtility.ScreenPointToWorldPointInRectangle(transform.parent as RectTransform, screenPoint, camera, out worldPoint))
 			{
 				transform.position = worldPoint;
 			}
@@ -155,12 +194,12 @@ namespace Lean.Touch
 		protected virtual void Translate(float pinchScale, Vector2 screenCenter)
 		{
 			// Make sure the camera exists
-			var camera = LeanTouch.GetCamera(Camera, gameObject);
+			Camera camera = LeanTouch.GetCamera(Camera, gameObject);
 
 			if (camera != null)
 			{
 				// Screen position of the transform
-				var screenPosition = camera.WorldToScreenPoint(transform.position);
+				Vector3 screenPosition = camera.WorldToScreenPoint(transform.position);
 
 				// Push the screen position away from the reference point based on the scale
 				screenPosition.x = screenCenter.x + (screenPosition.x - screenCenter.x) * pinchScale;

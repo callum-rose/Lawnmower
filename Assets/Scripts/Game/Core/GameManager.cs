@@ -6,6 +6,7 @@ using UI.Dialogs;
 using Game.UndoSystem;
 using Sirenix.OdinInspector;
 using System;
+using BalsamicBits.Extensions;
 using Core.EventChannels;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -24,10 +25,16 @@ namespace Game.Core
 		[SerializeField, AssetsOnly] private LevelDataManager levelDataManager;
 		[SerializeField] private IUndoSystemContainer undoSystemContainer;
 		[SerializeField] private UndoController undoController;
+		[SerializeField] private GamePlayData gamePlayData;
 
 		[TitleGroup("Event Channels")] 
 		[SerializeField] private OpenDialogEventChannel openDialogEventChannel;
 		[SerializeField] private CloseDialogEventChannel closeDialogEventChannel;
+		[SerializeField] private IVoidEventChannelTransmitterContainer startPlayingEventChannel;
+		[SerializeField] private IVoidEventChannelTransmitterContainer stopPlayingEventChannel;
+
+		private IVoidEventChannelTransmitter StartPlayingEventChannel => startPlayingEventChannel.Result;
+		private IVoidEventChannelTransmitter StopPlayingEventChannel => stopPlayingEventChannel.Result;
 
 		private IUndoSystem UndoSystem => undoSystemContainer.Result;
 
@@ -76,6 +83,8 @@ namespace Game.Core
 
 			_levelDataRecorder = new LevelDataRecorder(UndoSystem);
 			_levelDataRecorder.StartRecording();
+
+			this.Timer(gamePlayData.LevelIntroDuration, StartPlayingEventChannel.Raise);
 		}
 
 		public void End()
@@ -87,6 +96,8 @@ namespace Game.Core
 			_inputData = null;
 
 			UndoSystem.Reset();
+			
+			StopPlayingEventChannel.Raise();
 		}
 
 		#endregion

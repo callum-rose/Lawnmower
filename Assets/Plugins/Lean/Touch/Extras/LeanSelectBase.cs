@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace Lean.Touch
 {
@@ -70,10 +72,10 @@ namespace Lean.Touch
 		public void SelectScreenPosition(LeanFinger finger, Vector2 screenPosition)
 		{
 			// Stores the component we hit, which depends on the SelectType (e.g. Collider, Collider2D, Transform)
-			var component = default(Component);
+			Component component = default(Component);
 
 			// Stores the point that was selected
-			var worldPosition = default(Vector3);
+			Vector3 worldPosition = default(Vector3);
 
 			TryGetComponent(SelectUsing, screenPosition, ref component, ref worldPosition);
 
@@ -99,16 +101,16 @@ namespace Lean.Touch
 				case SelectType.Raycast3D:
 				{
 					// Make sure the camera exists
-					var camera = LeanTouch.GetCamera(Camera, gameObject);
+					Camera camera = LeanTouch.GetCamera(Camera, gameObject);
 
 					if (camera != null)
 					{
-						var ray   = camera.ScreenPointToRay(screenPosition);
-						var count = Physics.RaycastNonAlloc(ray, raycastHits, float.PositiveInfinity, LayerMask);
+						Ray ray   = camera.ScreenPointToRay(screenPosition);
+						int count = Physics.RaycastNonAlloc(ray, raycastHits, float.PositiveInfinity, LayerMask);
 
 						if (count > 0)
 						{
-							var closestHit = raycastHits[GetClosestRaycastHitsIndex(count)];
+							RaycastHit closestHit = raycastHits[GetClosestRaycastHitsIndex(count)];
 
 							component     = closestHit.transform;
 							worldPosition = closestHit.point;
@@ -124,16 +126,16 @@ namespace Lean.Touch
 				case SelectType.Overlap2D:
 				{
 					// Make sure the camera exists
-					var camera = LeanTouch.GetCamera(Camera, gameObject);
+					Camera camera = LeanTouch.GetCamera(Camera, gameObject);
 
 					if (camera != null)
 					{
-						var ray   = camera.ScreenPointToRay(screenPosition);
-						var slope = -ray.direction.z;
+						Ray ray   = camera.ScreenPointToRay(screenPosition);
+						float slope = -ray.direction.z;
 
 						if (slope != 0.0f)
 						{
-							var point = ray.GetPoint(ray.origin.z / slope);
+							Vector3 point = ray.GetPoint(ray.origin.z / slope);
 
 							component = Physics2D.OverlapPoint(point, LayerMask);
 
@@ -152,11 +154,11 @@ namespace Lean.Touch
 
 				case SelectType.CanvasUI:
 				{
-					var results = LeanTouch.RaycastGui(screenPosition, LayerMask);
+					List<RaycastResult> results = LeanTouch.RaycastGui(screenPosition, LayerMask);
 
 					if (results != null && results.Count > 0)
 					{
-						var firstTransform = results[0].gameObject.transform;
+						Transform firstTransform = results[0].gameObject.transform;
 
 						component     = firstTransform;
 						worldPosition = firstTransform.position;
@@ -166,18 +168,18 @@ namespace Lean.Touch
 
 				case SelectType.ScreenDistance:
 				{
-					var bestDistance = MaxScreenDistance * LeanTouch.ScalingFactor;
+					float bestDistance = MaxScreenDistance * LeanTouch.ScalingFactor;
 
 					bestDistance *= bestDistance;
 
 					// Make sure the camera exists
-					var camera = LeanTouch.GetCamera(Camera, gameObject);
+					Camera camera = LeanTouch.GetCamera(Camera, gameObject);
 
 					if (camera != null)
 					{
-						foreach (var selectable in LeanSelectable.Instances)
+						foreach (LeanSelectable selectable in LeanSelectable.Instances)
 						{
-							var distance = Vector2.SqrMagnitude(GetScreenPoint(camera, selectable.transform) - screenPosition);
+							float distance = Vector2.SqrMagnitude(GetScreenPoint(camera, selectable.transform) - screenPosition);
 
 							if (distance <= bestDistance)
 							{
@@ -193,16 +195,16 @@ namespace Lean.Touch
 				case SelectType.Intersect2D:
 				{
 					// Make sure the camera exists
-					var camera = LeanTouch.GetCamera(Camera, gameObject);
+					Camera camera = LeanTouch.GetCamera(Camera, gameObject);
 
 					if (camera != null)
 					{
-						var ray   = camera.ScreenPointToRay(screenPosition);
-						var count = Physics2D.GetRayIntersectionNonAlloc(ray, raycastHit2Ds, float.PositiveInfinity, LayerMask);
+						Ray ray   = camera.ScreenPointToRay(screenPosition);
+						int count = Physics2D.GetRayIntersectionNonAlloc(ray, raycastHit2Ds, float.PositiveInfinity, LayerMask);
 
 						if (count > 0)
 						{
-							var firstHit = raycastHit2Ds[0];
+							RaycastHit2D firstHit = raycastHit2Ds[0];
 
 							component     = firstHit.transform;
 							worldPosition = firstHit.point;
@@ -219,12 +221,12 @@ namespace Lean.Touch
 
 		private static int GetClosestRaycastHitsIndex(int count)
 		{
-			var closestIndex    = -1;
-			var closestDistance = float.PositiveInfinity;
+			int closestIndex    = -1;
+			float closestDistance = float.PositiveInfinity;
 
-			for (var i = 0; i < count; i++)
+			for (int i = 0; i < count; i++)
 			{
-				var distance = raycastHits[i].distance;
+				float distance = raycastHits[i].distance;
 
 				if (distance < closestDistance)
 				{
@@ -240,7 +242,7 @@ namespace Lean.Touch
 		{
 			if (transform is RectTransform)
 			{
-				var canvas = transform.GetComponentInParent<Canvas>();
+				Canvas canvas = transform.GetComponentInParent<Canvas>();
 
 				if (canvas != null && canvas.renderMode == RenderMode.ScreenSpaceOverlay)
 				{

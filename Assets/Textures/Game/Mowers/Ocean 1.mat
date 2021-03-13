@@ -21,7 +21,7 @@ Material:
     m_TexEnvs: []
     m_Floats:
     - _AlphaCutoff: 0.5
-    - _Banding: 21
+    - _Banding: 15
     - _BoundarySoftness: 0.39
     - _Float0: 0
     - _Float1: 4.02

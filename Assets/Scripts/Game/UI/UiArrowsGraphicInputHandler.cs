@@ -15,6 +15,7 @@ namespace Game.UI
 	{
 		[SerializeField] private Camera camera;
 		[SerializeField] private UiArrowsManager raycaster;
+		[SerializeField] private RenderTexture renderTexture;
 
 		[TitleGroup("Colour")]
 		[SerializeField] private RawImage image;
@@ -56,6 +57,21 @@ namespace Game.UI
 			_initialScale = transform.localScale;
 
 			MowerInputEventChannelListener.EventRaised += MowerInputEventChannelOnEventRaised;
+		}
+
+		private void Start()
+		{
+			UpdateRenderTextureSize();
+		}
+
+		private void UpdateRenderTextureSize()
+		{
+			Matrix4x4 localToWorldMatrix = _rectTransform.localToWorldMatrix;
+			Vector2 bottomLeft = RectTransformUtility.WorldToScreenPoint(camera, localToWorldMatrix * _rectTransform.rect.min);
+			Vector2 topRight = RectTransformUtility.WorldToScreenPoint(camera, localToWorldMatrix * _rectTransform.rect.max);
+			Vector2 diff = topRight - bottomLeft;
+			renderTexture.width = (int) diff.x;
+			renderTexture.height = (int) diff.y;
 		}
 
 		private void OnEnable()
@@ -147,7 +163,7 @@ namespace Game.UI
 		private void SetBeingUsedAppearance(bool force = false)
 		{
 			bool lastLocalInputWasThisFrame = Time.frameCount == _lastInputFrame;
-			
+
 			if (!force && lastLocalInputWasThisFrame == _isBeingUsed)
 			{
 				return;

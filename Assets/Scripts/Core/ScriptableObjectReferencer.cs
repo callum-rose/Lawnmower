@@ -16,7 +16,6 @@ namespace Core
 #if UNITY_EDITOR
 
 		[MenuItem("Callum/Update Scriptable Objects Referencers")]
-		[InitializeOnLoadMethod]
 		public static void UpdateAll()
 		{
 			ScriptableObjectReferencer[] all = Resources

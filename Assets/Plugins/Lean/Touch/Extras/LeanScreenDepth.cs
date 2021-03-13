@@ -66,7 +66,7 @@ namespace Lean.Touch
         // This will do the actual conversion
         public Vector3 Convert(Vector2 screenPoint, GameObject gameObject = null, Transform ignore = null)
         {
-            var position = default(Vector3);
+            Vector3 position = default(Vector3);
 
             TryConvert(ref position, screenPoint, gameObject, ignore);
 
@@ -76,8 +76,8 @@ namespace Lean.Touch
         // This will return the delta between two converted screenPoints
         public Vector3 ConvertDelta(Vector2 lastScreenPoint, Vector2 screenPoint, GameObject gameObject = null, Transform ignore = null)
         {
-            var lastWorldPoint = Convert(lastScreenPoint, gameObject, ignore);
-            var worldPoint = Convert(screenPoint, gameObject, ignore);
+            Vector3 lastWorldPoint = Convert(lastScreenPoint, gameObject, ignore);
+            Vector3 worldPoint = Convert(screenPoint, gameObject, ignore);
 
             return worldPoint - lastWorldPoint;
         }
@@ -85,7 +85,7 @@ namespace Lean.Touch
         // This will do the actual conversion
         public bool TryConvert(ref Vector3 position, Vector2 screenPoint, GameObject gameObject = null, Transform ignore = null)
         {
-            var camera = LeanTouch.GetCamera(Camera, gameObject);
+            Camera camera = LeanTouch.GetCamera(Camera, gameObject);
 
             if (camera != null)
             {
@@ -93,7 +93,7 @@ namespace Lean.Touch
                 {
                     case ConversionType.FixedDistance:
                         {
-                            var screenPoint3 = new Vector3(screenPoint.x, screenPoint.y, Distance);
+                            Vector3 screenPoint3 = new Vector3(screenPoint.x, screenPoint.y, Distance);
 
                             position = camera.ScreenToWorldPoint(screenPoint3);
 
@@ -104,12 +104,12 @@ namespace Lean.Touch
 
                     case ConversionType.DepthIntercept:
                         {
-                            var ray = camera.ScreenPointToRay(screenPoint);
-                            var slope = -ray.direction.z;
+                            Ray ray = camera.ScreenPointToRay(screenPoint);
+                            float slope = -ray.direction.z;
 
                             if (slope != 0.0f)
                             {
-                                var scale = (ray.origin.z - Distance) / slope;
+                                float scale = (ray.origin.z - Distance) / slope;
 
                                 position = ray.GetPoint(scale);
 
@@ -122,15 +122,15 @@ namespace Lean.Touch
 
                     case ConversionType.PhysicsRaycast:
                         {
-                            var ray = camera.ScreenPointToRay(screenPoint);
-                            var hitCount = Physics.RaycastNonAlloc(ray, hits, float.PositiveInfinity, Layers);
-                            var bestPoint = default(Vector3);
-                            var bestDist = float.PositiveInfinity;
+                            Ray ray = camera.ScreenPointToRay(screenPoint);
+                            int hitCount = Physics.RaycastNonAlloc(ray, hits, float.PositiveInfinity, Layers);
+                            Vector3 bestPoint = default(Vector3);
+                            float bestDist = float.PositiveInfinity;
 
-                            for (var i = hitCount - 1; i >= 0; i--)
+                            for (int i = hitCount - 1; i >= 0; i--)
                             {
-                                var hit = hits[i];
-                                var hitDistance = hit.distance;
+                                RaycastHit hit = hits[i];
+                                float hitDistance = hit.distance;
 
                                 if (hitDistance < bestDist && IsChildOf(hit.transform, ignore) == false)
                                 {
@@ -152,14 +152,14 @@ namespace Lean.Touch
 
                     case ConversionType.PlaneIntercept:
                         {
-                            var plane = default(LeanPlane);
+                            LeanPlane plane = default(LeanPlane);
 
-                            if (Exists(gameObject, ref plane) == true)
+                            if (Exists(gameObject, ref plane))
                             {
-                                var ray = camera.ScreenPointToRay(screenPoint);
-                                var hit = default(Vector3);
+                                Ray ray = camera.ScreenPointToRay(screenPoint);
+                                Vector3 hit = default(Vector3);
 
-                                if (plane.TryRaycast(ray, ref hit, Distance) == true)
+                                if (plane.TryRaycast(ray, ref hit, Distance))
                                 {
                                     position = hit;
 
@@ -173,13 +173,13 @@ namespace Lean.Touch
 
                     case ConversionType.PathClosest:
                         {
-                            var path = default(LeanPath);
+                            LeanPath path = default(LeanPath);
 
-                            if (Exists(gameObject, ref path) == true)
+                            if (Exists(gameObject, ref path))
                             {
-                                var ray = camera.ScreenPointToRay(screenPoint);
+                                Ray ray = camera.ScreenPointToRay(screenPoint);
 
-                                if (path.TryGetClosest(ray, ref position, -1, Distance * Time.deltaTime) == true)
+                                if (path.TryGetClosest(ray, ref position, -1, Distance * Time.deltaTime))
                                 {
                                     LastWorldNormal = LeanPath.LastWorldNormal;
 
@@ -193,8 +193,8 @@ namespace Lean.Touch
                         {
                             if (gameObject != null)
                             {
-                                var depth = camera.WorldToScreenPoint(gameObject.transform.position).z;
-                                var screenPoint3 = new Vector3(screenPoint.x, screenPoint.y, depth + Distance);
+                                float depth = camera.WorldToScreenPoint(gameObject.transform.position).z;
+                                Vector3 screenPoint3 = new Vector3(screenPoint.x, screenPoint.y, depth + Distance);
 
                                 position = camera.ScreenToWorldPoint(screenPoint3);
 
@@ -207,12 +207,12 @@ namespace Lean.Touch
 
                     case ConversionType.HeightIntercept:
                         {
-                            var ray = camera.ScreenPointToRay(screenPoint);
-                            var slope = -ray.direction.y;
+                            Ray ray = camera.ScreenPointToRay(screenPoint);
+                            float slope = -ray.direction.y;
 
                             if (slope != 0.0f)
                             {
-                                var scale = (ray.origin.y - Distance) / slope;
+                                float scale = (ray.origin.y - Distance) / slope;
 
                                 position = ray.GetPoint(scale);
 
@@ -306,9 +306,9 @@ namespace Lean.Touch
     {
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
-            var conversion = (LeanScreenDepth.ConversionType)property.FindPropertyRelative("Conversion").enumValueIndex;
-            var height = base.GetPropertyHeight(property, label);
-            var step = height + 2;
+            LeanScreenDepth.ConversionType conversion = (LeanScreenDepth.ConversionType)property.FindPropertyRelative("Conversion").enumValueIndex;
+            float height = base.GetPropertyHeight(property, label);
+            float step = height + 2;
 
             switch (conversion)
             {
@@ -327,8 +327,8 @@ namespace Lean.Touch
 
         public override void OnGUI(Rect rect, SerializedProperty property, GUIContent label)
         {
-            var conversion = (LeanScreenDepth.ConversionType)property.FindPropertyRelative("Conversion").enumValueIndex;
-            var height = base.GetPropertyHeight(property, label);
+            LeanScreenDepth.ConversionType conversion = (LeanScreenDepth.ConversionType)property.FindPropertyRelative("Conversion").enumValueIndex;
+            float height = base.GetPropertyHeight(property, label);
 
             rect.height = height;
 
@@ -342,7 +342,7 @@ namespace Lean.Touch
                 {
                     case LeanScreenDepth.ConversionType.FixedDistance:
                         {
-                            var color = GUI.color; if (property.FindPropertyRelative("Distance").floatValue == 0.0f) GUI.color = Color.red;
+                            Color color = GUI.color; if (property.FindPropertyRelative("Distance").floatValue == 0.0f) GUI.color = Color.red;
                             DrawProperty(ref rect, property, label, "Distance", "Distance", "The world space distance from the camera the point will be placed. This should be greater than 0.");
                             GUI.color = color;
                         }
@@ -356,7 +356,7 @@ namespace Lean.Touch
 
                     case LeanScreenDepth.ConversionType.PhysicsRaycast:
                         {
-                            var color = GUI.color; if (property.FindPropertyRelative("Layers").intValue == 0) GUI.color = Color.red;
+                            Color color = GUI.color; if (property.FindPropertyRelative("Layers").intValue == 0) GUI.color = Color.red;
                             DrawProperty(ref rect, property, label, "Layers", "The layers used in the raycast.");
                             GUI.color = color;
                             DrawProperty(ref rect, property, label, "Distance", "Offset", "The world space offset from the raycast hit point.");
@@ -390,7 +390,7 @@ namespace Lean.Touch
                         break;
                     case LeanScreenDepth.ConversionType.Custom:
                         {
-                            var color = GUI.color;
+                            Color color = GUI.color;
 
                             DrawProperty(ref rect, property, label, "Distance", "Y =", "The world space point along the Y axis the plane will be placed. For normal top down scenes this should be 0.");
                         }
@@ -403,12 +403,12 @@ namespace Lean.Touch
         private void DrawObjectProperty<T>(ref Rect rect, SerializedProperty property, string title, string tooltip)
             where T : Object
         {
-            var propertyObject = property.FindPropertyRelative("Object");
-            var oldValue = propertyObject.objectReferenceValue as T;
+            SerializedProperty propertyObject = property.FindPropertyRelative("Object");
+            T oldValue = propertyObject.objectReferenceValue as T;
 
-            var color = GUI.color; if (oldValue == null) GUI.color = Color.red;
-            var mixed = EditorGUI.showMixedValue; EditorGUI.showMixedValue = propertyObject.hasMultipleDifferentValues;
-            var newValue = EditorGUI.ObjectField(rect, new GUIContent(title, tooltip), oldValue, typeof(T), true);
+            Color color = GUI.color; if (oldValue == null) GUI.color = Color.red;
+            bool mixed = EditorGUI.showMixedValue; EditorGUI.showMixedValue = propertyObject.hasMultipleDifferentValues;
+            Object newValue = EditorGUI.ObjectField(rect, new GUIContent(title, tooltip), oldValue, typeof(T), true);
             EditorGUI.showMixedValue = mixed;
             GUI.color = color;
 
@@ -422,7 +422,7 @@ namespace Lean.Touch
 
         private void DrawProperty(ref Rect rect, SerializedProperty property, GUIContent label, string childName, string overrideName = null, string overrideTooltip = null)
         {
-            var childProperty = property.FindPropertyRelative(childName);
+            SerializedProperty childProperty = property.FindPropertyRelative(childName);
 
             label.text = string.IsNullOrEmpty(overrideName) == false ? overrideName : childProperty.displayName;
 

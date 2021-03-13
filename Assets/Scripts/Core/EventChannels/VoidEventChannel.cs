@@ -1,10 +1,21 @@
+using System;
+using IUnified;
 using UnityEngine;
 
 namespace Core.EventChannels
 {
-	[CreateAssetMenu(fileName = nameof(VoidEventChannel), menuName = SONames.CoreDir + nameof(VoidEventChannel))]
-	public class VoidEventChannel : BaseEventChannel
+	[CreateAssetMenu(fileName = nameof(VoidEventChannel), menuName = SoNames.CoreDir + nameof(VoidEventChannel))]
+	public class VoidEventChannel : BaseEventChannel, IVoidEventChannelListener, IVoidEventChannelTransmitter
 	{
 		protected override bool ShouldBeSolo => false;
 	}
+	
+	public interface IVoidEventChannelListener : IEventChannelListener { }
+	public interface IVoidEventChannelTransmitter : IEventChannelTransmitter { }
+	
+	[Serializable]
+	public class IVoidEventChannelListenerContainer : IUnifiedContainer<IVoidEventChannelListener> { }	
+	
+	[Serializable]
+	public class IVoidEventChannelTransmitterContainer : IUnifiedContainer<IVoidEventChannelTransmitter> { }
 }

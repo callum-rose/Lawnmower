@@ -1,4 +1,3 @@
-using System.Linq;
 using UnityEngine;
 
 namespace Lean.Touch
@@ -45,12 +44,12 @@ namespace Lean.Touch
 
         protected void HandleFingerSwipe(LeanFinger finger)
         {
-            if (IgnoreStartedOverGui == true && finger.StartedOverGui == true)
+            if (IgnoreStartedOverGui && finger.StartedOverGui)
             {
                 return;
             }
 
-            if (IgnoreIsOverGui == true && finger.IsOverGui == true)
+            if (IgnoreIsOverGui && finger.IsOverGui)
             {
                 return;
             }

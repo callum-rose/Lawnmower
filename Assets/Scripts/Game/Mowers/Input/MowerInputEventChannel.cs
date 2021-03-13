@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Game.Mowers.Input
 {
-	[CreateAssetMenu(fileName = nameof(MowerInputEventChannel), menuName = SONames.GameDir + nameof(MowerInputEventChannel))]
+	[CreateAssetMenu(fileName = nameof(MowerInputEventChannel), menuName = SoNames.GameDir + nameof(MowerInputEventChannel))]
 	public class MowerInputEventChannel : BaseEventChannel<GridVector>, IMowerInputEventChannelListener, IMowerInputEventChannelTransmitter
 	{
 		public bool IsBlocked { get; set; }

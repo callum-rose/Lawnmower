@@ -134,6 +134,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4527269}
   - component: {fileID: 4527270}
+  - component: {fileID: 4527271}
   m_Layer: 0
   m_Name: CM BlendListCamera1
   m_TagString: Untagged
@@ -205,6 +206,26 @@ MonoBehaviour:
         m_PreInfinity: 2
         m_PostInfinity: 2
         m_RotationOrder: 4
+--- !u!114 &4527271
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4527268}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3a496462950b9f4ab8d9a3998adbe79, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gamePlayData: {fileID: 11400000, guid: 123151afb2fdd074f9d46e345d51c0f4, type: 2}
+  blendListCamera: {fileID: 4527270}
+  startPlayingEventChannel:
+    ObjectField: {fileID: 11400000, guid: 0753d5f32b98fc541b97209da7ce916f, type: 2}
+    ResultType: 
+  stopPlayingEventChannel:
+    ObjectField: {fileID: 11400000, guid: 0c0bdcfee7c27f44bb674cb0d325eb33, type: 2}
+    ResultType: 
 --- !u!1 &12490846
 GameObject:
   m_ObjectHideFlags: 0
@@ -442,11 +463,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 66872175}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 70d45639f76ea6c4e9b407b781b29835, type: 3}
+  m_Script: {fileID: 11500000, guid: 271631cf3e6140b291ac7b968d30aee8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gameCamera: {fileID: 964599404}
-  defaultCameraOrthoSize: 5
+  dummyMower: {fileID: 433243511}
+  targetGroupTransform: {fileID: 1945353390}
+  maxSnapRotationAnimDuration: 1
+  framesToWaitBeforeSnapping: 2
 --- !u!114 &66872178
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -456,35 +479,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 66872175}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7c73c1ab94e28d244827af556dca1ed2, type: 3}
+  m_Script: {fileID: 11500000, guid: 1c060ebe82bc4844ba75d9ae58b24f40, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Use:
-    Filter: 0
-    IgnoreStartedOverGui: 1
-    RequiredFingerCount: 2
-    RequiredMouseButtons: 0
-    RequiredSelectable: {fileID: 0}
-  Camera: {fileID: 0}
-  Relative: 0
-  Sensitivity: 1
-  Dampening: -1
-  Scale:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 66872177}
-        m_TargetAssemblyTypeName: Game.Camera.TouchPinchHandler, Assembly-CSharp
-        m_MethodName: OnPinch
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-  remainingScale: {x: 0, y: 0, z: 0}
+  camera: {fileID: 2059453229}
+  minFov: 7
+  maxFov: 10
+  speedFactor: 0.5
+  invertDirection: 1
 --- !u!1 &83278714
 GameObject:
   m_ObjectHideFlags: 0
@@ -1540,6 +1542,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   camera: {fileID: 255483896}
   raycaster: {fileID: 1529931566}
+  renderTexture: {fileID: 8400000, guid: 2c527a97f357f4d41aa8977bb9167adf, type: 2}
   image: {fileID: 387251411}
   beingUsedColour: {r: 1, g: 1, b: 1, a: 0.7490196}
   notBeingUsedColour: {r: 1, g: 1, b: 1, a: 0.2509804}
@@ -1749,8 +1752,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 433243511}
+  - component: {fileID: 433243512}
   m_Layer: 0
-  m_Name: Dummy
+  m_Name: DummyMower
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1768,8 +1772,24 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 753614663}
-  m_RootOrder: 4
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &433243512
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 433243510}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eccce27c7e2d48a7b38288528b4f1846, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dummyMower: {fileID: 433243511}
+  mowerObjectMovedEventChannel:
+    ObjectField: {fileID: 11400000, guid: ea3df77c7ddc40947afc66b8918e7953, type: 2}
+    ResultType: 
 --- !u!1 &457597533
 GameObject:
   m_ObjectHideFlags: 0
@@ -6624,6 +6644,7 @@ GameObject:
   - component: {fileID: 534669906}
   - component: {fileID: 534669907}
   - component: {fileID: 534669908}
+  - component: {fileID: 534669909}
   m_Layer: 0
   m_Name: GameCamera
   m_TagString: MainCamera
@@ -6689,8 +6710,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 534669902}
-  m_LocalRotation: {x: 0.50351477, y: 0.16235343, z: -0.09696765, w: 0.8430371}
-  m_LocalPosition: {x: -0.17609406, y: 0.8804474, z: -0.44023132}
+  m_LocalRotation: {x: 0.50351614, y: 0.16235387, z: -0.09696831, w: 0.8430362}
+  m_LocalPosition: {x: -20, y: 100, z: -50}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 753614663}
@@ -6780,6 +6801,22 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967295
   m_MaxRayIntersections: 0
+--- !u!114 &534669909
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 534669902}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70c080398a3345f48ad72308eb5c1d14, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  camera: {fileID: 534669904}
+  graphicsSettingEventChannel:
+    ObjectField: {fileID: 11400000, guid: 345e62d23c1eb6a4e84b7bcc075413e3, type: 2}
+    ResultType: 
 --- !u!1 &553937440
 GameObject:
   m_ObjectHideFlags: 0
@@ -6832,10 +6869,17 @@ MonoBehaviour:
     ObjectField: {fileID: 165245712}
     ResultType: 
   undoController: {fileID: 165245711}
+  gamePlayData: {fileID: 11400000, guid: 123151afb2fdd074f9d46e345d51c0f4, type: 2}
   openDialogEventChannel: {fileID: 11400000, guid: 0611004ef216acb40ae7cf58c8128b48,
     type: 2}
   closeDialogEventChannel: {fileID: 11400000, guid: f34ff3e23ec36c247b8992dc19da2023,
     type: 2}
+  startPlayingEventChannel:
+    ObjectField: {fileID: 11400000, guid: 0753d5f32b98fc541b97209da7ce916f, type: 2}
+    ResultType: 
+  stopPlayingEventChannel:
+    ObjectField: {fileID: 11400000, guid: 0c0bdcfee7c27f44bb674cb0d325eb33, type: 2}
+    ResultType: 
 --- !u!1001 &581798740
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7383,8 +7427,8 @@ Transform:
   - {fileID: 534669905}
   - {fileID: 66872176}
   - {fileID: 4527269}
-  - {fileID: 1945353390}
   - {fileID: 433243511}
+  - {fileID: 1945353390}
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -7416,7 +7460,7 @@ Transform:
   m_GameObject: {fileID: 816126236}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: -0.5, z: 0}
-  m_LocalScale: {x: 0.8, y: 0.8, z: 0.8}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 2014382488}
   m_RootOrder: 3
@@ -7499,7 +7543,7 @@ GameObject:
   - component: {fileID: 860175881}
   - component: {fileID: 860175882}
   m_Layer: 0
-  m_Name: CM vcam1
+  m_Name: Intro Cam
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7512,7 +7556,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 860175880}
-  m_LocalRotation: {x: 0.50351477, y: 0.16235343, z: -0.09696765, w: 0.8430371}
+  m_LocalRotation: {x: 0.50351614, y: 0.16235387, z: -0.09696831, w: 0.8430362}
   m_LocalPosition: {x: -20, y: 100, z: -50}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -7954,7 +7998,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 964599403}
-  m_LocalRotation: {x: 0.50351477, y: 0.16235344, z: -0.09696767, w: 0.8430371}
+  m_LocalRotation: {x: 0.50351614, y: 0.16235389, z: -0.09696831, w: 0.8430362}
   m_LocalPosition: {x: -22.715218, y: 103.36459, z: -58.376045}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -8299,11 +8343,14 @@ GameObject:
   - component: {fileID: 1028350307}
   - component: {fileID: 1028350303}
   - component: {fileID: 1028350305}
-  - component: {fileID: 1028350309}
   - component: {fileID: 1028350304}
+  - component: {fileID: 1028350309}
   - component: {fileID: 1028350308}
+  - component: {fileID: 1028350311}
+  - component: {fileID: 1028350310}
+  - component: {fileID: 1028350306}
   m_Layer: 0
-  m_Name: TouchInput
+  m_Name: Input
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8379,9 +8426,9 @@ MonoBehaviour:
   onFinger:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1028350304}
-        m_TargetAssemblyTypeName: Game.Mowers.Input.TouchSwipeHandler, Assembly-CSharp
-        m_MethodName: OnFingerMove
+      - m_Target: {fileID: 1028350306}
+        m_TargetAssemblyTypeName: Game.Core.GestureHandler, Scripts
+        m_MethodName: OnSwipe
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -8425,6 +8472,79 @@ MonoBehaviour:
   RequiredSelectable: {fileID: 0}
   swipeMinStraightnessThreshold: 0.8
   snapShotSkips: 2
+--- !u!114 &1028350306
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1028350301}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a87d6988b15056b4dbd401c8e47cff71, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cancelCurrentAfterFrames: 2
+  pinchEvent:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 66872178}
+        m_TargetAssemblyTypeName: Game.Cameras.ZoomHandler, Scripts
+        m_MethodName: OnPinchGesture
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  twistEvent:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 66872177}
+        m_TargetAssemblyTypeName: Game.Cameras.RotationHandler, Scripts
+        m_MethodName: OnTwistGesture
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  swipeEvent:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1028350304}
+        m_TargetAssemblyTypeName: Game.Mowers.Input.TouchSwipeHandler, Scripts
+        m_MethodName: OnFingerMove
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  tapEvent:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1028350308}
+        m_TargetAssemblyTypeName: Game.Mowers.Input.TouchTapHandler, Scripts
+        m_MethodName: OnFingerMove
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1028350307
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8474,9 +8594,9 @@ MonoBehaviour:
   onFinger:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1028350308}
-        m_TargetAssemblyTypeName: Game.Mowers.Input.TouchTapHandler, Assembly-CSharp
-        m_MethodName: OnFingerMove
+      - m_Target: {fileID: 1028350306}
+        m_TargetAssemblyTypeName: Game.Core.GestureHandler, Scripts
+        m_MethodName: OnTap
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -8500,6 +8620,85 @@ MonoBehaviour:
   onWorld:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &1028350310
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1028350301}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52d72cc6210cb7144a24acb7402222a6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Use:
+    Filter: 0
+    IgnoreStartedOverGui: 0
+    RequiredFingerCount: 2
+    RequiredMouseButtons: 0
+    RequiredSelectable: {fileID: 0}
+  Camera: {fileID: 0}
+  Relative: 1
+  Dampening: -1
+  mode: 1
+  rotationEvent:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1028350306}
+        m_TargetAssemblyTypeName: Game.Core.GestureHandler, Scripts
+        m_MethodName: OnTwist
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  twistStartThresholdDegrees: 8
+  remainingTranslation: {x: 0, y: 0, z: 0}
+  remainingRotation: {x: 0, y: 0, z: 0, w: 1}
+--- !u!114 &1028350311
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1028350301}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c73c1ab94e28d244827af556dca1ed2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Use:
+    Filter: 0
+    IgnoreStartedOverGui: 0
+    RequiredFingerCount: 2
+    RequiredMouseButtons: 0
+    RequiredSelectable: {fileID: 0}
+  Camera: {fileID: 0}
+  Relative: 0
+  Sensitivity: 1
+  Dampening: -1
+  Scale:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1028350306}
+        m_TargetAssemblyTypeName: Game.Core.GestureHandler, Scripts
+        m_MethodName: OnPinch
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  pinchStartThresholdFactor: 1.1
+  remainingScale: {x: 0, y: 0, z: 0}
 --- !u!1 &1064352648
 GameObject:
   m_ObjectHideFlags: 3
@@ -8577,14 +8776,14 @@ MonoBehaviour:
   m_ScreenY: 0.5
   m_DeadZoneWidth: 0
   m_DeadZoneHeight: 0
-  m_SoftZoneWidth: 0.8
-  m_SoftZoneHeight: 0.8
+  m_SoftZoneWidth: 0
+  m_SoftZoneHeight: 0
   m_BiasX: 0
   m_BiasY: 0
   m_CenterOnActivate: 1
   m_GroupFramingSize: 0.9
   m_FramingMode: 2
-  m_FrameDamping: 5
+  m_FrameDamping: 15
   m_AdjustmentMode: 1
   m_MaxDollyIn: 5000
   m_MaxDollyOut: 5000
@@ -9873,14 +10072,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fa7155796051b734daa718462081dc5f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_BindingMode: 4
+  m_BindingMode: 1
   m_FollowOffset: {x: -20, y: 50, z: -50}
-  m_XDamping: 0
-  m_YDamping: 0
-  m_ZDamping: 0
+  m_XDamping: 1
+  m_YDamping: 1
+  m_ZDamping: 1
   m_AngularDampingMode: 0
   m_PitchDamping: 0
-  m_YawDamping: 0
+  m_YawDamping: 1
   m_RollDamping: 0
   m_AngularDamping: 0
 --- !u!114 &1812139363
@@ -9892,9 +10091,24 @@ MonoBehaviour:
   m_GameObject: {fileID: 1812139360}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e8b78ac948f05a46a6d8339a503172b, type: 3}
+  m_Script: {fileID: 11500000, guid: f4044717213e31446939f7bd49c896ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_TrackedObjectOffset: {x: 0, y: 1, z: 0}
+  m_LookaheadTime: 0
+  m_LookaheadSmoothing: 0
+  m_LookaheadIgnoreY: 0
+  m_HorizontalDamping: 0.5
+  m_VerticalDamping: 0.5
+  m_ScreenX: 0.5
+  m_ScreenY: 0.5
+  m_DeadZoneWidth: 0
+  m_DeadZoneHeight: 0
+  m_SoftZoneWidth: 0
+  m_SoftZoneHeight: 0
+  m_BiasX: 0
+  m_BiasY: 0
+  m_CenterOnActivate: 1
 --- !u!114 &1812139364
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -10018,10 +10232,7 @@ MonoBehaviour:
   m_PositionMode: 0
   m_RotationMode: 0
   m_UpdateMethod: 2
-  m_Targets:
-  - target: {fileID: 433243511}
-    weight: 0
-    radius: 0
+  m_Targets: []
 --- !u!4 &1945353390
 Transform:
   m_ObjectHideFlags: 0
@@ -10034,7 +10245,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 753614663}
-  m_RootOrder: 3
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1957743164
 GameObject:
@@ -10431,7 +10642,7 @@ MonoBehaviour:
     ResultType: 
   autoBuild: 1
   mowerData: {fileID: 11400000, guid: 4de52aaac6464994e8d6eff9736edfe2, type: 2}
-  levelAsset: {fileID: 11400000, guid: f7f236141454ffb41b1bdae46560bc7b, type: 2}
+  levelAsset: {fileID: 11400000, guid: 335784b4cd9bd24488aa81a35771e2c7, type: 2}
   levelSaver: {fileID: 11400000, guid: 7345bf63fe99b6549ae1f2c8bc065de9, type: 2}
 --- !u!1 &2014382484
 GameObject:
@@ -10538,7 +10749,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2059453227}
-  m_LocalRotation: {x: 0.3588993, y: 0.17602387, z: -0.06911769, w: 0.91401845}
+  m_LocalRotation: {x: 0.35429475, y: 0.17636947, z: -0.06823092, w: 0.9158131}
   m_LocalPosition: {x: -22.715218, y: 53.364597, z: -58.376045}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:

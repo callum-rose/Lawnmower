@@ -1,4 +1,8 @@
+using System.Collections.Generic;
+using Sirenix.OdinInspector;
+using Sirenix.Utilities;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace Lean.Touch
 {
@@ -7,6 +11,12 @@ namespace Lean.Touch
 	[AddComponentMenu(LeanTouch.ComponentPathPrefix + "Twist Rotate")]
 	public class LeanTwistRotate : MonoBehaviour
 	{
+		public enum Mode
+		{
+			Normal,
+			Transmitter
+		}
+
 		/// <summary>The method used to find fingers to use with this component. See LeanFingerFilter documentation for more information.</summary>
 		public LeanFingerFilter Use = new LeanFingerFilter(true);
 
@@ -23,9 +33,26 @@ namespace Lean.Touch
 		/// -1 = Instantly change.
 		/// 1 = Slowly change.
 		/// 10 = Quickly change.</summary>
-		[Tooltip("If you want this component to change smoothly over time, then this allows you to control how quick the changes reach their target value.\n\n-1 = Instantly change.\n\n1 = Slowly change.\n\n10 = Quickly change.")]
+		[Tooltip(
+			"If you want this component to change smoothly over time, then this allows you to control how quick the changes reach their target value.\n\n-1 = Instantly change.\n\n1 = Slowly change.\n\n10 = Quickly change.")]
 		public float Dampening = -1.0f;
 
+		[TitleGroup("Custom Stuff")]
+		[SerializeField] private Mode mode;
+
+		[SerializeField] private UnityEvent<float> rotationEvent;
+
+		[SerializeField, Min(0)] private float twistStartThresholdDegrees;
+
+		[ShowInInspector, Sirenix.OdinInspector.ReadOnly]
+		private bool _isPotentiallyTwisting;
+
+		[ShowInInspector, Sirenix.OdinInspector.ReadOnly]
+		private bool _isTwisting;
+
+		[ShowInInspector, Sirenix.OdinInspector.ReadOnly]
+		private float _cumulativeTwistDegrees;
+		
 		[HideInInspector]
 		[SerializeField]
 		private Vector3 remainingTranslation;
@@ -67,72 +94,101 @@ namespace Lean.Touch
 		protected virtual void Update()
 		{
 			// Store
-			var oldPosition = transform.localPosition;
-			var oldRotation = transform.localRotation;
+			Vector3 oldPosition = transform.localPosition;
+			Quaternion oldRotation = transform.localRotation;
 
 			// Get the fingers we want to use
-			var fingers = Use.GetFingers();
+			List<LeanFinger> fingers = Use.GetFingers();
+
+			if (fingers.IsNullOrEmpty())
+			{
+				_isPotentiallyTwisting = false;
+				_isTwisting = false;
+				_cumulativeTwistDegrees = 0;
+			}
 
 			// Calculate the rotation values based on these fingers
-			var twistDegrees = LeanGesture.GetTwistDegrees(fingers);
+			float twistDegrees = LeanGesture.GetTwistDegrees(fingers);
 
-			if (twistDegrees != 0.0f)
+			if (twistDegrees != 0f || _isPotentiallyTwisting)
 			{
-				if (Relative == true)
-				{
-					var twistScreenCenter = LeanGesture.GetScreenCenter(fingers);
+				_isPotentiallyTwisting = true;
+				_cumulativeTwistDegrees += twistDegrees;
 
-					if (transform is RectTransform)
-					{
-						TranslateUI(twistDegrees, twistScreenCenter);
-						RotateUI(twistDegrees);
-					}
-					else
-					{
-						Translate(twistDegrees, twistScreenCenter);
-						Rotate(twistDegrees);
-					}
-				}
-				else
+				if (_isTwisting || Mathf.Abs(_cumulativeTwistDegrees) > twistStartThresholdDegrees)
 				{
-					if (transform is RectTransform)
+					if (!_isTwisting)
 					{
-						RotateUI(twistDegrees);
+						twistDegrees += _cumulativeTwistDegrees - twistDegrees;
+						_isTwisting = true;
+					}
+
+					if (mode == Mode.Normal)
+					{
+						if (Relative)
+						{
+							Vector2 twistScreenCenter = LeanGesture.GetScreenCenter(fingers);
+
+							if (transform is RectTransform)
+							{
+								TranslateUI(twistDegrees, twistScreenCenter);
+								RotateUI(twistDegrees);
+							}
+							else
+							{
+								Translate(twistDegrees, twistScreenCenter);
+								Rotate(twistDegrees);
+							}
+						}
+						else
+						{
+							if (transform is RectTransform)
+							{
+								RotateUI(twistDegrees);
+							}
+							else
+							{
+								Rotate(twistDegrees);
+							}
+						}
 					}
 					else
 					{
-						Rotate(twistDegrees);
+						rotationEvent.Invoke(twistDegrees);
 					}
 				}
 			}
 
-			// Increment
-			remainingTranslation += transform.localPosition - oldPosition;
-			remainingRotation    *= Quaternion.Inverse(oldRotation) * transform.localRotation;
+			if (mode == Mode.Normal)
+			{
+				// Increment
+				remainingTranslation += transform.localPosition - oldPosition;
+				remainingRotation *= Quaternion.Inverse(oldRotation) * transform.localRotation;
 
-			// Get t value
-			var factor = LeanTouch.GetDampenFactor(Dampening, Time.deltaTime);
+				// Get t value
+				float factor = LeanTouch.GetDampenFactor(Dampening, Time.deltaTime);
 
-			// Dampen remainingDelta
-			var newRemainingTranslation = Vector3.Lerp(remainingTranslation, Vector3.zero, factor);
-			var newRemainingRotation    = Quaternion.Slerp(remainingRotation, Quaternion.identity, factor);
+				// Dampen remainingDelta
+				Vector3 newRemainingTranslation = Vector3.Lerp(remainingTranslation, Vector3.zero, factor);
+				Quaternion newRemainingRotation = Quaternion.Slerp(remainingRotation, Quaternion.identity, factor);
 
-			// Shift this transform by the change in delta
-			transform.localPosition = oldPosition + remainingTranslation - newRemainingTranslation;
-			transform.localRotation = oldRotation * Quaternion.Inverse(newRemainingRotation) * remainingRotation;
+				// Shift this transform by the change in delta
+				transform.localPosition = oldPosition + remainingTranslation - newRemainingTranslation;
+				transform.localRotation = oldRotation * Quaternion.Inverse(newRemainingRotation) * remainingRotation;
 
-			// Update remainingDelta with the dampened value
-			remainingTranslation = newRemainingTranslation;
-			remainingRotation    = newRemainingRotation;
+				// Update remainingDelta with the dampened value
+				remainingTranslation = newRemainingTranslation;
+				remainingRotation = newRemainingRotation;
+			}
 		}
 
 		protected virtual void TranslateUI(float twistDegrees, Vector2 twistScreenCenter)
 		{
-			var camera = Camera;
+			Camera camera = Camera;
 
 			if (camera == null)
 			{
-				var canvas = transform.GetComponentInParent<Canvas>();
+				Canvas canvas = transform.GetComponentInParent<Canvas>();
 
 				if (canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay)
 				{
@@ -141,19 +197,20 @@ namespace Lean.Touch
 			}
 
 			// Screen position of the transform
-			var screenPoint = RectTransformUtility.WorldToScreenPoint(camera, transform.position);
+			Vector2 screenPoint = RectTransformUtility.WorldToScreenPoint(camera, transform.position);
 
 			// Twist screen point around the twistScreenCenter by twistDegrees
-			var twistRotation = Quaternion.Euler(0.0f, 0.0f, twistDegrees);
-			var screenDelta   = twistRotation * (screenPoint - twistScreenCenter);
+			Quaternion twistRotation = Quaternion.Euler(0.0f, 0.0f, twistDegrees);
+			Vector3 screenDelta = twistRotation * (screenPoint - twistScreenCenter);
 
 			screenPoint.x = twistScreenCenter.x + screenDelta.x;
 			screenPoint.y = twistScreenCenter.y + screenDelta.y;
 
 			// Convert back to world space
-			var worldPoint = default(Vector3);
+			Vector3 worldPoint = default(Vector3);
 
-			if (RectTransformUtility.ScreenPointToWorldPointInRectangle(transform.parent as RectTransform, screenPoint, camera, out worldPoint) == true)
+			if (RectTransformUtility.ScreenPointToWorldPointInRectangle(transform.parent as RectTransform, screenPoint,
+				camera, out worldPoint))
 			{
 				transform.position = worldPoint;
 			}
@@ -162,16 +219,16 @@ namespace Lean.Touch
 		protected virtual void Translate(float twistDegrees, Vector2 twistScreenCenter)
 		{
 			// Make sure the camera exists
-			var camera = LeanTouch.GetCamera(Camera, gameObject);
+			Camera camera = LeanTouch.GetCamera(Camera, gameObject);
 
 			if (camera != null)
 			{
 				// Screen position of the transform
-				var screenPoint = camera.WorldToScreenPoint(transform.position);
+				Vector3 screenPoint = camera.WorldToScreenPoint(transform.position);
 
 				// Twist screen point around the twistScreenCenter by twistDegrees
-				var twistRotation = Quaternion.Euler(0.0f, 0.0f, twistDegrees);
-				var screenDelta   = twistRotation * ((Vector2)screenPoint - twistScreenCenter);
+				Quaternion twistRotation = Quaternion.Euler(0.0f, 0.0f, twistDegrees);
+				Vector3 screenDelta = twistRotation * ((Vector2) screenPoint - twistScreenCenter);
 
 				screenPoint.x = twistScreenCenter.x + screenDelta.x;
 				screenPoint.y = twistScreenCenter.y + screenDelta.y;
@@ -181,7 +238,8 @@ namespace Lean.Touch
 			}
 			else
 			{
-				Debug.LogError("Failed to find camera. Either tag your cameras MainCamera, or set one in this component.", this);
+				Debug.LogError(
+					"Failed to find camera. Either tag your cameras MainCamera, or set one in this component.", this);
 			}
 		}
 
@@ -193,17 +251,18 @@ namespace Lean.Touch
 		protected virtual void Rotate(float twistDegrees)
 		{
 			// Make sure the camera exists
-			var camera = LeanTouch.GetCamera(Camera, gameObject);
+			Camera camera = LeanTouch.GetCamera(Camera, gameObject);
 
 			if (camera != null)
 			{
-				var axis = transform.InverseTransformDirection(camera.transform.forward);
+				Vector3 axis = transform.InverseTransformDirection(camera.transform.forward);
 
 				transform.rotation *= Quaternion.AngleAxis(twistDegrees, axis);
 			}
 			else
 			{
-				Debug.LogError("Failed to find camera. Either tag your cameras MainCamera, or set one in this component.", this);
+				Debug.LogError(
+					"Failed to find camera. Either tag your cameras MainCamera, or set one in this component.", this);
 			}
 		}
 	}

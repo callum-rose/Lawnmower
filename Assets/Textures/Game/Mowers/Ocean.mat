@@ -10,7 +10,7 @@ Material:
   m_Name: Ocean
   m_Shader: {fileID: 4800000, guid: 2fc9c69e369387544b81891480252f02, type: 3}
   m_ShaderKeywords: _GRAPHICSSETTINGSS_GRAPHICSLOW _GRAPHICSSETTINGSS_HIGH _GRAPHICSSETTINGS_GRAPHICSHIGH
-    _GRAPHICSSETTINGS_HIGH _INTERSECTIONFOAM_GRAPHICSLOW
+    _GRAPHICSSETTINGS_LOW _INTERSECTIONFOAM_GRAPHICSLOW
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -22,11 +22,11 @@ Material:
     m_TexEnvs: []
     m_Floats:
     - _AlphaCutoff: 0.5
-    - _Banding: 9
+    - _Banding: 8
     - _BoundarySoftness: 0.39
     - _Float0: 0
-    - _Float1: 4.02
-    - _GraphicsSettings: 1
+    - _Float1: 10
+    - _GraphicsSettings: 0
     - _GraphicsSettingss: 1
     - _IntersectionFoam: 0
     - _IntersectionNoiseAmplitude: 0.03
@@ -39,7 +39,7 @@ Material:
     - _TessPhongStrength: 0.5
     - _TessValue: 16
     - _TimeScale: 0.12
-    - _WaveSpeed: 0
+    - _WaveSpeed: 0.2
     m_Colors:
     - _CloseColour: {r: 0.1568628, g: 0.4901961, b: 0.4901961, a: 1}
     - _EmissionColor: {r: 1, g: 1, b: 1, a: 1}

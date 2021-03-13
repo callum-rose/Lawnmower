@@ -6,7 +6,7 @@ using UnityEngine.Serialization;
 
 namespace Game.Mowers
 {
-	[CreateAssetMenu(fileName = nameof(CurrentMowerManager), menuName = SONames.GameDir + nameof(CurrentMowerManager))]
+	[CreateAssetMenu(fileName = nameof(CurrentMowerManager), menuName = SoNames.GameDir + nameof(CurrentMowerManager))]
 	public class CurrentMowerManager : ScriptableObject
 	{
 		[FormerlySerializedAs("mowerDataHolder")] [SerializeField]

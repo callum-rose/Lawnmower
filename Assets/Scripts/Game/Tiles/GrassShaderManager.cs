@@ -7,7 +7,7 @@ using ReadOnly = Sirenix.OdinInspector.ReadOnlyAttribute;
 namespace Game.Tiles
 {
 	[UnreferencedScriptableObject]
-	[CreateAssetMenu(fileName = nameof(GrassShaderManager), menuName = SONames.GameDir + nameof(GrassShaderManager))]
+	[CreateAssetMenu(fileName = nameof(GrassShaderManager), menuName = SoNames.GameDir + nameof(GrassShaderManager))]
 	internal class GrassShaderManager : ScriptableObject
 	{
 		[TitleGroup("Wind")]

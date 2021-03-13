@@ -7,7 +7,7 @@ using UnityEngine;
 namespace Game.Levels
 {
 	[CreateAssetMenu(fileName = nameof(EditModeLevelTraversalChecker),
-		menuName = SONames.GameDir + nameof(EditModeLevelTraversalChecker))]
+		menuName = SoNames.GameDir + nameof(EditModeLevelTraversalChecker))]
 	internal class EditModeLevelTraversalChecker : ScriptableObject, ILevelTraversalChecker, IHasEditMode
 	{
 		[SerializeField] private LevelTraversalChecker standardTraversalChecker;

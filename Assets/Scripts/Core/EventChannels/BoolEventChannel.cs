@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Core.EventChannels
 {
-	[CreateAssetMenu(fileName = nameof(BoolEventChannel), menuName = SONames.CoreDir + nameof(BoolEventChannel))]
+	[CreateAssetMenu(fileName = nameof(BoolEventChannel), menuName = SoNames.CoreDir + nameof(BoolEventChannel))]
 	public class BoolEventChannel : BaseEventChannel<bool>, IBoolEventChannelListener, IBoolEventChannelTransmitter
 	{
 		protected override bool ShouldBeSolo => true;

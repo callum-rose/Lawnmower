@@ -10,7 +10,7 @@ using Random = UnityEngine.Random;
 namespace Game.Tiles
 {
 	[CreateAssetMenu(fileName = nameof(GrassMaterialDataHolder),
-		menuName = SONames.GameDir + nameof(GrassMaterialDataHolder))]
+		menuName = SoNames.GameDir + nameof(GrassMaterialDataHolder))]
 	internal class GrassMaterialDataHolder : SerializedScriptableObject
 	{
 		[SerializeField] private SerialisedDictionary<int, Material> grassMaterials;

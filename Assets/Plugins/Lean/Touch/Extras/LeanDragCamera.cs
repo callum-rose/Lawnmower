@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Lean.Touch
@@ -39,12 +40,12 @@ namespace Lean.Touch
 		[ContextMenu("Move To Selection")]
 		public virtual void MoveToSelection()
 		{
-			var center = default(Vector3);
-			var count  = 0;
+			Vector3 center = default(Vector3);
+			int count  = 0;
 
-			foreach (var selectable in LeanSelectable.Instances)
+			foreach (LeanSelectable selectable in LeanSelectable.Instances)
 			{
-				if (selectable.IsSelected == true)
+				if (selectable.IsSelected)
 				{
 					center += selectable.transform.position;
 					count  += 1;
@@ -53,7 +54,7 @@ namespace Lean.Touch
 
 			if (count > 0)
 			{
-				var oldPosition = transform.localPosition;
+				Vector3 oldPosition = transform.localPosition;
 
 				transform.position = center / count;
 
@@ -96,17 +97,17 @@ namespace Lean.Touch
 		protected virtual void LateUpdate()
 		{
 			// Get the fingers we want to use
-			var fingers = Use.GetFingers();
+			List<LeanFinger> fingers = Use.GetFingers();
 
 			// Get the last and current screen point of all fingers
-			var lastScreenPoint = LeanGesture.GetLastScreenCenter(fingers);
-			var screenPoint     = LeanGesture.GetScreenCenter(fingers);
+			Vector2 lastScreenPoint = LeanGesture.GetLastScreenCenter(fingers);
+			Vector2 screenPoint     = LeanGesture.GetScreenCenter(fingers);
 
 			// Get the world delta of them after conversion
-			var worldDelta = ScreenDepth.ConvertDelta(lastScreenPoint, screenPoint, gameObject);
+			Vector3 worldDelta = ScreenDepth.ConvertDelta(lastScreenPoint, screenPoint, gameObject);
 
 			// Store the current position
-			var oldPosition = transform.localPosition;
+			Vector3 oldPosition = transform.localPosition;
 
 			// Pan the camera based on the world delta
 			transform.position -= worldDelta * Sensitivity;
@@ -115,10 +116,10 @@ namespace Lean.Touch
 			remainingDelta += transform.localPosition - oldPosition;
 
 			// Get t value
-			var factor = LeanTouch.GetDampenFactor(Dampening, Time.deltaTime);
+			float factor = LeanTouch.GetDampenFactor(Dampening, Time.deltaTime);
 
 			// Dampen remainingDelta
-			var newRemainingDelta = Vector3.Lerp(remainingDelta, Vector3.zero, factor);
+			Vector3 newRemainingDelta = Vector3.Lerp(remainingDelta, Vector3.zero, factor);
 
 			// Shift this position by the change in delta
 			transform.localPosition = oldPosition + remainingDelta - newRemainingDelta;

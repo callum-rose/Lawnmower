@@ -7,7 +7,7 @@ using Core;
 
 namespace Game.Mowers
 {
-	[CreateAssetMenu(fileName = nameof(MowerDataManager), menuName = SONames.GameDir + nameof(MowerDataManager))]
+	[CreateAssetMenu(fileName = nameof(MowerDataManager), menuName = SoNames.GameDir + nameof(MowerDataManager))]
 	internal class MowerDataManager : ScriptableObject
 	{
 		[SerializeField, InlineEditor] private List<MowerData> mowerData;

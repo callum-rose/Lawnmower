@@ -8,7 +8,7 @@ using UnityEngine;
 namespace Core.EventChannels
 {
 	[CreateAssetMenu(fileName = nameof(LoadViewChannel),
-		menuName = SONames.CoreDir + nameof(LoadViewChannel))]
+		menuName = SoNames.CoreDir + nameof(LoadViewChannel))]
 	public class LoadViewChannel : BaseEventChannel
 	{
 		[SerializeField, ValueDropdown(nameof(SceneNames), HideChildProperties = true), Required]

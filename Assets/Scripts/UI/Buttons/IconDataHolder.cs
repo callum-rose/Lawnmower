@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace UI.Buttons
 {
-    [CreateAssetMenu(fileName = nameof(IconDataHolder), menuName = SONames.UIDir + nameof(IconDataHolder))]
+    [CreateAssetMenu(fileName = nameof(IconDataHolder), menuName = SoNames.UIDir + nameof(IconDataHolder))]
 	internal class IconDataHolder : SerializedScriptableObject
 	{
 		[SerializeField] private Dictionary<IconType, Sprite> iconToSpriteDict;

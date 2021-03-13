@@ -76,7 +76,11 @@ namespace Game.Mowers.Input
         {
             _mowerPosition = null;
         }
+        
+        #endregion
 
+        #region Events
+        
         public void OnFingerMove(LeanFinger finger)
         {
             Vector3 tapWorldPos = screenToWorldConverter.GetWorldPoint(finger.ScreenPosition);
@@ -94,8 +98,7 @@ namespace Game.Mowers.Input
                 return;
             }
 
-            bool test = IsWorldPositionWithinToleranceAngle(tapWorldPos, out GridVector direction);
-            if (test)
+            if (IsWorldPositionWithinToleranceAngle(tapWorldPos, out GridVector direction))
             {
                 Move?.Invoke(direction);
             }

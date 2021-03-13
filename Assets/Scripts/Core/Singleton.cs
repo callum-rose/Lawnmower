@@ -5,22 +5,23 @@ namespace Core
 {
     public abstract class Singleton<T> : ScriptableObjectWithCoroutines where T : ScriptableObject
     {
-        private static T ___instance;
         public static T Instance
         {
             get
             {
-                if (___instance != null)
+                if (_instance != null)
                 {
-                    return ___instance;
+                    return _instance;
                 }
 
                 T[] instances = Resources.LoadAll<T>("");
                 Assert.IsTrue(instances.Length == 1);
-                ___instance = instances[0];
+                _instance = instances[0];
                 
-                return ___instance;
+                return _instance;
             }
         }
+
+        private static T _instance;
     }
 }

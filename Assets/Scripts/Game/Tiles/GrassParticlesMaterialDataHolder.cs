@@ -6,7 +6,7 @@ using UnityEngine;
 namespace Game.Tiles
 {
 	[CreateAssetMenu(fileName = nameof(GrassParticlesMaterialDataHolder),
-		menuName = SONames.GameDir + nameof(GrassParticlesMaterialDataHolder))]
+		menuName = SoNames.GameDir + nameof(GrassParticlesMaterialDataHolder))]
 	internal class GrassParticlesMaterialDataHolder : SerializedScriptableObject
 	{
 		[SerializeField] private SerialisedDictionary<int, Material> grassMaterials =

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 610204b2bae6425abd56bce466d1db19, type: 3}
   m_Name: MowerCreatedAnimator
   m_EditorClassIdentifier: 
-  delay: 0.5
+  gamePlayData: {fileID: 11400000, guid: 123151afb2fdd074f9d46e345d51c0f4, type: 2}
   dropFromHeight: 20
   dropDuration: 1
   animEase: 30

@@ -37,7 +37,7 @@ namespace Lean.Touch
 		protected virtual void Update()
 		{
 			// Get t value
-			var factor = LeanTouch.GetDampenFactor(Dampening, Time.deltaTime);
+			float factor = LeanTouch.GetDampenFactor(Dampening, Time.deltaTime);
 
 			// Lerp angle
 			currentAngle = Mathf.LerpAngle(currentAngle, Angle, factor);

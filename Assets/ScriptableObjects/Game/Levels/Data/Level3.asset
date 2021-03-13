@@ -23,7 +23,7 @@ MonoBehaviour:
     SerializationNodes:
     - Name: id
       Entry: 2
-      Data: 00000000000000000000000000000000
+      Data: 2b462ecb888545e588f62ebb524dd6e2
     - Name: newTiles
       Entry: 7
       Data: 0|Game.Tiles.Tile[,], Scripts

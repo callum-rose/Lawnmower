@@ -14,3 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mowerInputEventChannel: {fileID: 11400000, guid: 493087ea426ec094fa4aa264e865b8fe,
     type: 2}
+  startPlayingEventChannel: {fileID: 11400000, guid: 0753d5f32b98fc541b97209da7ce916f,
+    type: 2}
+  stopPlayingEventChannel: {fileID: 11400000, guid: 0c0bdcfee7c27f44bb674cb0d325eb33,
+    type: 2}

@@ -14,7 +14,7 @@ using Utils;
 
 namespace Game.Levels
 {
-	[CreateAssetMenu(fileName = "LevelData", menuName = SONames.GameDir + "Level Data")]
+	[CreateAssetMenu(fileName = "LevelData", menuName = SoNames.GameDir + "Level Data")]
 	internal partial class LevelData : SerializedScriptableObject, IReadOnlyLevelData
 	{
 		[OdinSerialize] private Guid id;

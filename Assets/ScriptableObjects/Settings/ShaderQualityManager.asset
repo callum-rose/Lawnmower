@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9200d6dd51bb42e39fe6d1830d6b3728, type: 3}
   m_Name: ShaderQualityManager
   m_EditorClassIdentifier: 
-  graphicsSettingsLowShaderKeyword: _GRAPHICSSETTINGS_LOW
-  graphicSettingsHighShaderKeyword: _GRAPHICSSETTINGS_HIGH
+  graphicsSettingsLowShaderKeyword: _GraphicsSettingsLow
+  graphicSettingsHighShaderKeyword: _GraphicsSettingsHigh
   defaultQualitySetting: 1
   graphicsSettingEventChannel:
     ObjectField: {fileID: 11400000, guid: 345e62d23c1eb6a4e84b7bcc075413e3, type: 2}

@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Game.Mowers
 {
-	[CreateAssetMenu(fileName = nameof(MowerMoverData), menuName = SONames.GameDir + nameof(MowerMoverData))]
+	[CreateAssetMenu(fileName = nameof(MowerMoverData), menuName = SoNames.GameDir + nameof(MowerMoverData))]
 	public class MowerMoverData : ScriptableObject
 	{
 		[SerializeField, Min(0)] private float acceleration = 1;

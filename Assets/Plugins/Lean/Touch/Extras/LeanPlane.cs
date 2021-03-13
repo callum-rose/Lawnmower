@@ -41,10 +41,10 @@ namespace Lean.Touch
 		{
 			Gizmos.matrix = transform.localToWorldMatrix;
 
-			var x1 = MinX;
-			var x2 = MaxX;
-			var y1 = MinY;
-			var y2 = MaxY;
+			float x1 = MinX;
+			float x2 = MaxX;
+			float y1 = MinY;
+			float y2 = MaxY;
 
 			if (ClampX == false)
 			{
@@ -77,7 +77,7 @@ namespace Lean.Touch
 		public Vector3 GetClosest(Vector3 position, float offset = 0.0f)
 		{
 			// Transform point to plane space
-			var point = transform.InverseTransformPoint(position);
+			Vector3 point = transform.InverseTransformPoint(position);
 
 			// Clamp values?
 			if (ClampX) point.x = Mathf.Clamp(point.x, MinX, MaxX);
@@ -98,9 +98,9 @@ namespace Lean.Touch
 
 		public bool TryRaycast(Ray ray, ref Vector3 hit, float offset = 0.0f, bool getClosest = true)
 		{
-			var point = transform.position;
-			var normal = transform.forward;
-			var distance = default(float);
+			Vector3 point = transform.position;
+			Vector3 normal = transform.forward;
+			float distance = default(float);
 
 			if (RayToPlane(point, normal, ray, ref distance))
 			{
@@ -116,9 +116,9 @@ namespace Lean.Touch
 
 		public Vector3 GetClosest(Ray ray)
 		{
-			var point = transform.position;
-			var normal = transform.forward;
-			var distance = default(float);
+			Vector3 point = transform.position;
+			Vector3 normal = transform.forward;
+			float distance = default(float);
 
 			if (RayToPlane(point, normal, ray, ref distance)) return GetClosest(ray.GetPoint(distance));
 
@@ -127,12 +127,12 @@ namespace Lean.Touch
 
 		private static bool RayToPlane(Vector3 point, Vector3 normal, Ray ray, ref float distance)
 		{
-			var b = Vector3.Dot(ray.direction, normal);
+			float b = Vector3.Dot(ray.direction, normal);
 
 			if (Mathf.Approximately(b, 0.0f)) return false;
 
-			var d = -Vector3.Dot(normal, point);
-			var a = -Vector3.Dot(ray.origin, normal) - d;
+			float d = -Vector3.Dot(normal, point);
+			float a = -Vector3.Dot(ray.origin, normal) - d;
 
 			distance = a / b;
 

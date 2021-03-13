@@ -18,8 +18,7 @@ Shader "Grass"
 		_AOMap2("AO Map", 2D) = "white" {}
 		_AOStrength2("AO Strength", Range( 0 , 1)) = 0
 		_WindOffsetMagnitude("Wind Offset Magnitude", Range( 0 , 0.002)) = 0
-		_BendOffsetMagnitude("Bend Offset Magnitude", Range( 0 , 0.001)) = 0
-		[ASEEnd][KeywordEnum(Low,High)] _GraphicsSettings("Graphics Settings", Float) = 1
+		[ASEEnd]_BendOffsetMagnitude("Bend Offset Magnitude", Range( 0 , 0.001)) = 0
 
 		//_TessPhongStrength( "Tess Phong Strength", Range( 0, 1 ) ) = 0.5
 		//_TessValue( "Tess Max Tessellation", Range( 1, 32 ) ) = 16
@@ -177,7 +176,7 @@ Shader "Grass"
 			#endif
 
 			#define ASE_NEEDS_VERT_NORMAL
-			#pragma multi_compile _GRAPHICSSETTINGS_LOW _GRAPHICSSETTINGS_HIGH
+			#pragma multi_compile _GraphicsSettingsLow _GraphicsSettingsHigh
 			#pragma shader_feature_local _USEAO2_ON
 
 
@@ -254,11 +253,11 @@ Shader "Grass"
 				float3 ase_worldPos = mul(GetObjectToWorldMatrix(), v.vertex).xyz;
 				float2 temp_output_8_0_g39 = ( ( texCoord50_g39.x * float2( 10,10 ) ) + ( (ase_worldPos).xz * WindNoiseScale ) + ( WindNoiseVelocity * _TimeParameters.x ) );
 				float4 temp_cast_0 = ( 1 * -1 );
-				float4 break13_g41 = (temp_cast_0 + (tex2Dlod( BakedNoiseTex, float4( ( temp_output_8_0_g39 * 1.0 * 0.15 ), 0, 0.0) ) - float4( 0,0,0,0 )) * (float4( 1,0,0,0 ) - temp_cast_0) / (float4( 1,1,1,1 ) - float4( 0,0,0,0 )));
+				float4 break13_g41 = (temp_cast_0 + (tex2Dlod( BakedNoiseTex, float4( ( temp_output_8_0_g39 * 1.0 * 0.15 ), 0, 0.0) ) - float4( 0,0,0,0 )) * (float4( 1,1,1,1 ) - temp_cast_0) / (float4( 1,1,1,1 ) - float4( 0,0,0,0 )));
 				float3 appendResult14_g39 = (float3(break13_g41.r , 0.0 , break13_g41.g));
 				float2 texCoord54_g39 = v.ase_texcoord1.xy * float2( 1,1 ) + float2( 0,0 );
 				float4 temp_cast_1 = ( 1 * -1 );
-				float4 break13_g44 = (temp_cast_1 + (tex2Dlod( BakedNoiseTex, float4( ( texCoord54_g39 * BendNoiseScale * 0.15 ), 0, 0.0) ) - float4( 0,0,0,0 )) * (float4( 1,0,0,0 ) - temp_cast_1) / (float4( 1,1,1,1 ) - float4( 0,0,0,0 )));
+				float4 break13_g44 = (temp_cast_1 + (tex2Dlod( BakedNoiseTex, float4( ( texCoord54_g39 * BendNoiseScale * 0.15 ), 0, 0.0) ) - float4( 0,0,0,0 )) * (float4( 1,1,1,1 ) - temp_cast_1) / (float4( 1,1,1,1 ) - float4( 0,0,0,0 )));
 				float2 appendResult66_g39 = (float2(break13_g44.r , break13_g44.g));
 				float2 break59_g39 = ( appendResult66_g39 * _BendOffsetMagnitude );
 				float3 appendResult55_g39 = (float3(break59_g39.x , 0.0 , break59_g39.y));
@@ -271,11 +270,11 @@ Shader "Grass"
 				float mulTime105_g39 = _TimeParameters.x * MowerWindFlutterSpeed;
 				float2 temp_output_117_0_g39 = ( (temp_output_76_0_g39).xz + mulTime105_g39 );
 				float4 temp_cast_2 = ( 1 * -1 );
-				float4 break13_g45 = (temp_cast_2 + (tex2Dlod( BakedNoiseTex, float4( ( temp_output_117_0_g39 * 1.0 * 0.15 ), 0, 0.0) ) - float4( 0,0,0,0 )) * (float4( 1,0,0,0 ) - temp_cast_2) / (float4( 1,1,1,1 ) - float4( 0,0,0,0 )));
+				float4 break13_g45 = (temp_cast_2 + (tex2Dlod( BakedNoiseTex, float4( ( temp_output_117_0_g39 * 1.0 * 0.15 ), 0, 0.0) ) - float4( 0,0,0,0 )) * (float4( 1,1,1,1 ) - temp_cast_2) / (float4( 1,1,1,1 ) - float4( 0,0,0,0 )));
 				float2 texCoord47_g39 = v.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
-				#if defined(_GRAPHICSSETTINGS_LOW)
+				#if defined(_GraphicsSettingsLow)
 				float3 staticSwitch99 = float3(0,0,0);
-				#elif defined(_GRAPHICSSETTINGS_HIGH)
+				#elif defined(_GraphicsSettingsHigh)
 				float3 staticSwitch99 = ( ( ( appendResult14_g39 * _WindOffsetMagnitude ) + appendResult55_g39 + ( ( float3(0,-0.001,0) * temp_output_78_0_g39 ) + ( appendResult92_g39 * temp_output_78_0_g39 * MowerWindSize * (0.5 + (break13_g45.r - -1.0) * (1.0 - 0.5) / (1.0 - -1.0)) ) ) ) * ( texCoord47_g39.y * texCoord47_g39.y ) );
 				#else
 				float3 staticSwitch99 = ( ( ( appendResult14_g39 * _WindOffsetMagnitude ) + appendResult55_g39 + ( ( float3(0,-0.001,0) * temp_output_78_0_g39 ) + ( appendResult92_g39 * temp_output_78_0_g39 * MowerWindSize * (0.5 + (break13_g45.r - -1.0) * (1.0 - 0.5) / (1.0 - -1.0)) ) ) ) * ( texCoord47_g39.y * texCoord47_g39.y ) );
@@ -488,7 +487,7 @@ Shader "Grass"
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderGraphFunctions.hlsl"
 			#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
 
-			#pragma multi_compile _GRAPHICSSETTINGS_LOW _GRAPHICSSETTINGS_HIGH
+			#pragma multi_compile _GraphicsSettingsLow _GraphicsSettingsHigh
 
 
 			struct VertexInput
@@ -558,11 +557,11 @@ Shader "Grass"
 				float3 ase_worldPos = mul(GetObjectToWorldMatrix(), v.vertex).xyz;
 				float2 temp_output_8_0_g39 = ( ( texCoord50_g39.x * float2( 10,10 ) ) + ( (ase_worldPos).xz * WindNoiseScale ) + ( WindNoiseVelocity * _TimeParameters.x ) );
 				float4 temp_cast_0 = ( 1 * -1 );
-				float4 break13_g41 = (temp_cast_0 + (tex2Dlod( BakedNoiseTex, float4( ( temp_output_8_0_g39 * 1.0 * 0.15 ), 0, 0.0) ) - float4( 0,0,0,0 )) * (float4( 1,0,0,0 ) - temp_cast_0) / (float4( 1,1,1,1 ) - float4( 0,0,0,0 )));
+				float4 break13_g41 = (temp_cast_0 + (tex2Dlod( BakedNoiseTex, float4( ( temp_output_8_0_g39 * 1.0 * 0.15 ), 0, 0.0) ) - float4( 0,0,0,0 )) * (float4( 1,1,1,1 ) - temp_cast_0) / (float4( 1,1,1,1 ) - float4( 0,0,0,0 )));
 				float3 appendResult14_g39 = (float3(break13_g41.r , 0.0 , break13_g41.g));
 				float2 texCoord54_g39 = v.ase_texcoord1.xy * float2( 1,1 ) + float2( 0,0 );
 				float4 temp_cast_1 = ( 1 * -1 );
-				float4 break13_g44 = (temp_cast_1 + (tex2Dlod( BakedNoiseTex, float4( ( texCoord54_g39 * BendNoiseScale * 0.15 ), 0, 0.0) ) - float4( 0,0,0,0 )) * (float4( 1,0,0,0 ) - temp_cast_1) / (float4( 1,1,1,1 ) - float4( 0,0,0,0 )));
+				float4 break13_g44 = (temp_cast_1 + (tex2Dlod( BakedNoiseTex, float4( ( texCoord54_g39 * BendNoiseScale * 0.15 ), 0, 0.0) ) - float4( 0,0,0,0 )) * (float4( 1,1,1,1 ) - temp_cast_1) / (float4( 1,1,1,1 ) - float4( 0,0,0,0 )));
 				float2 appendResult66_g39 = (float2(break13_g44.r , break13_g44.g));
 				float2 break59_g39 = ( appendResult66_g39 * _BendOffsetMagnitude );
 				float3 appendResult55_g39 = (float3(break59_g39.x , 0.0 , break59_g39.y));
@@ -575,11 +574,11 @@ Shader "Grass"
 				float mulTime105_g39 = _TimeParameters.x * MowerWindFlutterSpeed;
 				float2 temp_output_117_0_g39 = ( (temp_output_76_0_g39).xz + mulTime105_g39 );
 				float4 temp_cast_2 = ( 1 * -1 );
-				float4 break13_g45 = (temp_cast_2 + (tex2Dlod( BakedNoiseTex, float4( ( temp_output_117_0_g39 * 1.0 * 0.15 ), 0, 0.0) ) - float4( 0,0,0,0 )) * (float4( 1,0,0,0 ) - temp_cast_2) / (float4( 1,1,1,1 ) - float4( 0,0,0,0 )));
+				float4 break13_g45 = (temp_cast_2 + (tex2Dlod( BakedNoiseTex, float4( ( temp_output_117_0_g39 * 1.0 * 0.15 ), 0, 0.0) ) - float4( 0,0,0,0 )) * (float4( 1,1,1,1 ) - temp_cast_2) / (float4( 1,1,1,1 ) - float4( 0,0,0,0 )));
 				float2 texCoord47_g39 = v.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
-				#if defined(_GRAPHICSSETTINGS_LOW)
+				#if defined(_GraphicsSettingsLow)
 				float3 staticSwitch99 = float3(0,0,0);
-				#elif defined(_GRAPHICSSETTINGS_HIGH)
+				#elif defined(_GraphicsSettingsHigh)
 				float3 staticSwitch99 = ( ( ( appendResult14_g39 * _WindOffsetMagnitude ) + appendResult55_g39 + ( ( float3(0,-0.001,0) * temp_output_78_0_g39 ) + ( appendResult92_g39 * temp_output_78_0_g39 * MowerWindSize * (0.5 + (break13_g45.r - -1.0) * (1.0 - 0.5) / (1.0 - -1.0)) ) ) ) * ( texCoord47_g39.y * texCoord47_g39.y ) );
 				#else
 				float3 staticSwitch99 = ( ( ( appendResult14_g39 * _WindOffsetMagnitude ) + appendResult55_g39 + ( ( float3(0,-0.001,0) * temp_output_78_0_g39 ) + ( appendResult92_g39 * temp_output_78_0_g39 * MowerWindSize * (0.5 + (break13_g45.r - -1.0) * (1.0 - 0.5) / (1.0 - -1.0)) ) ) ) * ( texCoord47_g39.y * texCoord47_g39.y ) );
@@ -744,7 +743,7 @@ Version=18500
 Node;AmplifyShaderEditor.FunctionNode;98;-534.0149,120.541;Inherit;True;Grass Vertex Offset New;12;;39;875d573184573524baee39a5588c350f;0;0;1;FLOAT3;0
 Node;AmplifyShaderEditor.Vector3Node;100;-446.0149,-59.659;Inherit;False;Constant;_Vector3;Vector 3;8;0;Create;True;0;0;False;0;False;0,0,0;0,0,0;0;4;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3
 Node;AmplifyShaderEditor.FunctionNode;94;-220,-83.5;Inherit;False;Toon;0;;46;a4a352ddda5e97a438bc3f7dc43e6fb7;0;1;40;COLOR;0,0,0,0;False;1;COLOR;0
-Node;AmplifyShaderEditor.StaticSwitch;99;-233.0149,28.341;Inherit;False;Property;_GraphicsSettings;Graphics Settings;25;0;Create;False;0;0;False;0;False;1;1;1;True;;KeywordEnum;2;Low;High;Create;False;True;9;1;FLOAT3;0,0,0;False;0;FLOAT3;0,0,0;False;2;FLOAT3;0,0,0;False;3;FLOAT3;0,0,0;False;4;FLOAT3;0,0,0;False;5;FLOAT3;0,0,0;False;6;FLOAT3;0,0,0;False;7;FLOAT3;0,0,0;False;8;FLOAT3;0,0,0;False;1;FLOAT3;0
+Node;AmplifyShaderEditor.StaticSwitch;99;-233.0149,28.341;Inherit;False;Property;_GraphicsSettings;Graphics Settings;25;0;Create;False;0;0;False;0;False;1;1;1;False;;KeywordEnum;2;Low;High;Create;False;True;9;1;FLOAT3;0,0,0;False;0;FLOAT3;0,0,0;False;2;FLOAT3;0,0,0;False;3;FLOAT3;0,0,0;False;4;FLOAT3;0,0,0;False;5;FLOAT3;0,0,0;False;6;FLOAT3;0,0,0;False;7;FLOAT3;0,0,0;False;8;FLOAT3;0,0,0;False;1;FLOAT3;0
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;0;0,0;Float;False;False;-1;2;UnityEditor.ShaderGraph.PBRMasterGUI;0;3;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;ExtraPrePass;0;0;ExtraPrePass;5;False;False;False;False;False;False;False;False;True;0;False;-1;True;0;False;-1;False;False;False;False;False;False;False;False;True;3;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;0;0;True;1;1;False;-1;0;False;-1;0;1;False;-1;0;False;-1;False;False;False;False;False;False;False;False;True;0;False;-1;True;True;True;True;True;0;False;-1;False;False;False;True;False;255;False;-1;255;False;-1;255;False;-1;7;False;-1;1;False;-1;1;False;-1;1;False;-1;7;False;-1;1;False;-1;1;False;-1;1;False;-1;True;1;False;-1;True;3;False;-1;True;True;0;False;-1;0;False;-1;True;0;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;2;0,0;Float;False;False;-1;2;UnityEditor.ShaderGraph.PBRMasterGUI;0;3;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;ShadowCaster;0;2;ShadowCaster;0;False;False;False;False;False;False;False;False;True;0;False;-1;True;0;False;-1;False;False;False;False;False;False;False;False;True;3;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;0;0;False;False;False;False;False;False;False;False;True;0;False;-1;False;False;False;False;False;False;True;1;False;-1;True;3;False;-1;False;True;1;LightMode=ShadowCaster;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;3;0,0;Float;False;False;-1;2;UnityEditor.ShaderGraph.PBRMasterGUI;0;3;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;DepthOnly;0;3;DepthOnly;0;False;False;False;False;False;False;False;False;True;0;False;-1;True;0;False;-1;False;False;False;False;False;False;False;False;True;3;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;0;0;False;False;False;False;False;False;False;False;True;0;False;-1;False;True;False;False;False;False;0;False;-1;False;False;False;False;True;1;False;-1;False;False;True;1;LightMode=DepthOnly;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
@@ -755,4 +754,4 @@ WireConnection;99;0;98;0
 WireConnection;1;2;94;0
 WireConnection;1;5;99;0
 ASEEND*/
-//CHKSM=AC3A3C1FE82A5617E037E87AB32624D232A890AC
+//CHKSM=B30FC9DD227D5CC710F18222896BBF70E085E38C

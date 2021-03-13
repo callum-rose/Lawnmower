@@ -66,7 +66,7 @@ namespace Lean.Touch
 		{
 			set
 			{
-				if (value == true)
+				if (value)
 				{
 					Select();
 				}
@@ -79,7 +79,7 @@ namespace Lean.Touch
 			get
 			{
 				// Hide IsSelected?
-				if (HideWithFinger == true && isSelected == true && selectingFingers.Count > 0)
+				if (HideWithFinger && isSelected && selectingFingers.Count > 0)
 				{
 					return false;
 				}
@@ -102,11 +102,11 @@ namespace Lean.Touch
 		{
 			get
 			{
-				var count = 0;
+				int count = 0;
 
-				foreach (var selectable in Instances)
+				foreach (LeanSelectable selectable in Instances)
 				{
-					if (selectable.IsSelected == true)
+					if (selectable.IsSelected)
 					{
 						count += 1;
 					}
@@ -143,7 +143,7 @@ namespace Lean.Touch
 		/// <summary>If requiredSelectable is set and not selected, the fingers list will be empty. If selected then the fingers list will only contain the selecting finger.</summary>
 		public static List<LeanFinger> GetFingers(bool ignoreIfStartedOverGui, bool ignoreIfOverGui, int requiredFingerCount = 0, LeanSelectable requiredSelectable = null)
 		{
-			var fingers = LeanTouch.GetFingers(ignoreIfStartedOverGui, ignoreIfOverGui, requiredFingerCount);
+			List<LeanFinger> fingers = LeanTouch.GetFingers(ignoreIfStartedOverGui, ignoreIfOverGui, requiredFingerCount);
 
 			if (requiredSelectable != null)
 			{
@@ -152,7 +152,7 @@ namespace Lean.Touch
 					fingers.Clear();
 				}
 
-				if (requiredSelectable.IsolateSelectingFingers == true)
+				if (requiredSelectable.IsolateSelectingFingers)
 				{
 					fingers.Clear();
 
@@ -177,9 +177,9 @@ namespace Lean.Touch
 			{
 				list.Clear();
 
-				foreach (var selectable in Instances)
+				foreach (LeanSelectable selectable in Instances)
 				{
-					if (selectable.IsSelected == true)
+					if (selectable.IsSelected)
 					{
 						list.Add(selectable);
 					}
@@ -192,9 +192,9 @@ namespace Lean.Touch
 		{
 			GetSelected(tempSelectables);
 
-			for (var i = maxCount; i < tempSelectables.Count; i++)
+			for (int i = maxCount; i < tempSelectables.Count; i++)
 			{
-				var selectable = tempSelectables[i];
+				LeanSelectable selectable = tempSelectables[i];
 
 				if (selectable != null) // If one selectable deselection triggers destruction of another, it may cause it to be null
 				{
@@ -206,9 +206,9 @@ namespace Lean.Touch
 		/// <summary>If the specified finger selected an object, this will return the first one.</summary>
 		public static LeanSelectable FindSelectable(LeanFinger finger)
 		{
-			foreach (var selectable in Instances)
+			foreach (LeanSelectable selectable in Instances)
 			{
-				if (selectable.IsSelectedBy(finger) == true)
+				if (selectable.IsSelectedBy(finger))
 				{
 					return selectable;
 				}
@@ -220,22 +220,22 @@ namespace Lean.Touch
 		/// <summary>This allows you to replace the currently selected objects with the ones in the specified list. This is useful if you're doing box selection or switching selection groups.</summary>
 		public static void ReplaceSelection(LeanFinger finger, List<LeanSelectable> selectables)
 		{
-			var selectableCount = 0;
+			int selectableCount = 0;
 
 			// Deselect missing selectables
 			if (selectables != null)
 			{
 				tempSelectables.Clear();
 
-				foreach (var selectable in Instances)
+				foreach (LeanSelectable selectable in Instances)
 				{
-					if (selectable.isSelected == true && selectables.Contains(selectable) == false)
+					if (selectable.isSelected && selectables.Contains(selectable) == false)
 					{
 						tempSelectables.Add(selectable);
 					}
 				}
 
-				foreach (var selectable in tempSelectables)
+				foreach (LeanSelectable selectable in tempSelectables)
 				{
 					if (selectable != null) // If one selectable deselection triggers destruction of another, it may cause it to be null
 					{
@@ -247,9 +247,9 @@ namespace Lean.Touch
 			// Add new selectables
 			if (selectables != null)
 			{
-				for (var i = selectables.Count - 1; i >= 0; i--)
+				for (int i = selectables.Count - 1; i >= 0; i--)
 				{
-					var selectable = selectables[i];
+					LeanSelectable selectable = selectables[i];
 
 					if (selectable != null)
 					{
@@ -273,7 +273,7 @@ namespace Lean.Touch
 		/// <summary>This tells you if the current selectable was selected by the specified finger.</summary>
 		public bool IsSelectedBy(LeanFinger finger)
 		{
-			for (var i = selectingFingers.Count - 1; i >= 0; i--)
+			for (int i = selectingFingers.Count - 1; i >= 0; i--)
 			{
 				if (selectingFingers[i] == finger)
 				{
@@ -287,7 +287,7 @@ namespace Lean.Touch
 		/// <summary>This tells you the IsSelected or IsSelectedRaw value.</summary>
 		public bool GetIsSelected(bool raw)
 		{
-			return raw == true ? IsSelectedRaw : IsSelected;
+			return raw ? IsSelectedRaw : IsSelected;
 		}
 
 		/// <summary>This selects the current object.</summary>
@@ -326,13 +326,13 @@ namespace Lean.Touch
 		public void Deselect()
 		{
 			// Make sure we don't deselect multiple times
-			if (isSelected == true)
+			if (isSelected)
 			{
 				isSelected = false;
 
-				for (var i = selectingFingers.Count - 1; i >= 0; i--)
+				for (int i = selectingFingers.Count - 1; i >= 0; i--)
 				{
-					var selectingFinger = selectingFingers[i];
+					LeanFinger selectingFinger = selectingFingers[i];
 
 					if (selectingFinger != null)
 					{
@@ -367,7 +367,7 @@ namespace Lean.Touch
 		{
 			GetSelected(tempSelectables);
 
-			foreach (var selectable in tempSelectables)
+			foreach (LeanSelectable selectable in tempSelectables)
 			{
 				selectable.Deselect();
 			}
@@ -396,7 +396,7 @@ namespace Lean.Touch
 
 			Instances.Remove(this);
 
-			if (isSelected == true)
+			if (isSelected)
 			{
 				Deselect();
 			}
@@ -406,9 +406,9 @@ namespace Lean.Touch
 		{
 			tempSelectables.Clear();
 
-			foreach (var selectable in Instances)
+			foreach (LeanSelectable selectable in Instances)
 			{
-				if (selectable.IsSelectedBy(finger) == true)
+				if (selectable.IsSelectedBy(finger))
 				{
 					tempSelectables.Add(selectable);
 				}
@@ -419,7 +419,7 @@ namespace Lean.Touch
 		{
 			BuildTempSelectables(finger);
 
-			foreach (var selectable in tempSelectables)
+			foreach (LeanSelectable selectable in tempSelectables)
 			{
 				if (selectable != null) // If one selectable deselection triggers destruction of another, it may cause it to be null
 				{
@@ -440,9 +440,9 @@ namespace Lean.Touch
 		{
 			get
 			{
-				for (var i = selectingFingers.Count - 1; i >= 0; i--)
+				for (int i = selectingFingers.Count - 1; i >= 0; i--)
 				{
-					if (selectingFingers[i].Set == true)
+					if (selectingFingers[i].Set)
 					{
 						return true;
 					}
@@ -456,11 +456,11 @@ namespace Lean.Touch
 		{
 			BuildTempSelectables(finger);
 
-			foreach (var selectable in tempSelectables)
+			foreach (LeanSelectable selectable in tempSelectables)
 			{
 				if (selectable != null) // If one selectable deselection triggers destruction of another, it may cause it to be null
 				{
-					if (selectable.DeselectOnUp == true && selectable.IsSelected == true && selectable.AnyFingersSet == false)
+					if (selectable.DeselectOnUp && selectable.IsSelected && selectable.AnyFingersSet == false)
 					{
 						selectable.Deselect();
 					}
@@ -483,7 +483,7 @@ namespace Lean.Touch
 
 		private static void HandleFingerInactive(LeanFinger finger)
 		{
-			foreach (var selectable in Instances)
+			foreach (LeanSelectable selectable in Instances)
 			{
 				selectable.selectingFingers.Remove(finger);
 			}
@@ -506,10 +506,10 @@ namespace Lean.Touch.Inspector
 		protected override void DrawInspector()
 		{
 			// isSelected modified?
-			if (Draw("isSelected", "Is this LeanSelectable component currently selected?") == true)
+			if (Draw("isSelected", "Is this LeanSelectable component currently selected?"))
 			{
 				// Grab the new value
-				var isSelected = serializedObject.FindProperty("isSelected").boolValue;
+				bool isSelected = serializedObject.FindProperty("isSelected").boolValue;
 
 				// Apply it directly to each instance before the SerializedObject applies it when this method returns
 				Each(t => t.IsSelected = isSelected);
@@ -520,31 +520,31 @@ namespace Lean.Touch.Inspector
 
 			EditorGUILayout.Separator();
 
-			var usedA = Any(t => t.OnSelect.GetPersistentEventCount() > 0);
-			var usedB = Any(t => t.OnSelectUpdate.GetPersistentEventCount() > 0);
-			var usedC = Any(t => t.OnSelectUp.GetPersistentEventCount() > 0);
-			var usedD = Any(t => t.OnDeselect.GetPersistentEventCount() > 0);
+			bool usedA = Any(t => t.OnSelect.GetPersistentEventCount() > 0);
+			bool usedB = Any(t => t.OnSelectUpdate.GetPersistentEventCount() > 0);
+			bool usedC = Any(t => t.OnSelectUp.GetPersistentEventCount() > 0);
+			bool usedD = Any(t => t.OnDeselect.GetPersistentEventCount() > 0);
 
 			showUnusedEvents = EditorGUILayout.Foldout(showUnusedEvents, "Show Unused Events");
 
 			EditorGUILayout.Separator();
 
-			if (usedA == true || showUnusedEvents == true)
+			if (usedA || showUnusedEvents)
 			{
 				Draw("onSelect");
 			}
 
-			if (usedB == true || showUnusedEvents == true)
+			if (usedB || showUnusedEvents)
 			{
 				Draw("onSelectUpdate");
 			}
 
-			if (usedC == true || showUnusedEvents == true)
+			if (usedC || showUnusedEvents)
 			{
 				Draw("onSelectUp");
 			}
 
-			if (usedD == true || showUnusedEvents == true)
+			if (usedD || showUnusedEvents)
 			{
 				Draw("onDeselect");
 			}

@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Game.Tiles
 {
-	[CreateAssetMenu(fileName = nameof(WoodAppearanceData), menuName = SONames.GameDir + nameof(WoodAppearanceData))]
+	[CreateAssetMenu(fileName = nameof(WoodAppearanceData), menuName = SoNames.GameDir + nameof(WoodAppearanceData))]
 	internal class WoodAppearanceData : ScriptableObject
 	{
 		#region Unity

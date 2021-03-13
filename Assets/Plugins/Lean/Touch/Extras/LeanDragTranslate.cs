@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Lean.Touch
@@ -70,13 +71,13 @@ namespace Lean.Touch
 		protected virtual void Update()
 		{
 			// Store
-			var oldPosition = transform.localPosition;
+			Vector3 oldPosition = transform.localPosition;
 
 			// Get the fingers we want to use
-			var fingers = Use.GetFingers();
+			List<LeanFinger> fingers = Use.GetFingers();
 
 			// Calculate the screenDelta value based on these fingers
-			var screenDelta = LeanGesture.GetScreenDelta(fingers);
+			Vector2 screenDelta = LeanGesture.GetScreenDelta(fingers);
 
 			if (screenDelta != Vector2.zero)
 			{
@@ -95,10 +96,10 @@ namespace Lean.Touch
 			remainingTranslation += transform.localPosition - oldPosition;
 
 			// Get t value
-			var factor = LeanTouch.GetDampenFactor(Dampening, Time.deltaTime);
+			float factor = LeanTouch.GetDampenFactor(Dampening, Time.deltaTime);
 
 			// Dampen remainingDelta
-			var newRemainingTranslation = Vector3.Lerp(remainingTranslation, Vector3.zero, factor);
+			Vector3 newRemainingTranslation = Vector3.Lerp(remainingTranslation, Vector3.zero, factor);
 
 			// Shift this transform by the change in delta
 			transform.localPosition = oldPosition + remainingTranslation - newRemainingTranslation;
@@ -114,11 +115,11 @@ namespace Lean.Touch
 
 		private void TranslateUI(Vector2 screenDelta)
 		{
-			var camera = Camera;
+			Camera camera = Camera;
 
 			if (camera == null)
 			{
-				var canvas = transform.GetComponentInParent<Canvas>();
+				Canvas canvas = transform.GetComponentInParent<Canvas>();
 
 				if (canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay)
 				{
@@ -127,15 +128,15 @@ namespace Lean.Touch
 			}
 
 			// Screen position of the transform
-			var screenPoint = RectTransformUtility.WorldToScreenPoint(camera, transform.position);
+			Vector2 screenPoint = RectTransformUtility.WorldToScreenPoint(camera, transform.position);
 
 			// Add the deltaPosition
 			screenPoint += screenDelta * Sensitivity;
 
 			// Convert back to world space
-			var worldPoint = default(Vector3);
+			Vector3 worldPoint = default(Vector3);
 
-			if (RectTransformUtility.ScreenPointToWorldPointInRectangle(transform.parent as RectTransform, screenPoint, camera, out worldPoint) == true)
+			if (RectTransformUtility.ScreenPointToWorldPointInRectangle(transform.parent as RectTransform, screenPoint, camera, out worldPoint))
 			{
 				transform.position = worldPoint;
 			}
@@ -144,12 +145,12 @@ namespace Lean.Touch
 		private void Translate(Vector2 screenDelta)
 		{
 			// Make sure the camera exists
-			var camera = LeanTouch.GetCamera(Camera, gameObject);
+			Camera camera = LeanTouch.GetCamera(Camera, gameObject);
 
 			if (camera != null)
 			{
 				// Screen position of the transform
-				var screenPoint = camera.WorldToScreenPoint(transform.position);
+				Vector3 screenPoint = camera.WorldToScreenPoint(transform.position);
 
 				// Add the deltaPosition
 				screenPoint += (Vector3)screenDelta * Sensitivity;

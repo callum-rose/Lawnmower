@@ -36,11 +36,11 @@ namespace Core
 		{
 			Clear();
 			
-			for (int i = 0; i < keys.Count; i++)
-				Add(keys[i], values[i]);
 
-			keys.Clear();
-			values.Clear();
+			for (int i = 0; i < keys.Count; i++)
+			{
+				Add(keys[i], values[i]);
+			}
 		}
 	}
 }

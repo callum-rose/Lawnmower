@@ -11,7 +11,7 @@ using R = Sirenix.OdinInspector.RequiredAttribute;
 namespace Game.Levels
 {
 	[UnreferencedScriptableObject]
-	[CreateAssetMenu(fileName = nameof(HeadlessLevelManager), menuName = SONames.GameDir + nameof(HeadlessLevelManager))]
+	[CreateAssetMenu(fileName = nameof(HeadlessLevelManager), menuName = SoNames.GameDir + nameof(HeadlessLevelManager))]
 	internal class HeadlessLevelManager : ScriptableObject, ILevelManager
 	{
 		[TitleGroup("Assets")] 

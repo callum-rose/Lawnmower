@@ -76,7 +76,7 @@ namespace Lean.Touch
 					fingers = new List<LeanFinger>();
 				}
 
-				for (var i = fingers.Count - 1; i >= 0; i--)
+				for (int i = fingers.Count - 1; i >= 0; i--)
 				{
 					if (fingers[i] == finger)
 					{
@@ -96,7 +96,7 @@ namespace Lean.Touch
 		/// <summary>If you've set Filter to ManuallyAddedFingers, then you can call this method to manually remove a finger.</summary>
 		public void RemoveFinger(LeanFinger finger)
 		{
-			for (var i = fingers.Count - 1; i >= 0; i--)
+			for (int i = fingers.Count - 1; i >= 0; i--)
 			{
 				if (fingers[i] == finger)
 				{
@@ -117,7 +117,7 @@ namespace Lean.Touch
 		{
 			if (fingers != null)
 			{
-				for (var i = fingers.Count - 1; i >= 0; i--)
+				for (int i = fingers.Count - 1; i >= 0; i--)
 				{
 					RemoveFinger(fingers[i]);
 				}
@@ -143,11 +143,11 @@ namespace Lean.Touch
 				break;
 			}
 
-			if (ignoreUpFingers == true)
+			if (ignoreUpFingers)
 			{
-				for (var i = fingers.Count - 1; i >= 0; i--)
+				for (int i = fingers.Count - 1; i >= 0; i--)
 				{
-					if (fingers[i].Up == true)
+					if (fingers[i].Up)
 					{
 						fingers.RemoveAt(i);
 					}
@@ -156,11 +156,11 @@ namespace Lean.Touch
 
 			if (RequiredMouseButtons != 0)
 			{
-				var keep = true;
+				bool keep = true;
 
-				for (var i = 0; i < 5; i++)
+				for (int i = 0; i < 5; i++)
 				{
-					var mask = 1 << i;
+					int mask = 1 << i;
 
 					if ((RequiredMouseButtons & mask) != 0 && Lean.Common.LeanInput.GetMousePressed(i) == false)
 					{
@@ -170,7 +170,7 @@ namespace Lean.Touch
 
 				if (keep == false)
 				{
-					for (var i = fingers.Count - 1; i >= 0; i--)
+					for (int i = fingers.Count - 1; i >= 0; i--)
 					{
 						if (fingers[i].Index < 0)
 						{
@@ -195,9 +195,9 @@ namespace Lean.Touch
 	{
 		public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
 		{
-			var filter = (LeanFingerFilter.FilterType)property.FindPropertyRelative("Filter").enumValueIndex;
-			var height = base.GetPropertyHeight(property, label);
-			var step   = height + 2;
+			LeanFingerFilter.FilterType filter = (LeanFingerFilter.FilterType)property.FindPropertyRelative("Filter").enumValueIndex;
+			float height = base.GetPropertyHeight(property, label);
+			float step   = height + 2;
 
 			switch (filter)
 			{
@@ -209,8 +209,8 @@ namespace Lean.Touch
 
 		public override void OnGUI(Rect rect, SerializedProperty property, GUIContent label)
 		{
-			var filter = (LeanFingerFilter.FilterType)property.FindPropertyRelative("Filter").enumValueIndex;
-			var height = base.GetPropertyHeight(property, label);
+			LeanFingerFilter.FilterType filter = (LeanFingerFilter.FilterType)property.FindPropertyRelative("Filter").enumValueIndex;
+			float height = base.GetPropertyHeight(property, label);
 
 			rect.height = height;
 
@@ -235,7 +235,7 @@ namespace Lean.Touch
 
 		private void DrawProperty(ref Rect rect, SerializedProperty property, GUIContent label, string childName, string overrideName = null, string overrideTooltip = null)
 		{
-			var childProperty = property.FindPropertyRelative(childName);
+			SerializedProperty childProperty = property.FindPropertyRelative(childName);
 
 			label.text = string.IsNullOrEmpty(overrideName) == false ? overrideName : childProperty.displayName;
 

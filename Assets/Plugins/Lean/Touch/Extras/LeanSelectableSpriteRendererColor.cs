@@ -22,9 +22,9 @@ namespace Lean.Touch
 
 		protected virtual void Awake()
 		{
-			if (AutoGetDefaultColor == true)
+			if (AutoGetDefaultColor)
 			{
-				var spriteRenderer = GetComponent<SpriteRenderer>();
+				SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
 
 				DefaultColor = spriteRenderer.color;
 			}
@@ -42,7 +42,7 @@ namespace Lean.Touch
 
 		private void ChangeColor(Color color)
 		{
-			var spriteRenderer = GetComponent<SpriteRenderer>();
+			SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
 
 			spriteRenderer.color = color;
 		}

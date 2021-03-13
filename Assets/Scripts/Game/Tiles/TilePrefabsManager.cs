@@ -6,14 +6,20 @@ using BalsamicBits.Extensions;
 using Core;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Game.Tiles
 {
-	[CreateAssetMenu(fileName = nameof(TilePrefabsManager), menuName = SONames.GameDir + nameof(TilePrefabsManager))]
-	internal partial class TilePrefabsManager : SerializedScriptableObject
+	[CreateAssetMenu(fileName = nameof(TilePrefabsManager), menuName = SoNames.GameDir + nameof(TilePrefabsManager))]
+	internal partial class TilePrefabsManager : ScriptableObject
 	{
-		[SerializeField] private Dictionary<Type, GameObject> tilePrefabs;
-
+		[Serializable]
+		private class StringGameObjectDictionary : SerialisedDictionary<string, GameObject>
+		{
+		}
+		
+		[SerializeField, ValidateInput(nameof(ValidatePrefabsDict))] private StringGameObjectDictionary tilePrefabs;
+		
 		#region Unity
 
 		private void Awake()
@@ -44,24 +50,21 @@ namespace Game.Tiles
 				case GrassTile _:
 					tileObjectType = typeof(GrassTileObject);
 					break;
-				default:
 				case EmptyTile _:
+					tileObjectType = typeof(EmptyTileObject);
+					break;
+				default:
 					return null;
 			}
 
-			if (!tilePrefabs.TryGetValue(tileObjectType, out GameObject prefab))
-			{
-				Debug.LogError($"Prefab isn't set for {tileObjectType}");
-				return null;
-			}
+			BaseTileObject prefab = GetPrefab(tileObjectType);
 
 			if (prefab == null)
 			{
 				return null;
 			}
-			
-			GameObject tileGameObject = Instantiate(prefab);
-			return tileGameObject.GetComponent(tileObjectType) as BaseTileObject;
+
+			return Instantiate(prefab);
 		}
 
 		#endregion
@@ -71,25 +74,71 @@ namespace Game.Tiles
 		[Button("Update Dictionary Keys")]
 		private void UpdateDict()
 		{
-			tilePrefabs ??= new SerialisedDictionary<Type, GameObject>();
+			//tilePrefabs ??= new StringGameObjectDictionary();
 
 			Type[] types = Assembly.GetAssembly(typeof(BaseTileObject)).GetTypes();
 			foreach (Type type in types
 				.Where(t => t.IsSubclassOf(typeof(BaseTileObject))))
 			{
-				if (!tilePrefabs.ContainsKey(type))
+				if (!tilePrefabs.ContainsKey(type.FullName))
 				{
-					tilePrefabs.Add(type, null);
+					tilePrefabs.Add(type.FullName, null);
 				}
 			}
 
-			foreach (Type key in tilePrefabs.Keys.ToArray())
+			foreach (string key in tilePrefabs.Keys.ToArray())
 			{
-				if (!key.IsSubclassOf(typeof(BaseTileObject)))
+				Type type = GetTypeFrom(key);
+
+				if (type == null)
+				{
+					Debug.LogError(key + " is not a type");
+					continue;
+				}
+
+				if (!type.IsSubclassOf(typeof(BaseTileObject)))
 				{
 					tilePrefabs.Remove(key);
 				}
 			}
+		}
+
+		private BaseTileObject GetPrefab(Type tileObjectType)
+		{
+			if (tilePrefabs.TryGetValue(tileObjectType.FullName, out GameObject prefab) && prefab != null)
+			{
+				return prefab.GetComponent(tileObjectType) as BaseTileObject;
+			}
+
+			return null;
+		}
+
+		private static Type GetTypeFrom(string typeFullName)
+		{
+			return Type.GetType(typeFullName);
+		}
+
+		private bool ValidatePrefabsDict(StringGameObjectDictionary value)
+		{
+			foreach (KeyValuePair<string, GameObject> keyValuePair in value)
+			{
+				if (keyValuePair.Value == null)
+				{
+					continue;
+				}
+				
+				string typeFullName = keyValuePair.Key;
+				Type type = GetTypeFrom(typeFullName);
+				BaseTileObject prefab = GetPrefab(type);
+
+				if (prefab == null)
+				{
+					Debug.LogError($"Prefab does not have component {type.FullName}");
+					return false;
+				}
+			}
+
+			return true;
 		}
 
 		#endregion

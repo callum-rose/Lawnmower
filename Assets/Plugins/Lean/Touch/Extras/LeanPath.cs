@@ -38,7 +38,7 @@ namespace Lean.Touch
 			{
 				if (Points != null)
 				{
-					var count = Points.Count;
+					int count = Points.Count;
 
 					if (count >= 2)
 					{
@@ -60,15 +60,15 @@ namespace Lean.Touch
 #if UNITY_EDITOR
 		protected virtual void OnDrawGizmosSelected()
 		{
-			var count = GetPointCount();
+			int count = GetPointCount();
 
 			if (count >= 2)
 			{
-				var pointA = GetPoint(0);
+				Vector3 pointA = GetPoint(0);
 
-				for (var i = 1; i < count; i++)
+				for (int i = 1; i < count; i++)
 				{
-					var pointB = GetPoint(i);
+					Vector3 pointB = GetPoint(i);
 
 					Gizmos.DrawLine(pointA, pointB);
 
@@ -84,7 +84,7 @@ namespace Lean.Touch
 			{
 				if (smoothing < 0) smoothing = Smoothing;
 
-				var count = Points.Count;
+				int count = Points.Count;
 
 				if (count >= 2 && smoothing >= 1)
 				{
@@ -101,22 +101,22 @@ namespace Lean.Touch
 		{
 			if (Points == null) throw new IndexOutOfRangeException();
 
-			var count = Points.Count;
+			int count = Points.Count;
 
 			if (count < 2) throw new Exception();
 
 			// Get int and fractional part of float index
-			var i = (int) index;
-			var t = Mathf.Abs(index - i);
+			int i = (int) index;
+			float t = Mathf.Abs(index - i);
 
 			// Get 4 control points
-			var a = GetPointRaw(i - 1, count);
-			var b = GetPointRaw(i, count);
-			var c = GetPointRaw(i + 1, count);
-			var d = GetPointRaw(i + 2, count);
+			Vector3 a = GetPointRaw(i - 1, count);
+			Vector3 b = GetPointRaw(i, count);
+			Vector3 c = GetPointRaw(i + 1, count);
+			Vector3 d = GetPointRaw(i + 2, count);
 
 			// Interpolate and return
-			var p = default(Vector3);
+			Vector3 p = default(Vector3);
 
 			p.x = CubicInterpolate(a.x, b.x, c.x, d.x, t);
 			p.y = CubicInterpolate(a.y, b.y, c.y, d.y, t);
@@ -133,7 +133,7 @@ namespace Lean.Touch
 
 			if (smoothing < 1) throw new ArgumentOutOfRangeException();
 
-			var count = Points.Count;
+			int count = Points.Count;
 
 			if (count < 2) throw new Exception();
 
@@ -149,7 +149,7 @@ namespace Lean.Touch
 			else
 				index = Mathf.Clamp(index, 0, count - 1);
 
-			var point = Points[index];
+			Vector3 point = Points[index];
 
 			if (Space == Space.Self) point = transform.TransformPoint(point);
 
@@ -170,20 +170,20 @@ namespace Lean.Touch
 		public bool TryGetClosest(Vector3 position, ref Vector3 closestPoint, ref int closestIndexA,
 			ref int closestIndexB, int smoothing = -1)
 		{
-			var count = GetPointCount(smoothing);
+			int count = GetPointCount(smoothing);
 
 			if (count >= 2)
 			{
-				var indexA = 0;
-				var pointA = GetPoint(indexA, smoothing);
-				var closestDistance = float.PositiveInfinity;
+				int indexA = 0;
+				Vector3 pointA = GetPoint(indexA, smoothing);
+				float closestDistance = float.PositiveInfinity;
 
-				for (var i = 1; i < count; i++)
+				for (int i = 1; i < count; i++)
 				{
-					var indexB = i;
-					var pointB = GetPoint(indexB, smoothing);
-					var point = GetClosestPoint(position, pointA, pointB - pointA);
-					var distance = Vector3.Distance(position, point);
+					int indexB = i;
+					Vector3 pointB = GetPoint(indexB, smoothing);
+					Vector3 point = GetClosestPoint(position, pointA, pointB - pointA);
+					float distance = Vector3.Distance(position, point);
 
 					if (distance < closestDistance)
 					{
@@ -207,8 +207,8 @@ namespace Lean.Touch
 
 		public bool TryGetClosest(Vector3 position, ref Vector3 closestPoint, int smoothing = -1)
 		{
-			var closestIndexA = default(int);
-			var closestIndexB = default(int);
+			int closestIndexA = default(int);
+			int closestIndexB = default(int);
 
 			return TryGetClosest(position, ref closestPoint, ref closestIndexA, ref closestIndexB, smoothing);
 		}
@@ -216,19 +216,19 @@ namespace Lean.Touch
 		public bool TryGetClosest(Ray ray, ref Vector3 closestPoint, ref int closestIndexA, ref int closestIndexB,
 			int smoothing = -1)
 		{
-			var count = GetPointCount(smoothing);
+			int count = GetPointCount(smoothing);
 
 			if (count >= 2)
 			{
-				var indexA = 0;
-				var pointA = GetPoint(0, smoothing);
-				var closestDistance = float.PositiveInfinity;
+				int indexA = 0;
+				Vector3 pointA = GetPoint(0, smoothing);
+				float closestDistance = float.PositiveInfinity;
 
-				for (var i = 1; i < count; i++)
+				for (int i = 1; i < count; i++)
 				{
-					var pointB = GetPoint(i, smoothing);
-					var point = GetClosestPoint(ray, pointA, pointB - pointA);
-					var distance = GetClosestDistance(ray, point);
+					Vector3 pointB = GetPoint(i, smoothing);
+					Vector3 point = GetClosestPoint(ray, pointA, pointB - pointA);
+					float distance = GetClosestDistance(ray, point);
 
 					if (distance < closestDistance)
 					{
@@ -252,8 +252,8 @@ namespace Lean.Touch
 
 		public bool TryGetClosest(Ray ray, ref Vector3 currentPoint, int smoothing = -1)
 		{
-			var closestIndexA = default(int);
-			var closestIndexB = default(int);
+			int closestIndexA = default(int);
+			int closestIndexB = default(int);
 
 			return TryGetClosest(ray, ref currentPoint, ref closestIndexA, ref closestIndexB, smoothing);
 		}
@@ -262,12 +262,12 @@ namespace Lean.Touch
 		{
 			if (maximumDelta > 0.0f)
 			{
-				var closestPoint = currentPoint;
+				Vector3 closestPoint = currentPoint;
 
 				if (TryGetClosest(ray, ref closestPoint, smoothing))
 				{
 					// Move toward closest point
-					var targetPoint = Vector3.MoveTowards(currentPoint, closestPoint, maximumDelta);
+					Vector3 targetPoint = Vector3.MoveTowards(currentPoint, closestPoint, maximumDelta);
 
 					return TryGetClosest(targetPoint, ref currentPoint, smoothing);
 				}
@@ -280,38 +280,38 @@ namespace Lean.Touch
 
 		private Vector3 GetClosestPoint(Vector3 position, Vector3 origin, Vector3 direction)
 		{
-			var denom = Vector3.Dot(direction, direction);
+			float denom = Vector3.Dot(direction, direction);
 
 			// If the line doesn't point anywhere, return origin
 			if (denom == 0.0f) return origin;
 
-			var dist01 = Vector3.Dot(position - origin, direction) / denom;
+			float dist01 = Vector3.Dot(position - origin, direction) / denom;
 
 			return origin + direction * Mathf.Clamp01(dist01);
 		}
 
 		private Vector3 GetClosestPoint(Ray ray, Vector3 origin, Vector3 direction)
 		{
-			var crossA = Vector3.Cross(ray.direction, direction);
-			var denom = Vector3.Dot(crossA, crossA);
+			Vector3 crossA = Vector3.Cross(ray.direction, direction);
+			float denom = Vector3.Dot(crossA, crossA);
 
 			// If lines are parallel, we can return any point on line
 			if (denom == 0.0f) return origin;
 
-			var crossB = Vector3.Cross(ray.direction, ray.origin - origin);
-			var dist01 = Vector3.Dot(crossA, crossB) / denom;
+			Vector3 crossB = Vector3.Cross(ray.direction, ray.origin - origin);
+			float dist01 = Vector3.Dot(crossA, crossB) / denom;
 
 			return origin + direction * Mathf.Clamp01(dist01);
 		}
 
 		private float GetClosestDistance(Ray ray, Vector3 point)
 		{
-			var denom = Vector3.Dot(ray.direction, ray.direction);
+			float denom = Vector3.Dot(ray.direction, ray.direction);
 
 			// If the ray doesn't point anywhere, return distance from origin to point
 			if (denom == 0.0f) return Vector3.Distance(ray.origin, point);
 
-			var dist01 = Vector3.Dot(point - ray.origin, ray.direction) / denom;
+			float dist01 = Vector3.Dot(point - ray.origin, ray.direction) / denom;
 
 			return Vector3.Distance(point, ray.GetPoint(dist01));
 		}
@@ -324,14 +324,14 @@ namespace Lean.Touch
 
 		private float CubicInterpolate(float a, float b, float c, float d, float t)
 		{
-			var tt = t * t;
-			var ttt = tt * t;
+			float tt = t * t;
+			float ttt = tt * t;
 
-			var e = a - b;
-			var f = d - c;
-			var g = f - e;
-			var h = e - g;
-			var i = c - a;
+			float e = a - b;
+			float f = d - c;
+			float g = f - e;
+			float h = e - g;
+			float i = c - a;
 
 			return g * ttt + h * tt + i * t + b;
 		}
@@ -340,11 +340,11 @@ namespace Lean.Touch
 		{
 			if (Visual != null)
 			{
-				var count = GetPointCount();
+				int count = GetPointCount();
 
 				Visual.positionCount = count;
 
-				for (var i = 0; i < count; i++) Visual.SetPosition(i, GetPoint(i));
+				for (int i = 0; i < count; i++) Visual.SetPosition(i, GetPoint(i));
 			}
 		}
 	}

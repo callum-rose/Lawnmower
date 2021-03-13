@@ -96,8 +96,8 @@ namespace Lean.Touch
         {
             if (RequiredArc >= 0.0f)
             {
-                var angle = Mathf.Atan2(vector.x, vector.y) * Mathf.Rad2Deg;
-                var angleDelta = Mathf.DeltaAngle(angle, RequiredAngle);
+                float angle = Mathf.Atan2(vector.x, vector.y) * Mathf.Rad2Deg;
+                float angleDelta = Mathf.DeltaAngle(angle, RequiredAngle);
 
                 if (angleDelta < RequiredArc * -0.5f || angleDelta >= RequiredArc * 0.5f)
                 {
@@ -110,9 +110,9 @@ namespace Lean.Touch
 
         protected void HandleFingerSwipe(LeanFinger finger, Vector2 screenFrom, Vector2 screenTo)
         {
-            var finalDelta = screenTo - screenFrom;
+            Vector2 finalDelta = screenTo - screenFrom;
 
-            if (AngleIsValid(finalDelta) == true)
+            if (AngleIsValid(finalDelta))
             {
                 if (onFinger != null)
                 {
@@ -155,8 +155,8 @@ namespace Lean.Touch
                     onDistance.Invoke(finalDelta.magnitude);
                 }
 
-                var worldFrom = ScreenDepth.Convert(screenFrom, gameObject);
-                var worldTo = ScreenDepth.Convert(screenTo, gameObject);
+                Vector3 worldFrom = ScreenDepth.Convert(screenFrom, gameObject);
+                Vector3 worldTo = ScreenDepth.Convert(screenTo, gameObject);
 
                 if (onWorldFrom != null)
                 {
@@ -199,13 +199,13 @@ namespace Lean.Touch.Inspector
 
             EditorGUILayout.Separator();
 
-            var usedA = Any(t => t.OnFinger.GetPersistentEventCount() > 0);
-            var usedB = Any(t => t.OnDelta.GetPersistentEventCount() > 0);
-            var usedC = Any(t => t.OnDistance.GetPersistentEventCount() > 0);
-            var usedD = Any(t => t.OnWorldFrom.GetPersistentEventCount() > 0);
-            var usedE = Any(t => t.OnWorldTo.GetPersistentEventCount() > 0);
-            var usedF = Any(t => t.OnWorldDelta.GetPersistentEventCount() > 0);
-            var usedG = Any(t => t.OnWorldFromTo.GetPersistentEventCount() > 0);
+            bool usedA = Any(t => t.OnFinger.GetPersistentEventCount() > 0);
+            bool usedB = Any(t => t.OnDelta.GetPersistentEventCount() > 0);
+            bool usedC = Any(t => t.OnDistance.GetPersistentEventCount() > 0);
+            bool usedD = Any(t => t.OnWorldFrom.GetPersistentEventCount() > 0);
+            bool usedE = Any(t => t.OnWorldTo.GetPersistentEventCount() > 0);
+            bool usedF = Any(t => t.OnWorldDelta.GetPersistentEventCount() > 0);
+            bool usedG = Any(t => t.OnWorldFromTo.GetPersistentEventCount() > 0);
 
             EditorGUI.BeginDisabledGroup(usedA && usedB && usedC && usedD && usedE && usedF && usedG);
             showUnusedEvents = EditorGUILayout.Foldout(showUnusedEvents, "Show Unused Events");
@@ -213,49 +213,49 @@ namespace Lean.Touch.Inspector
 
             EditorGUILayout.Separator();
 
-            if (usedA == true || showUnusedEvents == true)
+            if (usedA || showUnusedEvents)
             {
                 Draw("onFinger");
             }
 
-            if (usedB == true || usedC == true || showUnusedEvents == true)
+            if (usedB || usedC || showUnusedEvents)
             {
                 Draw("Modify", "Should the swipe delta be modified before use?\n\nNormalize = The swipe delta magnitude/length will be set to 1.\n\nNormalize4 = The swipe delta will be + or - 1 on either the x or y axis.");
                 Draw("Coordinate", "The coordinate space of the OnDelta values.");
                 Draw("Multiplier", "The swipe delta will be multiplied by this value.");
             }
 
-            if (usedB == true || showUnusedEvents == true)
+            if (usedB || showUnusedEvents)
             {
                 Draw("onDelta");
             }
 
-            if (usedC == true || showUnusedEvents == true)
+            if (usedC || showUnusedEvents)
             {
                 Draw("onDistance");
             }
 
-            if (usedD == true || usedE == true || usedF == true || usedG == true || showUnusedEvents == true)
+            if (usedD || usedE || usedF || usedG || showUnusedEvents)
             {
                 Draw("ScreenDepth");
             }
 
-            if (usedD == true || showUnusedEvents == true)
+            if (usedD || showUnusedEvents)
             {
                 Draw("onWorldFrom");
             }
 
-            if (usedE == true || showUnusedEvents == true)
+            if (usedE || showUnusedEvents)
             {
                 Draw("onWorldTo");
             }
 
-            if (usedF == true || showUnusedEvents == true)
+            if (usedF || showUnusedEvents)
             {
                 Draw("onWorldDelta");
             }
 
-            if (usedG == true || showUnusedEvents == true)
+            if (usedG || showUnusedEvents)
             {
                 Draw("onWorldFromTo");
             }

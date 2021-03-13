@@ -1,6 +1,7 @@
 using Core;
 using Core.EventChannels;
 using DG.Tweening;
+using Game.Core;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -8,11 +9,11 @@ using UnityEngine.Serialization;
 namespace Game.Mowers
 {
 	[CreateAssetMenu(fileName = nameof(MowerCreatedAnimator),
-		menuName = SONames.GameDir + nameof(MowerCreatedAnimator))]
+		menuName = SoNames.GameDir + nameof(MowerCreatedAnimator))]
 	[UnreferencedScriptableObject]
 	internal class MowerCreatedAnimator : ScriptableObject
 	{
-		[SerializeField] private float delay = 1;
+		[SerializeField] private GamePlayData gamePlayData;
 		[SerializeField] private float dropFromHeight = 10;
 		[SerializeField] private float dropDuration = 0.5f;
 		[SerializeField] private Ease animEase = Ease.OutBounce;
@@ -22,6 +23,8 @@ namespace Game.Mowers
 		[SerializeField] private IGameObjectEventChannelListenerContainer mowerCreatedEventChannelContainer;
 		[SerializeField] private IBoolEventChannelTransmitterContainer isMowerTransformControlledExternallyEventChannelContainer;
 
+		[ShowInInspector] private float DropDelay => gamePlayData.LevelIntroDuration - dropDuration;
+		
 		private IVector3EventChannelListener MowerObjectMovedEventChannel => mowerObjectMovedEventChannelContainer.Result;
 		private IGameObjectEventChannelListener MowerCreatedEventChannel => mowerCreatedEventChannelContainer.Result;
 		
@@ -56,7 +59,7 @@ namespace Game.Mowers
 			_mowerGameObject.transform.position += Vector3.up * dropFromHeight;
 			_mowerGameObject.transform
 				.DOMove(position, dropDuration)
-				.SetDelay(delay)
+				.SetDelay(DropDelay)
 				.SetEase(animEase)
 				.OnComplete(() => IsMowerTransformControlledExternallyEventChannel.Raise(false));
 

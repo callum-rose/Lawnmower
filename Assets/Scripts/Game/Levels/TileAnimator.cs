@@ -8,20 +8,19 @@ using UnityEngine;
 
 namespace Game.Levels
 {
-	[CreateAssetMenu(fileName = nameof(TileAnimator), menuName = SONames.GameDir + nameof(TileAnimator))]
+	[CreateAssetMenu(fileName = nameof(TileAnimator), menuName = SoNames.GameDir + nameof(TileAnimator))]
 	[UnreferencedScriptableObject]
 	internal class TileAnimator : ScriptableObject
 	{
 		[SerializeField] private Vector3 positionOffset;
 		[SerializeField] private float perTileAnimDuration = 0.5f;
-		[SerializeField] private float maxDelay = 2;
+		[SerializeField, InlineEditor] private GamePlayData gamePlayData;
 
 		[TitleGroup("Event Channels")]
 		[SerializeField] private ILevelDataEventChannelListenerContainer levelStartedEventChannelContainer;
-
 		[SerializeField] private TileObjectEventChannel tileObjectCreatedEventChannel;
-
-		[ShowInInspector] private float TotalAnimDuration => perTileAnimDuration + maxDelay;
+		
+		[ShowInInspector] private float MaxDelay => gamePlayData.LevelIntroDuration - perTileAnimDuration;
 
 		private ILevelDataEventChannelListener LevelStartedEventChannel => levelStartedEventChannelContainer.Result;
 
@@ -46,7 +45,7 @@ namespace Game.Levels
 
 			float distanceFromOrigin = position.Magnitude;
 			float normalisedDistance = distanceFromOrigin / _furthestTile;
-			float delay = normalisedDistance * maxDelay;
+			float delay = normalisedDistance * gamePlayData.LevelIntroDuration;
 
 			tile.transform.DOMove(worldPosition, perTileAnimDuration).SetDelay(delay);
 		}

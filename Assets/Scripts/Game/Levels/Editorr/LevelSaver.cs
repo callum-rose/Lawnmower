@@ -10,7 +10,7 @@ using Utils;
 
 namespace Game.Levels.Editorr
 {
-	[CreateAssetMenu(fileName = nameof(LevelSaver), menuName = SONames.GameDir + nameof(LevelSaver))]
+	[CreateAssetMenu(fileName = nameof(LevelSaver), menuName = SoNames.GameDir + nameof(LevelSaver))]
 	internal class LevelSaver : ScriptableObject
 	{
 		[SerializeField, FolderPath] private string savePath;

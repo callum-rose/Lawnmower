@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace UI.Dialogs
 {
-	[CreateAssetMenu(fileName = nameof(PresetOpenDialogEventChannel), menuName = SONames.GameDir + nameof(PresetOpenDialogEventChannel))]
+	[CreateAssetMenu(fileName = nameof(PresetOpenDialogEventChannel), menuName = SoNames.GameDir + nameof(PresetOpenDialogEventChannel))]
 	public class PresetOpenDialogEventChannel : ScriptableObject
 	{
 		[Required, SerializeField] private OpenDialogEventChannel openDialogEventChannel;

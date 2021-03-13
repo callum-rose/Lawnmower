@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using Cinemachine;
 using UnityEngine.Serialization;
@@ -10,91 +11,93 @@ using Sirenix.OdinInspector;
 
 namespace Game.Cameras
 {
-    internal class CameraManager : MonoBehaviour
-    {
-        [TitleGroup("Level Camera")]
-        [SerializeField] private CinemachineTargetGroup levelTargetGroup;
-        [SerializeField] private MouseTileSelector mouseTileSelector;
-        [SerializeField] private float tileWeight = 1;
-        [SerializeField] private float mowerWeight = 10;
-        
-        [TitleGroup("Mower Camera")]
-        [SerializeField] private CinemachineVirtualCamera mowerVCam;
+	internal class CameraManager : MonoBehaviour
+	{
+		[TitleGroup("Level Camera")]
+		[SerializeField] private CinemachineTargetGroup levelTargetGroup;
 
-        [TitleGroup("Event Channels")] 
-        [SerializeField] private IGameObjectEventChannelListenerContainer mowerCreatedEventChannelContainer;
-        [SerializeField] private IGameObjectEventChannelListenerContainer mowerWillBeDestroyedEventChannelContainer;
-        [SerializeField] private TileObjectEventChannel tileCreatedEventChannel;
-        [SerializeField] private GameObjectEventChannel tileWillBeDestroyedEventChannel;
+		[SerializeField] private MouseTileSelector mouseTileSelector;
+		[SerializeField] private float tileWeight = 1;
+		[SerializeField] private float mowerWeight = 10;
 
-        private IGameObjectEventChannelListener MowerCreatedEventChannel => mowerCreatedEventChannelContainer.Result;
-        private IGameObjectEventChannelListener MowerWillBeDestroyedEventChannel => mowerWillBeDestroyedEventChannelContainer.Result;
-        
-        #region Unity
+		[TitleGroup("Mower Camera")]
+		[SerializeField] private CinemachineVirtualCamera mowerVCam;
 
-        private void Awake()
-        {
-            mouseTileSelector.Dragging += OnMouseDragging;
+		[TitleGroup("Event Channels")]
+		[SerializeField] private IGameObjectEventChannelListenerContainer mowerCreatedEventChannelContainer;
 
-            MowerCreatedEventChannel.EventRaised += OnMowerCreated;
-            MowerWillBeDestroyedEventChannel.EventRaised += OnMowerWillBeDestroyed;
-            
-            tileCreatedEventChannel.EventRaised += OnTileObjectCreated;
-            tileWillBeDestroyedEventChannel.EventRaised += OnTileObjectWillBeDestroyed;
-        }
+		[SerializeField] private IGameObjectEventChannelListenerContainer mowerWillBeDestroyedEventChannelContainer;
+		[SerializeField] private TileObjectEventChannel tileCreatedEventChannel;
+		[SerializeField] private GameObjectEventChannel tileWillBeDestroyedEventChannel;
 
-        private void OnDestroy()
-        {
-            mouseTileSelector.Dragging -= OnMouseDragging;
-            
-            MowerCreatedEventChannel.EventRaised -= OnMowerCreated;
-            MowerWillBeDestroyedEventChannel.EventRaised -= OnMowerWillBeDestroyed;
+		private IGameObjectEventChannelListener MowerCreatedEventChannel => mowerCreatedEventChannelContainer.Result;
 
-            tileCreatedEventChannel.EventRaised -= OnTileObjectCreated;
-            tileWillBeDestroyedEventChannel.EventRaised -= OnTileObjectWillBeDestroyed;
-        }
+		private IGameObjectEventChannelListener MowerWillBeDestroyedEventChannel =>
+			mowerWillBeDestroyedEventChannelContainer.Result;
 
-        #endregion
+		#region Unity
 
-        #region Events
+		private void Awake()
+		{
+			mouseTileSelector.Dragging += OnMouseDragging;
 
-        private void OnMowerCreated(GameObject gameObject)
-        {
-            mowerVCam.Follow = mowerVCam.LookAt = gameObject.transform;
-        }
-        
-        private void OnMowerWillBeDestroyed(GameObject gameObject)
-        {
-            mowerVCam.Follow = mowerVCam.LookAt = null;
-        }
-        
-        private void OnTileObjectCreated(GameObject gameObject, GridVector _)
-        {
-            levelTargetGroup.AddMember(gameObject.transform, tileWeight, LevelDimensions.TileSize * 0.5f);
-        }        
-        
-        private void OnTileObjectWillBeDestroyed(GameObject gameObject)
-        {
-            if (gameObject.transform == null)
-            {
-                levelTargetGroup.m_Targets = levelTargetGroup.m_Targets
-                    .Where(t => t.target != null)
-                    .ToArray();
-                return;
-            }
+			MowerCreatedEventChannel.EventRaised += OnMowerCreated;
+			MowerWillBeDestroyedEventChannel.EventRaised += OnMowerWillBeDestroyed;
 
-            levelTargetGroup.RemoveMember(gameObject.transform);
-        }
+			tileCreatedEventChannel.EventRaised += OnTileObjectCreated;
+			tileWillBeDestroyedEventChannel.EventRaised += OnTileObjectWillBeDestroyed;
+		}
 
-        private void OnMouseDragging(bool isDragging)
-        {
-            //Debug.Log(isDragging);
+		private void OnDestroy()
+		{
+			mouseTileSelector.Dragging -= OnMouseDragging;
 
-            //    targetGroupVCam.GetCinemachineComponent<CinemachineGroupComposer>().enabled = !isDragging;
+			MowerCreatedEventChannel.EventRaised -= OnMowerCreated;
+			MowerWillBeDestroyedEventChannel.EventRaised -= OnMowerWillBeDestroyed;
 
-            ////freezeVCam.enabled = isDragging;
-        }
+			tileCreatedEventChannel.EventRaised -= OnTileObjectCreated;
+			tileWillBeDestroyedEventChannel.EventRaised -= OnTileObjectWillBeDestroyed;
+		}
 
-        #endregion
-    }
+		#endregion
+
+		#region Events
+
+		private void OnMowerCreated(GameObject gameObject)
+		{
+		}
+
+		private void OnMowerWillBeDestroyed(GameObject gameObject)
+		{
+		}
+
+		private void OnTileObjectCreated(GameObject gameObject, GridVector _)
+		{
+			levelTargetGroup.AddMember(gameObject.transform, tileWeight, LevelDimensions.TileSize * 0.5f);
+		}
+
+		private void OnTileObjectWillBeDestroyed(GameObject gameObject)
+		{
+			if (gameObject.transform == null)
+			{
+				levelTargetGroup.m_Targets = levelTargetGroup.m_Targets
+					.Where(t => t.target != null)
+					.ToArray();
+				return;
+			}
+
+			levelTargetGroup.RemoveMember(gameObject.transform);
+		}
+
+		private void OnMouseDragging(bool isDragging)
+		{
+			//Debug.Log(isDragging);
+
+			//    targetGroupVCam.GetCinemachineComponent<CinemachineGroupComposer>().enabled = !isDragging;
+
+			////freezeVCam.enabled = isDragging;
+		}
+
+		#endregion
+	}
 }
