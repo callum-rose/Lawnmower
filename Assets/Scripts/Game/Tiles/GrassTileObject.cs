@@ -16,7 +16,7 @@ namespace Game.Tiles
 		[SerializeField, Range(0, GrassTile.MaxGrassHeight), OnValueChanged(nameof(OnDisplayGrassHeightChanged))]
 		private int displayGrassHeight;
 
-		private GrassTile _tileData;
+		private IReadonlyGrassTile _tileData;
 		
 		private IAppearanceSetter _appearanceSetter;
 
@@ -34,9 +34,9 @@ namespace Game.Tiles
 		
 		#region API
 
-		public override void Bind(Tile tileData)
+		public override void Bind(IReadonlyTile tileData)
 		{
-			_tileData = (GrassTile)tileData;
+			_tileData = (IReadonlyGrassTile)tileData;
 
 			_tileData.GrassHeight.ValueChangedFromTo += OnGrassHeightValueChanged;
 			SetAppearance(_tileData.GrassHeight.Value);

@@ -12,6 +12,7 @@ namespace Game.Levels
 		ILevelDataEventChannelTransmitter
 	{
 		protected override bool ShouldBeSolo => true;
+		protected override bool PushLastDataOnSubscribe => true;
 	}
 
 	internal interface ILevelDataEventChannelListener : IEventChannelListener<IReadOnlyLevelData> { }

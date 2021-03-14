@@ -6,7 +6,7 @@ using UnityEngine;
 namespace Game.Tiles
 {
 	[Serializable]
-	internal class GrassTile : Tile
+	internal class GrassTile : Tile, IReadonlyGrassTile
 	{
 		public const int MaxGrassHeight = 3;
 		public const int PerfectGrassHeight = 1;

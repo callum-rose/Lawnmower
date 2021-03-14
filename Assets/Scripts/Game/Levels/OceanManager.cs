@@ -1,31 +1,60 @@
-using System;
+using System.Collections.Generic;
 using BalsamicBits.Extensions;
 using Game.Core;
-using Settings;
-using Settings.EventChannels;
 using Sirenix.OdinInspector;
 using UnityEngine;
-using Utils;
 
 namespace Game.Levels
 {
+	[ExecuteInEditMode]
 	internal class OceanManager : MonoBehaviour
 	{
 		[SerializeField] private Positioner positioner;
 		[SerializeField] private int sizeOffset = 2;
 		[SerializeField] private float planeDefaultSize = 10;
+		
+		[TitleGroup("Material")]
 		[SerializeField] private Material material;
+		[SerializeField, Range(0,1)] private float amountShowingRadially;
+		[SerializeField] private float waveSpeed;
+
+		[TitleGroup("Defaults")]
+		[SerializeField] private Vector3 defaultWorldCenter;
+
+		[TitleGroup("Defaults")] [SerializeField]
+		private float defaultRadius;
 
 		[TitleGroup("Event Channels")]
 		[SerializeField] private LevelDataEventChannel levelDataEventChannel;
-		
-		private static readonly int bandingId = Shader.PropertyToID("_Banding");
 
+		[SerializeField, HideInInspector] private Transform[] cameraTargets;
+
+		public IEnumerable<Transform> CameraTargets => cameraTargets;
+
+		private static readonly int bandingId = Shader.PropertyToID("_Banding");
+		private static readonly int radialShowingId = Shader.PropertyToID("_AmountRadiallyShowing");
+		private static readonly int waveSpeedId = Shader.PropertyToID("_WaveSpeed");
+		
 		#region Unity
 
 		private void Awake()
 		{
+			SetDefaults();
 			levelDataEventChannel.EventRaised += LevelDataEventChannelOnEventRaised;
+		}
+
+		private void OnDrawGizmosSelected()
+		{
+			Gizmos.color = Color.cyan;
+			foreach (Transform target in cameraTargets)
+			{
+				Gizmos.DrawSphere(target.position, 0.25f);
+			}
+		}
+
+		private void Update()
+		{
+			SetMaterialProperties();
 		}
 
 		private void OnDestroy()
@@ -39,23 +68,25 @@ namespace Game.Levels
 
 		private void LevelDataEventChannelOnEventRaised(IReadOnlyLevelData level)
 		{
-			Vector3 worldCenter = GetWorldCenter(level);
+			Vector3 worldCenter = positioner.GetLevelWorldCenter(level);
 			SetToCenter(worldCenter);
 
-			float maxDistanceFromCenter = GetMaxDistanceFromCenter(level, worldCenter);
+			float maxDistanceFromCenter = positioner.GetMaxDistanceFromLevelCenter(level, worldCenter);
 			float planeRadius = CalculatePlaneRadius(maxDistanceFromCenter);
 			SetSize(planeRadius);
 
-			SetBanding();
+			SetMaterialProperties();
 		}
-		
+
 		#endregion
 
 		#region Methods
 
-		private void SetBanding()
+		private void SetMaterialProperties()
 		{
 			material.SetFloat(bandingId, transform.localScale.x * planeDefaultSize + 1);
+			material.SetFloat(radialShowingId, amountShowingRadially);
+			material.SetFloat(waveSpeedId, waveSpeed);
 		}
 
 		private void SetSize(float planeRadius)
@@ -66,8 +97,7 @@ namespace Game.Levels
 		private void SetToCenter(Vector3 worldCenter)
 		{
 			float initialY = transform.position.y;
-			transform.position = worldCenter;
-			transform.position = transform.position.SetY(initialY);
+			transform.localPosition = worldCenter.SetY(initialY);
 		}
 
 		private float CalculatePlaneRadius(float maxDistance)
@@ -75,41 +105,41 @@ namespace Game.Levels
 			float maxDistanceRoundedUpToNearestTileSize =
 				Mathf.Ceil(maxDistance / LevelDimensions.TileSize) * LevelDimensions.TileSize;
 
-			float planeRadius = maxDistanceRoundedUpToNearestTileSize + sizeOffset;
-			return planeRadius;
+			return maxDistanceRoundedUpToNearestTileSize + sizeOffset;
 		}
 
-		private float GetMaxDistanceFromCenter(IReadOnlyLevelData level, Vector3 worldCenter)
+#if UNITY_EDITOR
+		[TitleGroup("Camera Targets"), Button, HideInPlayMode]
+		private void CreateCircumferencialTargetTransforms(int count)
 		{
-			float maxDistanceSqr = 0;
-			Loops.TwoD(level.Width, level.Depth, (x, y) =>
+			if (cameraTargets == null || count != cameraTargets.Length)
 			{
-				Vector3 worldPosition = positioner.GetWorldPosition(new GridVector(x, y));
-				float distanceSqr = Vector3.SqrMagnitude(worldPosition - worldCenter);
+				transform.DestroyAllChildrenImmediate();
 
-				if (distanceSqr > maxDistanceSqr)
+				cameraTargets = new Transform[count];
+				for (int i = 0; i < count; i++)
 				{
-					maxDistanceSqr = distanceSqr;
+					Transform newTarget = new GameObject("Target " + i).transform;
+					newTarget.SetParent(transform);
+					cameraTargets[i] = newTarget;
 				}
-			});
+			}
 
-			float maxDistance = Mathf.Sqrt(maxDistanceSqr);
-			return maxDistance;
+			for (int i = 0; i < count; i++)
+			{
+				Transform target = cameraTargets[i];
+				float angle = 2f * Mathf.PI * i / count;
+				target.localPosition = new Vector3(Mathf.Cos(angle), 0, Mathf.Sin(angle)) * planeDefaultSize / 2;
+			}
 		}
+#endif
 
-		private Vector3 GetWorldCenter(IReadOnlyLevelData level)
+		[TitleGroup("Defaults"), Button("Set Defaults")]
+		private void SetDefaults()
 		{
-			GridVector levelCenterMin = new GridVector(
-				Mathf.FloorToInt((level.Width - 1) / 2f),
-				Mathf.FloorToInt((level.Depth - 1) / 2f));
-			GridVector levelCenterMax = new GridVector(
-				Mathf.CeilToInt((level.Width - 1) / 2f),
-				Mathf.CeilToInt((level.Depth - 1) / 2f));
-
-			Vector3 worldCenterMin = positioner.GetWorldPosition(levelCenterMin);
-			Vector3 worldCenterMax = positioner.GetWorldPosition(levelCenterMax);
-
-			return (worldCenterMin + worldCenterMax) * 0.5f;
+			SetToCenter(defaultWorldCenter);
+			SetSize(defaultRadius);
+			SetMaterialProperties();
 		}
 
 		#endregion

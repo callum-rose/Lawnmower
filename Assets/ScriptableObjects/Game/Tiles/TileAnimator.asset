@@ -20,3 +20,6 @@ MonoBehaviour:
     ResultType: 
   tileObjectCreatedEventChannel: {fileID: 11400000, guid: 125155f780e7ea846a0e46c85c75f398,
     type: 2}
+  tileAnimationsFinishedEventChannel:
+    ObjectField: {fileID: 11400000, guid: 5b7337faae3afe741aef948b40204a19, type: 2}
+    ResultType: 

@@ -44,6 +44,39 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c6fa324e11843f3a2d9bebc6811be41, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  bobAnimationCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0.00094256445
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 136
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.1062046
+      value: -0.13602754
+      inSlope: -0.5581449
+      outSlope: -0.5581449
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.23737267
+    - serializedVersion: 3
+      time: 0.5
+      value: 0
+      inSlope: -0.8270406
+      outSlope: -0.8270406
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.14520966
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1001 &7880530903935526108
 PrefabInstance:
   m_ObjectHideFlags: 0

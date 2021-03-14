@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Game.Core;
 using Game.Mowers.Input;
@@ -60,6 +61,9 @@ namespace Game.Levels.EditorWindow
 			}
 		}
 
+		[ShowInInspector, HideLabel, DisplayAsString]
+		private string _clickActionInfoText;
+
 		private bool CurrentNotNull => _editableLevel != null;
 		private bool CurrentNull => _editableLevel == null;
 
@@ -69,7 +73,13 @@ namespace Game.Levels.EditorWindow
 
 		private delegate void TileClickedEvent(int x, int y);
 
-		private TileClickedEvent _tileClicked;
+		private struct TileClickData
+		{
+			public TileClickedEvent action;
+			public string description;
+		}
+
+		private Queue<TileClickData> _tileClickedActionQueue = new Queue<TileClickData>();
 
 		private MowerInputEventChannel _mowerInputEventChannel;
 
@@ -153,6 +163,10 @@ namespace Game.Levels.EditorWindow
 					ColorUtility.TryParseHtmlString("#916B4C", out colour);
 					break;
 
+				case SpringTile _:
+					colour = Color.yellow;
+					break;
+
 				default:
 					throw new ArgumentOutOfRangeException();
 			}
@@ -163,7 +177,9 @@ namespace Game.Levels.EditorWindow
 		[Button, BoxGroup(SplitLeft)]
 		private void ClickSetStartPosition()
 		{
-			_tileClicked = (x, y) => _editableLevel.StartPosition = new GridVector(x, y);
+			SetNextTileClickedAction(
+				(x, y) => _editableLevel.StartPosition = new GridVector(x, y),
+				"Set start position");
 		}
 
 		[Button, BoxGroup(SplitLeft)]
@@ -235,9 +251,24 @@ namespace Game.Levels.EditorWindow
 
 		internal void OnTileClicked(int x, int y)
 		{
-			_tileClicked ??= SetTile;
-			_tileClicked.Invoke(x, y);
-			_tileClicked = null;
+			if (_tileClickedActionQueue.Count > 0)
+			{
+				TileClickData tileClickData = _tileClickedActionQueue.Dequeue();
+				tileClickData.action(x, y);
+			}
+			else
+			{
+				SetTile(x, y);
+			}
+			
+			if (_tileClickedActionQueue.Count > 0)
+			{
+				_clickActionInfoText = _tileClickedActionQueue.Peek().description;
+			}
+			else
+			{
+				_clickActionInfoText = null;
+			}
 		}
 
 		private void SetTile(int x, int y)
@@ -249,22 +280,39 @@ namespace Game.Levels.EditorWindow
 
 
 			Tile currentTile = _editableLevel.GetTile(x, y);
-			Tile cloneTile = _currentTilePaint.Clone();
-			
-			if (currentTile is StoneTile && cloneTile is StoneTile)
+			Tile newTile = _currentTilePaint.Clone();
+
+			if (currentTile is StoneTile && newTile is StoneTile)
 			{
 				StoneTile newStoneTile = currentTile.Clone() as StoneTile;
 				newStoneTile.Direction++;
 				newStoneTile.Direction %= 4;
 
-				cloneTile = newStoneTile;
+				newTile = newStoneTile;
 			}
-			
+			else if (newTile is SpringTile springTile)
+			{
+				SetNextTileClickedAction(
+					(x, y) => springTile.LandingPosition = new GridVector(x, y),
+					"Click sping tile landing position");
+			}
+
 			IUndoable undoable = new Undoable(
-				() => Set_Local(cloneTile),
+				() => Set_Local(newTile),
 				() => Set_Local(currentTile));
 
 			_undoSystem.Do(undoable);
+		}
+
+		private void SetNextTileClickedAction(TileClickedEvent action, string description)
+		{
+			TileClickData tileClickData = new TileClickData
+			{
+				action = action,
+				description = description
+			};
+
+			_tileClickedActionQueue.Enqueue(tileClickData);
 		}
 	}
 }

@@ -7,7 +7,9 @@ namespace Core.EventChannels
 	[CreateAssetMenu(fileName = nameof(VoidEventChannel), menuName = SoNames.CoreDir + nameof(VoidEventChannel))]
 	public class VoidEventChannel : BaseEventChannel, IVoidEventChannelListener, IVoidEventChannelTransmitter
 	{
-		protected override bool ShouldBeSolo => false;
+		[SerializeField] private bool shouldBeSolo;
+
+		protected override bool ShouldBeSolo => shouldBeSolo;
 	}
 	
 	public interface IVoidEventChannelListener : IEventChannelListener { }

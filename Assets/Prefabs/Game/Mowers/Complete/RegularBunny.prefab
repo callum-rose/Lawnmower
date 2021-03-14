@@ -172,6 +172,12 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4294696418991189797, guid: 9226f47e547bc3f479283ed99ac47c74,
+        type: 3}
+      propertyPath: movedEventChannel.ObjectField
+      value: 
+      objectReference: {fileID: 11400000, guid: ea3df77c7ddc40947afc66b8918e7953,
+        type: 2}
     - target: {fileID: 6682515571242675335, guid: 9226f47e547bc3f479283ed99ac47c74,
         type: 3}
       propertyPath: needPositionerContainers.Array.size

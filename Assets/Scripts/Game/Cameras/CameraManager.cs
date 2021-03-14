@@ -1,10 +1,10 @@
-using System;
+using System.Collections.Generic;
 using UnityEngine;
 using Cinemachine;
-using UnityEngine.Serialization;
 using Game.Levels;
 using Game.Tiles;
 using System.Linq;
+using BalsamicBits.Extensions;
 using Core.EventChannels;
 using Game.Core;
 using Sirenix.OdinInspector;
@@ -18,10 +18,6 @@ namespace Game.Cameras
 
 		[SerializeField] private MouseTileSelector mouseTileSelector;
 		[SerializeField] private float tileWeight = 1;
-		[SerializeField] private float mowerWeight = 10;
-
-		[TitleGroup("Mower Camera")]
-		[SerializeField] private CinemachineVirtualCamera mowerVCam;
 
 		[TitleGroup("Event Channels")]
 		[SerializeField] private IGameObjectEventChannelListenerContainer mowerCreatedEventChannelContainer;
@@ -34,6 +30,9 @@ namespace Game.Cameras
 
 		private IGameObjectEventChannelListener MowerWillBeDestroyedEventChannel =>
 			mowerWillBeDestroyedEventChannelContainer.Result;
+
+		private readonly Dictionary<GameObject, Transform> _tileToPlaceholderDict =
+			new Dictionary<GameObject, Transform>();
 
 		#region Unity
 
@@ -73,7 +72,12 @@ namespace Game.Cameras
 
 		private void OnTileObjectCreated(GameObject gameObject, GridVector _)
 		{
-			levelTargetGroup.AddMember(gameObject.transform, tileWeight, LevelDimensions.TileSize * 0.5f);
+			Transform tilePlaceholder = new GameObject(gameObject.name + " Placeholder").transform;
+			tilePlaceholder.position = gameObject.transform.position;
+
+			levelTargetGroup.AddMember(tilePlaceholder, tileWeight, LevelDimensions.TileSize * 0.5f);
+
+			_tileToPlaceholderDict.Add(gameObject, tilePlaceholder);
 		}
 
 		private void OnTileObjectWillBeDestroyed(GameObject gameObject)
@@ -86,7 +90,9 @@ namespace Game.Cameras
 				return;
 			}
 
-			levelTargetGroup.RemoveMember(gameObject.transform);
+			Transform tilePlaceholder = _tileToPlaceholderDict.GetThenRemove(gameObject);
+			levelTargetGroup.RemoveMember(tilePlaceholder);
+			Destroy(tilePlaceholder.gameObject);
 		}
 
 		private void OnMouseDragging(bool isDragging)

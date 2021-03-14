@@ -73,7 +73,8 @@ namespace Game.UndoSystem
 		{
 			yield return new WaitForEndOfFrame();
 
-			if (_undosThisFrame.Count > 0)
+			// this is a while because an undo might be added to _undosThisFrame inside the body
+			while (_undosThisFrame.Count > 0)
 			{
 				IUndoable undoable;
 				if (_undosThisFrame.Count > 1)

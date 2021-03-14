@@ -49,7 +49,7 @@ namespace Game.Levels
             OnEnable();
         }
         
-        public void SetTiles(IReadOnlyLevelData levelData)
+        public void SetLevel(IReadOnlyLevelData levelData)
         {
             _levelData = levelData;
         }
@@ -77,11 +77,11 @@ namespace Game.Levels
 
             GridVector direction = positionToInteract - positionMovingFrom;
 
-            Tile tileTo = _levelData.GetTile(positionToInteract);
-            tileTo.TraverseOnto(direction, inverted);
-
             Tile tileFrom = _levelData.GetTile(positionMovingFrom);
             tileFrom.TraverseAway(direction, inverted);
+            
+            Tile tileTo = _levelData.GetTile(positionToInteract);
+            tileTo.TraverseOnto(direction, inverted);
         }
 
         private void Bump(GridVector prevPosition, GridVector targetPosition, Xor isUndo)

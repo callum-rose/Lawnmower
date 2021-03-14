@@ -5,7 +5,6 @@ using Game.Mowers;
 using UI.Dialogs;
 using Game.UndoSystem;
 using Sirenix.OdinInspector;
-using System;
 using BalsamicBits.Extensions;
 using Core.EventChannels;
 using UnityEngine;
@@ -122,7 +121,8 @@ namespace Game.Core
 
 					void ButtonAction()
 					{
-						Begin(new GameSetupPassThroughData(cachedMower, nextLevelInfo.LevelData));
+						GameSetupPassThroughData data = new GameSetupPassThroughData(cachedMower, nextLevelInfo.LevelData);
+						ViewManager.Instance.Load(UnityScene.Game, data);
 					}
 
 					DialogInfo dialogInfo = new DialogInfo(
@@ -133,8 +133,7 @@ namespace Game.Core
 				}
 				else
 				{
-					// TODO
-					throw new NotImplementedException();
+					ViewManager.Instance.Load(UnityScene.LevelSelect);
 				}
 			}
 			else

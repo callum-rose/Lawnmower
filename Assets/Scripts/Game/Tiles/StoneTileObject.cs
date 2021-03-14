@@ -5,11 +5,11 @@ namespace Game.Tiles
 {
 	internal class StoneTileObject : BaseTileObject
 	{
-		private StoneTile _data;
+		private IReadonlyStoneTile _data;
 		
-		public override void Bind(Tile data)
+		public override void Bind(IReadonlyTile data)
 		{
-			_data = (StoneTile)data;
+			_data = (IReadonlyStoneTile)data;
 			
 			transform.rotation *= Quaternion.AngleAxis(_data.Direction * 90, Vector3.up);
 		}

@@ -20,12 +20,14 @@ namespace Game.Mowers
 
             public void Do()
             {
+                GridVector prevPosition = _movementManager.MowerPosition;
+                
+                _movementManager._mowerMover.Move(_targetPosition, false);
+                
                 _movementManager.Moved.Invoke(
-                    _movementManager.MowerPosition,
+                    prevPosition,
                     _targetPosition,
                     (Xor)false);
-
-                _movementManager._mowerMover.Move(_targetPosition, false);
             }
 
             public void Undo()

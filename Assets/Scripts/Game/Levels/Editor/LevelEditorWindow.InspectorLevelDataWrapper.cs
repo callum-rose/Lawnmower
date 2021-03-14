@@ -120,16 +120,28 @@ namespace Game.Levels
 			Color tileColour = LevelEditorWindow.GetColourForTile(tileData);
 
 			EditorGUI.DrawRect(cellRect.Padding(1), tileColour);
-			
+
 			switch (tileData)
 			{
 				case StoneTile stoneTile:
 				{
-					GUIStyle guiStyle = new GUIStyle {
+					GUIStyle guiStyle = new GUIStyle
+					{
 						alignment = TextAnchor.MiddleCenter,
 						border = new RectOffset(1, 1, 1, 1)
 					};
 					EditorGUI.LabelField(cellRect, stoneTile.Direction.ToString(), guiStyle);
+					break;
+				}
+
+				case SpringTile springTile:
+				{
+					GUIStyle guiStyle = new GUIStyle
+					{
+						alignment = TextAnchor.MiddleCenter,
+						border = new RectOffset(1, 1, 1, 1)
+					};
+					EditorGUI.LabelField(cellRect, springTile.LandingPosition.ToString(), guiStyle);
 					break;
 				}
 			}

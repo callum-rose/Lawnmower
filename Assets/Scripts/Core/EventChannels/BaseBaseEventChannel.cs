@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using JetBrains.Annotations;
+using Sirenix.OdinInspector;
 using UnityEditor;
 using UnityEngine;
 
@@ -15,7 +15,7 @@ namespace Core.EventChannels
 		protected virtual bool PushLastDataOnSubscribe => false;
 
 		private static readonly List<Type> initialisedTypes = new List<Type>();
-		
+
 #if UNITY_EDITOR
 		protected virtual void Awake()
 		{
@@ -57,6 +57,12 @@ namespace Core.EventChannels
 		{
 			EventRaised?.Invoke();
 		}
+
+		[Button]
+		private void ManualClearListeners()
+		{
+			EventRaised = null;
+		}
 	}
 
 	public interface IEventChannelTransmitter
@@ -76,11 +82,15 @@ namespace Core.EventChannels
 		{
 			add
 			{
-				if (PushLastDataOnSubscribe && _lastArgSet)
+				if (PushLastDataOnSubscribe && _lastArgSet
+#if UNITY_EDITOR
+				                            && !EditorApplication.isPlaying
+#endif
+				)
 				{
-					value.Invoke(_lastArg);
+					//value.Invoke(_lastArg);
 				}
-				
+
 				EventRaisedInternal += value;
 			}
 
@@ -92,12 +102,43 @@ namespace Core.EventChannels
 		private T _lastArg;
 		private bool _lastArgSet = false;
 
+#if UNITY_EDITOR
+		protected void OnEnable()
+		{
+			EditorApplication.playModeStateChanged += OnPlaymodeStateChanged;
+		}
+
+		private void OnDisable()
+		{
+			EditorApplication.playModeStateChanged -= OnPlaymodeStateChanged;
+		}
+
+		private void OnPlaymodeStateChanged(PlayModeStateChange state)
+		{
+			if (state == PlayModeStateChange.ExitingEditMode)
+			{
+				Reset();
+			}
+		}
+
+		[Button]
+		private void ManualClearListeners()
+		{
+			EventRaisedInternal = null;
+		}
+#endif
+
 		public virtual void Raise(T arg)
 		{
 			EventRaisedInternal?.Invoke(arg);
-			
+
 			_lastArg = arg;
 			_lastArgSet = true;
+		}
+		
+		private void Reset()
+		{
+			_lastArgSet = false;
 		}
 	}
 
@@ -120,7 +161,8 @@ namespace Core.EventChannels
 			{
 				if (EventRaisedInternal != null && EventRaisedInternal.GetInvocationList().Length > 0)
 				{
-					Debug.LogError($"There can only be one listener subscribed to an instance of {nameof(BaseReturnEventChannel<T, TReturn>)}");
+					Debug.LogError(
+						$"There can only be one listener subscribed to an instance of {nameof(BaseReturnEventChannel<T, TReturn>)}");
 					return;
 				}
 
@@ -133,10 +175,16 @@ namespace Core.EventChannels
 		protected sealed override bool PushLastDataOnSubscribe => false;
 
 		private event Func<T, TReturn> EventRaisedInternal;
-		
+
 		public virtual TReturn Raise(T arg)
 		{
 			return EventRaisedInternal == null ? default : EventRaisedInternal.Invoke(arg);
+		}
+		
+		[Button]
+		private void ManualClearListeners()
+		{
+			EventRaisedInternal = null;
 		}
 	}
 
@@ -157,11 +205,15 @@ namespace Core.EventChannels
 		{
 			add
 			{
-				if (PushLastDataOnSubscribe && _lastArgSet)
+				if (PushLastDataOnSubscribe && _lastArgSet
+#if UNITY_EDITOR
+				                            && !EditorApplication.isPlaying
+#endif
+				)
 				{
-					value.Invoke(_lastArg0, _lastArg1);
+					//value.Invoke(_lastArg0, _lastArg1);
 				}
-				
+
 				EventRaisedInternal += value;
 			}
 
@@ -174,6 +226,26 @@ namespace Core.EventChannels
 		private T1 _lastArg1;
 		private bool _lastArgSet = false;
 
+#if UNITY_EDITOR
+		protected void OnEnable()
+		{
+			EditorApplication.playModeStateChanged += OnPlaymodeStateChanged;
+		}
+
+		private void OnDisable()
+		{
+			EditorApplication.playModeStateChanged -= OnPlaymodeStateChanged;
+		}
+
+		private void OnPlaymodeStateChanged(PlayModeStateChange state)
+		{
+			if (state == PlayModeStateChange.ExitingEditMode)
+			{
+				_lastArgSet = false;
+			}
+		}
+#endif
+
 		public virtual void Raise(T0 arg0, T1 arg1)
 		{
 			EventRaisedInternal?.Invoke(arg0, arg1);
@@ -182,6 +254,12 @@ namespace Core.EventChannels
 			_lastArg1 = arg1;
 
 			_lastArgSet = true;
+		}
+		
+		[Button]
+		private void ManualClearListeners()
+		{
+			EventRaisedInternal = null;
 		}
 	}
 
@@ -204,7 +282,8 @@ namespace Core.EventChannels
 			{
 				if (EventRaisedInternal != null && EventRaisedInternal.GetInvocationList().Length > 0)
 				{
-					Debug.LogError($"There can only be one listener subscribed to an instance of {nameof(BaseReturnEventChannel<T0, T1, TReturn>)}");
+					Debug.LogError(
+						$"There can only be one listener subscribed to an instance of {nameof(BaseReturnEventChannel<T0, T1, TReturn>)}");
 					return;
 				}
 
@@ -221,6 +300,12 @@ namespace Core.EventChannels
 		public virtual TReturn Raise(T0 arg0, T1 arg1)
 		{
 			return EventRaisedInternal == null ? default : EventRaisedInternal.Invoke(arg0, arg1);
+		}
+		
+		[Button]
+		private void ManualClearListeners()
+		{
+			EventRaisedInternal = null;
 		}
 	}
 

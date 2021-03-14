@@ -1,5 +1,6 @@
 #if UNITY_EDITOR
 using System.Collections.Generic;
+using Core.EventChannels;
 using Game.Core;
 using Game.Mowers;
 using Game.Tiles;
@@ -34,7 +35,7 @@ namespace Game.Levels.EditorWindow
 		[Button, BoxGroup(Playgroup)]
 		public void BeginEdit()
 		{
-			_tileClicked = (x, y) => Begin(true, x, y);
+			SetNextTileClickedAction((x, y) => Begin(true, x, y), "Set edit mode start position");
 		}
 
 		private void Begin(bool editMode, int x, int y)
@@ -59,14 +60,17 @@ namespace Game.Levels.EditorWindow
 			LevelStateChecker levelStateChecker = CreateInstance<LevelStateChecker>();
 			HeadlessLevelManager levelManager = CreateInstance<HeadlessLevelManager>();
 			HeadlessMowerManager mowerManager = CreateInstance<HeadlessMowerManager>();
-
-			_mowerMovementManager.Construct(_mowerInputEventChannel);
+			VoidEventChannel startPlayingEventChannel = CreateInstance<VoidEventChannel>();
+			
+			_mowerMovementManager.Construct(_mowerInputEventChannel, startPlayingEventChannel);
 			tileInteractor.Construct(_mowerMovementManager);
 			levelManager.Construct(_mowerMovementManager, levelTraversalChecker, tileInteractor, levelStateChecker);
 			mowerManager.Construct(_mowerMovementManager);
 
 			tileInteractor.IsEditMode = editMode;
 			levelTraversalChecker.IsEditMode = editMode;
+			
+			startPlayingEventChannel.Raise();
 
 			levelTraversalChecker.Init(_editableLevel);
 			tileUpgrader.Init(_editableLevel, _undoSystem);
@@ -84,7 +88,15 @@ namespace Game.Levels.EditorWindow
 			levelManager.LevelCompleted += End_Internal;
 			levelManager.LevelFailed += End_Internal;
 
-			_objectsMadeForGame = new List<Object> { tileInteractor, _mowerMovementManager, levelStateChecker, mowerManager, levelManager };
+			_objectsMadeForGame = new List<Object>
+			{
+				tileInteractor,
+				_mowerMovementManager,
+				levelStateChecker,
+				mowerManager,
+				levelManager,
+				startPlayingEventChannel
+			};
 		}
 
 		[Button, BoxGroup(Playgroup)]

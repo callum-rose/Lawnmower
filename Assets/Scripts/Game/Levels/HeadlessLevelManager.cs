@@ -3,6 +3,7 @@ using Game.Mowers;
 using Game.UndoSystem;
 using System;
 using Core;
+using Game.Tiles;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -21,9 +22,9 @@ namespace Game.Levels
 		[SerializeField, R] private LevelStateChecker levelStateChecker;
 		
 		[TitleGroup("Event Channels")]
-		[SerializeField] private ILevelDataEventChannelTransmitterContainer levelStartedEventChannelContainer;
+		[SerializeField, R] private ILevelDataEventChannelTransmitterContainer levelStartedEventChannelContainer;
 
-		private ILevelDataEventChannelTransmitter LevelStartedEventChannel => levelStartedEventChannelContainer.Result;
+		private ILevelDataEventChannelTransmitter LevelStartedEventChannel => levelStartedEventChannelContainer?.Result;
 
 		public event Action LevelChanged;
 		public event UndoableAction LevelCompleted;
@@ -78,16 +79,26 @@ namespace Game.Levels
 		{
 			Assert.IsNotNull(level);
 			Level = level;
+
+			foreach (Tile tile in level)
+			{
+				switch (tile)
+				{
+					case SpringTile springTile:
+						springTile.TraversedOnto += (direction, inverted) => mowerMovementManager.MoveToPosition(springTile.LandingPosition);
+						break;
+				}
+			}
 			
 			LevelTraversalChecker.Init(Level);
-			tileInteractor.SetTiles(Level);
+			tileInteractor.SetLevel(Level);
 
-			mowerMovementManager.SetPosition(Level.StartPosition);
+			mowerMovementManager.SetInitialPosition(Level.StartPosition);
 
 			levelStateChecker.Init(Level, mowerMovementManager);
 
 			LevelChanged?.Invoke();
-			LevelStartedEventChannel.Raise(level);
+			LevelStartedEventChannel?.Raise(level);
 
 			mowerMovementManager.IsRunning = true;
 		}

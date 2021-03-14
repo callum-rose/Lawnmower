@@ -79,9 +79,10 @@ namespace Game.Mowers
 
 		#region API
 
-		public void Construct(MowerInputEventChannel mowerInputEventChannel)
+		public void Construct(MowerInputEventChannel mowerInputEventChannel, VoidEventChannel startPlayingEventChannel)
 		{
 			this.mowerInputEventChannel = mowerInputEventChannel;
+			this.startPlayingEventChannel = startPlayingEventChannel;
 
 			OnEnable();
 		}
@@ -105,7 +106,7 @@ namespace Game.Mowers
 		}
 
 		[Button(Expanded = true)]
-		public void SetPosition(GridVector position)
+		public void SetInitialPosition(GridVector position)
 		{
 			_mowerMover.Move(position, true);
 		}
@@ -147,6 +148,11 @@ namespace Game.Mowers
 
 			GridVector targetPosition = MowerPosition + direction;
 
+			MoveToPosition(targetPosition);
+		}
+
+		public void MoveToPosition(GridVector targetPosition)
+		{
 			IUndoable action;
 			switch (_traversalChecker.CanTraverseTo(targetPosition))
 			{

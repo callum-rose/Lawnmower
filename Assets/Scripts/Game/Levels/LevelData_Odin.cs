@@ -33,43 +33,16 @@ namespace Game.Levels
 			int flippedY = arr.GetLength(1) - 1 - y;
 			Tile value = arr[x, flippedY];
 
-			Color colour;
+			Color colour = LevelEditorWindow.GetColourForTile(value);
 			string text = "";
 			switch (value)
 			{
-				case EmptyTile emptyTile:
-					colour = Color.white;
-					break;
 				case GrassTile grassTile:
-					switch (grassTile.GrassHeight.Value)
-					{
-						case 3:
-							ColorUtility.TryParseHtmlString("#0D7352", out colour);
-							break;
-						case 2:
-							ColorUtility.TryParseHtmlString("#12A175", out colour);
-							break;
-						case 1:
-							ColorUtility.TryParseHtmlString("#1BF1AC", out colour);
-							break;
-						default:
-							colour = Color.black;
-							break;
-					}
-
 					text = grassTile.GrassHeight.Value.ToString();
 					break;
-				case StoneTile stoneTile:
-					colour = Color.gray;
+				case SpringTile springTile:
+					text = springTile.LandingPosition.ToString();
 					break;
-				case WaterTile waterTile:
-					colour = Color.blue;
-					break;
-				case WoodTile woodTile:
-					ColorUtility.TryParseHtmlString("#916B4C", out colour);
-					break;
-				default:
-					throw new ArgumentOutOfRangeException();
 			}
 
 			EditorGUI.DrawRect(rect.Padding(1), colour);

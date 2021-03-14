@@ -41,15 +41,24 @@ namespace Game.Levels
 
 		public GridVector MowerPosition => headlessLevelManager.MowerPosition;
 
+		private IReadOnlyLevelData _level;
 		private GameObject[,] _tileObjects;
 
 		public void Init(IReadOnlyLevelData level)
 		{
-			Clear();
+			_level = level;
 			
-			headlessLevelManager.Init(level);
+			headlessLevelManager.Init(_level);
+		}
+
+		public void Build()
+		{
+			if (_level == null)
+			{
+				throw new NullReferenceException("Level is null");
+			}
 			
-			_tileObjects = levelFactory.Build(level);
+			_tileObjects = levelFactory.Build(_level);
 		}
 		
 		public void Clear()

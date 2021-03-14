@@ -20,7 +20,7 @@ namespace Lean.Touch
 
 			if (camera != null)
 			{
-				var point = new Vector3(ScreenPosition.x, ScreenPosition.y, distance);
+				Vector3 point = new Vector3(ScreenPosition.x, ScreenPosition.y, distance);
 
 				return camera.ScreenToWorldPoint(point);
 			}
@@ -39,8 +39,8 @@ namespace Lean.Touch
 		{
 			if (InactiveSnapshots.Count > 0)
 			{
-				var index    = InactiveSnapshots.Count - 1;
-				var snapshot = InactiveSnapshots[index];
+				int index    = InactiveSnapshots.Count - 1;
+				LeanSnapshot snapshot = InactiveSnapshots[index];
 
 				InactiveSnapshots.RemoveAt(index);
 
@@ -56,7 +56,7 @@ namespace Lean.Touch
 			if (snapshots != null && snapshots.Count > 0)
 			{
 				// Below start?
-				var snapshotF = snapshots[0];
+				LeanSnapshot snapshotF = snapshots[0];
 
 				if (targetAge <= snapshotF.Age)
 				{
@@ -64,7 +64,7 @@ namespace Lean.Touch
 				}
 
 				// After end?
-				var snapshotL = snapshots[snapshots.Count - 1];
+				LeanSnapshot snapshotL = snapshots[snapshots.Count - 1];
 
 				if (targetAge >= snapshotL.Age)
 				{
@@ -72,11 +72,11 @@ namespace Lean.Touch
 				}
 
 				// Interpolate to find screenPosition at targetAge
-				var lowerIndex = GetLowerIndex(snapshots, targetAge);
-				var upperIndex = lowerIndex + 1;
-				var lower      = snapshots[lowerIndex];
-				var upper      = upperIndex < snapshots.Count ? snapshots[upperIndex] : lower;
-				var across     = Mathf.InverseLerp(lower.Age, upper.Age, targetAge);
+				int lowerIndex = GetLowerIndex(snapshots, targetAge);
+				int upperIndex = lowerIndex + 1;
+				LeanSnapshot lower      = snapshots[lowerIndex];
+				LeanSnapshot upper      = upperIndex < snapshots.Count ? snapshots[upperIndex] : lower;
+				float across     = Mathf.InverseLerp(lower.Age, upper.Age, targetAge);
 
 				screenPosition = Vector2.Lerp(lower.ScreenPosition, upper.ScreenPosition, across);
 
@@ -92,7 +92,7 @@ namespace Lean.Touch
 		{
 			if (index >= 0 && index < snapshots.Count)
 			{
-				var snapshot = snapshots[index];
+				LeanSnapshot snapshot = snapshots[index];
 
 				age            = snapshot.Age;
 				screenPosition = snapshot.ScreenPosition;
@@ -109,11 +109,11 @@ namespace Lean.Touch
 		{
 			if (snapshots != null)
 			{
-				var count = snapshots.Count;
+				int count = snapshots.Count;
 
 				if (count > 0)
 				{
-					for (var i = count - 1; i >= 0; i--)
+					for (int i = count - 1; i >= 0; i--)
 					{
 						if (snapshots[i].Age <= targetAge)
 						{

@@ -1,0 +1,111 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7126b9c1309bd8a418748c882885cd26, type: 3}
+  m_Name: Level Spring Test
+  m_EditorClassIdentifier: 
+  serializationData:
+    SerializedFormat: 2
+    SerializedBytes: 
+    ReferencedUnityObjects: []
+    SerializedBytesString: 
+    Prefab: {fileID: 0}
+    PrefabModificationsReferencedUnityObjects: []
+    PrefabModifications: []
+    SerializationNodes:
+    - Name: id
+      Entry: 2
+      Data: 00000000000000000000000000000000
+    - Name: newTiles
+      Entry: 7
+      Data: 0|Game.Tiles.Tile[,], Scripts
+    - Name: 
+      Entry: 12
+      Data: 9
+    - Name: ranks
+      Entry: 1
+      Data: 3|3
+    - Name: 
+      Entry: 7
+      Data: 1|Game.Tiles.GrassTile, Scripts
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 2|Game.Tiles.GrassTile, Scripts
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 3|Game.Tiles.EmptyTile, Scripts
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 4|Game.Tiles.GrassTile, Scripts
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 5|Game.Tiles.GrassTile, Scripts
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 6|Game.Tiles.GrassTile, Scripts
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 7|Game.Tiles.GrassTile, Scripts
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 8|Game.Tiles.EmptyTile, Scripts
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 9|Game.Tiles.SpringTile, Scripts
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+  startPosition:
+    x: 0
+    y: 0
+  tilesData: '[[{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
+    mscorlib]], Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.GrassTile,
+    Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32, mscorlib]],
+    Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.EmptyTile,
+    Scripts"}],[{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
+    mscorlib]], Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.GrassTile,
+    Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32, mscorlib]],
+    Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.GrassTile,
+    Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32, mscorlib]],
+    Scripts","_value":2,"Value":2,"RawValue":2}}],[{"$type":"Game.Tiles.GrassTile,
+    Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32, mscorlib]],
+    Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.EmptyTile,
+    Scripts"},{"$type":"Game.Tiles.SpringTile, Scripts","LandingPosition":{"x":2,"y":0,"Magnitude":2.0}}]]'

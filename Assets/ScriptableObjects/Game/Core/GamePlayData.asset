@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b060b2620cd5446eaa2a29a1d7f14f3b, type: 3}
   m_Name: GamePlayData
   m_EditorClassIdentifier: 
-  levelIntroDuration: 2
+  levelIntroDuration: 1.5

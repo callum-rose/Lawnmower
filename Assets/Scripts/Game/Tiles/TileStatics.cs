@@ -11,7 +11,8 @@ namespace Game.Tiles
 			new GrassTile(3),
 			new StoneTile(),
 			new WaterTile(),
-			new WoodTile()
+			new WoodTile(),
+			new SpringTile()
 		};
 	}
 }

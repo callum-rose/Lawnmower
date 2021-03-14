@@ -49,15 +49,12 @@ namespace Game.Tiles
 			SetupChannelSearchTree();
 #endif
 
-			try
+			if (!_setupSearchTree.ContainsKey(inDirection) || !_setupSearchTree[inDirection].ContainsKey(outDirection))
 			{
-				return _setupSearchTree[inDirection][outDirection];
+				return new ChannelSetup();
 			}
-			catch (Exception e)
-			{
-				Console.WriteLine(e);
-				throw;
-			}
+
+			return _setupSearchTree[inDirection][outDirection];
 		}
 
 		private void Test()

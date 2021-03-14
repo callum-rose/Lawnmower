@@ -30,7 +30,7 @@ namespace Game.Tutorial
 			}
 			else
 			{
-				ViewManager.Instance.Load(UnityScene.MainMenu);
+				//ViewManager.Instance.Load(UnityScene.MainMenu);
 			}
 		}
 	}

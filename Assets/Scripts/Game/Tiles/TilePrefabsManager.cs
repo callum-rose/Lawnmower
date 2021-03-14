@@ -2,11 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using BalsamicBits.Extensions;
 using Core;
 using Sirenix.OdinInspector;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Game.Tiles
 {
@@ -17,9 +15,20 @@ namespace Game.Tiles
 		private class StringGameObjectDictionary : SerialisedDictionary<string, GameObject>
 		{
 		}
-		
-		[SerializeField, ValidateInput(nameof(ValidatePrefabsDict))] private StringGameObjectDictionary tilePrefabs;
-		
+
+		[SerializeField, ValidateInput(nameof(ValidatePrefabsDict))]
+		private StringGameObjectDictionary tilePrefabs;
+
+		private readonly IReadOnlyDictionary<Type, Type> _tileToObjectTypeDict = new Dictionary<Type, Type>()
+		{
+			{ typeof(StoneTile), typeof(StoneTileObject) },
+			{ typeof(WoodTile), typeof(WoodTileObject) },
+			{ typeof(WaterTile), typeof(WaterTileObject) },
+			{ typeof(GrassTile), typeof(GrassTileObject) },
+			{ typeof(EmptyTile), typeof(EmptyTileObject) },
+			{ typeof(SpringTile), typeof(SpringTileObject) },
+		};
+
 		#region Unity
 
 		private void Awake()
@@ -35,28 +44,7 @@ namespace Game.Tiles
 
 		public BaseTileObject GetPrefabAndInstantiate(Tile tile)
 		{
-			Type tileObjectType;
-			switch (tile)
-			{
-				case StoneTile _:
-					tileObjectType = typeof(StoneTileObject);
-					break;
-				case WoodTile _:
-					tileObjectType = typeof(WoodTileObject);
-					break;
-				case WaterTile _:
-					tileObjectType = typeof(WaterTileObject);
-					break;
-				case GrassTile _:
-					tileObjectType = typeof(GrassTileObject);
-					break;
-				case EmptyTile _:
-					tileObjectType = typeof(EmptyTileObject);
-					break;
-				default:
-					return null;
-			}
-
+			Type tileObjectType = _tileToObjectTypeDict[tile.GetType()];
 			BaseTileObject prefab = GetPrefab(tileObjectType);
 
 			if (prefab == null)
@@ -126,7 +114,7 @@ namespace Game.Tiles
 				{
 					continue;
 				}
-				
+
 				string typeFullName = keyValuePair.Key;
 				Type type = GetTypeFrom(typeFullName);
 				BaseTileObject prefab = GetPrefab(type);

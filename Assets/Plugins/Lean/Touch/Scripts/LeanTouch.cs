@@ -193,7 +193,7 @@ namespace Lean.Touch
 			get
 			{
 				// Get the current screen DPI
-				var dpi = Screen.dpi;
+				float dpi = Screen.dpi;
 
 				// If it's 0 or less, it's invalid, so return the default scale of 1.0
 				if (dpi <= 0)
@@ -212,7 +212,7 @@ namespace Lean.Touch
 			get
 			{
 				// Get shortest size
-				var size = Mathf.Min(Screen.width, Screen.height);
+				int size = Mathf.Min(Screen.width, Screen.height);
 
 				// If it's 0 or less, it's invalid, so return the default scale of 1.0
 				if (size <= 0)
@@ -237,7 +237,7 @@ namespace Lean.Touch
 				}
 
 				// New GUI in use?
-				for (var i = Fingers.Count - 1; i >= 0; i--)
+				for (int i = Fingers.Count - 1; i >= 0; i--)
 				{
 					if (Fingers[i].StartedOverGui == true)
 					{
@@ -296,14 +296,14 @@ namespace Lean.Touch
 		{
 			return RaycastGui(screenPosition, CurrentGuiLayers);
 		}
-
+		
 		/// <summary>This will return all the RaycastResults under the specified screen point using the specified layerMask.
 		/// NOTE: The first result (0) will be the top UI element that was first hit.</summary>
 		public static List<RaycastResult> RaycastGui(Vector2 screenPosition, LayerMask layerMask)
 		{
 			tempRaycastResults.Clear();
 
-			var currentEventSystem = EventSystem.current;
+			EventSystem currentEventSystem = EventSystem.current;
 
 			if (currentEventSystem == null)
 			{
@@ -335,10 +335,10 @@ namespace Lean.Touch
 				// Loop through all results and remove any that don't match the layer mask
 				if (tempRaycastResults.Count > 0)
 				{
-					for (var i = tempRaycastResults.Count - 1; i >= 0; i--)
+					for (int i = tempRaycastResults.Count - 1; i >= 0; i--)
 					{
-						var raycastResult = tempRaycastResults[i];
-						var raycastLayer  = 1 << raycastResult.gameObject.layer;
+						RaycastResult raycastResult = tempRaycastResults[i];
+						int raycastLayer  = 1 << raycastResult.gameObject.layer;
 
 						if ((raycastLayer & layerMask) == 0)
 						{
@@ -363,9 +363,9 @@ namespace Lean.Touch
 		{
 			filteredFingers.Clear();
 
-			for (var i = 0; i < Fingers.Count; i++)
+			for (int i = 0; i < Fingers.Count; i++)
 			{
-				var finger = Fingers[i];
+				LeanFinger finger = Fingers[i];
 
 				// Ignore?
 				if (ignoreIfStartedOverGui == true && finger.StartedOverGui == true)
@@ -430,11 +430,11 @@ namespace Lean.Touch
 			// Set the finger texture?
 			if (FingerTexture == null)
 			{
-				var guids = UnityEditor.AssetDatabase.FindAssets("FingerVisualization t:texture2d");
+				string[] guids = UnityEditor.AssetDatabase.FindAssets("FingerVisualization t:texture2d");
 
 				if (guids.Length > 0)
 				{
-					var path = UnityEditor.AssetDatabase.GUIDToAssetPath(guids[0]);
+					string path = UnityEditor.AssetDatabase.GUIDToAssetPath(guids[0]);
 
 					FingerTexture = UnityEditor.AssetDatabase.LoadMainAssetAtPath(path) as Texture2D;
 				}
@@ -483,15 +483,15 @@ namespace Lean.Touch
 			// Show simulated multi fingers?
 			if (FingerTexture != null && Fingers.Count > 1)
 			{
-				for (var i = Fingers.Count - 1; i >= 0; i--)
+				for (int i = Fingers.Count - 1; i >= 0; i--)
 				{
-					var finger = Fingers[i];
+					LeanFinger finger = Fingers[i];
 
 					// Simulated fingers have a negative index
 					if (finger.Index < 0)
 					{
-						var screenPosition = finger.ScreenPosition;
-						var screenRect     = new Rect(0, 0, FingerTexture.width, FingerTexture.height);
+						Vector2 screenPosition = finger.ScreenPosition;
+						Rect screenRect     = new Rect(0, 0, FingerTexture.width, FingerTexture.height);
 
 						screenRect.center = new Vector2(screenPosition.x, Screen.height - screenPosition.y);
 
@@ -505,9 +505,9 @@ namespace Lean.Touch
 		private void BeginFingers()
 		{
 			// Age inactive fingers
-			for (var i = InactiveFingers.Count - 1; i >= 0; i--)
+			for (int i = InactiveFingers.Count - 1; i >= 0; i--)
 			{
-				var inactiveFinger = InactiveFingers[i];
+				LeanFinger inactiveFinger = InactiveFingers[i];
 
 				inactiveFinger.Age += Time.unscaledDeltaTime;
 
@@ -521,9 +521,9 @@ namespace Lean.Touch
 			}
 
 			// Reset finger data
-			for (var i = Fingers.Count - 1; i >= 0; i--)
+			for (int i = Fingers.Count - 1; i >= 0; i--)
 			{
-				var finger = Fingers[i];
+				LeanFinger finger = Fingers[i];
 
 				// Was this set to up last time? If so, it's now inactive
 				if (finger.Up == true || finger.Set == false)
@@ -555,9 +555,9 @@ namespace Lean.Touch
 		// Update all Fingers based on the new finger data
 		private void EndFingers()
 		{
-			for (var i = Fingers.Count - 1; i >= 0; i--)
+			for (int i = Fingers.Count - 1; i >= 0; i--)
 			{
-				var finger = Fingers[i];
+				LeanFinger finger = Fingers[i];
 
 				// Up?
 				if (finger.Up == true)
@@ -609,7 +609,7 @@ namespace Lean.Touch
 			// Store all active fingers (these are later removed in AddFinger)
 			missingFingers.Clear();
 
-			for (var i = Fingers.Count - 1; i >= 0; i--)
+			for (int i = Fingers.Count - 1; i >= 0; i--)
 			{
 				missingFingers.Add(Fingers[i]);
 			}
@@ -617,7 +617,7 @@ namespace Lean.Touch
 			// Update real fingers
 			if (LeanInput.GetTouchCount() > 0)
 			{
-				for (var i = 0; i < LeanInput.GetTouchCount(); i++)
+				for (int i = 0; i < LeanInput.GetTouchCount(); i++)
 				{
 					int id; Vector2 position; float pressure; bool set;
 
@@ -629,10 +629,10 @@ namespace Lean.Touch
 			// If there are no real touches, simulate some from the mouse?
 			else if (LeanInput.GetMouseExists() == true)
 			{
-				var mouseSet = false;
-				var mouseUp  = false;
+				bool mouseSet = false;
+				bool mouseUp  = false;
 
-				for (var i = 0; i < 5; i++)
+				for (int i = 0; i < 5; i++)
 				{
 					mouseSet |= LeanInput.GetMousePressed(i);
 					mouseUp  |= LeanInput.GetMouseUp(i);
@@ -640,7 +640,7 @@ namespace Lean.Touch
 
 				if (mouseSet == true || mouseUp == true)
 				{
-					var mousePosition = LeanInput.GetMousePosition();
+					Vector2 mousePosition = LeanInput.GetMousePosition();
 
 					// Is the mouse within the screen?
 					//if (new Rect(0, 0, Screen.width, Screen.height).Contains(mousePosition) == true)
@@ -658,7 +658,7 @@ namespace Lean.Touch
 
 							if (LeanInput.GetPressed(PinchTwistKey) == true)
 							{
-								var center = new Vector2(Screen.width * pivot.x, Screen.height * pivot.y);
+								Vector2 center = new Vector2(Screen.width * pivot.x, Screen.height * pivot.y);
 
 								AddFinger(-2, center - (mousePosition - center), 1.0f, mouseSet);
 							}
@@ -677,7 +677,7 @@ namespace Lean.Touch
 
 			tempFingers.AddRange(missingFingers);
 
-			foreach (var finger in tempFingers)
+			foreach (LeanFinger finger in tempFingers)
 			{
 				AddFinger(finger.Index, finger.ScreenPosition, finger.Pressure, false);
 			}
@@ -685,13 +685,13 @@ namespace Lean.Touch
 
 		private void UpdateEvents()
 		{
-			var fingerCount = Fingers.Count;
+			int fingerCount = Fingers.Count;
 
 			if (fingerCount > 0)
 			{
-				for (var i = 0; i < fingerCount; i++)
+				for (int i = 0; i < fingerCount; i++)
 				{
-					var finger = Fingers[i];
+					LeanFinger finger = Fingers[i];
 
 					if (finger.Tap   == true && OnFingerTap    != null) OnFingerTap(finger);
 					if (finger.Swipe == true && OnFingerSwipe  != null) OnFingerSwipe(finger);
@@ -713,7 +713,7 @@ namespace Lean.Touch
 		// Add a finger based on index, or return the existing one
 		private LeanFinger AddFinger(int index, Vector2 screenPosition, float pressure, bool set)
 		{
-			var finger = FindFinger(index);
+			LeanFinger finger = FindFinger(index);
 
 			// Finger is already active, so remove it from the missing collection
 			if (finger != null)
@@ -729,7 +729,7 @@ namespace Lean.Touch
 					return null;
 				}
 
-				var inactiveIndex = FindInactiveFingerIndex(index);
+				int inactiveIndex = FindInactiveFingerIndex(index);
 
 				// Use inactive finger?
 				if (inactiveIndex >= 0)
@@ -787,7 +787,7 @@ namespace Lean.Touch
 				{
 					if (finger.SnapshotDuration > RecordLimit)
 					{
-						var removeCount = LeanSnapshot.GetLowerIndex(finger.Snapshots, finger.Age - RecordLimit);
+						int removeCount = LeanSnapshot.GetLowerIndex(finger.Snapshots, finger.Age - RecordLimit);
 
 						finger.ClearSnapshots(removeCount);
 					}
@@ -813,9 +813,9 @@ namespace Lean.Touch
 		// Find the finger with the specified index, or return null
 		private LeanFinger FindFinger(int index)
 		{
-			for (var i = Fingers.Count - 1; i >= 0; i--)
+			for (int i = Fingers.Count - 1; i >= 0; i--)
 			{
-				var finger = Fingers[i];
+				LeanFinger finger = Fingers[i];
 
 				if (finger.Index == index)
 				{
@@ -853,7 +853,7 @@ namespace Lean.Touch
 		/// Find the index of the inactive finger with the specified index, or return -1
 		private int FindInactiveFingerIndex(int index)
 		{
-			for (var i = InactiveFingers.Count - 1; i>= 0; i--)
+			for (int i = InactiveFingers.Count - 1; i>= 0; i--)
 			{
 				if (InactiveFingers[i].Index == index)
 				{
@@ -881,7 +881,7 @@ namespace Lean.Touch.Inspector
 		[MenuItem("GameObject/Lean/Touch", false, 1)]
 		public static void CreateTouch()
 		{
-			var gameObject = new GameObject(typeof(LeanTouch).Name);
+			GameObject gameObject = new GameObject(typeof(LeanTouch).Name);
 
 			Undo.RegisterCreatedObjectUndo(gameObject, "Create Touch");
 
@@ -900,7 +900,7 @@ namespace Lean.Touch.Inspector
 				EditorGUILayout.Separator();
 			}
 
-			var touch = (LeanTouch)target;
+			LeanTouch touch = (LeanTouch)target;
 
 			EditorGUILayout.Separator();
 
@@ -961,15 +961,15 @@ namespace Lean.Touch.Inspector
 			allFingers.AddRange(LeanTouch.InactiveFingers);
 			allFingers.Sort((a, b) => a.Index.CompareTo(b.Index));
 
-			for (var i = 0; i < allFingers.Count; i++)
+			for (int i = 0; i < allFingers.Count; i++)
 			{
-				var finger   = allFingers[i];
-				var progress = touch.TapThreshold > 0.0f ? finger.Age / touch.TapThreshold : 0.0f;
-				var style    = GetFadingLabel(finger.Set, progress);
+				LeanFinger finger   = allFingers[i];
+				float progress = touch.TapThreshold > 0.0f ? finger.Age / touch.TapThreshold : 0.0f;
+				GUIStyle style    = GetFadingLabel(finger.Set, progress);
 
 				if (style.normal.textColor.a > 0.0f)
 				{
-					var screenPosition = finger.ScreenPosition;
+					Vector2 screenPosition = finger.ScreenPosition;
 
 					EditorGUILayout.LabelField("#" + finger.Index + " x " + finger.TapCount + " (" + Mathf.FloorToInt(screenPosition.x) + ", " + Mathf.FloorToInt(screenPosition.y) + ") - " + finger.Age.ToString("0.0"), style);
 				}
@@ -995,8 +995,8 @@ namespace Lean.Touch.Inspector
 				fadingLabel = new GUIStyle(EditorStyles.label);
 			}
 
-			var a = EditorStyles.label.normal.textColor;
-			var b = a; b.a = active == true ? 0.5f : 0.0f;
+			Color a = EditorStyles.label.normal.textColor;
+			Color b = a; b.a = active == true ? 0.5f : 0.0f;
 
 			fadingLabel.normal.textColor = Color.Lerp(a, b, progress);
 

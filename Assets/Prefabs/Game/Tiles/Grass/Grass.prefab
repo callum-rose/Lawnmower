@@ -160,7 +160,6 @@ GameObject:
   m_Component:
   - component: {fileID: 8723563144886214523}
   - component: {fileID: 43315966577984983}
-  - component: {fileID: 7032916919265020135}
   - component: {fileID: 2793972216092024432}
   m_Layer: 0
   m_Name: Grass
@@ -206,24 +205,6 @@ MonoBehaviour:
   dirtParticlesEventChannel: {fileID: 11400000, guid: c50c4a082720ead48b7e0f97b1db35c5,
     type: 2}
   displayGrassHeight: 3
---- !u!114 &7032916919265020135
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8723563144886214407}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d9994b87c8e849779bef2c8520cf37c9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  dirtAppearanceSetter: {fileID: 2233695902691597157}
-  grassParticlesEventChannel: {fileID: 11400000, guid: a0d44f1fe0272654481648582818aafc,
-    type: 2}
-  dirtParticlesEventChannel: {fileID: 11400000, guid: c50c4a082720ead48b7e0f97b1db35c5,
-    type: 2}
-  displayGrassHeight: 0
 --- !u!114 &2793972216092024432
 MonoBehaviour:
   m_ObjectHideFlags: 0

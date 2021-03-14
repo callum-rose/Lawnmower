@@ -1,4 +1,3 @@
-using System;
 using Cinemachine;
 using Core.EventChannels;
 using Game.Core;

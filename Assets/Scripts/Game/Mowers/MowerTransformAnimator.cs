@@ -1,10 +1,7 @@
-using System;
 using System.Collections;
 using BalsamicBits.Extensions;
-using Core;
 using Core.EventChannels;
 using UnityEngine;
-using DG.Tweening;
 using Game.Core;
 using Game.Mowers.Input;
 using Game.Mowers.Models;
@@ -19,9 +16,10 @@ namespace Game.Mowers
 		[SerializeField] private AnimationCurve animEase;
 
 		[TitleGroup("Event Channels")]
-		[SerializeField] private Vector3EventChannel movedEventChannel;
+		[SerializeField] private IVector3EventChannelTransmitterContainer movedEventChannel;
 		[SerializeField] private IBoolEventChannelListenerContainer isMowerTransformControlledExternallyEventChannelContainer;
 
+		private IVector3EventChannelTransmitter MovedEventChannel => movedEventChannel.Result;
 		private IBoolEventChannelListener IsMowerTransformControlledExternallyEventChannel => isMowerTransformControlledExternallyEventChannelContainer.Result;
 
 		private Positioner _positioner;
@@ -73,7 +71,7 @@ namespace Game.Mowers
 		{
 			_transformIsControlledExternally = isControlledExternally;
 		}
-		
+
 		private void OnMowerMoved(GridVector prevPosition, GridVector targetPosition, Xor inInverted)
 		{
 			if (_transformIsControlledExternally)
@@ -81,9 +79,17 @@ namespace Game.Mowers
 				Debug.Log("Transform is being controlled elsewhere");
 				return;
 			}
-			
+
 			AnimateRotation(prevPosition, targetPosition, inInverted);
-			AnimationPosition(targetPosition, inInverted);
+
+			if (Mathf.Approximately((targetPosition - prevPosition).Magnitude, 1))
+			{
+				AnimationPosition(targetPosition, inInverted);
+			}
+			else
+			{
+				
+			}
 		}
 
 		private void AnimateRotation(GridVector prevPosition, GridVector targetPosition, Xor isInverted)
@@ -121,7 +127,7 @@ namespace Game.Mowers
 			else
 			{
 				transform.position = worldPosition;
-				movedEventChannel.Raise(worldPosition);
+				MovedEventChannel.Raise(worldPosition);
 			}
 		}
 
@@ -130,7 +136,7 @@ namespace Game.Mowers
 			void SetPosition(Vector3 pos)
 			{
 				transform.position = pos;
-				movedEventChannel.Raise(pos);
+				MovedEventChannel.Raise(pos);
 			}
 
 			Vector3 from = transform.position;

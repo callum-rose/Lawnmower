@@ -6,15 +6,13 @@ using Newtonsoft.Json;
 namespace Game.Tiles
 {
 	[Serializable]
-	public abstract class Tile
+	public abstract class Tile : IReadonlyTile
 	{
 		[JsonIgnore] public abstract bool IsComplete { get; }
 
 		[JsonIgnore] public virtual bool IsRuined => false;
 
 		public abstract bool IsTraversable(bool editMode);
-
-		public delegate void TraverseEvent(GridVector direction, Xor isInverted);
 		
 		public event TraverseEvent TraversedOnto;
 		public event TraverseEvent TraversedAway;

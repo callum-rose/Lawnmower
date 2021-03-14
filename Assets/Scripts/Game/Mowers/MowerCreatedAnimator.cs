@@ -1,74 +1,89 @@
+using System.Collections;
 using Core;
 using Core.EventChannels;
 using DG.Tweening;
-using Game.Core;
 using Sirenix.OdinInspector;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Game.Mowers
 {
 	[CreateAssetMenu(fileName = nameof(MowerCreatedAnimator),
 		menuName = SoNames.GameDir + nameof(MowerCreatedAnimator))]
 	[UnreferencedScriptableObject]
-	internal class MowerCreatedAnimator : ScriptableObject
+	internal class MowerCreatedAnimator : ScriptableObjectWithCoroutines
 	{
-		[SerializeField] private GamePlayData gamePlayData;
 		[SerializeField] private float dropFromHeight = 10;
 		[SerializeField] private float dropDuration = 0.5f;
 		[SerializeField] private Ease animEase = Ease.OutBounce;
 
 		[TitleGroup("Event Channels")]
 		[SerializeField] private IVector3EventChannelListenerContainer mowerObjectMovedEventChannelContainer;
-		[SerializeField] private IGameObjectEventChannelListenerContainer mowerCreatedEventChannelContainer;
-		[SerializeField] private IBoolEventChannelTransmitterContainer isMowerTransformControlledExternallyEventChannelContainer;
 
-		[ShowInInspector] private float DropDelay => gamePlayData.LevelIntroDuration - dropDuration;
+		[SerializeField] private IGameObjectEventChannelListenerContainer mowerCreatedEventChannelContainer;
+
+		[SerializeField]
+		private IBoolEventChannelTransmitterContainer isMowerTransformControlledExternallyEventChannelContainer;
+
+		[SerializeField] private IVoidEventChannelListenerContainer tileAnimationsFinishedEventChannel;
 		
-		private IVector3EventChannelListener MowerObjectMovedEventChannel => mowerObjectMovedEventChannelContainer.Result;
+		private IVector3EventChannelListener MowerObjectMovedEventChannel =>
+			mowerObjectMovedEventChannelContainer.Result;
+
 		private IGameObjectEventChannelListener MowerCreatedEventChannel => mowerCreatedEventChannelContainer.Result;
-		
+
+		private IVoidEventChannelListener TileAnimationsFinishedEventChannel =>
+			tileAnimationsFinishedEventChannel.Result;
+
 		private IBoolEventChannelTransmitter IsMowerTransformControlledExternallyEventChannel =>
 			isMowerTransformControlledExternallyEventChannelContainer.Result;
 
-		private bool NeedsToAnimate => _mowerGameObject != null;
-		
-		private GameObject _mowerGameObject;
-
 		private void OnEnable()
 		{
-			MowerObjectMovedEventChannel.EventRaised += MowerObjectMovedEventChannelOnEventRaised;
 			MowerCreatedEventChannel.EventRaised += OnMowerCreated;
 		}
 
 		private void OnDisable()
 		{
-			MowerObjectMovedEventChannel.EventRaised -= MowerObjectMovedEventChannelOnEventRaised;
 			MowerCreatedEventChannel.EventRaised -= OnMowerCreated;
 		}
-		
-		private void MowerObjectMovedEventChannelOnEventRaised(Vector3 position)
+
+		private void OnMowerCreated(GameObject mower)
 		{
-			if (!NeedsToAnimate)
-			{
-				return;
-			}
-			
-			IsMowerTransformControlledExternallyEventChannel.Raise(true);
-
-			_mowerGameObject.transform.position += Vector3.up * dropFromHeight;
-			_mowerGameObject.transform
-				.DOMove(position, dropDuration)
-				.SetDelay(DropDelay)
-				.SetEase(animEase)
-				.OnComplete(() => IsMowerTransformControlledExternallyEventChannel.Raise(false));
-
-			_mowerGameObject = null;
+			mower.SetActive(false);			
+			StartCoroutine(WaitForAnimationRoutine(mower));
 		}
 
-		private void OnMowerCreated(GameObject gameObject)
+		private IEnumerator WaitForAnimationRoutine(GameObject mower)
 		{
-			_mowerGameObject = gameObject;
+			Vector3? mowerPosition = null;
+			bool tileAnimationsFinished = false;
+
+			void OnMowerMoved(Vector3 position) => mowerPosition = position;
+			void OnTileAnimationsFinished() => tileAnimationsFinished = true;
+
+			MowerObjectMovedEventChannel.EventRaised += OnMowerMoved;
+			TileAnimationsFinishedEventChannel.EventRaised += OnTileAnimationsFinished;
+
+			bool CanAnimate() => mowerPosition.HasValue && tileAnimationsFinished;
+
+			yield return new WaitUntil(CanAnimate);
+
+			MowerObjectMovedEventChannel.EventRaised -= OnMowerMoved;
+			TileAnimationsFinishedEventChannel.EventRaised -= OnTileAnimationsFinished;
+
+			mower.SetActive(true);			
+			AnimateMower(mower, mowerPosition.Value);
+		}
+		private void AnimateMower(GameObject mower, Vector3 toPosition)
+		{		
+			mower.transform.position += Vector3.up * dropFromHeight;
+
+			IsMowerTransformControlledExternallyEventChannel.Raise(true);
+
+			mower.transform
+				.DOMove(toPosition, dropDuration)
+				.SetEase(animEase)
+				.OnComplete(() => IsMowerTransformControlledExternallyEventChannel.Raise(false));
 		}
 	}
 }

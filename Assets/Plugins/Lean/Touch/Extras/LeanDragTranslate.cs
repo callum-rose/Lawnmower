@@ -1,5 +1,8 @@
 using System.Collections.Generic;
+using Sirenix.OdinInspector;
+using Sirenix.Utilities;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace Lean.Touch
 {
@@ -8,6 +11,13 @@ namespace Lean.Touch
 	[AddComponentMenu(LeanTouch.ComponentPathPrefix + "Drag Translate")]
 	public class LeanDragTranslate : MonoBehaviour
 	{
+		public enum Mode
+		{
+			Translate,
+			TranslateUI,
+			TransmitWorldDelta
+		}
+
 		/// <summary>The method used to find fingers to use with this component. See LeanFingerFilter documentation for more information.</summary>
 		public LeanFingerFilter Use = new LeanFingerFilter(true);
 
@@ -25,14 +35,26 @@ namespace Lean.Touch
 		/// -1 = Instantly change.
 		/// 1 = Slowly change.
 		/// 10 = Quickly change.</summary>
-		[Tooltip("If you want this component to change smoothly over time, then this allows you to control how quick the changes reach their target value.\n\n-1 = Instantly change.\n\n1 = Slowly change.\n\n10 = Quickly change.")]
+		[Tooltip(
+			"If you want this component to change smoothly over time, then this allows you to control how quick the changes reach their target value.\n\n-1 = Instantly change.\n\n1 = Slowly change.\n\n10 = Quickly change.")]
 		public float Dampening = -1.0f;
 
 		/// <summary>This allows you to control how much momenum is retained when the dragging fingers are all released.
 		/// NOTE: This requires <b>Dampening</b> to be above 0.</summary>
-		[Tooltip("This allows you to control how much momenum is retained when the dragging fingers are all released.\n\nNOTE: This requires <b>Dampening</b> to be above 0.")]
+		[Tooltip(
+			"This allows you to control how much momenum is retained when the dragging fingers are all released.\n\nNOTE: This requires <b>Dampening</b> to be above 0.")]
 		[Range(0.0f, 1.0f)]
 		public float Inertia;
+
+		[TitleGroup("Custom Stuff")]
+		[SerializeField] private Mode mode;
+
+		[SerializeField] private UnityEvent<Vector2> dragDeltaEvent;
+		[SerializeField, Min(0)] private float dragStartScreenDistanceThreshold;
+
+		[ShowInInspector, ReadOnly] private bool _isPotentiallyDragging;
+		[ShowInInspector, ReadOnly] private bool _isDragging;
+		[ShowInInspector, ReadOnly] private Vector2 _cumulativeScreenDrag;
 
 		[HideInInspector]
 		[SerializeField]
@@ -76,19 +98,44 @@ namespace Lean.Touch
 			// Get the fingers we want to use
 			List<LeanFinger> fingers = Use.GetFingers();
 
+			if (fingers.IsNullOrEmpty())
+			{
+				_isDragging = false;
+				_isPotentiallyDragging = false;
+				_cumulativeScreenDrag = Vector2.zero;
+			}
+
 			// Calculate the screenDelta value based on these fingers
 			Vector2 screenDelta = LeanGesture.GetScreenDelta(fingers);
 
-			if (screenDelta != Vector2.zero)
+			if (_isPotentiallyDragging || screenDelta != Vector2.zero)
 			{
-				// Perform the translation
-				if (transform is RectTransform)
+				_isPotentiallyDragging = true;
+				_cumulativeScreenDrag += screenDelta;
+
+				bool canStartDragging = _cumulativeScreenDrag.sqrMagnitude >
+				                        dragStartScreenDistanceThreshold * dragStartScreenDistanceThreshold;
+				if (_isDragging || canStartDragging)
 				{
-					TranslateUI(screenDelta);
-				}
-				else
-				{
-					Translate(screenDelta);
+					if (!_isDragging)
+					{
+						screenDelta += _cumulativeScreenDrag - screenDelta;
+						_isDragging = true;
+					}
+
+					// Perform the translation
+					switch (mode)
+					{
+						case Mode.TranslateUI:
+							TranslateUI(screenDelta);
+							break;
+						case Mode.Translate:
+							Translate(screenDelta);
+							break;
+						case Mode.TransmitWorldDelta:
+							TransmitDelta(screenDelta);
+							break;
+					}
 				}
 			}
 
@@ -136,7 +183,8 @@ namespace Lean.Touch
 			// Convert back to world space
 			Vector3 worldPoint = default(Vector3);
 
-			if (RectTransformUtility.ScreenPointToWorldPointInRectangle(transform.parent as RectTransform, screenPoint, camera, out worldPoint))
+			if (RectTransformUtility.ScreenPointToWorldPointInRectangle(transform.parent as RectTransform, screenPoint,
+				camera, out worldPoint))
 			{
 				transform.position = worldPoint;
 			}
@@ -153,15 +201,25 @@ namespace Lean.Touch
 				Vector3 screenPoint = camera.WorldToScreenPoint(transform.position);
 
 				// Add the deltaPosition
-				screenPoint += (Vector3)screenDelta * Sensitivity;
+				screenPoint += (Vector3) screenDelta * Sensitivity;
+
+				Vector3 newPosition = camera.ScreenToWorldPoint(screenPoint);
 
 				// Convert back to world space
-				transform.position = camera.ScreenToWorldPoint(screenPoint);
+				transform.position = newPosition;
 			}
 			else
 			{
-				Debug.LogError("Failed to find camera. Either tag your camera as MainCamera, or set one in this component.", this);
+				Debug.LogError(
+					"Failed to find camera. Either tag your camera as MainCamera, or set one in this component.", this);
 			}
+		}
+
+		private void TransmitDelta(Vector2 screenDelta)
+		{
+			Vector3 sensitisedScreenDelta = (Vector3) screenDelta * Sensitivity;
+
+			dragDeltaEvent.Invoke(sensitisedScreenDelta);
 		}
 	}
 }

@@ -1,4 +1,7 @@
+using BalsamicBits.Extensions;
+using Game.Levels;
 using UnityEngine;
+using Utils;
 using static Game.Levels.LevelDimensions;
 
 namespace Game.Core
@@ -7,11 +10,10 @@ namespace Game.Core
     {
         [SerializeField] private Transform container;
 
-        private Vector3 _initialPosition;
 
         private void Awake()
         {
-            _initialPosition = transform.position;
+            container.position = container.position.SetY(LevelBasePlaneY);
         }
 
         public void Position(Transform transform, GridVector position)
@@ -26,7 +28,7 @@ namespace Game.Core
 
         public Vector3 GetLocalPosition(GridVector position)
         {
-            return new Vector3((position.x + 0.5f) * TileSize, 0, (position.y + 0.5f) * TileSize);
+            return new Vector3((position.x + 0.5f) * TileSize, LevelBasePlaneY, (position.y + 0.5f) * TileSize);
         }
 
         public Vector3 GetWorldPosition(GridVector position)
@@ -42,15 +44,42 @@ namespace Game.Core
 
             return new GridVector(WorldAxisToGrid(localPosition.x), WorldAxisToGrid(localPosition.z));
         }
-
-        public void ZeroOffset()
+        
+        public Vector3 GetLevelWorldCenter(IReadOnlyLevelData level)
         {
-            transform.position = _initialPosition;
+            GridVector levelCenterMin = new GridVector(
+                Mathf.FloorToInt((level.Width - 1) / 2f),
+                Mathf.FloorToInt((level.Depth - 1) / 2f));
+            GridVector levelCenterMax = new GridVector(
+                Mathf.CeilToInt((level.Width - 1) / 2f),
+                Mathf.CeilToInt((level.Depth - 1) / 2f));
+
+            Vector3 worldCenterMin = GetWorldPosition(levelCenterMin);
+            Vector3 worldCenterMax = GetWorldPosition(levelCenterMax);
+
+            return (worldCenterMin + worldCenterMax) * 0.5f;
         }
 
-        public void OffsetContainer(GridVector offset)
+        public float GetMaxDistanceFromLevelCenter(IReadOnlyLevelData level)
         {
-            container.position += offset.ToXZ() * TileSize;
+            return GetMaxDistanceFromLevelCenter(level, GetLevelWorldCenter(level));
+        }
+
+        public float GetMaxDistanceFromLevelCenter(IReadOnlyLevelData level, Vector3 worldCenter)
+        {
+            float maxDistanceSqr = 0;
+            Loops.TwoD(level.Width, level.Depth, (x, y) =>
+            {
+                Vector3 worldPosition = GetWorldPosition(new GridVector(x, y));
+                float distanceSqr = Vector3.SqrMagnitude(worldPosition - worldCenter);
+
+                if (distanceSqr > maxDistanceSqr)
+                {
+                    maxDistanceSqr = distanceSqr;
+                }
+            });
+
+            return Mathf.Sqrt(maxDistanceSqr);
         }
     }
 }

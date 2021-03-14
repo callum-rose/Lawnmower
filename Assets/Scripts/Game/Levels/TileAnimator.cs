@@ -1,4 +1,3 @@
-using System;
 using Core;
 using Core.EventChannels;
 using DG.Tweening;
@@ -18,13 +17,20 @@ namespace Game.Levels
 
 		[TitleGroup("Event Channels")]
 		[SerializeField] private ILevelDataEventChannelListenerContainer levelStartedEventChannelContainer;
+
 		[SerializeField] private TileObjectEventChannel tileObjectCreatedEventChannel;
-		
+		[SerializeField] private IVoidEventChannelTransmitterContainer tileAnimationsFinishedEventChannel;
+
 		[ShowInInspector] private float MaxDelay => gamePlayData.LevelIntroDuration - perTileAnimDuration;
 
 		private ILevelDataEventChannelListener LevelStartedEventChannel => levelStartedEventChannelContainer.Result;
 
+		private IVoidEventChannelTransmitter TileAnimationsFinishedEventChannel =>
+			tileAnimationsFinishedEventChannel.Result;
+
 		private float _furthestTile = 999f;
+
+		private int _tileAnimCount;
 
 		private void OnEnable()
 		{
@@ -47,11 +53,25 @@ namespace Game.Levels
 			float normalisedDistance = distanceFromOrigin / _furthestTile;
 			float delay = normalisedDistance * gamePlayData.LevelIntroDuration;
 
-			tile.transform.DOMove(worldPosition, perTileAnimDuration).SetDelay(delay);
+			_tileAnimCount++;
+			tile.transform.DOMove(worldPosition, perTileAnimDuration)
+				.SetDelay(delay)
+				.OnComplete(() =>
+				{
+					_tileAnimCount--;
+
+					if (_tileAnimCount > 0)
+					{
+						return;
+					}
+
+					TileAnimationsFinishedEventChannel.Raise();
+				});
 		}
 
 		private void OnLevelStarted(IReadOnlyLevelData level)
 		{
+			_tileAnimCount = 0;
 			_furthestTile = new GridVector(level.Width - 1, level.Depth - 1).Magnitude;
 		}
 	}

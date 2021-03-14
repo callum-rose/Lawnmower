@@ -58,7 +58,7 @@ namespace Game.Levels.Editorr
 		private void OnEnable()
 		{
 #if UNITY_EDITOR
-			if (autoBuild)
+			if (autoBuild && Time.frameCount == 0)
 			{
 				BuildSelectedLevel();
 			}

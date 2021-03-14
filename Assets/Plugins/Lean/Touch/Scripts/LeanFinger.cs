@@ -110,11 +110,11 @@ namespace Lean.Touch
 		{
 			get
 			{
-				var snapshotCount = Snapshots.Count;
+				int snapshotCount = Snapshots.Count;
 
 				if (snapshotCount > 0)
 				{
-					var snapshot = Snapshots[snapshotCount - 1];
+					LeanSnapshot snapshot = Snapshots[snapshotCount - 1];
 
 					if (snapshot != null)
 					{
@@ -176,10 +176,10 @@ namespace Lean.Touch
 		{
 			if (Snapshots.Count > 0 && Set == true)
 			{
-				var d = Snapshots[Mathf.Max(0, Snapshots.Count - 4)].ScreenPosition;
-				var c = Snapshots[Mathf.Max(0, Snapshots.Count - 3)].ScreenPosition;
-				var b = Snapshots[Mathf.Max(0, Snapshots.Count - 2)].ScreenPosition;
-				var a = Snapshots[Mathf.Max(0, Snapshots.Count - 1)].ScreenPosition;
+				Vector2 d = Snapshots[Mathf.Max(0, Snapshots.Count - 4)].ScreenPosition;
+				Vector2 c = Snapshots[Mathf.Max(0, Snapshots.Count - 3)].ScreenPosition;
+				Vector2 b = Snapshots[Mathf.Max(0, Snapshots.Count - 2)].ScreenPosition;
+				Vector2 a = Snapshots[Mathf.Max(0, Snapshots.Count - 1)].ScreenPosition;
 
 				return Hermite(d, c, b, a, t);
 			}
@@ -194,8 +194,8 @@ namespace Lean.Touch
 			{
 				if (Snapshots.Count > 0 && Set == true)
 				{
-					var c = Snapshots[Mathf.Max(0, Snapshots.Count - 3)].ScreenPosition;
-					var b = Snapshots[Mathf.Max(0, Snapshots.Count - 2)].ScreenPosition;
+					Vector2 c = Snapshots[Mathf.Max(0, Snapshots.Count - 3)].ScreenPosition;
+					Vector2 b = Snapshots[Mathf.Max(0, Snapshots.Count - 2)].ScreenPosition;
 
 					return Vector2.Distance(c, b);
 				}
@@ -206,22 +206,22 @@ namespace Lean.Touch
 
 		private static Vector2 Hermite(Vector2 a, Vector2 b, Vector2 c, Vector2 d, float t)
 		{
-			var mu2 = t * t;
-			var mu3 = mu2 * t;
-			var x   = HermiteInterpolate(a.x, b.x, c.x, d.x, t, mu2, mu3);
-			var y   = HermiteInterpolate(a.y, b.y, c.y, d.y, t, mu2, mu3);
+			float mu2 = t * t;
+			float mu3 = mu2 * t;
+			float x   = HermiteInterpolate(a.x, b.x, c.x, d.x, t, mu2, mu3);
+			float y   = HermiteInterpolate(a.y, b.y, c.y, d.y, t, mu2, mu3);
 
 			return new Vector2(x, y);
 		}
 
 		private static float HermiteInterpolate(float y0,float y1, float y2,float y3, float mu, float mu2, float mu3)
 		{
-			var m0 = (y1 - y0) * 0.5f + (y2 - y1) * 0.5f;
-			var m1 = (y2 - y1) * 0.5f + (y3 - y2) * 0.5f;
-			var a0 =  2.0f * mu3 - 3.0f * mu2 + 1.0f;
-			var a1 =         mu3 - 2.0f * mu2 + mu;
-			var a2 =         mu3 -        mu2;
-			var a3 = -2.0f * mu3 + 3.0f * mu2;
+			float m0 = (y1 - y0) * 0.5f + (y2 - y1) * 0.5f;
+			float m1 = (y2 - y1) * 0.5f + (y3 - y2) * 0.5f;
+			float a0 =  2.0f * mu3 - 3.0f * mu2 + 1.0f;
+			float a1 =         mu3 - 2.0f * mu2 + mu;
+			float a2 =         mu3 -        mu2;
+			float a3 = -2.0f * mu3 + 3.0f * mu2;
 
 			return(a0*y1+a1*m0+a2*m1+a3*y2);
 		}
@@ -277,7 +277,7 @@ namespace Lean.Touch
 		/// <summary>This will return the recorded position of the current finger when it was at 'targetAge'.</summary>
 		public Vector2 GetSnapshotScreenPosition(float targetAge)
 		{
-			var screenPosition = ScreenPosition;
+			Vector2 screenPosition = ScreenPosition;
 
 			LeanSnapshot.TryGetScreenPosition(Snapshots, targetAge, ref screenPosition);
 
@@ -292,8 +292,8 @@ namespace Lean.Touch
 
 			if (camera != null)
 			{
-				var screenPosition = GetSnapshotScreenPosition(targetAge);
-				var point          = new Vector3(screenPosition.x, screenPosition.y, distance);
+				Vector2 screenPosition = GetSnapshotScreenPosition(targetAge);
+				Vector3 point          = new Vector3(screenPosition.x, screenPosition.y, distance);
 
 				return camera.ScreenToWorldPoint(point);
 			}
@@ -338,9 +338,9 @@ namespace Lean.Touch
 		/// <summary>This will return the delta angle between the last and current finger position relative to the reference point and the last reference point.</summary>
 		public float GetDeltaRadians(Vector2 referencePoint, Vector2 lastReferencePoint)
 		{
-			var a = GetLastRadians(lastReferencePoint);
-			var b = GetRadians(referencePoint);
-			var d = Mathf.Repeat(a - b, Mathf.PI * 2.0f);
+			float a = GetLastRadians(lastReferencePoint);
+			float b = GetRadians(referencePoint);
+			float d = Mathf.Repeat(a - b, Mathf.PI * 2.0f);
 
 			if (d > Mathf.PI)
 			{
@@ -406,7 +406,7 @@ namespace Lean.Touch
 
 			if (camera != null)
 			{
-				var point = new Vector3(StartScreenPosition.x, StartScreenPosition.y, distance);
+				Vector3 point = new Vector3(StartScreenPosition.x, StartScreenPosition.y, distance);
 
 				return camera.ScreenToWorldPoint(point);
 			}
@@ -426,7 +426,7 @@ namespace Lean.Touch
 
 			if (camera != null)
 			{
-				var point = new Vector3(LastScreenPosition.x, LastScreenPosition.y, distance);
+				Vector3 point = new Vector3(LastScreenPosition.x, LastScreenPosition.y, distance);
 
 				return camera.ScreenToWorldPoint(point);
 			}
@@ -446,7 +446,7 @@ namespace Lean.Touch
 
 			if (camera != null)
 			{
-				var point = new Vector3(ScreenPosition.x, ScreenPosition.y, distance);
+				Vector3 point = new Vector3(ScreenPosition.x, ScreenPosition.y, distance);
 
 				return camera.ScreenToWorldPoint(point);
 			}
@@ -488,7 +488,7 @@ namespace Lean.Touch
 			// Clear old ones only?
 			if (count > 0 && count <= Snapshots.Count)
 			{
-				for (var i = 0; i < count; i++)
+				for (int i = 0; i < count; i++)
 				{
 					LeanSnapshot.InactiveSnapshots.Add(Snapshots[i]);
 				}
@@ -508,7 +508,7 @@ namespace Lean.Touch
 		public void RecordSnapshot()
 		{
 			// Get an unused snapshot and set it up
-			var snapshot = LeanSnapshot.Pop();
+			LeanSnapshot snapshot = LeanSnapshot.Pop();
 
 			snapshot.Age            = Age;
 			snapshot.ScreenPosition = ScreenPosition;

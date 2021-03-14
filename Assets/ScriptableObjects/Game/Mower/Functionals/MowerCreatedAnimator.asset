@@ -25,3 +25,6 @@ MonoBehaviour:
   isMowerTransformControlledExternallyEventChannelContainer:
     ObjectField: {fileID: 11400000, guid: 8fc555462e5e2e343ac88a8662fbb2ad, type: 2}
     ResultType: 
+  tileAnimationsFinishedEventChannel:
+    ObjectField: {fileID: 11400000, guid: 5b7337faae3afe741aef948b40204a19, type: 2}
+    ResultType: 
