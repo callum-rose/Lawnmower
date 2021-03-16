@@ -463,13 +463,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c060ebe82bc4844ba75d9ae58b24f40, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cameraZoomDatas:
-  - camera: {fileID: 2059453229}
-    minFov: 7
-    maxFov: 10
-  - camera: {fileID: 412570099}
-    minFov: 8
-    maxFov: 11
+  mixingCamera: {fileID: 699633248}
   speedFactor: 0.5
   invertDirection: 1
 --- !u!114 &66872179
@@ -7873,7 +7867,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 860175880}
-  m_LocalRotation: {x: 0.50351614, y: 0.16235389, z: -0.09696829, w: 0.8430362}
+  m_LocalRotation: {x: 0.50351614, y: 0.16235389, z: -0.09696831, w: 0.8430362}
   m_LocalPosition: {x: -15.5, y: 99.5, z: -47}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -8315,7 +8309,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 964599403}
-  m_LocalRotation: {x: 0.50351614, y: 0.16235389, z: -0.09696829, w: 0.8430362}
+  m_LocalRotation: {x: 0.50351614, y: 0.16235389, z: -0.09696831, w: 0.8430362}
   m_LocalPosition: {x: -18.215218, y: 102.86459, z: -55.376045}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -9314,7 +9308,7 @@ MonoBehaviour:
   m_BiasX: 0
   m_BiasY: 0
   m_CenterOnActivate: 1
-  m_GroupFramingSize: 0.9
+  m_GroupFramingSize: 0.8
   m_FramingMode: 2
   m_FrameDamping: 15
   m_AdjustmentMode: 1
