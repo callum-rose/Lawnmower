@@ -4,10 +4,8 @@ A grid-based puzzle game built in **Unity**. You drive a lawnmower across a lawn
 have to mow every patch of grass to *exactly* the right height — no more, no less — in
 a single continuous route.
 
-> ⚠️ **Unfinished prototype.** This project was never completed. It's a working
-> vertical slice with the core mechanic, a level editor, and supporting systems in
-> place, but it is not a shippable game — expect missing content, placeholder/demo
-> scenes, TODOs, half-built features, and rough edges.
+> ⚠️ **This is a prototype.** It's a working vertical slice with the core mechanic, a level editor, and supporting
+> systems in place.
 
 ## The game
 
@@ -15,8 +13,8 @@ You control a mower sitting on a grid of tiles. Each turn you move one tile in o
 four directions (up / down / left / right). The goal is to mow the whole lawn perfectly.
 
 - **Grass** has a height of 0–3. Driving onto a grass tile cuts it down by one.
-  - A grass tile is **perfect** when its height is exactly **1**.
-  - A grass tile is **ruined** if it's cut to **0** (over-mowed).
+    - A grass tile is **perfect** when its height is exactly **1**.
+    - A grass tile is **ruined** if it's cut to **0** (over-mowed).
 - A **level is complete** when *every* tile is in its complete state (all grass at
   height 1, with non-grass tiles always counting as complete).
 - A **level fails** the moment *any* grass tile is ruined.
@@ -27,17 +25,19 @@ patch one time too many.
 
 ### Tile types
 
-| Tile   | Traversable | Behaviour |
-|--------|-------------|-----------|
+| Tile   | Traversable | Behaviour                                                                           |
+|--------|-------------|-------------------------------------------------------------------------------------|
 | Grass  | Yes         | Cut down by 1 each time the mower drives onto it. Perfect at height 1, ruined at 0. |
-| Wood   | Yes         | A plain walkable path tile; always "complete". |
-| Spring | Yes         | Launches the mower to a defined landing position elsewhere on the grid. |
-| Stone  | No          | Solid obstacle — the mower bumps off it. |
-| Water  | No          | Impassable. |
-| Empty  | No          | A hole / gap in the lawn. |
+| Wood   | Yes         | A plain walkable path tile; always "complete".                                      |
+| Spring | Yes         | Launches the mower to a defined landing position elsewhere on the grid.             |
+| Stone  | No          | Solid obstacle — the mower bumps off it.                                            |
+| Water  | No          | Impassable.                                                                         |
+| Empty  | No          | A hole / gap in the lawn.                                                           |
 
 Moving into a non-traversable tile registers as a **bump** (the mower doesn't move).
 Moving off the edge of the grid is simply ignored.
+
+More tile types could be easily added to vary the complexity of the puzzle.
 
 ### Controls
 
@@ -68,10 +68,6 @@ Unity project — main code lives under `Assets/Scripts`:
 - `Assets/Scenes/Boids` — a standalone, Jobs-based boids (flocking birds) demo, used
   for background ambience; not part of the core puzzle loop.
 
-### Scenes
-
-`Assets/Scenes/`: `Setup`, `MainMenu`, `LevelSelect`, `Game`, plus the `Boids` demo.
-
 ### Notable tech / dependencies
 
 - **Odin Inspector** (`Sirenix.OdinInspector`) for editor tooling and data authoring.
@@ -82,16 +78,3 @@ Unity project — main code lives under `Assets/Scripts`:
 - A bespoke in-Unity **level editor window** for authoring levels and tile layouts.
 
 The project targets mobile (Android performance work is present in the history).
-
-## Building / running
-
-This is a standard Unity project — open the root folder in the Unity Editor (matching
-the version in `ProjectSettings/ProjectVersion.txt`) and press Play from the `Setup`
-or `Game` scene. There is no automated build pipeline set up here.
-
-## Status
-
-Prototype / abandoned. The central mowing mechanic, tile system, undo, level editor,
-and menu flow are implemented, but the game is incomplete: it lacks a finished set of
-levels, polish, and final content, and various systems contain TODOs and experimental
-or demo code (e.g. the boids scene, multiple `FlexGrid`/editor iterations).
