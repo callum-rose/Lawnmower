@@ -2,7 +2,6 @@ using Core;
 using Game.Core;
 using Game.Tiles;
 using Game.UndoSystem;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Game.Levels
@@ -10,7 +9,7 @@ namespace Game.Levels
 	[CreateAssetMenu(fileName = nameof(EditModeLevelTileUpgrader), menuName = SoNames.GameDir + nameof(EditModeLevelTileUpgrader))]
 	internal class EditModeLevelTileUpgrader : ScriptableObject
 	{
-		[SerializeField, ListDrawerSettings(Expanded = true)] private TileUpgradePair[] tileUpgradePairs;
+		[SerializeField] private TileUpgradePair[] tileUpgradePairs;
 		
 		private EditableLevelData _levelData;
 		private IUndoSystem _undoSystem;

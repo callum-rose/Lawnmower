@@ -2,7 +2,6 @@ using BalsamicBits.Extensions;
 using DG.Tweening;
 using Game.Core;
 using Game.Mowers.Input;
-using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -16,20 +15,20 @@ namespace Game.UI
 		[SerializeField] private UiArrowsManager raycaster;
 		[SerializeField] private RenderTexture renderTexture;
 
-		[TitleGroup("Colour")]
+		[Header("Colour")]
 		[SerializeField] private RawImage image;
 
 		[SerializeField] private Color beingUsedColour;
 		[SerializeField] private Color notBeingUsedColour;
 		[SerializeField] private float colourChangeDuration;
 
-		[TitleGroup("Dragging")]
+		[Header("Dragging")]
 		[SerializeField] private bool isDraggable;
 
 		[SerializeField, Min(0)] private float padding;
 		[SerializeField, Min(0)] private float dragTransformScaleFactor = 1.2f;
 
-		[TitleGroup("Event Channels")]
+		[Header("Event Channels")]
 		[SerializeField] private IMowerInputEventChannelListenerContainer mowerInputEventChannelContainer;
 
 		private IMowerInputEventChannelListener MowerInputEventChannelListener =>

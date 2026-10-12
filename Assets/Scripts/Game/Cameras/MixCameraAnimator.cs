@@ -1,7 +1,6 @@
 using System.Collections;
 using BalsamicBits.Extensions;
 
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Game.Cameras
@@ -28,7 +27,6 @@ namespace Game.Cameras
 			}
 		}
 
-		[Button("Debug Animate To")]
 		public void AnimateTo(int index)
 		{
 			if (index < 0 || index >= _mixingCamera.ChildCameras.Count)
@@ -54,7 +52,7 @@ namespace Game.Cameras
 			_lastIndexSet = index;
 		}
 		
-		[Button("Debug Animate Toggle")]
+		[ContextMenu("Debug Animate Toggle")]
 		public void AnimateToggle()
 		{
 			AnimateTo((_lastIndexSet + 1) % _mixingCamera.ChildCameras.Count);

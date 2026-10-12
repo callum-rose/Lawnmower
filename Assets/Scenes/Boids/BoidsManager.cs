@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using BalsamicBits.Extensions;
-using Sirenix.OdinInspector;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Jobs.LowLevel.Unsafe;
@@ -55,7 +54,7 @@ namespace Scenes.Boids
 			Gizmos.DrawWireCube(bounds.center, bounds.extents * 2);
 		}
 
-		[Button]
+		[ContextMenu("Init")]
 		private void Init()
 		{
 			Clear();

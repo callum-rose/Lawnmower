@@ -3,19 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using Core;
 using Game.Core;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Game.Tiles
 {
 	[CreateAssetMenu(fileName = nameof(DirtAppearanceSetterData),
 		menuName = SoNames.GameDir + nameof(DirtAppearanceSetterData))]
-	internal partial class DirtAppearanceSetterData : SerializedScriptableObject
+	internal partial class DirtAppearanceSetterData : ScriptableObject
 	{
 		// TODO split all this data out into a scriptable object
-		[SerializeField, //ValidateInput(nameof(AreThereNoDuplicateChannelSetups)),
-		 ListDrawerSettings(Expanded = true, NumberOfItemsPerPage = 4)]
-		private ChannelSetup[] channels;
+		[SerializeField] private ChannelSetup[] channels;
 
 		private static readonly GridVector[] cardinalDirections =
 		{

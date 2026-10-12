@@ -1,5 +1,4 @@
 using System;
-using Sirenix.OdinInspector;
 using UI.Buttons;
 using UnityEngine;
 
@@ -8,7 +7,7 @@ namespace UI.Dialogs
 	[Serializable]
 	public class DialogInfo
 	{
-		[TitleGroup("Dialog Info")] [SerializeField]
+		[Header("Dialog Info")] [SerializeField]
 		public string header;
 
 		[SerializeField] private string body;
@@ -33,11 +32,5 @@ namespace UI.Dialogs
 		public string Body => body;
 		public ButtonInfo Button1 => button1;
 		public ButtonInfo Button2 => button2;
-		
-		[Button]
-		private void ClearButton2Info()
-		{
-			button2 = default;
-		}
 	}
 }

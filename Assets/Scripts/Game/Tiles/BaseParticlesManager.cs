@@ -1,14 +1,13 @@
 using System;
 using System.Collections;
 using Core;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Game.Tiles
 {
 	internal abstract class BaseParticlesManager : ScriptableObjectWithCoroutines
 	{		
-		[SerializeField, AssetsOnly] private ParticleSystem particlesPrefab;
+		[SerializeField] private ParticleSystem particlesPrefab;
 		
 		// ReSharper disable Unity.PerformanceAnalysis
 		protected void Play(Vector3 position, params Action<ParticleSystem>[] middlewares)
@@ -35,9 +34,13 @@ namespace Game.Tiles
 		{
 			particles.Play();
 			
-			yield return new WaitWhile(particles.IsAlive);
-			
-			Destroy(particles.gameObject);
+			// The particles live in the scene, so a scene change can destroy them before they finish.
+			yield return new WaitWhile(() => particles != null && particles.IsAlive());
+
+			if (particles != null)
+			{
+				Destroy(particles.gameObject);
+			}
 		}
 	}
 }

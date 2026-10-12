@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using BalsamicBits.Extensions;
-using Sirenix.OdinInspector;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -13,7 +12,7 @@ namespace Game.Tiles
 {
 	public class PrefabArranger : MonoBehaviour
 	{
-		[TitleGroup("Inputs")] [SerializeField]
+		[Header("Inputs")] [SerializeField]
 		private WeightedPrefab[] prefabs;
 
 		[SerializeField] private Vector2Int resolution = new Vector2Int(5, 5);
@@ -22,21 +21,21 @@ namespace Game.Tiles
 		[SerializeField] private Vector3 randomPositionOffset;
 		[SerializeField] private bool doRandomRotation;
 
-		[SerializeField, Indent, ShowIf(nameof(doRandomRotation))]
+		[SerializeField]
 		private Vector3 randomRotation;
 
 		[SerializeField] private bool doRandomScale;
 
-		[SerializeField, Indent, ShowIf(nameof(doRandomScale))]
+		[SerializeField]
 		private bool scaleUniform;
 
-		[SerializeField, LabelText("Scale Factor"), Indent, ShowIf(nameof(doRandomScale)), ShowIf(nameof(scaleUniform))]
+		[SerializeField]
 		private float scaleFactorSingle = 1;
 
-		[SerializeField, LabelText("Scale Factor"), Indent, ShowIf(nameof(doRandomScale)), HideIf(nameof(scaleUniform))]
+		[SerializeField]
 		private Vector3 randomScaleFactorVec = Vector3.one;
 
-		[TitleGroup("Instantiated")] [SerializeField]
+		[Header("Instantiated")] [SerializeField]
 		private Transform[] transforms;
 
 #if UNITY_EDITOR
@@ -62,8 +61,7 @@ namespace Game.Tiles
 			}
 		}
 
-		[TitleGroup("Actions")]
-		[Button]
+		[ContextMenu("Create")]
 		private void Create()
 		{
 			int GetWeightedRandomPrefabIndex()
@@ -101,7 +99,7 @@ namespace Game.Tiles
 			});
 		}
 
-		[Button]
+		[ContextMenu("Re Arrange")]
 		private void ReArrange()
 		{
 			Loops.TwoD(resolution.x, resolution.y, (x, z) =>
@@ -111,7 +109,7 @@ namespace Game.Tiles
 			});
 		}
 
-		[Button]
+		[ContextMenu("Destroy All Children")]
 		private void DestroyAllChildren()
 		{
 			while (transform.childCount > 0)
@@ -168,16 +166,12 @@ namespace Game.Tiles
 		[Serializable]
 		private struct WeightedPrefab
 		{
-			[HorizontalGroup(0.6f), LabelWidth(50)]
 			public GameObject prefab;
 
-			[HorizontalGroup(0.25f), LabelWidth(50)]
 			public float weight;
 
 			[HideInInspector] public float totalWeight;
 
-			[HorizontalGroup(0.15f)]
-			[ShowInInspector, HideLabel]
 			public float NormalisedWeight => weight / totalWeight;
 		}
 	}

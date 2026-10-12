@@ -2,7 +2,6 @@ using System.Collections;
 using Core;
 using Core.EventChannels;
 using DG.Tweening;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Game.Mowers
@@ -16,7 +15,7 @@ namespace Game.Mowers
 		[SerializeField] private float dropDuration = 0.5f;
 		[SerializeField] private Ease animEase = Ease.OutBounce;
 
-		[TitleGroup("Event Channels")]
+		[Header("Event Channels")]
 		[SerializeField] private IVector3EventChannelListenerContainer mowerObjectMovedEventChannelContainer;
 
 		[SerializeField] private IGameObjectEventChannelListenerContainer mowerCreatedEventChannelContainer;

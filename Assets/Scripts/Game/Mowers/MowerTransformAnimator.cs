@@ -6,7 +6,6 @@ using Game.Core;
 using Game.Mowers.Input;
 using Game.Mowers.Models;
 using Game.UndoSystem;
-using Sirenix.OdinInspector;
 
 namespace Game.Mowers
 {
@@ -15,7 +14,7 @@ namespace Game.Mowers
 		[SerializeField] private AnimationSpeedHandler animationSpeedHandler;
 		[SerializeField] private AnimationCurve animEase;
 
-		[TitleGroup("Event Channels")]
+		[Header("Event Channels")]
 		[SerializeField] private IVector3EventChannelTransmitterContainer movedEventChannel;
 		[SerializeField] private IBoolEventChannelListenerContainer isMowerTransformControlledExternallyEventChannelContainer;
 

@@ -1,6 +1,5 @@
 using Core.EventChannels;
 using Game.UndoSystem;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace UI.Buttons
@@ -48,13 +47,13 @@ namespace UI.Buttons
 
 		#region API
 
-		[Button, DisableInEditorMode, HideIf(nameof(IsPulsing))]
+		[ContextMenu("Pulse")]
 		public void Pulse()
 		{
 			_animator.SetBool(_doPulseId, true);
 		}
 
-		[Button, DisableInEditorMode, ShowIf(nameof(IsPulsing))]
+		[ContextMenu("Stop Pulse")]
 		public void StopPulse()
 		{
 			_animator.SetBool(_doPulseId, false);

@@ -1,6 +1,4 @@
 using System.Collections.Generic;
-using Sirenix.OdinInspector;
-using Sirenix.Utilities;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -46,15 +44,15 @@ namespace Lean.Touch
 		[Range(0.0f, 1.0f)]
 		public float Inertia;
 
-		[TitleGroup("Custom Stuff")]
+		[Header("Custom Stuff")]
 		[SerializeField] private Mode mode;
 
 		[SerializeField] private UnityEvent<Vector2> dragDeltaEvent;
 		[SerializeField, Min(0)] private float dragStartScreenDistanceThreshold;
 
-		[ShowInInspector, ReadOnly] private bool _isPotentiallyDragging;
-		[ShowInInspector, ReadOnly] private bool _isDragging;
-		[ShowInInspector, ReadOnly] private Vector2 _cumulativeScreenDrag;
+		private bool _isPotentiallyDragging;
+		private bool _isDragging;
+		private Vector2 _cumulativeScreenDrag;
 
 		[HideInInspector]
 		[SerializeField]
@@ -98,7 +96,7 @@ namespace Lean.Touch
 			// Get the fingers we want to use
 			List<LeanFinger> fingers = Use.GetFingers();
 
-			if (fingers.IsNullOrEmpty())
+			if (fingers == null || fingers.Count == 0)
 			{
 				_isDragging = false;
 				_isPotentiallyDragging = false;

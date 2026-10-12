@@ -1,5 +1,4 @@
 using System;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Game.Core
@@ -7,7 +6,7 @@ namespace Game.Core
 	[Serializable]
 	public struct GridVector : IEquatable<GridVector>
 	{
-		[HorizontalGroup(LabelWidth = 20)] public int x, y;
+		public int x, y;
 
 		public float Magnitude => ((Vector2Int) this).magnitude;
 

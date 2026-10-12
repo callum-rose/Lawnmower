@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using BalsamicBits.Extensions;
 using Game.Core;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Game.Levels
@@ -13,18 +12,18 @@ namespace Game.Levels
 		[SerializeField] private int sizeOffset = 2;
 		[SerializeField] private float planeDefaultSize = 10;
 		
-		[TitleGroup("Material")]
+		[Header("Material")]
 		[SerializeField] private Material material;
 		[SerializeField, Range(0,1)] private float amountShowingRadially;
 		[SerializeField] private float waveSpeed;
 
-		[TitleGroup("Defaults")]
+		[Header("Defaults")]
 		[SerializeField] private Vector3 defaultWorldCenter;
 
-		[TitleGroup("Defaults")] [SerializeField]
+		[Header("Defaults")] [SerializeField]
 		private float defaultRadius;
 
-		[TitleGroup("Event Channels")]
+		[Header("Event Channels")]
 		[SerializeField] private LevelDataEventChannel levelDataEventChannel;
 
 		[SerializeField, HideInInspector] private Transform[] cameraTargets;
@@ -109,7 +108,6 @@ namespace Game.Levels
 		}
 
 #if UNITY_EDITOR
-		[TitleGroup("Camera Targets"), Button, HideInPlayMode]
 		private void CreateCircumferencialTargetTransforms(int count)
 		{
 			if (cameraTargets == null || count != cameraTargets.Length)
@@ -134,7 +132,7 @@ namespace Game.Levels
 		}
 #endif
 
-		[TitleGroup("Defaults"), Button("Set Defaults")]
+		[ContextMenu("Set Defaults")]
 		private void SetDefaults()
 		{
 			SetToCenter(defaultWorldCenter);

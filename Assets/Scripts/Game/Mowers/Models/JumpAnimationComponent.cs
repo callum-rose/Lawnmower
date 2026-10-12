@@ -1,7 +1,6 @@
 using Game.Core;
 using Game.Mowers.Input;
 using Game.UndoSystem;
-using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -58,7 +57,7 @@ namespace Game.Mowers.Models
 
 		#region Methods
 		
-		[Button("Debug Animate", Expanded = true)]
+		[ContextMenu("Debug Animate")]
 		private void Animate()
 		{
 			jumpAction.Invoke();

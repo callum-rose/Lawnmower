@@ -2,7 +2,6 @@
 
 using BalsamicBits.Extensions;
 using Lean.Touch;
-using Sirenix.Utilities;
 using UnityEngine;
 
 namespace Game.UI
@@ -16,7 +15,7 @@ namespace Game.UI
         {
             foreach (LeanFinger finger in LeanTouch.Fingers)
             {
-                Rect rect = new Rect().SetSize(size, size).SetCenter(finger.ScreenPosition.SetY(Screen.height - finger.ScreenPosition.y));
+                Rect rect = new Rect(0, 0, size, size) { center = finger.ScreenPosition.SetY(Screen.height - finger.ScreenPosition.y) };
                 GUI.DrawTexture(rect, texture);
             }
         }

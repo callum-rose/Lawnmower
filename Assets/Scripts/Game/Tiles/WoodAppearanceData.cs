@@ -3,7 +3,6 @@ using System.IO;
 using BalsamicBits.Extensions;
 using Core;
 using Plugins.Utils;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Game.Tiles
@@ -24,10 +23,10 @@ namespace Game.Tiles
 
 		#region Input
 
-		[TitleGroup("Input")] [SerializeField] private Vector2Int textureSize = new Vector2Int(256, 4);
+		[Header("Input")] [SerializeField] private Vector2Int textureSize = new Vector2Int(256, 4);
 		[SerializeField] private Gradient highGradientLut, lowGradientLut;
 
-		[SerializeField, FolderPath(RequireExistingPath = true, ParentFolder = "Assets")]
+		[SerializeField]
 		private string outputPath;
 
 		[SerializeField] private string outputName = "lut";
@@ -35,8 +34,7 @@ namespace Game.Tiles
 		[SerializeField] private bool askBeforeOverwrite = true;
 
 #if UNITY_EDITOR
-		[TitleGroup("Input")]
-		[Button]
+		[ContextMenu("Generate")]
 		private void Generate()
 		{
 			highLut = GradientToTextureGenerator.GenerateLut(textureSize, highGradientLut, GetFullPath("high"),
@@ -50,18 +48,17 @@ namespace Game.Tiles
 
 		#region Output
 
-		[TitleGroup("Output")] [SerializeField]
+		[Header("Output")] [SerializeField]
 		private Texture2D highLut, lowLut;
 
 		#endregion
 
 		#region Material
 
-		[TitleGroup("Material")] [SerializeField]
+		[Header("Material")] [SerializeField]
 		private Material woodMaterial;
 
-		[SerializeField, DisableIf("@" + nameof(woodMaterial) + " == null"),
-		 ValueDropdown(nameof(WoodShaderProperties), HideChildProperties = true)]
+		[SerializeField]
 		private string highLutShaderPropertyName, lowLutShaderPropertyName;
 
 		private List<string> WoodShaderProperties
@@ -77,7 +74,7 @@ namespace Game.Tiles
 			}
 		}
 
-		[Button, DisableIf("@" + nameof(woodMaterial) + " == null")]
+		[ContextMenu("Assign Luts To Material")]
 		private void AssignLutsToMaterial()
 		{
 			woodMaterial.SetTexture(highLutShaderPropertyName, highLut);

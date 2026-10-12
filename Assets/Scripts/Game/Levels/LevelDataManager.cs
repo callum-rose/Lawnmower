@@ -1,5 +1,4 @@
 using Core;
-using Sirenix.OdinInspector;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,19 +8,12 @@ namespace Game.Levels
 	[CreateAssetMenu(fileName = nameof(LevelDataManager), menuName = SoNames.GameDir + nameof(LevelDataManager))]
 	internal partial class LevelDataManager : ScriptableObject
 	{
-		[ShowInInspector, PropertyOrder(5), TitleGroup("In Game Data")]
 		public int LevelsCompleted { get; private set; }
 
-		[SerializeField, PropertyOrder(5)] private bool unlockAllLevels;
+		[SerializeField] private bool unlockAllLevels;
 
-		[SerializeField]
-#if UNITY_EDITOR
-		[OnValueChanged(nameof(UpdateNotIncludedLevels)), AssetsOnly,
-		 ListDrawerSettings(Expanded = true, ShowIndexLabels = true), PropertyOrder(1)]
-#endif
-		private LevelData[] levelDatas;
+		[SerializeField] private LevelData[] levelDatas;
 
-		[ShowInInspector, ListDrawerSettings(Expanded = true, IsReadOnly = true), ReadOnly, PropertyOrder(4)]
 		private List<LevelData> _notIncludedLevels;
 
 		public int LevelCount => levelDatas.Length;

@@ -2,7 +2,6 @@
 using System.Collections;
 using UnityEngine;
 using BalsamicBits.Extensions;
-using Sirenix.OdinInspector;
 using TMPro;
 using UnityEngine.UI;
 
@@ -56,7 +55,6 @@ namespace UI.Buttons
             }
         }
 
-        [Button]
         public void Set(bool useIcon, bool useText, bool instant)
         {
 #if UNITY_EDITOR

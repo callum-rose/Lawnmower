@@ -4,7 +4,6 @@ using Game.Core;
 using Game.Levels;
 using Game.Mowers.Input;
 using Game.UndoSystem;
-using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -105,7 +104,6 @@ namespace Game.Mowers
 			_undoManager = null;
 		}
 
-		[Button(Expanded = true)]
 		public void SetInitialPosition(GridVector position)
 		{
 			_mowerMover.Move(position, true);
