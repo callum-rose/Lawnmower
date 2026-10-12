@@ -138,7 +138,7 @@ Material:
     - _ShimmerSpeed: 1.5
     - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0
-    - _SparkleBoost: 2
+    - _SparkleBoost: 0.7
     - _SparkleChance: 0.12
     - _SpecularHighlights: 1
     - _SrcBlend: 1

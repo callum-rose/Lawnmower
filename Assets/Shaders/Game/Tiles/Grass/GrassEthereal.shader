@@ -24,14 +24,14 @@ Shader "Grass Ethereal"
 		_AlphaFadePower("Alpha Fade Power", Range(0.1, 8)) = 4
 
 		[Header(Tip Glow)]
-		_GlowColourA("Glow Colour A", Color) = (0.85,1,0.35,1)
-		_GlowColourB("Glow Colour B", Color) = (0.4,1,0.65,1)
-		_GlowColourC("Glow Colour C", Color) = (0.35,0.95,1,1)
-		_GlowIntensity("Glow Intensity", Range(0, 2)) = 0.9
-		_GlowPower("Glow Power", Range(0.5, 8)) = 2.5
+		_GlowColourA("Glow Colour A", Color) = (0.75,1,0.2,1)
+		_GlowColourB("Glow Colour B", Color) = (0.2,1,0.55,1)
+		_GlowColourC("Glow Colour C", Color) = (0.2,0.9,1,1)
+		_GlowIntensity("Glow Intensity", Range(0, 2)) = 1.4
+		_GlowPower("Glow Power", Range(0.5, 8)) = 4.5
 		_GlowVariationScale("Glow Variation Scale", Float) = 4
 		_SparkleChance("Sparkle Chance", Range(0, 1)) = 0.12
-		_SparkleBoost("Sparkle Boost", Range(0, 4)) = 1.5
+		_SparkleBoost("Sparkle Boost", Range(0, 4)) = 0.7
 
 		[Header(Shimmer)]
 		_ShimmerAmount("Shimmer Amount", Range(0, 1)) = 0.35

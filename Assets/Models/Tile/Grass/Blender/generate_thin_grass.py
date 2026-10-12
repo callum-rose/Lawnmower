@@ -20,10 +20,11 @@ TILES = [
 	("grass_thin_3", 0.60, 0.0, 3),
 ]
 
-BLADES_PER_SIDE = 20
+BLADES_PER_SIDE = 14
 EDGE_MARGIN = 0.0
 SEGMENTS = 4
-TAPER_POWER = 2.2
+TIP_WIDTH_RATIO = 0.75
+CAP_POINTS = 5
 HEIGHT_RANGE = (0.55, 1.0)
 BASE_WIDTH_RANGE = (0.03, 0.045)
 LEAN_RANGE = (0.05, 0.22)
@@ -52,24 +53,34 @@ def build_tile(name, tile_height, offset, seed):
 			face_normal = side.cross(Vector((0, 0, 1))).normalized()
 			normal = (face_normal + Vector((0, 0, NORMAL_UP_BIAS))).normalized()
 
+			# Body tapers slightly up to the shoulder, then a semicircular cap rounds off the tip
+			cap_radius = width * 0.5 * TIP_WIDTH_RATIO
+			shoulder_t = 1 - cap_radius / height
+
 			start = len(verts)
-			for s in range(SEGMENTS):
-				t = s / SEGMENTS
+			for s in range(SEGMENTS + 1):
+				t = shoulder_t * s / SEGMENTS
 				centre = base + Vector((0, 0, height * t)) + lean * t * t
-				half = side * width * 0.5 * (1 - t ** TAPER_POWER) ** 0.6
+				half = side * width * 0.5 * (1 + (TIP_WIDTH_RATIO - 1) * s / SEGMENTS)
 				verts += [centre - half, centre + half]
 				uv0s += [(u, t), (u, t)]
-			verts.append(base + Vector((0, 0, height)) + lean)
-			uv0s.append((u, 1.0))
-			count = SEGMENTS * 2 + 1
+
+			shoulder = base + Vector((0, 0, height * shoulder_t)) + lean * shoulder_t * shoulder_t
+			tangent = (Vector((0, 0, height)) + lean * 2 * shoulder_t).normalized()
+			for i in range(1, CAP_POINTS + 1):
+				angle = math.pi * i / (CAP_POINTS + 1)
+				verts.append(shoulder + side * cap_radius * math.cos(angle) + tangent * cap_radius * math.sin(angle))
+				uv0s.append((u, shoulder_t + cap_radius * math.sin(angle) / height))
+
+			count = (SEGMENTS + 1) * 2 + CAP_POINTS
 			uv1s += [(bx, by)] * count
 			normals += [normal] * count
 
-			for s in range(SEGMENTS - 1):
+			for s in range(SEGMENTS):
 				a = start + s * 2
 				faces.append((a, a + 1, a + 3, a + 2))
-			last = start + (SEGMENTS - 1) * 2
-			faces.append((last, last + 1, start + count - 1))
+			left = start + SEGMENTS * 2
+			faces.append((left, left + 1, *range(left + 2, left + 2 + CAP_POINTS)))
 
 	mesh = bpy.data.meshes.new(name)
 	mesh.from_pydata([tuple(v) for v in verts], [], faces)
