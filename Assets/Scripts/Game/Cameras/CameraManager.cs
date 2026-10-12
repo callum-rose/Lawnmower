@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
-using Cinemachine;
+
 using Game.Levels;
 using Game.Tiles;
 using System.Linq;
@@ -14,7 +14,7 @@ namespace Game.Cameras
 	internal class CameraManager : MonoBehaviour
 	{
 		[TitleGroup("Level Camera")]
-		[SerializeField] private CinemachineTargetGroup levelTargetGroup;
+		[SerializeField] private Unity.Cinemachine.CinemachineTargetGroup levelTargetGroup;
 
 		[SerializeField] private MouseTileSelector mouseTileSelector;
 		[SerializeField] private float tileWeight = 1;
@@ -84,9 +84,7 @@ namespace Game.Cameras
 		{
 			if (gameObject.transform == null)
 			{
-				levelTargetGroup.m_Targets = levelTargetGroup.m_Targets
-					.Where(t => t.target != null)
-					.ToArray();
+				levelTargetGroup.Targets.RemoveAll(t => t.Object == null);
 				return;
 			}
 

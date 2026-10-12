@@ -11,7 +11,7 @@ namespace Scenes.Boids
 
 		public LinearAnimationCurve(KeyValuePair<float, float> key0, KeyValuePair<float, float> key1)
 		{
-			if (_key0.Key < _key1.Key)
+			if (key0.Key < key1.Key)
 			{
 				_key0 = key0;
 				_key1 = key1;
