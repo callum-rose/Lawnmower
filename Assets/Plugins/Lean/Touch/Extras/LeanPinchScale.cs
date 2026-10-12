@@ -1,6 +1,4 @@
 using System.Collections.Generic;
-using Sirenix.OdinInspector;
-using Sirenix.Utilities;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -38,19 +36,16 @@ namespace Lean.Touch
 
 		public UnityEvent<float> Scale; 
 		
-		[TitleGroup("Custom Stuff")]
+		[Header("Custom Stuff")]
 		[SerializeField, Min(1)] private float pinchStartThresholdFactor;
 
-		[ShowInInspector, ReadOnly] private float PinchStartThresholdFactorUpper => 1 * pinchStartThresholdFactor;
-		[ShowInInspector, ReadOnly] private float PinchStartThresholdFactorLower => 1 / pinchStartThresholdFactor;
+		private float PinchStartThresholdFactorUpper => 1 * pinchStartThresholdFactor;
+		private float PinchStartThresholdFactorLower => 1 / pinchStartThresholdFactor;
 
-		[ShowInInspector, ReadOnly]
 		private bool _isPotentiallyPinching;
 
-		[ShowInInspector, ReadOnly]
 		private bool _isPinching;
 
-		[ShowInInspector, ReadOnly]
 		private float _cumulativePinchScale = 1;
 
 		[HideInInspector]
@@ -95,7 +90,7 @@ namespace Lean.Touch
 			// Get the fingers we want to use
 			List<LeanFinger> fingers = Use.GetFingers();
 
-			if (fingers.IsNullOrEmpty())
+			if (fingers == null || fingers.Count == 0)
 			{
 				_isPinching = false;
 				_isPotentiallyPinching = false;

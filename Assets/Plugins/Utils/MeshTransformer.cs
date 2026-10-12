@@ -1,5 +1,4 @@
-﻿using Sirenix.OdinInspector;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Utils
 {
@@ -9,7 +8,7 @@ namespace Utils
         [SerializeField] private Vector3 offset;
         [SerializeField] private Vector3 rotation;
 
-        [Button]
+        [ContextMenu("Apply Transform")]
         private void ApplyTransform()
         {
             Matrix4x4 translateMatrix = Matrix4x4.Translate(offset);
