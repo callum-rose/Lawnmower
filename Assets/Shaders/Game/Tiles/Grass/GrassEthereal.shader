@@ -23,6 +23,12 @@ Shader "Grass Ethereal"
 		_TipAlpha("Tip Alpha", Range(0, 1)) = 0.35
 		_AlphaFadePower("Alpha Fade Power", Range(0.1, 8)) = 4
 
+		[Header(Variation)]
+		_BodyColumn("Body Colour Column", Range(0, 1)) = 0.375
+		_BodyVariation("Body Colour Variation", Range(0, 1)) = 0.25
+		_GlowHueVariation("Glow Hue Variation", Range(0, 1)) = 0.3
+		_GlowBrightnessVariation("Glow Brightness Variation", Range(0, 1)) = 0.35
+
 		[Header(Tip Glow)]
 		_GlowColourA("Glow Colour A", Color) = (0.75,1,0.2,1)
 		_GlowColourB("Glow Colour B", Color) = (0.2,1,0.55,1)
@@ -30,7 +36,7 @@ Shader "Grass Ethereal"
 		_GlowIntensity("Glow Intensity", Range(0, 2)) = 1.4
 		_GlowPower("Glow Power", Range(0.5, 8)) = 4.5
 		_GlowVariationScale("Glow Variation Scale", Float) = 4
-		_SparkleChance("Sparkle Chance", Range(0, 1)) = 0.12
+		_SparkleChance("Sparkle Chance", Range(0, 1)) = 0.05
 		_SparkleBoost("Sparkle Boost", Range(0, 4)) = 0.7
 
 		[Header(Shimmer)]
@@ -111,6 +117,10 @@ Shader "Grass Ethereal"
 			float _GlowPower;
 			float _GlowVariationScale;
 			float _SparkleChance;
+			float _BodyColumn;
+			float _BodyVariation;
+			float _GlowHueVariation;
+			float _GlowBrightnessVariation;
 			float _SparkleBoost;
 			float _ShimmerAmount;
 			float _ShimmerSpeed;
@@ -188,7 +198,9 @@ Shader "Grass Ethereal"
 				float highlight = smoothstep(_HighlightCutoff2, _HighlightCutoff2 + _BoundarySmoothness2, nDotL);
 				float shadow = smoothstep(-_ShadowCutoff2, -_ShadowCutoff2 - _BoundarySmoothness2, nDotL);
 
-				float3 colour = tex2D(_MainTex2, uv0 * _MainTex2_ST.xy + _MainTex2_ST.zw).rgb * _Tint2.rgb * diffuse
+				// Pull each blade's colour column towards one shared column so a tile reads as a single lawn type
+				float2 bodyUV = float2(lerp(_BodyColumn, uv0.x, _BodyVariation), uv0.y);
+				float3 colour = tex2D(_MainTex2, bodyUV * _MainTex2_ST.xy + _MainTex2_ST.zw).rgb * _Tint2.rgb * diffuse
 					+ highlight * _Highlight2 - shadow * _Shadow2;
 
 				#ifdef _USEAO2_ON
@@ -202,13 +214,14 @@ Shader "Grass Ethereal"
 
 				// Cycle A -> B -> C -> A so neighbouring blades pick different hues
 				float hue = frac(bladeSeed + patch * 0.6) * 3;
-				float3 glowColour = hue < 1 ? lerp(_GlowColourA.rgb, _GlowColourB.rgb, hue)
+				float3 glowPalette = hue < 1 ? lerp(_GlowColourA.rgb, _GlowColourB.rgb, hue)
 					: hue < 2 ? lerp(_GlowColourB.rgb, _GlowColourC.rgb, hue - 1)
 					: lerp(_GlowColourC.rgb, _GlowColourA.rgb, hue - 2);
+				float3 glowColour = lerp(_GlowColourB.rgb, glowPalette, _GlowHueVariation);
 				float shimmerPhase = bladeSeed * 6.2832;
 				float shimmer = 1 - _ShimmerAmount * (0.5 + 0.5 * sin(_TimeParameters.x * _ShimmerSpeed + shimmerPhase));
 				float sparkle = step(1 - _SparkleChance, frac(bladeSeed * 13.17)) * _SparkleBoost;
-				float bladeBrightness = lerp(0.35, 1, frac(bladeSeed * 7.31)) + sparkle;
+				float bladeBrightness = lerp(1, lerp(0.35, 1, frac(bladeSeed * 7.31)), _GlowBrightnessVariation) + sparkle;
 				float3 glow = glowColour * pow(height, _GlowPower) * _GlowIntensity * bladeBrightness * shimmer;
 
 				float alpha = lerp(_BaseAlpha, _TipAlpha, pow(height, _AlphaFadePower));

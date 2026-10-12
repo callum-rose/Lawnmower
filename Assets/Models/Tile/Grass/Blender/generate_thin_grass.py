@@ -1,5 +1,6 @@
 # Generates thin, tapered grass blade tiles (Pixar's Soul style) and exports them as FBX.
-# Run headless:  blender -b --factory-startup -P generate_thin_grass.py -- <output_dir>
+# Run headless:  blender -b --factory-startup -P generate_thin_grass.py -- <output_dir> [density]
+#   density  fraction of REFERENCE_BLADES_PER_SIDE^2 blades (default DEFAULT_DENSITY); blade width scales inversely to keep coverage
 #
 # UV conventions the Grass shaders rely on:
 #   uv0.x  texture colour column, constant per blade
@@ -20,7 +21,8 @@ TILES = [
 	("grass_thin_3", 0.60, 0.0, 3),
 ]
 
-BLADES_PER_SIDE = 10
+REFERENCE_BLADES_PER_SIDE = 14
+DEFAULT_DENSITY = 0.25
 EDGE_MARGIN = 0.0
 SEGMENTS = 4
 TIP_WIDTH_RATIO = 0.75
@@ -32,17 +34,17 @@ COLUMN_CENTRES = (0.125, 0.375, 0.625)
 NORMAL_UP_BIAS = 2.5
 
 
-def build_tile(name, tile_height, offset, seed):
+def build_tile(name, tile_height, offset, seed, blades_per_side, width_scale):
 	rng = random.Random(seed)
 	verts, faces, uv0s, uv1s, normals = [], [], [], [], []
-	cell = (1 - 2 * EDGE_MARGIN) / BLADES_PER_SIDE
+	cell = (1 - 2 * EDGE_MARGIN) / blades_per_side
 
-	for ix in range(BLADES_PER_SIDE):
-		for iy in range(BLADES_PER_SIDE):
+	for ix in range(blades_per_side):
+		for iy in range(blades_per_side):
 			bx = EDGE_MARGIN + (ix + rng.random()) * cell
 			by = EDGE_MARGIN + (iy + rng.random()) * cell
 			height = tile_height * rng.uniform(*HEIGHT_RANGE)
-			width = rng.uniform(*BASE_WIDTH_RANGE)
+			width = rng.uniform(*BASE_WIDTH_RANGE) * width_scale
 			yaw = rng.uniform(0, math.tau)
 			side = Vector((math.cos(yaw), math.sin(yaw), 0))
 			lean_yaw = yaw + math.pi / 2 + rng.uniform(-0.8, 0.8)
@@ -102,11 +104,15 @@ def build_tile(name, tile_height, offset, seed):
 def main():
 	argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
 	output_dir = argv[0] if argv else "."
+	density = float(argv[1]) if len(argv) > 1 else DEFAULT_DENSITY
+	blades_per_side = max(1, round(REFERENCE_BLADES_PER_SIDE * math.sqrt(density)))
+	width_scale = REFERENCE_BLADES_PER_SIDE ** 2 / blades_per_side ** 2
+	print(f"{blades_per_side ** 2} blades per tile, width x{width_scale:.2f}")
 
 	bpy.ops.wm.read_factory_settings(use_empty=True)
 
 	for name, height, offset, seed in TILES:
-		obj = build_tile(name, height, offset, seed)
+		obj = build_tile(name, height, offset, seed, blades_per_side, width_scale)
 		bpy.ops.object.select_all(action="DESELECT")
 		obj.select_set(True)
 		bpy.context.view_layer.objects.active = obj

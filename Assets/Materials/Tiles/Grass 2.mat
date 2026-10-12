@@ -113,6 +113,8 @@ Material:
     - _BendNoiseScale: 1
     - _BendOffsetMagnitude: 0.00101
     - _Blend: 0
+    - _BodyColumn: 0.375
+    - _BodyVariation: 0.25
     - _BoundarySmoothness: 0.923
     - _BoundarySmoothness2: 1
     - _BumpScale: 1
@@ -131,6 +133,8 @@ Material:
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
+    - _GlowBrightnessVariation: 0.35
+    - _GlowHueVariation: 0.3
     - _GlowIntensity: 1.4
     - _GlowPower: 4.5
     - _GlowVariationScale: 4
@@ -151,7 +155,7 @@ Material:
     - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0
     - _SparkleBoost: 0.7
-    - _SparkleChance: 0.12
+    - _SparkleChance: 0.05
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _Surface: 0
