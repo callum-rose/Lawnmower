@@ -17,7 +17,8 @@ import bpy
 from mathutils import Vector
 
 TILES = [
-	# name, height, xy offset (matches the original grass_n meshes), seed, blade width scale (shorter grass is thinner)
+	# name, height, xy offset (matches the original grass_n meshes), seed, blade width scale (shorter grass is thinner,
+	# and gets proportionally more blades so coverage stays the same)
 	("grass_thin_1", 0.40, 0.0, 1, 0.5),
 	("grass_thin_2", 0.50, -0.1, 2, 0.75),
 	("grass_thin_3", 0.60, 0.0, 3, 1.0),
@@ -189,14 +190,16 @@ def main():
 	argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
 	output_dir = argv[0] if argv else "."
 	density = float(argv[1]) if len(argv) > 1 else DEFAULT_DENSITY
-	blades_per_side = max(1, round(REFERENCE_BLADES_PER_SIDE * math.sqrt(density)))
-	width_scale = REFERENCE_BLADES_PER_SIDE ** 2 / blades_per_side ** 2
-	print(f"{blades_per_side ** 2} blades per tile, width x{width_scale:.2f}")
 
 	bpy.ops.wm.read_factory_settings(use_empty=True)
 
 	for name, height, offset, seed, tile_width_scale in TILES:
-		obj = build_tile(name, height, offset, seed, blades_per_side, width_scale * tile_width_scale)
+		# Thinner blades get proportionally more blades; width is then derived from the rounded blade count so
+		# blade count x width (coverage) matches REFERENCE_BLADES_PER_SIDE^2 blades at the reference width
+		blades_per_side = max(1, round(REFERENCE_BLADES_PER_SIDE * math.sqrt(density / tile_width_scale)))
+		width_scale = REFERENCE_BLADES_PER_SIDE ** 2 / blades_per_side ** 2
+		print(f"{name}: {blades_per_side ** 2} blades, width x{width_scale:.2f}")
+		obj = build_tile(name, height, offset, seed, blades_per_side, width_scale)
 		bpy.ops.object.select_all(action="DESELECT")
 		obj.select_set(True)
 		bpy.context.view_layer.objects.active = obj
