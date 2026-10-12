@@ -24,5 +24,6 @@ MonoBehaviour:
     - Name: id
       Entry: 2
       Data: 57944479062546d9bab013ca63cb41f6
+  guid: 57944479062546d9bab013ca63cb41f6
   name: Regular Bunny
   prefab: {fileID: 7875553606739911851, guid: 3b2913012ccd6b24286c77d5d98ca402, type: 3}

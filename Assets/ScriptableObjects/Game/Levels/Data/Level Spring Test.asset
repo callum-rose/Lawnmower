@@ -23,7 +23,7 @@ MonoBehaviour:
     SerializationNodes:
     - Name: id
       Entry: 2
-      Data: 00000000000000000000000000000000
+      Data: 545e271d7720404bbc9027508515676e
     - Name: newTiles
       Entry: 7
       Data: 0|Game.Tiles.Tile[,], Scripts
@@ -96,16 +96,62 @@ MonoBehaviour:
   startPosition:
     x: 0
     y: 0
-  tilesData: '[[{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
-    mscorlib]], Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.GrassTile,
-    Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32, mscorlib]],
-    Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.EmptyTile,
-    Scripts"}],[{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32,
-    mscorlib]], Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.GrassTile,
-    Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32, mscorlib]],
-    Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.GrassTile,
-    Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32, mscorlib]],
-    Scripts","_value":2,"Value":2,"RawValue":2}}],[{"$type":"Game.Tiles.GrassTile,
-    Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32, mscorlib]],
-    Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.EmptyTile,
-    Scripts"},{"$type":"Game.Tiles.SpringTile, Scripts","LandingPosition":{"x":2,"y":0,"Magnitude":2.0}}]]'
+  tilesData: '[[{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32, mscorlib]], Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32, mscorlib]], Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.EmptyTile, Scripts"}],[{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32, mscorlib]], Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32, mscorlib]], Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32, mscorlib]], Scripts","_value":2,"Value":2,"RawValue":2}}],[{"$type":"Game.Tiles.GrassTile, Scripts","GrassHeight":{"$type":"Game.Core.EventProperty`1[[System.Int32, mscorlib]], Scripts","_value":2,"Value":2,"RawValue":2}},{"$type":"Game.Tiles.EmptyTile, Scripts"},{"$type":"Game.Tiles.SpringTile, Scripts","LandingPosition":{"x":2,"y":0,"Magnitude":2.0}}]]'
+  guid: 545e271d7720404bbc9027508515676e
+  width: 3
+  depth: 3
+  tiles:
+  - kind: 1
+    grassHeight: 2
+    stoneDirection: 0
+    springLanding:
+      x: 0
+      y: 0
+  - kind: 1
+    grassHeight: 2
+    stoneDirection: 0
+    springLanding:
+      x: 0
+      y: 0
+  - kind: 1
+    grassHeight: 2
+    stoneDirection: 0
+    springLanding:
+      x: 0
+      y: 0
+  - kind: 1
+    grassHeight: 2
+    stoneDirection: 0
+    springLanding:
+      x: 0
+      y: 0
+  - kind: 1
+    grassHeight: 2
+    stoneDirection: 0
+    springLanding:
+      x: 0
+      y: 0
+  - kind: 0
+    grassHeight: 0
+    stoneDirection: 0
+    springLanding:
+      x: 0
+      y: 0
+  - kind: 0
+    grassHeight: 0
+    stoneDirection: 0
+    springLanding:
+      x: 0
+      y: 0
+  - kind: 1
+    grassHeight: 2
+    stoneDirection: 0
+    springLanding:
+      x: 0
+      y: 0
+  - kind: 5
+    grassHeight: 0
+    stoneDirection: 0
+    springLanding:
+      x: 2
+      y: 0

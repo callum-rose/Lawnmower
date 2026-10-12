@@ -24,5 +24,6 @@ MonoBehaviour:
     - Name: id
       Entry: 2
       Data: f7536016d50d4cbd8d3016edd0422253
+  guid: f7536016d50d4cbd8d3016edd0422253
   name: Robo Bunny
   prefab: {fileID: 3173319665444835024, guid: 85e126f02ec45b54aaf1767de3221026, type: 3}

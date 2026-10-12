@@ -24,5 +24,6 @@ MonoBehaviour:
     - Name: id
       Entry: 2
       Data: 42f1c3d3cf164371ac4ec62a81a89296
+  guid: 42f1c3d3cf164371ac4ec62a81a89296
   name: Robo Snail
   prefab: {fileID: 5596861079548388941, guid: 9287157b7d631bb418502aceee6e0048, type: 3}

@@ -6405,6 +6405,13 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
+  allowedGesturePairs:
+  - a: 1
+    b: 2
+  - a: 1
+    b: 5
+  - a: 2
+    b: 5
   cancelCurrentAfterFrames: 2
   logCurrentGestures: 0
   pinchEvent:

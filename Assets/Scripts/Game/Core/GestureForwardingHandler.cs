@@ -15,7 +15,7 @@ namespace Game.Core
 {
 	public class GestureForwardingHandler : SerializedMonoBehaviour
 	{
-		private enum Gesture
+		internal enum Gesture
 		{
 			None,
 			Pinch,
@@ -30,6 +30,18 @@ namespace Game.Core
 			 ResizableColumns = false),
 		 InfoBox("$" + nameof(MatrixLegend))]
 		private bool[,] allowedSimultaneousGestures;
+
+		[Serializable]
+		internal struct GesturePair
+		{
+			public Gesture a;
+			public Gesture b;
+		}
+
+		// Unity-serialized replacement for the Odin matrix (populated by the Odin data migration).
+		[SerializeField] internal List<GesturePair> allowedGesturePairs = new List<GesturePair>();
+
+		internal bool[,] LegacyMatrix => allowedSimultaneousGestures;
 
 		[SerializeField, Min(1)]
 		private int cancelCurrentAfterFrames = 1;

@@ -43,6 +43,12 @@ namespace Game.Levels
 
 		public Guid Id => id;
 
+		// --- Unity-serialized replacement fields (populated by the Odin data migration) ---
+		[SerializeField] internal string guid;
+		[SerializeField] internal int width;
+		[SerializeField] internal int depth;
+		[SerializeField] internal Game.Levels.Serialization.TileRecord[] tiles;
+
 		private static readonly JsonSerializerSettings jsonSettings = new JsonSerializerSettings
 		{
 			TypeNameHandling = TypeNameHandling.Auto,

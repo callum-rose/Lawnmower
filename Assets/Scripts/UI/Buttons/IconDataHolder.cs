@@ -7,10 +7,22 @@ using UnityEngine;
 
 namespace UI.Buttons
 {
+	[System.Serializable]
+	internal struct IconSprite
+	{
+		public IconType icon;
+		public Sprite sprite;
+	}
+
     [CreateAssetMenu(fileName = nameof(IconDataHolder), menuName = SoNames.UIDir + nameof(IconDataHolder))]
 	internal class IconDataHolder : SerializedScriptableObject
 	{
 		[SerializeField] private Dictionary<IconType, Sprite> iconToSpriteDict;
+
+		// Unity-serialized replacement for the Odin dictionary (populated by the Odin data migration).
+		[SerializeField] internal List<IconSprite> icons = new List<IconSprite>();
+
+		internal Dictionary<IconType, Sprite> LegacyIcons => iconToSpriteDict;
 
         #region Unity
 
