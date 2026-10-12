@@ -28,6 +28,7 @@ namespace Game.Levels
 		public EditableLevelData(Tile[,] tiles, GridVector mowerStartPosition)
 		{
 			_grid = new FlexGrid<Tile>(tiles, () => new EmptyTile());
+			StartPosition = mowerStartPosition;
 		}
 
 		public Tile GetTile(GridVector position)

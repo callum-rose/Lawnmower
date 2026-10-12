@@ -7,5 +7,7 @@ namespace Game.Tiles
     {
         public override bool IsTraversable(bool editMode) => true;
         public override bool IsComplete => true;
+
+        protected override string TypeKey => "wood";
     }
 }

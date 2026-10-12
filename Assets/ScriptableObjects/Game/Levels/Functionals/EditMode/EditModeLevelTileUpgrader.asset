@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tileUpgradePairs:
   - upgradee: None
-    upgradeTo: 'Game.Tiles.GrassTile: 1'
-  - upgradee: 'Game.Tiles.GrassTile: 3'
-    upgradeTo: Game.Tiles.WoodTile
-  - upgradee: Game.Tiles.EmptyTile
-    upgradeTo: 'Game.Tiles.GrassTile: 1'
+    upgradeTo: grass:1
+  - upgradee: grass:3
+    upgradeTo: wood
+  - upgradee: empty
+    upgradeTo: grass:1
