@@ -37,6 +37,9 @@ The main problems are:
 4. **An unfinished refactor** (`TileData`/`TileType` → `Tile` subclasses) left a lot of
    dead and duplicated code behind.
 5. A handful of real bugs, mostly around springs, level unlocking, and undo grouping.
+6. **Everything is in one `Scripts` assembly**, so nothing enforces the model/view
+   boundary, `Editor` folders inside it aren't treated as editor-only, and namespaces have
+   circular dependencies. Section 9 proposes an assembly layout and migration order.
 
 The recommended way forward (section 8) is to extract a pure C# `LevelSimulation` that
 owns all rules and state, test it hard, and make everything Unity-side a thin
@@ -189,7 +192,7 @@ problems are in the middle layer.
 | B12 | `GameManager.OnLevelFailed` | Entirely commented out. Failing a level gives no feedback in game except whatever listens to `LevelRuinedChannel` (nothing in code does). |
 | B13 | `GameManager.Begin` | Creates a new `LevelDataRecorder` each level and never `Dispose`s the old one, so old recorders stay subscribed to the undo system. |
 | B14 | `Editorr/EditorTileUpdator.cs:48` | In-scene editor tile placement throws `NotImplementedException`. `LevelEditorManager` is still in `Game.unity`. |
-| B15 | `Core/EventChannels/BaseBaseEventChannel.cs` | `using UnityEditor;` outside `#if UNITY_EDITOR` in a runtime assembly. This normally fails a player build; worth checking before anything else if a build is attempted. |
+| B15 | 9 files (listed in §9.2) | `using UnityEditor;` at the top of runtime code, outside `#if UNITY_EDITOR`. Code inside an asmdef is compiled into the player regardless of folder name, so this should fail a player build. Fix before attempting any build. |
 | B16 | `/EditorTileUpdator.cs` (repo root) | Not compiled by Unity (outside `Assets/`), and wouldn't compile anyway (`Monobehaviour`). |
 | B17 | `SpringTileObject.OnDrawGizmos` | `FindObjectOfType<Positioner>()` every gizmo draw, and NREs before `Bind` is called (`_data` null). |
 | B18 | `TileUpgradePair.IsMatch` | Matches tiles by `ToString()` (which includes the full type name and, for grass, the height). Renaming a namespace/class silently breaks every saved upgrade pair. |
@@ -279,18 +282,19 @@ object.
 1. Open in Unity 2020.2.3f1 first (exact version), confirm it runs, commit any
    reserialization. Then decide whether to upgrade to a current LTS; do the upgrade as a
    separate commit.
-2. Fix B15 (`using UnityEditor` guard) and try a player build.
+2. Fix B15 (`using UnityEditor` guards) and try a player build. Then do §9 steps 1–2
+   (editor assemblies) so this class of break can't come back.
 3. Delete the dead code in §6 in one commit so the rest of the work is against a smaller
    surface.
 
 ### Phase 1 — extract a pure model assembly
 
-Create `Assets/Scripts/Model/Lawnmower.Model.asmdef` with `noEngineReferences: true`
-(no UnityEngine, no Odin). Move into it:
+Create the `Lawnmower.Model` assembly described in §9 (`noEngineReferences: true`, no
+Odin). Move into it:
 
 - `GridVector`, `Xor`, `EventProperty`, `IListenableProperty`
 - `IUndoable`, `IUndoSystem`, `UndoSystem`, `MultiUndo`, `Undoable`
-- `Tile` and all subclasses (replace `Mathf.Clamp` with `Math.Clamp`; keep JSON cloning or
+- `Tile` and all subclasses (replace `Mathf.Clamp` with `Math.Max`/`Math.Min` — `Math.Clamp` needs .NET Standard 2.1; keep JSON cloning or
   give each tile a `Clone()` override)
 - A new `Level` class (`Tile[,]` + start position + id) replacing `IReadOnlyLevelData`'s
   implementations at runtime
@@ -298,7 +302,8 @@ Create `Assets/Scripts/Model/Lawnmower.Model.asmdef` with `noEngineReferences: t
 If something won't compile there, it has a Unity dependency that belongs in a
 presenter/view. That's the enforcement mechanism that was missing.
 
-Add `[assembly: InternalsVisibleTo("Tests")]` or make the model types `public`.
+Make the model's API `public` and keep implementation details `internal`; add
+`[assembly: InternalsVisibleTo("Lawnmower.Model.Tests")]` only if tests need internals.
 
 ### Phase 2 — one `LevelSimulation`
 
@@ -380,3 +385,141 @@ blocks. Use reverse-play authoring plus the solver to build the level set.
 3. Phase 3 solution tests as soon as `LevelSimulation` exists
 4. Phase 4 presenters, one scene at a time
 5. Phase 5 features
+
+---
+
+## 9. Assemblies
+
+### 9.1 Current state
+
+| Assembly | Contents | References |
+|---|---|---|
+| `Scripts` | **All** game code: model, rules, views, UI, menus, settings, in-scene editor, and the Odin level editor window (`Game/Levels/Editor`) | TextMeshPro, Cinemachine, LeanCommon, LeanTouch, Extensions, Utils, Plugins (+ auto-referenced Odin, Newtonsoft, DOTween DLLs) |
+| `Plugins` | IUnified (runtime + `Editor/` folder), DOTween modules | — |
+| `Utils`, `Extensions` | Personal utility libraries (`Loops`, `InterfaceHelper`, `Singleton`, mesh tools, coroutine extensions, …) | none declared |
+| `BoidsTest` | Boids demo | Extensions, Burst, Mathematics |
+| `Tests` (EditMode) | Undo / FlexGrid / BiDirectionList tests | Scripts, NUnit, Moq |
+| `PlayMode` | `MonoUndoSystem` tests | Scripts, NUnit, Moq |
+| *Assembly-CSharp-Editor* | `Assets/Editor/Editor/*` (enum generators, namespace auto-setter, …) — no asmdef | everything auto-referenced |
+
+### 9.2 Problems
+
+1. **One assembly for the whole game.** Nothing stops the model referencing views, Odin,
+   or `UnityEditor`, so the MVP boundary was enforced only by discipline — and it slipped
+   (31 of 53 files in `Game/Tiles`, 21 of 31 in `Game/Levels` import Unity/Odin/JSON,
+   including model types).
+2. **`Editor` folders don't work inside an asmdef.** Unity's special-casing of folders
+   named `Editor` only applies to code *not* covered by an asmdef. So
+   `Scripts/Game/Levels/Editor/*` and `Plugins/IUnified/Editor/*` compile into runtime
+   assemblies; they survive only because every file is wrapped in `#if UNITY_EDITOR`.
+   (This is probably also why the in-scene editor folder was named `Editorr`.)
+   These runtime files import `UnityEditor` without a guard (B15):
+   - `Scripts/Core/EventChannels/BaseBaseEventChannel.cs`
+   - `Scripts/Core/DummyInitScriptableObjects.cs`
+   - `Scripts/Core/ScriptableObjectReferencer.cs`
+   - `Scripts/Core/ViewManager_Odin.cs`
+   - `Scripts/Game/Core/GestureForwardingHandler.cs`
+   - `Scripts/Game/Tiles/PrefabArranger.cs`
+   - `Scripts/Game/Tiles/GrassTileGrassMaterialSetter.cs`
+   - `Plugins/Utils/InterfaceHelper.cs`
+   - `Plugins/Utils/ScriptableObjectReferencer.cs`
+3. **Circular namespace dependencies** that will block a straightforward split:
+   - `Game.Tiles` ↔ `Game.Levels` (`WoodTileObject` uses Levels; Levels uses Tiles)
+   - `Game.Levels` ↔ `Game.Mowers` (`HeadlessLevelManager`/`LevelStateChecker`/
+     `LevelTileInteractor` use `MowerMovementManager`; `MowerMovementManager` uses
+     `ILevelTraversalChecker`)
+   - `Game.Core` → `Levels`/`Mowers`, while everything → `Game.Core`. `Game.Core` is a
+     grab-bag: `GridVector` (model) sits next to `GameManager` (scene glue) and
+     `Positioner` (view).
+   - Root `Core` (meant to be generic infrastructure) → `Game`
+     (`TileObjectEventChannel`, `UndoableEventChannel`, `ViewManager_Odin`), and
+     `UI.Buttons.Pulser` / `LevelSelect.SceneManager` → `Game`.
+   - `Core` vs `Game.Core` vs `Plugins/Utils` all contain a `ScriptableObjectReferencer`.
+4. **Namespaces are organised by feature, not by layer.** `Game.Tiles` holds both
+   `GrassTile` (model) and `GrassTileObject` (view); `Game.Mowers` holds
+   `MowerMovementManager` (rules), `MowerTransformAnimator` (view) and input handlers. An
+   assembly split along MVP lines has to cut through every namespace.
+5. **`GridVector` depends on `UnityEngine`** (`Vector2Int` magnitude, `ToXZ()`), so the most
+   fundamental model type can't go in an engine-free assembly as-is.
+6. **Tests are wired loosely.** `PlayMode` is `autoReferenced: true` (so every
+   auto-referencing assembly can see test code), test assemblies reference `Scripts` by
+   name, and there's no test assembly per production assembly.
+7. **Third-party code isn't isolated.** Odin/DOTween/Newtonsoft are auto-referenced
+   precompiled DLLs, so any assembly picks them up silently. Prefer
+   `overrideReferences: true` + explicit `precompiledReferences` where you want to keep
+   a layer free of them.
+
+### 9.3 Target layout
+
+Dependencies point downwards only. Names are suggestions.
+
+```
+Lawnmower.Model            noEngineReferences: true. GridVector, Xor, EventProperty, undo system,
+                           Tile + subclasses, Level, LevelSimulation, solver. Only precompiled ref:
+                           Newtonsoft.Json (or none, if cloning/serialisation lives elsewhere).
+    ▲
+Lawnmower.Model.Tests      Editor-only test asmdef. Pure NUnit: per-tile rules, undo round-trips,
+                           solutions for every level (loads LevelData via an editor helper).
+    ▲
+Lawnmower.Infrastructure   Generic Unity plumbing with no game knowledge: event channels,
+                           persistent data, pooling, ViewManager, Singleton. (Today's root `Core`
+                           minus the Game references, merged with `Utils`/`Extensions` or
+                           referencing them.)
+    ▲
+Lawnmower.Data             ScriptableObject assets: LevelData (wraps Model.Level), level list,
+                           tile prefab table, game timing config. Unity + Odin allowed.
+    ▲
+Lawnmower.Presentation     Views and presenters: tile objects, mower animators, particles,
+                           cameras, input, GameManager/LevelPresenter, UI, menus, tutorial.
+    ▲
+Lawnmower.Presentation.Tests  PlayMode tests for presenters/views (few; most coverage is in Model).
+
+Lawnmower.Editor           includePlatforms: [Editor]. Level editor window, custom drawers,
+                           Assets/Editor/Editor tools, Odin editor code. References any of the above.
+Lawnmower.Editor.Tests     Editor-only tests for editor tooling (optional).
+```
+
+Notes:
+
+- `Lawnmower.Model` with `noEngineReferences: true` is the single most valuable change: the
+  compiler then enforces "headless", and the model tests run in milliseconds with no scene.
+- Tests that need level *assets* still run headlessly: an editor-only test can
+  `AssetDatabase.LoadAssetAtPath<LevelData>` and pass `levelData.ToModel()` into
+  `LevelSimulation`. Only that adapter touches Unity.
+- Third-party plugins: keep `LeanTouch`/`LeanCommon` as is; give IUnified its runtime part
+  in `Plugins` and move `IUnified/Editor` into an editor-only asmdef (or an `.asmref`).
+- Boids: leave as its own assembly; nothing references it.
+- The `AutoSetScriptNamespacesToFolderName` tool will help once folders match assemblies:
+  make folders `Assets/Scripts/Model/...`, `Assets/Scripts/Presentation/...`, etc.
+  Then set each asmdef's `rootNamespace` (`Lawnmower.Model`, …).
+
+### 9.4 Migration steps
+
+Each step should leave the project compiling.
+
+1. **Editor assembly first (low risk).** Add `Assets/Editor/Lawnmower.Editor.asmdef`
+   (`includePlatforms: ["Editor"]`), move `Scripts/Game/Levels/Editor/*` and
+   `Assets/Editor/Editor/*` into it, drop their `#if UNITY_EDITOR` wrappers. Add an
+   editor-only asmdef for `Plugins/IUnified/Editor`.
+2. **Fix B15.** Guard or remove the nine unguarded `using UnityEditor;` lines; move any
+   real editor-only logic (`ViewManager_Odin`, `ScriptableObjectReferencer`,
+   `DummyInitScriptableObjects`) into the editor assembly behind an interface if runtime
+   code needs it. Do a player build to confirm.
+3. **Make `GridVector` engine-free.** Compute magnitude with `Math.Sqrt`; move `ToXZ()` and
+   `Vector2Int` conversions to an extension class in Presentation.
+4. **Create `Lawnmower.Model`** and move the undo system, `Xor`, `EventProperty`,
+   `GridVector`, and the `Tile` hierarchy into it. Expect the compiler to flag every
+   Unity/Odin dependency — each one is a model/view leak to fix (e.g. `GrassTile`'s
+   `Mathf`, Odin attributes on model types).
+5. **Break the cycles** while building `LevelSimulation` (§8 Phase 2): the rules that
+   currently tie `Levels` ↔ `Mowers` all move into the model, so the remaining
+   Presentation code only depends downward.
+6. **Split `Game.Core`**: model types → Model; `Positioner`, `ScreenToWorldPointConverter`,
+   gesture handling → Presentation; `GameManager` → Presentation.
+7. **Clean root `Core`** of `Game` references (generic `TileObjectEventChannel` →
+   `GameObjectEventChannel`, etc.) and turn it into `Lawnmower.Infrastructure`. Dedupe
+   the three `ScriptableObjectReferencer`s.
+8. **Tests**: rename/split into `Lawnmower.Model.Tests` (EditMode) and
+   `Lawnmower.Presentation.Tests` (PlayMode); set both `autoReferenced: false`.
+9. Optionally move `LevelData`/config SOs into `Lawnmower.Data` once the rest has settled;
+   until then they can live in Presentation.
