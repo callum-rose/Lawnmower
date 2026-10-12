@@ -15,21 +15,21 @@ namespace Core
 
 		#region Load First
 
-		// Shown and driven by ViewManagerEditor ("Enter Play Mode" / "Load Scene" buttons).
 		[Header("Scene To Load")]
 		[SerializeField] private UnityScene sceneToOpen;
 
-		[SerializeField, Tooltip("Only used when Scene To Open is Game")]
-		private GameSetupPassThroughData gameSetupPassThroughData;
+		[SerializeField] private GameSetupPassThroughData gameSetupPassThroughData;
 
-		internal void EnterPlayModeFromEditor()
+		[ContextMenu("Enter Play Mode")]
+		private void EnterPlayMode()
 		{
 			SetAppWasStartedByViewManager(true);
 
 			EditorApplication.EnterPlaymode();
 		}
 
-		internal void LoadSelectedSceneFromEditor()
+		[ContextMenu("Load Scene")]
+		private void LoadSelectedScene()
 		{
 			Load(sceneToOpen, GetData());
 		}

@@ -58,7 +58,7 @@ namespace Game.Tiles
 		[Header("Material")] [SerializeField]
 		private Material woodMaterial;
 
-		[SerializeField, Dropdown(nameof(WoodShaderProperties))]
+		[SerializeField]
 		private string highLutShaderPropertyName, lowLutShaderPropertyName;
 
 		private List<string> WoodShaderProperties

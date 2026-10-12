@@ -11,7 +11,7 @@ namespace UI.Buttons
 		[SerializeField] private IconType icon;
 		[SerializeField] private Color? colour;
 
-		[SerializeField, Tooltip("This button will just close the dialog")]
+		[SerializeField]
 		private BaseEventChannel channel;
 
 		private bool ChannelNull => channel == null;

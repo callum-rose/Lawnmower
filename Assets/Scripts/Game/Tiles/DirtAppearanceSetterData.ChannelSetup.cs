@@ -27,7 +27,6 @@ namespace Game.Tiles
 
 			public DirtAppearanceSetter.ChannelType type;
 
-			[Tooltip("Rotation in degrees: 0, 90, 180 or 270")]
 			public float angle;
 
 			public ChannelSetup(GridVector inDirection, GridVector outDirection)

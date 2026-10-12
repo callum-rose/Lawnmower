@@ -10,7 +10,7 @@ namespace Core.EventChannels
 		menuName = SoNames.CoreDir + nameof(LoadViewChannel))]
 	public class LoadViewChannel : BaseEventChannel
 	{
-		[SerializeField, Dropdown(nameof(SceneNames))]
+		[SerializeField]
 		private string sceneToLoad;
 		
 		protected override bool ShouldBeSolo => false;

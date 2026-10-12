@@ -1,4 +1,3 @@
-using System;
 using Core.EventChannels;
 using Game.Core;
 using Game.UndoSystem;
@@ -121,21 +120,6 @@ namespace Game.Tiles
 			_appearanceSetter.SetAppearance(grassHeight);
 		}
 		
-#if UNITY_EDITOR
-		[NonSerialized] private int? _lastValidatedGrassHeight;
-
-		private void OnValidate()
-		{
-			// Preview the appearance when displayGrassHeight is edited in the inspector (not on load).
-			if (_lastValidatedGrassHeight.HasValue && _lastValidatedGrassHeight != displayGrassHeight &&
-			    GetComponent<IAppearanceSetter>() != null)
-			{
-				SetAppearance(displayGrassHeight);
-			}
-
-			_lastValidatedGrassHeight = displayGrassHeight;
-		}
-#endif
 
 		#endregion
 	}

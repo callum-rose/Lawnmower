@@ -1,4 +1,3 @@
-using Core;
 using System.Collections.Generic;
 using BalsamicBits.Extensions;
 using UnityEngine;
@@ -10,7 +9,7 @@ namespace Game.Core
 	{
 		[SerializeField] private Vector2 range;
 
-		[SerializeField, Dropdown(nameof(MaterialPropertyNames))]
+		[SerializeField]
 		private string shaderRangePropertyName;
 
 		private List<string> MaterialPropertyNames

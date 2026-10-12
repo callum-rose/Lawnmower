@@ -37,15 +37,6 @@ namespace Game.Tiles
 #endif
 		}
 
-#if UNITY_EDITOR
-		private void OnValidate()
-		{
-			if (tilePrefabs != null)
-			{
-				ValidatePrefabsDict(tilePrefabs);
-			}
-		}
-#endif
 
 		#endregion
 

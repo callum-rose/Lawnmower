@@ -1,4 +1,3 @@
-using Core;
 using System.Collections;
 using BalsamicBits.Extensions;
 using Game.Core;
@@ -23,7 +22,7 @@ namespace Game.Mowers.Models
 		[SerializeField] private float durationBeforeLookAround = 3f;
 		[SerializeField, Range(0, 1)] private float blinkToLookAroundRatio = 0.33f;
 		[SerializeField] private float blinkDuration = 0.2f;
-		[SerializeField, MinMaxRange(0, 5)] private Vector2 lookElsewhereAfterDurationRange = new Vector2(1, 3);
+		[SerializeField] private Vector2 lookElsewhereAfterDurationRange = new Vector2(1, 3);
 
 		private static readonly int decalTex = Shader.PropertyToID("_DecalTex");
 

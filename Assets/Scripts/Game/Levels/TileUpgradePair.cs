@@ -1,4 +1,3 @@
-using Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,10 +9,10 @@ namespace Game.Levels
 	[Serializable]
 	internal class TileUpgradePair
 	{
-		[SerializeField, Dropdown(nameof(PossibleTileConfigurations))]
+		[SerializeField]
 		private string upgradee = NoneStr;
 
-		[SerializeField, Dropdown(nameof(PossibleTileConfigurations))]
+		[SerializeField]
 		private string upgradeTo = NoneStr;
 
 		private const string NoneStr = "None";

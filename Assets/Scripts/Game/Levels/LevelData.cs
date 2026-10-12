@@ -15,7 +15,7 @@ namespace Game.Levels
 	/// (row-major, index = x + y * width), and decoded lazily into runtime <see cref="Tile"/>s.
 	/// </summary>
 	[CreateAssetMenu(fileName = "LevelData", menuName = SoNames.GameDir + "Level Data")]
-	internal partial class LevelData : ScriptableObject, IReadOnlyLevelData
+	internal class LevelData : ScriptableObject, IReadOnlyLevelData
 	{
 		/// <summary>Level id in Guid "N" format. Keys player progress, so never change it once shipped.</summary>
 		[SerializeField] private string guid;
@@ -25,7 +25,7 @@ namespace Game.Levels
 		[SerializeField, Min(1)] private int width = 1;
 		[SerializeField, Min(1)] private int depth = 1;
 
-		[SerializeField, HideInInspector] private TileRecord[] tiles = { new TileRecord() };
+		[SerializeField] private TileRecord[] tiles = { new TileRecord() };
 
 		[NonSerialized] private Tile[,] _cache;
 
