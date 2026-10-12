@@ -1,6 +1,5 @@
 using Core;
 using Core.EventChannels;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace UI.Dialogs
@@ -8,8 +7,8 @@ namespace UI.Dialogs
 	[CreateAssetMenu(fileName = nameof(PresetOpenDialogEventChannel), menuName = SoNames.GameDir + nameof(PresetOpenDialogEventChannel))]
 	public class PresetOpenDialogEventChannel : ScriptableObject
 	{
-		[Required, SerializeField] private OpenDialogEventChannel openDialogEventChannel;
-		[SerializeField, InlineProperty, HideLabel] private DialogInfo dialogInfo;
+		[SerializeField] private OpenDialogEventChannel openDialogEventChannel;
+		[SerializeField] private DialogInfo dialogInfo;
 		
 		public void Raise()
 		{

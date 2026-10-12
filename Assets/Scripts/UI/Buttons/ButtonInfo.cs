@@ -1,6 +1,5 @@
 using System;
 using Core.EventChannels;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace UI.Buttons
@@ -12,7 +11,7 @@ namespace UI.Buttons
 		[SerializeField] private IconType icon;
 		[SerializeField] private Color? colour;
 
-		[SerializeField, InfoBox("This button will just close the dialog", InfoMessageType.Info, nameof(ChannelNull))]
+		[SerializeField, Tooltip("This button will just close the dialog")]
 		private BaseEventChannel channel;
 
 		private bool ChannelNull => channel == null;

@@ -1,6 +1,5 @@
 using Core;
 using Settings.EventChannels;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Settings
@@ -14,7 +13,7 @@ namespace Settings
 		[SerializeField] private string graphicSettingsHighShaderKeyword = "_GRAPHICSSETTINGS_HIGH";
 		[SerializeField] private GraphicsSetting defaultQualitySetting;
 
-		[TitleGroup("Event Channels")]
+		[Header("Event Channels")]
 		[SerializeField] private IGraphicsSettingEventChannelListenerContainer graphicsSettingEventChannel;
 
 		private IGraphicsSettingEventChannelListener GraphicsSettingEventChannel => graphicsSettingEventChannel.Result;
@@ -30,21 +29,21 @@ namespace Settings
 			GraphicsSettingEventChannel.EventRaised -= OnGraphicsSettingsChanged;
 		}
 
-		[Button]
+		[ContextMenu("Set Low")]
 		public void SetLow()
 		{
 			Shader.DisableKeyword(graphicSettingsHighShaderKeyword);
 			Shader.EnableKeyword(graphicsSettingsLowShaderKeyword);
 		}
 
-		[Button]
+		[ContextMenu("Set High")]
 		public void SetHigh()
 		{
 			Shader.DisableKeyword(graphicsSettingsLowShaderKeyword);
 			Shader.EnableKeyword(graphicSettingsHighShaderKeyword);
 		}
 
-		[Button]
+		[ContextMenu("Toggle")]
 		public void Toggle()
 		{
 			bool isLow = Shader.IsKeywordEnabled(graphicsSettingsLowShaderKeyword);

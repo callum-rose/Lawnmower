@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Sirenix.OdinInspector;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -60,7 +59,7 @@ namespace Core.EventChannels
 			EventRaised?.Invoke();
 		}
 
-		[Button]
+		[ContextMenu("Manual Clear Listeners")]
 		private void ManualClearListeners()
 		{
 			EventRaised = null;
@@ -123,7 +122,7 @@ namespace Core.EventChannels
 			}
 		}
 
-		[Button]
+		[ContextMenu("Manual Clear Listeners")]
 		private void ManualClearListeners()
 		{
 			EventRaisedInternal = null;
@@ -183,7 +182,7 @@ namespace Core.EventChannels
 			return EventRaisedInternal == null ? default : EventRaisedInternal.Invoke(arg);
 		}
 		
-		[Button]
+		[ContextMenu("Manual Clear Listeners")]
 		private void ManualClearListeners()
 		{
 			EventRaisedInternal = null;
@@ -258,7 +257,7 @@ namespace Core.EventChannels
 			_lastArgSet = true;
 		}
 		
-		[Button]
+		[ContextMenu("Manual Clear Listeners")]
 		private void ManualClearListeners()
 		{
 			EventRaisedInternal = null;
@@ -304,7 +303,7 @@ namespace Core.EventChannels
 			return EventRaisedInternal == null ? default : EventRaisedInternal.Invoke(arg0, arg1);
 		}
 		
-		[Button]
+		[ContextMenu("Manual Clear Listeners")]
 		private void ManualClearListeners()
 		{
 			EventRaisedInternal = null;

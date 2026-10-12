@@ -1,5 +1,4 @@
 using Game.Core;
-using Sirenix.OdinInspector;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -10,31 +9,27 @@ namespace Core
 #if UNITY_EDITOR
 	public partial class ViewManager
 	{
-		private const string SceneToOpenTitle = "Scene To Load";
-
 		private const string EditorPrefTag = "EnteredPlayFromViewManager";
 
 		private static bool WasAppStartedByViewManager => EditorPrefs.GetBool(EditorPrefTag, false);
-		
+
 		#region Load First
 
-		[TitleGroup(SceneToOpenTitle), SerializeField,
-		 EnumToggleButtons, HideLabel]
-		private UnityScene sceneToOpen;
+		// Shown and driven by ViewManagerEditor ("Enter Play Mode" / "Load Scene" buttons).
+		[Header("Scene To Load")]
+		[SerializeField] private UnityScene sceneToOpen;
 
-		[TitleGroup(SceneToOpenTitle), SerializeField, ShowIf("@this.sceneToOpen == UnityScene.Game")]
+		[SerializeField, Tooltip("Only used when Scene To Open is Game")]
 		private GameSetupPassThroughData gameSetupPassThroughData;
 
-		[TitleGroup(SceneToOpenTitle), Button, HideInPlayMode]
-		private void EnterPlayMode()
+		internal void EnterPlayModeFromEditor()
 		{
 			SetAppWasStartedByViewManager(true);
 
-			UnityEditor.EditorApplication.EnterPlaymode();
+			EditorApplication.EnterPlaymode();
 		}
 
-		[TitleGroup(SceneToOpenTitle), Button("Load Scene"), ShowIf("@UnityEditor.EditorApplication.isPlaying")]
-		private void Load_Odin()
+		internal void LoadSelectedSceneFromEditor()
 		{
 			Load(sceneToOpen, GetData());
 		}
@@ -51,7 +46,7 @@ namespace Core
 				_ => null
 			};
 		}
-		
+
 		private static void SetAppWasStartedByViewManager(bool wasSet)
 		{
 			EditorPrefs.SetBool(EditorPrefTag, wasSet);
@@ -59,7 +54,5 @@ namespace Core
 
 		#endregion
 	}
-
-
 #endif
 }

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using BalsamicBits.Extensions;
-using Sirenix.OdinInspector;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -53,7 +52,7 @@ namespace Core
 			Debug.Log("Updated " + nameof(ScriptableObjectReferencer));
 		}
 
-		[Button]
+		[ContextMenu("Find All Unreferenced SOs")]
 		private void FindAllUnreferencedSOs()
 		{
 			scriptableObjects = new List<ScriptableObject>();

@@ -1,5 +1,4 @@
 ﻿using Game.Levels;
-using Sirenix.OdinInspector;
 using System;
 using System.Collections.Generic;
 using BalsamicBits.Extensions;
@@ -9,8 +8,8 @@ namespace LevelSelect
 {
 	internal class LevelTileManager : MonoBehaviour
 	{
-		[SerializeField, AssetsOnly] private LevelDataManager levelDataManager;
-		[SerializeField, AssetsOnly] private LevelTile levelTilePrefab;
+		[SerializeField] private LevelDataManager levelDataManager;
+		[SerializeField] private LevelTile levelTilePrefab;
 		[SerializeField] private Transform tileContainer;
 
 		public event Action<IReadOnlyLevelData> LevelSelected;
