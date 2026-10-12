@@ -79,15 +79,17 @@ namespace Game.Mowers
 				return;
 			}
 
-			AnimateRotation(prevPosition, targetPosition, inInverted);
-
-			if (Mathf.Approximately((targetPosition - prevPosition).Magnitude, 1))
+			if ((targetPosition - prevPosition).IsCardinalUnit)
 			{
+				AnimateRotation(prevPosition, targetPosition, inInverted);
 				AnimationPosition(targetPosition, inInverted);
 			}
 			else
 			{
-				
+				// Start placement (Zero -> start) and spring jumps: snap. This also raises the
+				// mower-moved channel that MowerCreatedAnimator waits on before showing the mower.
+				// TODO(step 5): animate jumps from MoveResult.Path (B3).
+				SnapPosition(targetPosition);
 			}
 		}
 
@@ -128,6 +130,16 @@ namespace Game.Mowers
 				transform.position = worldPosition;
 				MovedEventChannel.Raise(worldPosition);
 			}
+		}
+
+		private void SnapPosition(GridVector position)
+		{
+			_translationRoutine.Stop(this);
+			_translationRoutine = null;
+
+			Vector3 worldPosition = _positioner.GetWorldPosition(position);
+			transform.position = worldPosition;
+			MovedEventChannel.Raise(worldPosition);
 		}
 
 		private IEnumerator TranslateRoutine(Vector3 to)

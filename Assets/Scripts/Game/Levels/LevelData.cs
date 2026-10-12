@@ -1,35 +1,31 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using Core;
 using Game.Core;
 using Game.Levels.Serialization;
-using Game.Tiles;
+using Lawnmower.Model;
 using UnityEngine;
 
 namespace Game.Levels
 {
 	/// <summary>
-	/// A level asset. The tiles are persisted once, as Unity-serialized <see cref="TileRecord"/>s
-	/// (row-major, index = x + y * width), and decoded lazily into runtime <see cref="Tile"/>s.
+	/// A level definition asset. The tiles are persisted once, as Unity-serialized <see cref="TileRecord"/>s
+	/// (row-major, index = x + y * width). Play never mutates this asset: <see cref="CreateLevel"/>
+	/// builds fresh runtime tiles each time.
 	/// </summary>
 	[CreateAssetMenu(fileName = "LevelData", menuName = SoNames.GameDir + "Level Data")]
-	internal class LevelData : ScriptableObject, IReadOnlyLevelData
+	internal class LevelData : ScriptableObject
 	{
 		/// <summary>Level id in Guid "N" format. Keys player progress, so never change it once shipped.</summary>
 		[SerializeField] private string guid;
 
-		[SerializeField] private GridVector startPosition = new GridVector(1, 1);
+		[SerializeField] private GridVector startPosition = new GridVector(0, 0);
 
 		[SerializeField, Min(1)] private int width = 1;
 		[SerializeField, Min(1)] private int depth = 1;
 
 		[SerializeField] private TileRecord[] tiles = { new TileRecord() };
 
-		[NonSerialized] private Tile[,] _cache;
-
-		private Tile[,] Tiles => _cache ??= TileRecordCodec.Decode(tiles, width, depth);
+		[NonSerialized] private LevelDefinition _definition;
 
 		public Guid Id => Guid.TryParse(guid, out Guid g) ? g : Guid.Empty;
 
@@ -41,7 +37,7 @@ namespace Game.Levels
 
 		private void OnValidate()
 		{
-			_cache = null;
+			_definition = null;
 		}
 
 #if UNITY_EDITOR
@@ -55,42 +51,25 @@ namespace Game.Levels
 
 		#region API
 
-		public Tile GetTile(int x, int y)
+		public LevelDefinition ToDefinition()
 		{
-			return Tiles[x, y];
+			return _definition ??= TileRecordCodec.Decode(Id, width, depth, startPosition, tiles);
 		}
 
-		public Tile GetTile(GridVector position)
+		/// <summary>A fresh runtime level (new tile objects every call).</summary>
+		public Level CreateLevel()
 		{
-			return GetTile(position.x, position.y);
+			return Level.FromDefinition(ToDefinition());
 		}
 
-		/// <summary>Overwrites this level's contents (used by the level editor's save and by <see cref="CreateFrom"/>).</summary>
-		internal void SetContents(IReadOnlyLevelData source, Guid id)
+		/// <summary>Overwrites this asset's layout. The guid is never changed.</summary>
+		internal void SetContents(LevelDefinition definition)
 		{
-			tiles = TileRecordCodec.Encode(source);
-			width = source.Width;
-			depth = source.Depth;
-			startPosition = source.StartPosition;
-			guid = id.ToString("N");
-			_cache = null;
-		}
-
-		public static LevelData CreateFrom(IReadOnlyLevelData input)
-		{
-			LevelData output = CreateInstance<LevelData>();
-			output.SetContents(input, input.Id);
-			return output;
-		}
-
-		public IEnumerator<Tile> GetEnumerator()
-		{
-			return Tiles.Cast<Tile>().GetEnumerator();
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return GetEnumerator();
+			tiles = TileRecordCodec.Encode(definition);
+			width = definition.Width;
+			depth = definition.Depth;
+			startPosition = definition.StartPosition;
+			_definition = null;
 		}
 
 		#endregion

@@ -1,55 +1,35 @@
 using System;
 using System.Linq;
-using Game.Core;
-using Game.UndoSystem;
+using Lawnmower.Model;
 using UnityEngine;
 
 namespace Game.Levels
 {
-	internal class LevelManager : MonoBehaviour, ILevelManager
+	/// <summary>Builds and clears the tile views for the current level.</summary>
+	internal class LevelManager : MonoBehaviour
 	{
 		[Header("Scene")] [SerializeField]
 		private LevelObjectFactory levelFactory;
 
-		[Header("Assets"), SerializeField] 
-		private HeadlessLevelManager headlessLevelManager;
+		[Header("Event Channels")] [SerializeField]
+		private LevelDataEventChannel levelStartedEventChannel;
 
-		public bool IsEditMode
-		{
-			get => headlessLevelManager.IsEditMode;
-			set => headlessLevelManager.IsEditMode = value;
-		}
-		
-		public event UndoableAction LevelCompleted
-		{
-			add => headlessLevelManager.LevelCompleted += value;
-			remove => headlessLevelManager.LevelCompleted -= value;
-		}
-		public event UndoableAction LevelFailed
-		{
-			add => headlessLevelManager.LevelFailed += value;
-			remove => headlessLevelManager.LevelFailed -= value;
-		}
+		public Level Level => _level;
 
-		public IReadOnlyLevelData Level => headlessLevelManager.Level;
-		public event Action LevelChanged
-		{
-			add => headlessLevelManager.LevelChanged += value;
-			remove => headlessLevelManager.LevelChanged -= value;
-		}
-
-		public GridVector MowerPosition => headlessLevelManager.MowerPosition;
-
-		private IReadOnlyLevelData _level;
+		private Level _level;
 		private GameObject[,] _tileObjects;
 
-		public void Init(IReadOnlyLevelData level)
+		public void Init(Level level)
 		{
-			_level = level;
-			
-			headlessLevelManager.Init(_level);
+			_level = level ?? throw new ArgumentNullException(nameof(level));
+
+			if (levelStartedEventChannel)
+			{
+				levelStartedEventChannel.Raise(level);
+			}
 		}
 
+		/// <summary>Called by a Timeline signal in Game.unity; keep the name.</summary>
 		public void Build()
 		{
 			if (_level == null)
@@ -62,10 +42,7 @@ namespace Game.Levels
 		
 		public void Clear()
 		{
-			if (headlessLevelManager)
-			{
-				headlessLevelManager.Clear();
-			}
+			_level = null;
 
 			if (_tileObjects == null)
 			{
@@ -73,6 +50,7 @@ namespace Game.Levels
 			}
 
 			levelFactory.Remove(_tileObjects.Cast<GameObject>().Where(t => t != null));
+			_tileObjects = null;
 		}
 	}
 }

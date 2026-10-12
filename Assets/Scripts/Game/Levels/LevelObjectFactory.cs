@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Core.EventChannels;
 using Game.Core;
 using Game.Tiles;
+using Lawnmower.Model;
 using UnityEngine;
 
 namespace Game.Levels
@@ -17,7 +18,7 @@ namespace Game.Levels
 
         #region API
 
-        public GameObject[,] Build(IReadOnlyLevelData level)
+        public GameObject[,] Build(Level level)
         {
             GameObject[,] tiles = new GameObject[level.Width, level.Depth];
 

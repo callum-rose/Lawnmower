@@ -3,6 +3,7 @@ using Core.EventChannels;
 using DG.Tweening;
 using Game.Core;
 using UnityEngine;
+using Lawnmower.Model;
 
 namespace Game.Levels
 {
@@ -48,7 +49,7 @@ namespace Game.Levels
 			Vector3 worldPosition = tile.transform.position;
 			tile.transform.position += positionOffset;
 
-			float distanceFromOrigin = position.Magnitude;
+			float distanceFromOrigin = (float)position.Magnitude;
 			float normalisedDistance = distanceFromOrigin / _furthestTile;
 			float delay = normalisedDistance * gamePlayData.LevelIntroDuration;
 
@@ -68,10 +69,10 @@ namespace Game.Levels
 				});
 		}
 
-		private void OnLevelStarted(IReadOnlyLevelData level)
+		private void OnLevelStarted(Level level)
 		{
 			_tileAnimCount = 0;
-			_furthestTile = new GridVector(level.Width - 1, level.Depth - 1).Magnitude;
+			_furthestTile = (float)new GridVector(level.Width - 1, level.Depth - 1).Magnitude;
 		}
 	}
 }

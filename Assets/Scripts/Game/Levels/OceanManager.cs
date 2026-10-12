@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using BalsamicBits.Extensions;
 using Game.Core;
 using UnityEngine;
+using Lawnmower.Model;
 
 namespace Game.Levels
 {
@@ -65,7 +66,7 @@ namespace Game.Levels
 
 		#region Events
 
-		private void LevelDataEventChannelOnEventRaised(IReadOnlyLevelData level)
+		private void LevelDataEventChannelOnEventRaised(Level level)
 		{
 			Vector3 worldCenter = positioner.GetLevelWorldCenter(level);
 			SetToCenter(worldCenter);

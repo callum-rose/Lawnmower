@@ -1,5 +1,5 @@
 using System;
-using Game.Tiles;
+using Lawnmower.Model;
 using UnityEngine;
 
 namespace Game.Levels
@@ -7,17 +7,17 @@ namespace Game.Levels
 	/// <summary>Colours used to draw tiles in editor tooling (level editor window, LevelData inspector).</summary>
 	internal static class TileEditorColours
 	{
-		public static Color Get(Tile tileData)
+		public static Color Get(TileSpec tile)
 		{
 			Color colour;
-			switch (tileData)
+			switch (tile.Kind)
 			{
-				case EmptyTile _:
+				case TileKind.Empty:
 					colour = Color.white;
 					break;
 
-				case GrassTile grassTile:
-					switch (grassTile.GrassHeight.Value)
+				case TileKind.Grass:
+					switch (tile.GrassHeight)
 					{
 						case 3:
 							ColorUtility.TryParseHtmlString("#0D7352", out colour);
@@ -35,19 +35,19 @@ namespace Game.Levels
 
 					break;
 
-				case StoneTile _:
+				case TileKind.Stone:
 					colour = Color.gray;
 					break;
 
-				case WaterTile _:
+				case TileKind.Water:
 					colour = Color.blue;
 					break;
 
-				case WoodTile _:
+				case TileKind.Wood:
 					ColorUtility.TryParseHtmlString("#916B4C", out colour);
 					break;
 
-				case SpringTile _:
+				case TileKind.Spring:
 					colour = Color.yellow;
 					break;
 

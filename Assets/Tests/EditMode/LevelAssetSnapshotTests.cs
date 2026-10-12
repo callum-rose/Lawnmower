@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Game.Levels;
 using Game.Mowers;
-using Game.Tiles;
+using Lawnmower.Model;
 using NUnit.Framework;
 using UI.Buttons;
 using UnityEditor;
@@ -26,7 +26,7 @@ namespace Tests.EditMode
 			new object[]
 			{
 				"Level Spring Test", null, "3x3", "0,0",
-				"grass:2 grass:2 grass:2 / grass:2 grass:2 empty / empty grass:2 spring:2,0"
+				"grass:2 grass:2 grass:2 / grass:2 grass:2 empty / empty grass:2 spring:0,-2"
 			},
 			new object[]
 			{
@@ -81,8 +81,9 @@ namespace Tests.EditMode
 		[TestCaseSource(nameof(LevelCases))]
 		public void LevelAsset_MatchesSnapshot(string name, string id, string size, string start, string rows)
 		{
-			IReadOnlyLevelData level = AssetDatabase.LoadAssetAtPath<LevelData>(LevelDir + name + ".asset");
-			Assert.IsNotNull(level, name);
+			LevelData asset = AssetDatabase.LoadAssetAtPath<LevelData>(LevelDir + name + ".asset");
+			Assert.IsNotNull(asset, name);
+			LevelDefinition level = asset.ToDefinition();
 
 			if (id == null)
 			{
@@ -148,7 +149,7 @@ namespace Tests.EditMode
 			Assert.AreEqual(spriteGuid, AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(sprite)));
 		}
 
-		private static string Describe(IReadOnlyLevelData level)
+		private static string Describe(LevelDefinition level)
 		{
 			StringBuilder sb = new StringBuilder();
 			for (int y = 0; y < level.Depth; y++)
@@ -165,26 +166,11 @@ namespace Tests.EditMode
 						sb.Append(' ');
 					}
 
-					sb.Append(Describe(level.GetTile(x, y)));
+					sb.Append(level[x, y].ToString());
 				}
 			}
 
 			return sb.ToString();
-		}
-
-		private static string Describe(Tile tile)
-		{
-			switch (tile)
-			{
-				case null:
-					return "null";
-				case StoneTile stone:
-					return $"stone:{stone.Direction}";
-				case SpringTile spring:
-					return $"spring:{spring.LandingPosition.x},{spring.LandingPosition.y}";
-				default:
-					return tile.ConfigurationKey;
-			}
 		}
 	}
 }

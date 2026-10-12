@@ -3,6 +3,7 @@ using Game.Levels;
 using UnityEngine;
 using Utils;
 using static Game.Levels.LevelDimensions;
+using Lawnmower.Model;
 
 namespace Game.Core
 {
@@ -45,7 +46,7 @@ namespace Game.Core
             return new GridVector(WorldAxisToGrid(localPosition.x), WorldAxisToGrid(localPosition.z));
         }
         
-        public Vector3 GetLevelWorldCenter(IReadOnlyLevelData level)
+        public Vector3 GetLevelWorldCenter(Level level)
         {
             GridVector levelCenterMin = new GridVector(
                 Mathf.FloorToInt((level.Width - 1) / 2f),
@@ -60,12 +61,12 @@ namespace Game.Core
             return (worldCenterMin + worldCenterMax) * 0.5f;
         }
 
-        public float GetMaxDistanceFromLevelCenter(IReadOnlyLevelData level)
+        public float GetMaxDistanceFromLevelCenter(Level level)
         {
             return GetMaxDistanceFromLevelCenter(level, GetLevelWorldCenter(level));
         }
 
-        public float GetMaxDistanceFromLevelCenter(IReadOnlyLevelData level, Vector3 worldCenter)
+        public float GetMaxDistanceFromLevelCenter(Level level, Vector3 worldCenter)
         {
             float maxDistanceSqr = 0;
             Loops.TwoD(level.Width, level.Depth, (x, y) =>

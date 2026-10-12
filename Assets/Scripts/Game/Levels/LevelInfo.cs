@@ -2,10 +2,10 @@ namespace Game.Levels
 {
 	internal readonly struct LevelInfo
 	{
-		public readonly IReadOnlyLevelData LevelData;
+		public readonly LevelData LevelData;
 		public readonly bool Locked;
 
-		public LevelInfo(IReadOnlyLevelData levelData, bool locked)
+		public LevelInfo(LevelData levelData, bool locked)
 		{
 			LevelData = levelData;
 			Locked = locked;

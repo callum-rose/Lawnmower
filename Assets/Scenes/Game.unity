@@ -307,7 +307,6 @@ MonoBehaviour:
   mowerPositionRequirers:
   - ObjectField: {fileID: 1028350308}
     ResultType: 
-  headlessMowerManager: {fileID: 11400000, guid: 25d26b62e7bdb024e8eb4544672662f0, type: 2}
   mowerCreatedEventChannelContainer:
     ObjectField: {fileID: 11400000, guid: 12a07be353cc1b842a6e74de6d86c941, type: 2}
     ResultType: 
@@ -656,7 +655,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 165245710}
-  - component: {fileID: 165245712}
   - component: {fileID: 165245711}
   m_Layer: 0
   m_Name: Undo
@@ -692,22 +690,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2134bba01bcb9f44dbad3da442b6d4c1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  undoManagerContainer:
-    ObjectField: {fileID: 165245712}
-    ResultType: 
---- !u!114 &165245712
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 165245709}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c2359ac8de286f4429a893866e467317, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  undoLimit: 0
 --- !u!1 &170076733
 GameObject:
   m_ObjectHideFlags: 0
@@ -4649,11 +4631,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mowerManager: {fileID: 57374275}
   levelManager: {fileID: 1701694278}
-  levelTraversalChecker: {fileID: 11400000, guid: 3c448be198e671746bdbe22256346721, type: 2}
   levelDataManager: {fileID: 11400000, guid: aa70aff86d447fa4ea3762dc62345078, type: 2}
-  undoSystemContainer:
-    ObjectField: {fileID: 165245712}
-    ResultType: 
   undoController: {fileID: 165245711}
   gamePlayData: {fileID: 11400000, guid: 123151afb2fdd074f9d46e345d51c0f4, type: 2}
   openDialogEventChannel: {fileID: 11400000, guid: 0611004ef216acb40ae7cf58c8128b48, type: 2}
@@ -4664,6 +4642,8 @@ MonoBehaviour:
   stopPlayingEventChannel:
     ObjectField: {fileID: 11400000, guid: 0c0bdcfee7c27f44bb674cb0d325eb33, type: 2}
     ResultType: 
+  mowerInputEventChannel: {fileID: 11400000, guid: 493087ea426ec094fa4aa264e865b8fe, type: 2}
+  levelFailedChannel: {fileID: 11400000, guid: a09acfa985ce96e439eaaca03db88ca7, type: 2}
 --- !u!1001 &581798740
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7910,7 +7890,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   levelFactory: {fileID: 2014382487}
-  headlessLevelManager: {fileID: 11400000, guid: 9130864bceac75a4bae05e3b72f6d680, type: 2}
+  levelStartedEventChannel: {fileID: 11400000, guid: 6893d8a204369ee449b9d7778103aad6, type: 2}
 --- !u!114 &1701694279
 MonoBehaviour:
   m_ObjectHideFlags: 0

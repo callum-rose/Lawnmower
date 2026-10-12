@@ -30,12 +30,12 @@ namespace Game.Mowers.Models
 		void INeedMowerPosition.Set(IMowerPosition mowerPosition)
 		{
 			_mowerPosition = mowerPosition;
-			_mowerPosition.CurrentPosition.ValueChangedFromTo += MowerMovementManagerOnMoved;
+			_mowerPosition.CurrentPosition.ValueChangedFromTo += OnMowerMoved;
 		}
 		
 		void INeedMowerPosition.Clear()
 		{
-			_mowerPosition.CurrentPosition.ValueChangedFromTo -= MowerMovementManagerOnMoved;
+			_mowerPosition.CurrentPosition.ValueChangedFromTo -= OnMowerMoved;
 			_mowerPosition = null;
 		}
 
@@ -43,7 +43,7 @@ namespace Game.Mowers.Models
 		
 		#region Events
 
-		private void MowerMovementManagerOnMoved(GridVector from, GridVector to, Xor inverted)
+		private void OnMowerMoved(GridVector from, GridVector to, Xor inverted)
 		{
 			if (inverted)
 			{

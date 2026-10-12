@@ -1,8 +1,6 @@
 using Game.Mowers.Input;
-using Game.UndoSystem;
 using System.Linq;
 using Core.EventChannels;
-using Game.Levels;
 using UnityEngine;
 using static Game.Levels.LevelDimensions;
 
@@ -13,7 +11,6 @@ namespace Game.Mowers
 		[Header("Scene")]
 		[SerializeField] private MowerObjectCreator mowerObjectCreator;
 		[SerializeField] private INeedMowerPositionContainer[] mowerPositionRequirers;
-		[SerializeField] private HeadlessMowerManager headlessMowerManager;
 
 		[Header("Event Channels")]
 		[SerializeField] private IGameObjectEventChannelTransmitterContainer mowerCreatedEventChannelContainer;
@@ -24,15 +21,11 @@ namespace Game.Mowers
 		
 		private MowerObject _mowerObject;
 
-		public void Init(MowerData mower, ILevelTraversalChecker levelTraversalChecker, IUndoSystem undoManager)
+		public void Init(MowerData mower, IMowerPosition mowerPosition)
 		{
-			MowerMover mowerMover = new MowerMover();
+			_mowerObject = mowerObjectCreator.Create(mower, mowerPosition);
 
-			_mowerObject = mowerObjectCreator.Create(mower, mowerMover);
-
-			headlessMowerManager.InitMowerMovementManager(mowerMover, levelTraversalChecker, undoManager);
-
-			InitObjectsNeedingMowerPosition(mowerMover);
+			InitObjectsNeedingMowerPosition(mowerPosition);
 			InitCollider(_mowerObject.gameObject);
 
 			MowerCreatedEventChannel.Raise(_mowerObject.gameObject);
@@ -40,8 +33,6 @@ namespace Game.Mowers
 
 		public void Clear()
 		{
-			headlessMowerManager.Clear();
-
 			if (_mowerObject == null)
 			{
 				return;

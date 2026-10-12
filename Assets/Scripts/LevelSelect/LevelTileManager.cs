@@ -12,7 +12,7 @@ namespace LevelSelect
 		[SerializeField] private LevelTile levelTilePrefab;
 		[SerializeField] private Transform tileContainer;
 
-		public event Action<IReadOnlyLevelData> LevelSelected;
+		public event Action<LevelData> LevelSelected;
 
 		private void Awake()
 		{

@@ -24,7 +24,7 @@ namespace Game.Tutorial
 				MowerData mowerData = mowerDataManager.GetMowerData(mowerId);
 
 				LevelInfo levelInfo = levelDataManager.GetLevel(0);
-				IReadOnlyLevelData levelData = levelInfo.LevelData;
+				LevelData levelData = levelInfo.LevelData;
 				
 				ViewManager.Instance.Load(UnityScene.Game, new GameSetupPassThroughData(mowerData, levelData, true));
 			}

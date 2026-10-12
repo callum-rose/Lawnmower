@@ -7,7 +7,7 @@ using Game.Tiles;
 
 namespace Game.Mowers
 {
-	public class MowerObject : MonoBehaviour, IDataObject<MowerMover>
+	public class MowerObject : MonoBehaviour, IDataObject<IMowerPosition>
 	{
 		[SerializeField] private INeedMowerPositionContainer[] needMowerPositionContainers;
 		[SerializeField] private INeedPositionerContainer[] needPositionerContainers;
@@ -23,11 +23,11 @@ namespace Game.Mowers
 			}
 		}
 
-		public void Bind(MowerMover mowerMover)
+		public void Bind(IMowerPosition mowerPosition)
 		{
 			foreach (INeedMowerPosition needMowerPosition in NeedMowerPositions)
 			{
-				needMowerPosition.Set(mowerMover);
+				needMowerPosition.Set(mowerPosition);
 			}
 		}
 
