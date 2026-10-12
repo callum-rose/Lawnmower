@@ -1,13 +1,12 @@
 using System.Linq;
 using Core;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Game.Tiles
 {
 	[CreateAssetMenu(fileName = nameof(GrassParticlesMaterialDataHolder),
 		menuName = SoNames.GameDir + nameof(GrassParticlesMaterialDataHolder))]
-	internal class GrassParticlesMaterialDataHolder : SerializedScriptableObject
+	internal class GrassParticlesMaterialDataHolder : ScriptableObject
 	{
 		[SerializeField] private SerialisedDictionary<int, Material> grassMaterials =
 			new SerialisedDictionary<int, Material>(

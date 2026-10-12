@@ -3,17 +3,13 @@ using System.Collections.Generic;
 using System.Text;
 using BalsamicBits.Extensions;
 using Lean.Touch;
-using Sirenix.OdinInspector;
-using Sirenix.Serialization;
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Serialization;
 
 namespace Game.Core
 {
-	public class GestureForwardingHandler : SerializedMonoBehaviour
+	public class GestureForwardingHandler : MonoBehaviour
 	{
 		internal enum Gesture
 		{
@@ -25,12 +21,6 @@ namespace Game.Core
 			TwoFingerDrag
 		}
 
-		[BoxGroup(GesturesBoxGroup), OdinSerialize,
-		 TableMatrix(SquareCells = true, DrawElementMethod = nameof(DrawTableCell), RowHeight = 20,
-			 ResizableColumns = false),
-		 InfoBox("$" + nameof(MatrixLegend))]
-		private bool[,] allowedSimultaneousGestures;
-
 		[Serializable]
 		internal struct GesturePair
 		{
@@ -38,10 +28,10 @@ namespace Game.Core
 			public Gesture b;
 		}
 
-		// Unity-serialized replacement for the Odin matrix (populated by the Odin data migration).
-		[SerializeField] internal List<GesturePair> allowedGesturePairs = new List<GesturePair>();
-
-		internal bool[,] LegacyMatrix => allowedSimultaneousGestures;
+		[Tooltip("Pairs of different gestures that may be active at the same time. A gesture is always allowed " +
+		         "alongside itself; any pair not listed here cancels the newer gesture.")]
+		[SerializeField, FormerlySerializedAs("allowedGesturePairs")]
+		internal List<GesturePair> allowedSimultaneousGestures = new List<GesturePair>();
 
 		[SerializeField, Min(1)]
 		private int cancelCurrentAfterFrames = 1;
@@ -54,28 +44,9 @@ namespace Game.Core
 		[SerializeField] private UnityEvent<LeanFinger> tapEvent;
 		[SerializeField] private UnityEvent<Vector2> twoFingerDragEvent;
 
-		[BoxGroup(GesturesBoxGroup), ShowInInspector, ReadOnly, HideInEditorMode]
 		private readonly Dictionary<Gesture, bool> _currentGestures = new Dictionary<Gesture, bool>();
 
 		private readonly Dictionary<Gesture, Coroutine> _cancelGestureRoutines = new Dictionary<Gesture, Coroutine>();
-
-		private const string GesturesBoxGroup = "Gestures";
-
-		private string MatrixLegend
-		{
-			get
-			{
-				StringBuilder sb = new StringBuilder();
-				foreach (Gesture gesture in EnumExtensions.GetValues<Gesture>())
-				{
-					sb.Append($"{gesture.ToString()} = {(int) gesture}, ");
-				}
-
-				return sb.ToString();
-			}
-		}
-
-		private int GestureCount => Enum.GetNames(typeof(Gesture)).Length;
 
 		#region Unity
 
@@ -218,23 +189,9 @@ namespace Game.Core
 
 		private bool IsGestureAllowed(Gesture gestureToCheck)
 		{
-			for (int i = 0; i < GestureCount; i++)
+			foreach (KeyValuePair<Gesture, bool> current in _currentGestures)
 			{
-				Gesture gesture = (Gesture) i;
-
-				bool gestureIsActive = _currentGestures[gesture];
-				if (!gestureIsActive)
-				{
-					continue;
-				}
-
-				int x = (int) gestureToCheck;
-				int y = i;
-
-				bool gesturesAreAllowedTogether =
-					x > y ? allowedSimultaneousGestures[y, x] : allowedSimultaneousGestures[x, y];
-
-				if (!gesturesAreAllowedTogether)
+				if (current.Value && !AreAllowedTogether(allowedSimultaneousGestures, gestureToCheck, current.Key))
 				{
 					return false;
 				}
@@ -243,45 +200,22 @@ namespace Game.Core
 			return true;
 		}
 
-		[BoxGroup(GesturesBoxGroup), Button]
-		private void BuildMatrix()
+		internal static bool AreAllowedTogether(IReadOnlyList<GesturePair> allowedPairs, Gesture first, Gesture second)
 		{
-			allowedSimultaneousGestures = new bool[GestureCount, GestureCount];
-
-			for (int i = 0; i < GestureCount; i++)
+			if (first == second || first == Gesture.None || second == Gesture.None)
 			{
-				allowedSimultaneousGestures[i, i] = true;
-				allowedSimultaneousGestures[0, i] = true;
-			}
-		}
-
-		private static bool DrawTableCell(Rect rect, bool[,] matrix, int x, int y)
-		{
-#if UNITY_EDITOR
-			if (x > y)
-			{
-				return false;
+				return true;
 			}
 
-			bool disable = x == y || x == 0;
-			if (disable)
+			foreach (GesturePair pair in allowedPairs)
 			{
-				GUI.enabled = false;
+				if ((pair.a == first && pair.b == second) || (pair.a == second && pair.b == first))
+				{
+					return true;
+				}
 			}
 
-			bool value = matrix[x, y];
-			bool result = EditorGUI.Toggle(rect, value);
-
-			if (disable)
-			{
-				GUI.enabled = true;
-			}
-
-			return result;
-
-#else
-			return matrix[x,y];
-#endif
+			return false;
 		}
 
 		#endregion

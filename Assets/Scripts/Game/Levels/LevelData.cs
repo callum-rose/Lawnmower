@@ -2,68 +2,54 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
-using Sirenix.OdinInspector;
 using Core;
 using Game.Core;
+using Game.Levels.Serialization;
 using Game.Tiles;
-using Newtonsoft.Json;
-using Sirenix.Serialization;
-using UnityEngine.Serialization;
-using Utils;
+using UnityEngine;
 
 namespace Game.Levels
 {
+	/// <summary>
+	/// A level asset. The tiles are persisted once, as Unity-serialized <see cref="TileRecord"/>s
+	/// (row-major, index = x + y * width), and decoded lazily into runtime <see cref="Tile"/>s.
+	/// </summary>
 	[CreateAssetMenu(fileName = "LevelData", menuName = SoNames.GameDir + "Level Data")]
-	internal partial class LevelData : SerializedScriptableObject, IReadOnlyLevelData
+	internal partial class LevelData : ScriptableObject, IReadOnlyLevelData
 	{
-		[OdinSerialize] private Guid id;
+		/// <summary>Level id in Guid "N" format. Keys player progress, so never change it once shipped.</summary>
+		[SerializeField] private string guid;
 
-		[SerializeField, HideInInspector] private GridVector startPosition = new GridVector(1, 1);
+		[SerializeField] private GridVector startPosition = new GridVector(1, 1);
 
-		[OdinSerialize]
-#if UNITY_EDITOR
-		[TableMatrix(SquareCells = true, DrawElementMethod = nameof(DrawColouredTileElement), HideColumnIndices = true,
-			HideRowIndices = true)]
-#endif
-		internal Tile[,] newTiles;
-		
-		[ShowInInspector, PropertyOrder(1), MinValue(1), DelayedProperty]
-		public int Width => newTiles.GetLength(0);
+		[SerializeField, Min(1)] private int width = 1;
+		[SerializeField, Min(1)] private int depth = 1;
 
-		[ShowInInspector, PropertyOrder(1), MinValue(1), DelayedProperty]
-		public int Depth => newTiles.GetLength(1);
+		[SerializeField, HideInInspector] private TileRecord[] tiles = { new TileRecord() };
 
-		[ShowInInspector, PropertyOrder(1), DelayedProperty]
+		[NonSerialized] private Tile[,] _cache;
+
+		private Tile[,] Tiles => _cache ??= TileRecordCodec.Decode(tiles, width, depth);
+
+		public Guid Id => Guid.TryParse(guid, out Guid g) ? g : Guid.Empty;
+
+		public int Width => width;
+		public int Depth => depth;
 		public GridVector StartPosition => startPosition;
-
-		// keep just in case Odin serialiser messes up
-		[FormerlySerializedAs("___tilesData"), SerializeField, TextArea(8, 12)]
-		private string tilesData;
-
-		public Guid Id => id;
-
-		// --- Unity-serialized replacement fields (populated by the Odin data migration) ---
-		[SerializeField] internal string guid;
-		[SerializeField] internal int width;
-		[SerializeField] internal int depth;
-		[SerializeField] internal Game.Levels.Serialization.TileRecord[] tiles;
-
-		private static readonly JsonSerializerSettings jsonSettings = new JsonSerializerSettings
-		{
-			TypeNameHandling = TypeNameHandling.Auto,
-			NullValueHandling = NullValueHandling.Ignore
-		};
 
 		#region Unity
 
-		private void Awake()
+		private void OnValidate()
 		{
-			if (id == Guid.Empty)
-			{
-				id = Guid.NewGuid();
-			}
+			_cache = null;
 		}
+
+#if UNITY_EDITOR
+		private void Reset()
+		{
+			guid = Guid.NewGuid().ToString("N");
+		}
+#endif
 
 		#endregion
 
@@ -71,7 +57,7 @@ namespace Game.Levels
 
 		public Tile GetTile(int x, int y)
 		{
-			return newTiles[x, y];
+			return Tiles[x, y];
 		}
 
 		public Tile GetTile(GridVector position)
@@ -79,23 +65,27 @@ namespace Game.Levels
 			return GetTile(position.x, position.y);
 		}
 
+		/// <summary>Overwrites this level's contents (used by the level editor's save and by <see cref="CreateFrom"/>).</summary>
+		internal void SetContents(IReadOnlyLevelData source, Guid id)
+		{
+			tiles = TileRecordCodec.Encode(source);
+			width = source.Width;
+			depth = source.Depth;
+			startPosition = source.StartPosition;
+			guid = id.ToString("N");
+			_cache = null;
+		}
+
 		public static LevelData CreateFrom(IReadOnlyLevelData input)
 		{
 			LevelData output = CreateInstance<LevelData>();
-
-			output.newTiles = new Tile[input.Width, input.Depth];
-			Loops.TwoD(input.Width, input.Depth, (x, y) => output.newTiles[x, y] = input.GetTile(x, y).Clone());
-
-			output.startPosition = input.StartPosition;
-
-			output.id = input.Id;
-
+			output.SetContents(input, input.Id);
 			return output;
 		}
 
 		public IEnumerator<Tile> GetEnumerator()
 		{
-			return newTiles.Cast<Tile>().GetEnumerator();
+			return Tiles.Cast<Tile>().GetEnumerator();
 		}
 
 		IEnumerator IEnumerable.GetEnumerator()
@@ -104,15 +94,5 @@ namespace Game.Levels
 		}
 
 		#endregion
-
-		protected override void OnBeforeSerialize()
-		{
-			tilesData = JsonConvert.SerializeObject(newTiles, jsonSettings);
-		}
-
-		protected override void OnAfterDeserialize()
-		{
-			newTiles = JsonConvert.DeserializeObject<Tile[,]>(tilesData, jsonSettings);
-		}
 	}
 }

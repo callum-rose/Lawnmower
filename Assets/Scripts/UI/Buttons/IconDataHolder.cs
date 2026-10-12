@@ -1,8 +1,6 @@
-﻿using BalsamicBits.Extensions;
-using Core;
-using Sirenix.OdinInspector;
 using System.Collections.Generic;
-using System.Linq;
+using BalsamicBits.Extensions;
+using Core;
 using UnityEngine;
 
 namespace UI.Buttons
@@ -14,51 +12,44 @@ namespace UI.Buttons
 		public Sprite sprite;
 	}
 
-    [CreateAssetMenu(fileName = nameof(IconDataHolder), menuName = SoNames.UIDir + nameof(IconDataHolder))]
-	internal class IconDataHolder : SerializedScriptableObject
+	[CreateAssetMenu(fileName = nameof(IconDataHolder), menuName = SoNames.UIDir + nameof(IconDataHolder))]
+	internal class IconDataHolder : ScriptableObject
 	{
-		[SerializeField] private Dictionary<IconType, Sprite> iconToSpriteDict;
+		[SerializeField] private List<IconSprite> icons = new List<IconSprite>();
 
-		// Unity-serialized replacement for the Odin dictionary (populated by the Odin data migration).
-		[SerializeField] internal List<IconSprite> icons = new List<IconSprite>();
+		#region Unity
 
-		internal Dictionary<IconType, Sprite> LegacyIcons => iconToSpriteDict;
+#if UNITY_EDITOR
+		private void OnValidate()
+		{
+			// Back-fill an entry for every icon type so new enum values show up in the inspector.
+			foreach (IconType i in EnumExtensions.GetValues<IconType>())
+			{
+				if (!icons.Exists(e => e.icon == i))
+				{
+					icons.Add(new IconSprite { icon = i });
+				}
+			}
+		}
+#endif
 
-        #region Unity
+		#endregion
 
-        private void Awake()
-        {
-            if (iconToSpriteDict == null || iconToSpriteDict.Count == 0)
-            {
-                iconToSpriteDict = EnumExtensions.GetValues<IconType>().ToDictionary(i => i, i => (Sprite)null);
-            }
+		#region API
 
-            foreach (IconType i in EnumExtensions.GetValues<IconType>())
-            {
-                if (!iconToSpriteDict.ContainsKey(i))
-                {
-                    iconToSpriteDict.Add(i, null);
-                }
-            }
-        }
+		public Sprite GetIcon(IconType icon)
+		{
+			foreach (IconSprite entry in icons)
+			{
+				if (entry.icon == icon)
+				{
+					return entry.sprite;
+				}
+			}
 
-        #endregion
+			return null;
+		}
 
-        #region API
-
-        public Sprite GetIcon(IconType icon)
-        {
-            return iconToSpriteDict[icon];
-        }
-
-        #endregion
-
-        #region Events
-
-        #endregion
-
-        #region Methods
-
-        #endregion
-    }
+		#endregion
+	}
 }

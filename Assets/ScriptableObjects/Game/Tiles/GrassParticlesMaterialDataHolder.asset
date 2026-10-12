@@ -12,17 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f39e9919c189460a9eb5aec4042c243e, type: 3}
   m_Name: GrassParticlesMaterialDataHolder
   m_EditorClassIdentifier: 
-  serializationData:
-    SerializedFormat: 2
-    SerializedBytes: 
-    ReferencedUnityObjects: []
-    SerializedBytesString: 
-    Prefab: {fileID: 0}
-    PrefabModificationsReferencedUnityObjects: []
-    PrefabModifications: []
-    SerializationNodes: []
   grassMaterials:
-    keys: 010000000200000003000000
+    keys: 010000000200000003000000i
     values:
     - {fileID: 2100000, guid: faafe16e55e22214d8eeb7f23c502d2d, type: 2}
     - {fileID: 2100000, guid: bcc01392f1815794bb0612dfbf312a0a, type: 2}
