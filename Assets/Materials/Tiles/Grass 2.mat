@@ -118,7 +118,7 @@ Material:
     - _BumpScale: 1
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
-    - _Cull: 2
+    - _Cull: 0
     - _Cutoff: 0.5
     - _DetailAlbedoMapScale: 1
     - _DetailNormalMapScale: 1
@@ -131,8 +131,8 @@ Material:
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
-    - _GlowIntensity: 0.5
-    - _GlowPower: 4
+    - _GlowIntensity: 1.4
+    - _GlowPower: 4.5
     - _GlowVariationScale: 4
     - _GraphicsSettings: 1
     - _GraphicsSettings1: 0
@@ -150,6 +150,8 @@ Material:
     - _ShimmerSpeed: 1.5
     - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0
+    - _SparkleBoost: 2
+    - _SparkleChance: 0.12
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _Surface: 0
@@ -166,15 +168,16 @@ Material:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _GlowColourA: {r: 0.78, g: 1, b: 0.55, a: 1}
-    - _GlowColourB: {r: 0.5, g: 1, b: 0.88, a: 1}
+    - _GlowColourA: {r: 0.75, g: 1, b: 0.2, a: 1}
+    - _GlowColourB: {r: 0.2, g: 1, b: 0.55, a: 1}
+    - _GlowColourC: {r: 0.2, g: 0.9, b: 1, a: 1}
     - _Highlight: {r: 0.1, g: 0.1, b: 0.1, a: 0}
     - _Highlight2: {r: 0.1, g: 0.1, b: 0.1, a: 0}
     - _Shadow: {r: 0.1, g: 0.1, b: 0.1, a: 0}
     - _Shadow2: {r: 0.1, g: 0.1, b: 0.1, a: 0}
     - _SpecColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}
     - _Tint: {r: 1, g: 1, b: 1, a: 0}
-    - _Tint2: {r: 1, g: 1, b: 1, a: 0}
+    - _Tint2: {r: 0.72, g: 0.8, b: 0.85, a: 0}
     - _VertexOffsetNoiseFactorYRange: {r: 0, g: 1, b: 0, a: 0}
     - _VertexOffsetNoiseVelocity: {r: 0.5, g: 0, b: 0, a: 0}
     - _WindNoiseVelocity: {r: 1, g: 0, b: 0, a: 0}

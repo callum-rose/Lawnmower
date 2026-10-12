@@ -24,17 +24,21 @@ Shader "Grass Ethereal"
 		_AlphaFadePower("Alpha Fade Power", Range(0.1, 8)) = 4
 
 		[Header(Tip Glow)]
-		_GlowColourA("Glow Colour A", Color) = (0.78,1,0.55,1)
-		_GlowColourB("Glow Colour B", Color) = (0.5,1,0.88,1)
-		_GlowIntensity("Glow Intensity", Range(0, 2)) = 0.5
-		_GlowPower("Glow Power", Range(0.5, 8)) = 4
+		_GlowColourA("Glow Colour A", Color) = (0.85,1,0.35,1)
+		_GlowColourB("Glow Colour B", Color) = (0.4,1,0.65,1)
+		_GlowColourC("Glow Colour C", Color) = (0.35,0.95,1,1)
+		_GlowIntensity("Glow Intensity", Range(0, 2)) = 0.9
+		_GlowPower("Glow Power", Range(0.5, 8)) = 2.5
 		_GlowVariationScale("Glow Variation Scale", Float) = 4
+		_SparkleChance("Sparkle Chance", Range(0, 1)) = 0.12
+		_SparkleBoost("Sparkle Boost", Range(0, 4)) = 1.5
 
 		[Header(Shimmer)]
 		_ShimmerAmount("Shimmer Amount", Range(0, 1)) = 0.35
 		_ShimmerSpeed("Shimmer Speed", Float) = 1.5
 
 		[Enum(Off,0,On,1)] _ZWrite("ZWrite", Float) = 1
+		[Enum(UnityEngine.Rendering.CullMode)] _Cull("Cull", Float) = 0
 	}
 
 	SubShader
@@ -49,7 +53,7 @@ Shader "Grass Ethereal"
 			Blend One OneMinusSrcAlpha
 			ZWrite [_ZWrite]
 			ZTest LEqual
-			Cull Back
+			Cull [_Cull]
 
 			HLSLPROGRAM
 			#pragma prefer_hlslcc gles
@@ -102,12 +106,16 @@ Shader "Grass Ethereal"
 			float _AlphaFadePower;
 			float4 _GlowColourA;
 			float4 _GlowColourB;
+			float4 _GlowColourC;
 			float _GlowIntensity;
 			float _GlowPower;
 			float _GlowVariationScale;
+			float _SparkleChance;
+			float _SparkleBoost;
 			float _ShimmerAmount;
 			float _ShimmerSpeed;
 			float _ZWrite;
+			float _Cull;
 			CBUFFER_END
 
 			sampler2D BakedNoiseTex;
@@ -192,10 +200,15 @@ Shader "Grass Ethereal"
 				float bladeSeed = frac(sin(dot(uv1, float2(12.9898, 78.233))) * 43758.5453);
 				float patch = tex2D(BakedNoiseTex, uv1 * _GlowVariationScale * 0.15).r;
 
-				float3 glowColour = lerp(_GlowColourA.rgb, _GlowColourB.rgb, saturate(bladeSeed * 0.7 + patch * 0.6 - 0.15));
+				// Cycle A -> B -> C -> A so neighbouring blades pick different hues
+				float hue = frac(bladeSeed + patch * 0.6) * 3;
+				float3 glowColour = hue < 1 ? lerp(_GlowColourA.rgb, _GlowColourB.rgb, hue)
+					: hue < 2 ? lerp(_GlowColourB.rgb, _GlowColourC.rgb, hue - 1)
+					: lerp(_GlowColourC.rgb, _GlowColourA.rgb, hue - 2);
 				float shimmerPhase = bladeSeed * 6.2832;
 				float shimmer = 1 - _ShimmerAmount * (0.5 + 0.5 * sin(_TimeParameters.x * _ShimmerSpeed + shimmerPhase));
-				float bladeBrightness = lerp(0.4, 1.4, frac(bladeSeed * 7.31));
+				float sparkle = step(1 - _SparkleChance, frac(bladeSeed * 13.17)) * _SparkleBoost;
+				float bladeBrightness = lerp(0.35, 1, frac(bladeSeed * 7.31)) + sparkle;
 				float3 glow = glowColour * pow(height, _GlowPower) * _GlowIntensity * bladeBrightness * shimmer;
 
 				float alpha = lerp(_BaseAlpha, _TipAlpha, pow(height, _AlphaFadePower));
