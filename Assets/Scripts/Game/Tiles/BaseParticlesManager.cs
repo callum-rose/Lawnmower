@@ -34,9 +34,13 @@ namespace Game.Tiles
 		{
 			particles.Play();
 			
-			yield return new WaitWhile(particles.IsAlive);
-			
-			Destroy(particles.gameObject);
+			// The particles live in the scene, so a scene change can destroy them before they finish.
+			yield return new WaitWhile(() => particles != null && particles.IsAlive());
+
+			if (particles != null)
+			{
+				Destroy(particles.gameObject);
+			}
 		}
 	}
 }
