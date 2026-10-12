@@ -7,6 +7,8 @@ namespace Game.Tiles
 	internal class SpringTile : Tile, IReadonlySpringTile
 	{
 		public override bool IsComplete => true;
+
+		protected override string TypeKey => "spring";
 		
 		public GridVector LandingPosition { get; set; }
 

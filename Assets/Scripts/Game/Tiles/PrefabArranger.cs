@@ -2,7 +2,9 @@ using System;
 using System.Linq;
 using BalsamicBits.Extensions;
 using Sirenix.OdinInspector;
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 using UnityEngine;
 using Utils;
 using Random = UnityEngine.Random;

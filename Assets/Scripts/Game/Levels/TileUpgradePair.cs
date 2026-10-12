@@ -23,21 +23,29 @@ namespace Game.Levels
 			get
 			{
 				List<string> ret = new List<string> { NoneStr };
-				ret.AddRange(TileStatics.AllTileConfigurations.Select(t => t.ToString()));
+				ret.AddRange(TileStatics.AllTileConfigurations.Select(t => t.ConfigurationKey));
 				return ret;
 			}
 		}
 
+		// Tiles are matched by their stable ConfigurationKey (e.g. "grass:3"), not ToString(),
+		// so renaming a tile class or namespace doesn't silently break saved pairs.
 		public bool IsMatch(Tile tileToUpgrade, out Tile tileToUpgradeTo)
 		{
-			string tileToUpgradeString = tileToUpgrade?.ToString() ?? NoneStr;
-			if (!tileToUpgradeString.Equals(upgradee))
+			string tileToUpgradeKey = tileToUpgrade?.ConfigurationKey ?? NoneStr;
+			if (!tileToUpgradeKey.Equals(upgradee))
 			{
 				tileToUpgradeTo = null;
 				return false;
 			}
 
-			tileToUpgradeTo = TileStatics.AllTileConfigurations.First(t => t.ToString().Equals(upgradeTo)).Clone();
+			Tile template = TileStatics.AllTileConfigurations.FirstOrDefault(t => t.ConfigurationKey.Equals(upgradeTo));
+			if (template == null)
+			{
+				throw new InvalidOperationException($"No tile configuration with key '{upgradeTo}' to upgrade '{upgradee}' to");
+			}
+
+			tileToUpgradeTo = template.Clone();
 			return true;
 		}
 	}

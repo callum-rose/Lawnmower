@@ -12,6 +12,16 @@ namespace Game.Tiles
 
 		[JsonIgnore] public virtual bool IsRuined => false;
 
+		/// <summary>
+		/// Stable identifier for this tile's configuration (kind plus any state that distinguishes
+		/// configurations, e.g. grass height). Used by saved config such as <c>TileUpgradePair</c>,
+		/// so it must never depend on CLR type or namespace names.
+		/// </summary>
+		[JsonIgnore] public virtual string ConfigurationKey => TypeKey;
+
+		/// <summary>Stable, rename-proof identifier for the tile kind.</summary>
+		protected abstract string TypeKey { get; }
+
 		public abstract bool IsTraversable(bool editMode);
 		
 		public event TraverseEvent TraversedOnto;

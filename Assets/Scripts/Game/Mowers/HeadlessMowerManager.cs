@@ -6,7 +6,7 @@ using UnityEngine;
 namespace Game.Mowers
 {
 	[CreateAssetMenu(fileName = nameof(HeadlessMowerManager), menuName = SoNames.GameDir + nameof(HeadlessMowerManager))]
-	internal class HeadlessMowerManager : ScriptableObject, IMowerManager
+	internal class HeadlessMowerManager : ScriptableObject
 	{
 		[SerializeField] private MowerMovementManager mowerMovementManager;
 		

@@ -8,6 +8,8 @@ namespace Game.Tiles
         public override bool IsTraversable(bool editMode) => false;
         public override bool IsComplete => true;
 
+        protected override string TypeKey => "stone";
+
         public int Direction
         {
             get => _direction;

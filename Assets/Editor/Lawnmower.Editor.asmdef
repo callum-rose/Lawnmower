@@ -1,0 +1,21 @@
+{
+    "name": "Lawnmower.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:4b853a98c9652d04486371daa107009d",
+        "GUID:90868c18e31ad1846b3d38a2d0d12b7e",
+        "GUID:3a94c0cb4efe84c4dada831cf7ac1c48",
+        "GUID:3aa9d4cbe4acac0459209e4656723ee8"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

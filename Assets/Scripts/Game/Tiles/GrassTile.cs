@@ -16,6 +16,10 @@ namespace Game.Tiles
 
 		public IListenableProperty<int> GrassHeight => _internalGrassHeight;
 
+		public override string ConfigurationKey => $"{TypeKey}:{_internalGrassHeight.Value}";
+
+		protected override string TypeKey => "grass";
+
 		private readonly EventProperty<int> _internalGrassHeight;
 
 		public GrassTile()
@@ -43,9 +47,10 @@ namespace Game.Tiles
 			{
 				newHeight = _internalGrassHeight.RawValue + 1;
 
-				if (_internalGrassHeight > MaxGrassHeight)
+				// Check the new raw (unclamped) value: the clamped getter can never exceed the max.
+				if (newHeight > MaxGrassHeight)
 				{
-					throw new InvalidOperationException("Grass height too high");
+					throw new InvalidOperationException($"Grass height too high: {newHeight} > {MaxGrassHeight}");
 				}
 			}
 			

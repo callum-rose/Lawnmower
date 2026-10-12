@@ -9,7 +9,7 @@ using static Game.Levels.LevelDimensions;
 
 namespace Game.Mowers
 {
-	internal class MowerManager : MonoBehaviour, IMowerManager
+	internal class MowerManager : MonoBehaviour
 	{
 		[TitleGroup("Scene")]
 		[SerializeField] private MowerObjectCreator mowerObjectCreator;

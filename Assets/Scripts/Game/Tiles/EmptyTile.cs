@@ -10,6 +10,8 @@ namespace Game.Tiles
 
         public override bool IsComplete => true;
 
+        protected override string TypeKey => "empty";
+
         public override bool IsTraversable(bool editMode) => false;
     }
 }

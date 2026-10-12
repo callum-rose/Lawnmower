@@ -1,6 +1,5 @@
 #if UNITY_EDITOR
 using System;
-using Game.Levels.EditorWindow;
 using Game.Tiles;
 using Sirenix.OdinInspector;
 using Sirenix.Utilities;
@@ -13,6 +12,9 @@ namespace Game.Levels
 	{
 		private static Color? _defaultEditorColour;
 
+		/// <summary>Set by the editor assembly so the inspector button can open the level editor window.</summary>
+		internal static Action<LevelData> OpenInLevelEditor;
+
 		[Button]
 		private void SelectInProjectWindow()
 		{
@@ -23,7 +25,7 @@ namespace Game.Levels
 		[Button]
 		private void OpenLevelEditorWindow()
 		{
-			LevelEditorWindow.OpenWindow(this);
+			OpenInLevelEditor?.Invoke(this);
 		}
 
 		private static Tile DrawColouredTileElement(Rect rect, Tile[,] arr, int x, int y)
@@ -33,7 +35,7 @@ namespace Game.Levels
 			int flippedY = arr.GetLength(1) - 1 - y;
 			Tile value = arr[x, flippedY];
 
-			Color colour = LevelEditorWindow.GetColourForTile(value);
+			Color colour = TileEditorColours.Get(value);
 			string text = "";
 			switch (value)
 			{

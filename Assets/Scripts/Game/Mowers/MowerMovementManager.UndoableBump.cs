@@ -24,8 +24,6 @@ namespace Game.Mowers
                     _movementController.MowerPosition,
                     _targetPosition,
                     (Xor)false);
-
-                _movementController._mowerMover.Bump(_targetPosition);
             }
 
             public void Undo()
@@ -34,8 +32,6 @@ namespace Game.Mowers
                     _movementController.MowerPosition,
                     _previousPosition,
                     (Xor)true);
-
-                _movementController._mowerMover.Bump(_previousPosition);
             }
         }
     }

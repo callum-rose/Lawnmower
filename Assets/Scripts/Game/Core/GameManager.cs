@@ -41,7 +41,7 @@ namespace Game.Core
 
 		private LevelDataRecorder _levelDataRecorder;
 
-		private int _levelCompletedDialogId, _levelFailedDialogId;
+		private int _levelCompletedDialogId;
 
 		#region Unity
 
@@ -144,18 +144,7 @@ namespace Game.Core
 
 		private void OnLevelFailed(Xor isUndo)
 		{
-			//if (!isUndo)
-			//{
-			//    void ButtonAction()
-			//    {
-			//        Begin(_inputData);
-			//    };
-			//    _levelFailedDialogId = dialogManager.Show("Level Completed!", "Nice one", new ButtonInfo("Retry", action: ButtonAction));
-			//}
-			//else
-			//{
-			//    dialogManager.Close(_levelFailedDialogId);
-			//}
+			// No in-game failure feedback yet (B12, fixed in a later phase).
 		}
 
 		#endregion

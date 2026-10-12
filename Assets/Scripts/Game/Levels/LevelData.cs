@@ -94,7 +94,7 @@ namespace Game.Levels
 
 		IEnumerator IEnumerable.GetEnumerator()
 		{
-			yield return GetEnumerator();
+			return GetEnumerator();
 		}
 
 		#endregion
