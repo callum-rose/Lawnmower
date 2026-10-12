@@ -1,0 +1,7 @@
+Bunny Heaven sound effects. All CC0 (public domain) by Kenney (www.kenney.nl).
+
+SfxMove.ogg   <- Impact Sounds 1.0   footstep_grass_004.ogg    https://kenney.nl/assets/impact-sounds
+SfxBump.ogg   <- Impact Sounds 1.0   impactSoft_medium_001.ogg https://kenney.nl/assets/impact-sounds
+SfxClick.ogg  <- UI Audio            click1.ogg                https://kenney.nl/assets/ui-audio
+SfxWin.ogg    <- Music Jingles       jingles_PIZZI02.ogg       https://kenney.nl/assets/music-jingles
+SfxFail.ogg   <- Music Jingles       jingles_PIZZI01.ogg       https://kenney.nl/assets/music-jingles
