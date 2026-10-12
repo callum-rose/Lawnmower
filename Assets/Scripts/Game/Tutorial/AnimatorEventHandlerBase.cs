@@ -1,6 +1,6 @@
+using Core;
 using System.Collections.Generic;
 using System.Linq;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Game.Tutorial
@@ -9,7 +9,7 @@ namespace Game.Tutorial
 	{
 		[SerializeField] private Animator animator;
 		
-		[SerializeField, Required, ValueDropdown(nameof(AnimatorParameterNames), HideChildProperties = true)]
+		[SerializeField, Dropdown(nameof(AnimatorParameterNames))]
 		private string propertyName;
 		
 		protected Animator Animator => animator;

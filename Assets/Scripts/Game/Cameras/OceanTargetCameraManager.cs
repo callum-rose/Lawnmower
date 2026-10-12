@@ -1,6 +1,5 @@
 
 using Game.Levels;
-using Sirenix.OdinInspector;
 using UnityEngine;
 using System.Linq;
 using BalsamicBits.Extensions;
@@ -19,7 +18,7 @@ namespace Game.Cameras
 			SetOceanTargets();
 		}
 
-		[Button]
+		[ContextMenu("Set Ocean Targets")]
 		private void SetOceanTargets()
 		{
 			if (!targetGroup.Targets.IsNullOrEmpty())

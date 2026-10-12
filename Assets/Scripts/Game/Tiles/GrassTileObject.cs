@@ -1,7 +1,7 @@
+using System;
 using Core.EventChannels;
 using Game.Core;
 using Game.UndoSystem;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Game.Tiles
@@ -10,10 +10,10 @@ namespace Game.Tiles
 	internal class GrassTileObject : BaseTileObject
 	{
 		[SerializeField] private DirtAppearanceSetter dirtAppearanceSetter;
-		[SerializeField, AssetsOnly] private Vector3AndIntEventChannel grassParticlesEventChannel;
-		[SerializeField, AssetsOnly] private Vector3EventChannel dirtParticlesEventChannel;
+		[SerializeField] private Vector3AndIntEventChannel grassParticlesEventChannel;
+		[SerializeField] private Vector3EventChannel dirtParticlesEventChannel;
 
-		[SerializeField, Range(0, GrassTile.MaxGrassHeight), OnValueChanged(nameof(OnDisplayGrassHeightChanged))]
+		[SerializeField, Range(0, GrassTile.MaxGrassHeight)]
 		private int displayGrassHeight;
 
 		private IReadonlyGrassTile _tileData;
@@ -121,10 +121,21 @@ namespace Game.Tiles
 			_appearanceSetter.SetAppearance(grassHeight);
 		}
 		
-		private void OnDisplayGrassHeightChanged(int _)
+#if UNITY_EDITOR
+		[NonSerialized] private int? _lastValidatedGrassHeight;
+
+		private void OnValidate()
 		{
-			SetAppearance(displayGrassHeight);
+			// Preview the appearance when displayGrassHeight is edited in the inspector (not on load).
+			if (_lastValidatedGrassHeight.HasValue && _lastValidatedGrassHeight != displayGrassHeight &&
+			    GetComponent<IAppearanceSetter>() != null)
+			{
+				SetAppearance(displayGrassHeight);
+			}
+
+			_lastValidatedGrassHeight = displayGrassHeight;
 		}
+#endif
 
 		#endregion
 	}

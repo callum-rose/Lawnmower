@@ -1,8 +1,8 @@
+using Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using Game.Tiles;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Game.Levels
@@ -10,10 +10,10 @@ namespace Game.Levels
 	[Serializable]
 	internal class TileUpgradePair
 	{
-		[LabelText("This tile"), SerializeField, ValueDropdown(nameof(PossibleTileConfigurations), HideChildProperties = true)]
+		[SerializeField, Dropdown(nameof(PossibleTileConfigurations))]
 		private string upgradee = NoneStr;
 
-		[LabelText("Upgrades To"), SerializeField, ValueDropdown(nameof(PossibleTileConfigurations), HideChildProperties = true)]
+		[SerializeField, Dropdown(nameof(PossibleTileConfigurations))]
 		private string upgradeTo = NoneStr;
 
 		private const string NoneStr = "None";

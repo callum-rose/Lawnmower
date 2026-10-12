@@ -1,6 +1,6 @@
+using Core;
 using System.Collections.Generic;
 using BalsamicBits.Extensions;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Game.Core
@@ -10,7 +10,7 @@ namespace Game.Core
 	{
 		[SerializeField] private Vector2 range;
 
-		[SerializeField, ValueDropdown(nameof(MaterialPropertyNames), HideChildProperties = true)]
+		[SerializeField, Dropdown(nameof(MaterialPropertyNames))]
 		private string shaderRangePropertyName;
 
 		private List<string> MaterialPropertyNames
@@ -50,7 +50,7 @@ namespace Game.Core
 			}
 		}
 
-		[Button, EnableIf(nameof(enabled))]
+		[ContextMenu("Set Property Block")]
 		private void SetPropertyBlock()
 		{
 #if UNITY_EDITOR

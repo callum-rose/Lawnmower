@@ -4,7 +4,6 @@ using Game.Levels;
 using Game.Mowers;
 using UI.Dialogs;
 using Game.UndoSystem;
-using Sirenix.OdinInspector;
 using BalsamicBits.Extensions;
 using Core.EventChannels;
 using UnityEngine;
@@ -21,12 +20,12 @@ namespace Game.Core
 
 		[SerializeField] private LevelManager levelManager;
 		[SerializeField] private LevelTraversalChecker levelTraversalChecker;
-		[SerializeField, AssetsOnly] private LevelDataManager levelDataManager;
+		[SerializeField] private LevelDataManager levelDataManager;
 		[SerializeField] private IUndoSystemContainer undoSystemContainer;
 		[SerializeField] private UndoController undoController;
 		[SerializeField] private GamePlayData gamePlayData;
 
-		[TitleGroup("Event Channels")] 
+		[Header("Event Channels")] 
 		[SerializeField] private OpenDialogEventChannel openDialogEventChannel;
 		[SerializeField] private CloseDialogEventChannel closeDialogEventChannel;
 		[SerializeField] private IVoidEventChannelTransmitterContainer startPlayingEventChannel;

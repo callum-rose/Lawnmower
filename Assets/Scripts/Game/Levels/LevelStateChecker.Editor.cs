@@ -1,23 +1,21 @@
-using Sirenix.OdinInspector;
-
 #if UNITY_EDITOR
+using UnityEngine;
 
 namespace Game.Levels
 {
 	internal partial class LevelStateChecker
 	{
-		[Button(Expanded = true)]
-		private void FakeCompleted(bool isInverted)
-		{
-			LevelCompleted.Invoke(isInverted);
-		}
-		
-		[Button(Expanded = true)]
-		private void FakeRuined(bool isInverted)
-		{
-			LevelFailed.Invoke(isInverted);
-		}
+		[ContextMenu("Debug/Fake Completed")]
+		private void FakeCompleted() => LevelCompleted.Invoke(false);
+
+		[ContextMenu("Debug/Fake Completed (inverted)")]
+		private void FakeCompletedInverted() => LevelCompleted.Invoke(true);
+
+		[ContextMenu("Debug/Fake Ruined")]
+		private void FakeRuined() => LevelFailed.Invoke(false);
+
+		[ContextMenu("Debug/Fake Ruined (inverted)")]
+		private void FakeRuinedInverted() => LevelFailed.Invoke(true);
 	}
 }
-
 #endif

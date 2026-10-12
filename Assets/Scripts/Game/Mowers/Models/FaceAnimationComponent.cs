@@ -1,9 +1,9 @@
+using Core;
 using System.Collections;
 using BalsamicBits.Extensions;
 using Game.Core;
 using Game.Mowers.Input;
 using Game.UndoSystem;
-using Sirenix.OdinInspector;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -13,17 +13,17 @@ namespace Game.Mowers.Models
 	{
 		[SerializeField] private Material material;
 		
-		[TitleGroup("Textures")]
+		[Header("Textures")]
 		[SerializeField] private Texture idleFace;
 		[SerializeField] private Texture mouthOpenFace;
 		[SerializeField] private Texture blinkFace;
 		[SerializeField] private Texture[] lookAroundFaces;
 
-		[TitleGroup("Parameters")]
+		[Header("Parameters")]
 		[SerializeField] private float durationBeforeLookAround = 3f;
 		[SerializeField, Range(0, 1)] private float blinkToLookAroundRatio = 0.33f;
 		[SerializeField] private float blinkDuration = 0.2f;
-		[SerializeField, MinMaxSlider(0, 5)] private Vector2 lookElsewhereAfterDurationRange = new Vector2(1, 3);
+		[SerializeField, MinMaxRange(0, 5)] private Vector2 lookElsewhereAfterDurationRange = new Vector2(1, 3);
 
 		private static readonly int decalTex = Shader.PropertyToID("_DecalTex");
 

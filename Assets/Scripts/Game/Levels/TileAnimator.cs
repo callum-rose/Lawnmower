@@ -2,7 +2,6 @@ using Core;
 using Core.EventChannels;
 using DG.Tweening;
 using Game.Core;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Game.Levels
@@ -13,15 +12,15 @@ namespace Game.Levels
 	{
 		[SerializeField] private Vector3 positionOffset;
 		[SerializeField] private float perTileAnimDuration = 0.5f;
-		[SerializeField, InlineEditor] private GamePlayData gamePlayData;
+		[SerializeField] private GamePlayData gamePlayData;
 
-		[TitleGroup("Event Channels")]
+		[Header("Event Channels")]
 		[SerializeField] private ILevelDataEventChannelListenerContainer levelStartedEventChannelContainer;
 
 		[SerializeField] private TileObjectEventChannel tileObjectCreatedEventChannel;
 		[SerializeField] private IVoidEventChannelTransmitterContainer tileAnimationsFinishedEventChannel;
 
-		[ShowInInspector] private float MaxDelay => gamePlayData.LevelIntroDuration - perTileAnimDuration;
+		private float MaxDelay => gamePlayData.LevelIntroDuration - perTileAnimDuration;
 
 		private ILevelDataEventChannelListener LevelStartedEventChannel => levelStartedEventChannelContainer.Result;
 

@@ -1,6 +1,5 @@
 using System;
 using Core;
-using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -12,7 +11,6 @@ namespace Game.Mowers
 		[FormerlySerializedAs("mowerDataHolder")] [SerializeField]
 		private MowerDataManager mowerDataManager;
 
-		[ShowInInspector, ValidateInput(nameof(SetCurrent))]
 		public Guid CurrentId { get; private set; }
 
 		private void Awake()

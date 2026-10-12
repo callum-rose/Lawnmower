@@ -7,19 +7,18 @@ using System.Linq;
 using BalsamicBits.Extensions;
 using Core.EventChannels;
 using Game.Core;
-using Sirenix.OdinInspector;
 
 namespace Game.Cameras
 {
 	internal class CameraManager : MonoBehaviour
 	{
-		[TitleGroup("Level Camera")]
+		[Header("Level Camera")]
 		[SerializeField] private Unity.Cinemachine.CinemachineTargetGroup levelTargetGroup;
 
 		[SerializeField] private MouseTileSelector mouseTileSelector;
 		[SerializeField] private float tileWeight = 1;
 
-		[TitleGroup("Event Channels")]
+		[Header("Event Channels")]
 		[SerializeField] private IGameObjectEventChannelListenerContainer mowerCreatedEventChannelContainer;
 
 		[SerializeField] private IGameObjectEventChannelListenerContainer mowerWillBeDestroyedEventChannelContainer;

@@ -1,38 +1,41 @@
 #if UNITY_EDITOR
-
 using System.Collections.Generic;
 using System.Linq;
-using Sirenix.OdinInspector;
 using UnityEditor;
 
 namespace Game.Levels
 {
 	internal partial class LevelDataManager
 	{
-		#region Odin
+		/// <summary>Level assets in the project that aren't in <see cref="levelDatas"/>. Shown by LevelDataManagerEditor.</summary>
+		internal IReadOnlyList<LevelData> NotIncludedLevels => _notIncludedLevels ??= new List<LevelData>();
 
-		[Button("Update Not Included Levels", ButtonSizes.Large), PropertyOrder(3), HorizontalGroup("Buttons"), GUIColor("@UnityEngine.Color.green")]
-		private void UpdateNotIncludedLevels()
+		private void OnValidate()
 		{
-			_notIncludedLevels = AssetDatabase.FindAssets("t:LevelData")
-				.Select(id => AssetDatabase.GUIDToAssetPath(id))
-				.Select(path => AssetDatabase.LoadAssetAtPath<LevelData>(path))
-				.Except(levelDatas)
-				.ToList();
-		}
-
-		[Button(ButtonSizes.Large), PropertyOrder(3), HorizontalGroup("Buttons"), GUIColor("@UnityEngine.Color.blue")]
-		private void AddNotIncludedLevels()
-		{
-			List<LevelData> tempLevels = levelDatas.ToList();
-			tempLevels.AddRange(_notIncludedLevels);
-			levelDatas = tempLevels.ToArray();
-
 			UpdateNotIncludedLevels();
 		}
 
-		#endregion
+		internal void UpdateNotIncludedLevels()
+		{
+			_notIncludedLevels = AssetDatabase.FindAssets("t:LevelData")
+				.Select(AssetDatabase.GUIDToAssetPath)
+				.Select(AssetDatabase.LoadAssetAtPath<LevelData>)
+				.Where(l => l != null)
+				.Except(levelDatas ?? new LevelData[0])
+				.ToList();
+		}
+
+		internal void AddNotIncludedLevels()
+		{
+			UpdateNotIncludedLevels();
+
+			List<LevelData> tempLevels = (levelDatas ?? new LevelData[0]).ToList();
+			tempLevels.AddRange(_notIncludedLevels);
+			levelDatas = tempLevels.ToArray();
+			EditorUtility.SetDirty(this);
+
+			UpdateNotIncludedLevels();
+		}
 	}
 }
-
 #endif

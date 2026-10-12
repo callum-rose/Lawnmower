@@ -1,14 +1,13 @@
 using System;
 using System.Collections;
 using Core;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Game.Tiles
 {
 	internal abstract class BaseParticlesManager : ScriptableObjectWithCoroutines
 	{		
-		[SerializeField, AssetsOnly] private ParticleSystem particlesPrefab;
+		[SerializeField] private ParticleSystem particlesPrefab;
 		
 		// ReSharper disable Unity.PerformanceAnalysis
 		protected void Play(Vector3 position, params Action<ParticleSystem>[] middlewares)

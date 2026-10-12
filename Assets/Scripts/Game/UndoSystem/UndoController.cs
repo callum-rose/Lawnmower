@@ -1,4 +1,3 @@
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Game.UndoSystem
@@ -34,13 +33,13 @@ namespace Game.UndoSystem
 
         #region API
 
-        [Button]
+        [ContextMenu("Undo")]
         public void Undo()
         {
             UndoManager.Undo();
         }
 
-        [Button]
+        [ContextMenu("Undo All")]
         public void UndoAll()
         {
             for (int i = 0; i < UndoManager.Count; i++)
@@ -49,7 +48,7 @@ namespace Game.UndoSystem
             }
         }
 
-        [Button]
+        [ContextMenu("Redo")]
         public void Redo()
         {
             UndoManager.Redo();
