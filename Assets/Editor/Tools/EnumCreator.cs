@@ -1,4 +1,3 @@
-#if UNITY_EDITOR
 using Sirenix.OdinInspector;
 using Sirenix.OdinInspector.Editor;
 using System.Text;
@@ -87,4 +86,3 @@ internal abstract class EnumCreator : OdinEditorWindow
         Debug.Log("Generated new enum at " + filePath);
     }
 }
-#endif

@@ -1,5 +1,3 @@
-#if UNITY_EDITOR
-
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -91,6 +89,12 @@ namespace Game.Levels.EditorWindow
 			window.Initialize();
 		}
 
+		[InitializeOnLoadMethod]
+		private static void RegisterLevelDataHook()
+		{
+			LevelData.OpenInLevelEditor = OpenWindow;
+		}
+
 		public static void OpenWindow(LevelData levelData)
 		{
 			LevelEditorWindow window = GetWindow<LevelEditorWindow>();
@@ -123,56 +127,7 @@ namespace Game.Levels.EditorWindow
 			_editableLevel = EditableLevelData.CreateFrom(levelData);
 		}
 
-		internal static Color GetColourForTile(Tile tileData)
-		{
-			Color colour;
-			switch (tileData)
-			{
-				case EmptyTile _:
-					colour = Color.white;
-					break;
-
-				case GrassTile grassTile:
-					switch (grassTile.GrassHeight.Value)
-					{
-						case 3:
-							ColorUtility.TryParseHtmlString("#0D7352", out colour);
-							break;
-						case 2:
-							ColorUtility.TryParseHtmlString("#12A175", out colour);
-							break;
-						case 1:
-							ColorUtility.TryParseHtmlString("#1BF1AC", out colour);
-							break;
-						default:
-							colour = Color.black;
-							break;
-					}
-
-					break;
-
-				case StoneTile _:
-					colour = Color.gray;
-					break;
-
-				case WaterTile _:
-					colour = Color.blue;
-					break;
-
-				case WoodTile _:
-					ColorUtility.TryParseHtmlString("#916B4C", out colour);
-					break;
-
-				case SpringTile _:
-					colour = Color.yellow;
-					break;
-
-				default:
-					throw new ArgumentOutOfRangeException();
-			}
-
-			return colour;
-		}
+		internal static Color GetColourForTile(Tile tileData) => TileEditorColours.Get(tileData);
 
 		[Button, BoxGroup(SplitLeft)]
 		private void ClickSetStartPosition()
@@ -316,4 +271,3 @@ namespace Game.Levels.EditorWindow
 		}
 	}
 }
-#endif

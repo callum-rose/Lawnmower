@@ -1,4 +1,3 @@
-#if UNITY_EDITOR
 using System;
 using Game.Core;
 using Game.Mowers.Input;
@@ -77,4 +76,3 @@ namespace Game.Levels.EditorWindow
 		}
 	}
 }
-#endif

@@ -1,4 +1,3 @@
-#if UNITY_EDITOR
 using System.Collections.Generic;
 using Core.EventChannels;
 using Game.Core;
@@ -130,4 +129,3 @@ namespace Game.Levels.EditorWindow
 		}
 	}
 }
-#endif

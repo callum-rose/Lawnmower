@@ -1,4 +1,3 @@
-#if UNITY_EDITOR
 using Sirenix.OdinInspector;
 using Sirenix.OdinInspector.Editor;
 using System.Text;
@@ -70,4 +69,3 @@ namespace Core
         }
     }
 }
-#endif

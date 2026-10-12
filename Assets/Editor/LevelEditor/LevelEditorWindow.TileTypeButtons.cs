@@ -1,4 +1,3 @@
-#if UNITY_EDITOR
 using Game.Tiles;
 using Sirenix.OdinInspector.Editor;
 using UnityEngine;
@@ -40,4 +39,3 @@ namespace Game.Levels.EditorWindow
 		}
 	}
 }
-#endif

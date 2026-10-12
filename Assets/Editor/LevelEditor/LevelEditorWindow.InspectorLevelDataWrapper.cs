@@ -1,4 +1,3 @@
-#if UNITY_EDITOR
 using System.Linq;
 using Game.Core;
 using Game.Levels.EditorWindow;
@@ -232,4 +231,3 @@ namespace Game.Levels
 		}
 	}
 }
-#endif
