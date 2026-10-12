@@ -1,4 +1,4 @@
-using Cinemachine;
+
 using Game.Levels;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -10,7 +10,7 @@ namespace Game.Cameras
 	internal class OceanTargetCameraManager : MonoBehaviour
 	{
 		[SerializeField] private OceanManager oceanManager;
-		[SerializeField] private CinemachineTargetGroup targetGroup;
+		[SerializeField] private Unity.Cinemachine.CinemachineTargetGroup targetGroup;
 		[SerializeField] private float targetWeight;
 		[SerializeField] private float targetRadius;
 
@@ -22,11 +22,11 @@ namespace Game.Cameras
 		[Button]
 		private void SetOceanTargets()
 		{
-			if (!targetGroup.m_Targets.IsNullOrEmpty())
+			if (!targetGroup.Targets.IsNullOrEmpty())
 			{
-				foreach (CinemachineTargetGroup.Target target in targetGroup.m_Targets.ToArray())
+				foreach (Unity.Cinemachine.CinemachineTargetGroup.Target target in targetGroup.Targets.ToArray())
 				{
-					targetGroup.RemoveMember(target.target);
+					targetGroup.RemoveMember(target.Object);
 				}
 			}
 
