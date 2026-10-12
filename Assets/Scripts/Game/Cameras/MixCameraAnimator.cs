@@ -1,27 +1,27 @@
 using System.Collections;
 using BalsamicBits.Extensions;
-using Cinemachine;
+
 using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Game.Cameras
 {
-	[RequireComponent(typeof(CinemachineMixingCamera))]
+	[RequireComponent(typeof(Unity.Cinemachine.CinemachineMixingCamera))]
 	internal class MixCameraAnimator : MonoBehaviour
 	{
 		[SerializeField] private float duration;
 		[SerializeField] private AnimationCurve mixCurve;
 		[SerializeField] private int initialIndex = 0;
 
-		private CinemachineMixingCamera _mixingCamera;
+		private Unity.Cinemachine.CinemachineMixingCamera _mixingCamera;
 
 		private int _lastIndexSet;
 		
 		private void Awake()
 		{
-			_mixingCamera = GetComponent<CinemachineMixingCamera>();
+			_mixingCamera = GetComponent<Unity.Cinemachine.CinemachineMixingCamera>();
 			
-			for (int i = 0; i < _mixingCamera.ChildCameras.Length; i++)
+			for (int i = 0; i < _mixingCamera.ChildCameras.Count; i++)
 			{
 				float weight = i == initialIndex ? 1 : 0;
 				_mixingCamera.SetWeight(i, weight);
@@ -31,7 +31,7 @@ namespace Game.Cameras
 		[Button("Debug Animate To")]
 		public void AnimateTo(int index)
 		{
-			if (index < 0 || index >= _mixingCamera.ChildCameras.Length)
+			if (index < 0 || index >= _mixingCamera.ChildCameras.Count)
 			{
 				Debug.LogError("Index out of range");
 				return;
@@ -39,7 +39,7 @@ namespace Game.Cameras
 			
 			StopAllCoroutines();
 
-			for (int i = 0; i < _mixingCamera.ChildCameras.Length; i++)
+			for (int i = 0; i < _mixingCamera.ChildCameras.Count; i++)
 			{
 				if (i == index)
 				{
@@ -57,7 +57,7 @@ namespace Game.Cameras
 		[Button("Debug Animate Toggle")]
 		public void AnimateToggle()
 		{
-			AnimateTo((_lastIndexSet + 1) % _mixingCamera.ChildCameras.Length);
+			AnimateTo((_lastIndexSet + 1) % _mixingCamera.ChildCameras.Count);
 		}
 
 		private IEnumerator AnimateWeightAtIndex(int index, float target)

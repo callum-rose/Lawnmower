@@ -1,12 +1,12 @@
 using System;
-using Cinemachine;
+
 using UnityEngine;
 
 namespace Game.Cameras
 {
 	internal class ZoomHandler : MonoBehaviour
 	{
-		[SerializeField] private CinemachineMixingCamera mixingCamera;
+		[SerializeField] private Unity.Cinemachine.CinemachineMixingCamera mixingCamera;
 		[SerializeField, Range(0, 1)] private float speedFactor = 1;
 		[SerializeField] private bool invertDirection;
 

@@ -1,8 +1,5 @@
-using UnityEngine;
-
 namespace Game.Tiles
 {
-    [SerializeField]
     public enum TileType
     {
         Empty,

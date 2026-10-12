@@ -1,13 +1,13 @@
-﻿using Cinemachine;
+﻿
 using UnityEngine;
 
 namespace Game.Levels.Editorr
 {
 	internal class EditorCameraSwitcher : MonoBehaviour
 	{
-		[SerializeField] private new CinemachineVirtualCamera camera;
+		[SerializeField] private new Unity.Cinemachine.CinemachineVirtualCamera camera;
 
-		private CinemachineTransposer _transposer;
+		private Unity.Cinemachine.CinemachineTransposer _transposer;
 		private Vector3 _initialFollowOffset;
 		private bool _isBirdsEye;
 
@@ -29,7 +29,7 @@ namespace Game.Levels.Editorr
 
         private void GetGroupComposer()
         {
-            _transposer = camera.GetCinemachineComponent<CinemachineTransposer>();
+            _transposer = camera.GetCinemachineComponent<Unity.Cinemachine.CinemachineTransposer>();
             _initialFollowOffset = _transposer.m_FollowOffset;
         }
     }

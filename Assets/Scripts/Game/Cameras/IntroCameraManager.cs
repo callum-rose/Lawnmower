@@ -1,4 +1,4 @@
-using Cinemachine;
+using Unity.Cinemachine;
 using Core.EventChannels;
 using Game.Core;
 using Sirenix.OdinInspector;
@@ -9,7 +9,7 @@ namespace Game.Cameras
 	internal class IntroCameraManager : MonoBehaviour
 	{
 		[SerializeField] private GamePlayData gamePlayData;
-		[SerializeField] private CinemachineBlendListCamera blendListCamera;
+		[SerializeField] private CinemachineSequencerCamera blendListCamera;
 
 		[TitleGroup("Event Channels")]
 		[SerializeField] private IVoidEventChannelListenerContainer startPlayingEventChannel;
@@ -21,9 +21,9 @@ namespace Game.Cameras
 
 		private void Awake()
 		{
-			var firstInstruction = blendListCamera.m_Instructions[0];
-			firstInstruction.m_Hold = gamePlayData.LevelIntroDuration;
-			blendListCamera.m_Instructions[0] = firstInstruction;
+			var firstInstruction = blendListCamera.Instructions[0];
+			firstInstruction.Hold = gamePlayData.LevelIntroDuration;
+			blendListCamera.Instructions[0] = firstInstruction;
 		}
 
 		private void OnEnable()
