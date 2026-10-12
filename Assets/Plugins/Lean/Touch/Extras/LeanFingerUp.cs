@@ -1,6 +1,8 @@
 using System;
 using Lean.Common;
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 using UnityEngine;
 using UnityEngine.Events;
 using FSA = UnityEngine.Serialization.FormerlySerializedAsAttribute;

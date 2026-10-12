@@ -5,7 +5,9 @@ using BalsamicBits.Extensions;
 using Lean.Touch;
 using Sirenix.OdinInspector;
 using Sirenix.Serialization;
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 using UnityEngine;
 using UnityEngine.Events;
 
