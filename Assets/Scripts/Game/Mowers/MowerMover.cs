@@ -18,9 +18,5 @@ namespace Game.Mowers
 		{
 			_internalPosition.SetValue(toPosition, isInverted);
 		}
-
-		public void Bump(GridVector toPosition)
-		{
-		}
 	}
 }
