@@ -172,9 +172,9 @@ Material:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _GlowColourA: {r: 0.75, g: 1, b: 0.2, a: 1}
-    - _GlowColourB: {r: 0.2, g: 1, b: 0.55, a: 1}
-    - _GlowColourC: {r: 0.2, g: 0.9, b: 1, a: 1}
+    - _GlowColourA: {r: 0.4, g: 1, b: 0.45, a: 1}
+    - _GlowColourB: {r: 0.25, g: 1, b: 0.6, a: 1}
+    - _GlowColourC: {r: 0.2, g: 1, b: 0.8, a: 1}
     - _Highlight: {r: 0.1, g: 0.1, b: 0.1, a: 0}
     - _Highlight2: {r: 0.1, g: 0.1, b: 0.1, a: 0}
     - _Shadow: {r: 0.1, g: 0.1, b: 0.1, a: 0}
