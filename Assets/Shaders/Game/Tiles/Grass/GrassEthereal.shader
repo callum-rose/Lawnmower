@@ -19,22 +19,22 @@ Shader "Grass Ethereal"
 		_BendOffsetMagnitude("Bend Offset Magnitude", Range(0, 0.001)) = 0
 
 		[Header(Translucency)]
-		_BaseAlpha("Base Alpha", Range(0, 1)) = 0.9
-		_TipAlpha("Tip Alpha", Range(0, 1)) = 0.3
-		_AlphaFadePower("Alpha Fade Power", Range(0.1, 4)) = 1.5
+		_BaseAlpha("Base Alpha", Range(0, 1)) = 1
+		_TipAlpha("Tip Alpha", Range(0, 1)) = 0.35
+		_AlphaFadePower("Alpha Fade Power", Range(0.1, 8)) = 4
 
 		[Header(Tip Glow)]
 		_GlowColourA("Glow Colour A", Color) = (0.78,1,0.55,1)
 		_GlowColourB("Glow Colour B", Color) = (0.5,1,0.88,1)
-		_GlowIntensity("Glow Intensity", Range(0, 2)) = 0.55
-		_GlowPower("Glow Power", Range(0.5, 8)) = 3
+		_GlowIntensity("Glow Intensity", Range(0, 2)) = 0.5
+		_GlowPower("Glow Power", Range(0.5, 8)) = 4
 		_GlowVariationScale("Glow Variation Scale", Float) = 4
 
 		[Header(Shimmer)]
 		_ShimmerAmount("Shimmer Amount", Range(0, 1)) = 0.35
 		_ShimmerSpeed("Shimmer Speed", Float) = 1.5
 
-		[Enum(Off,0,On,1)] _ZWrite("ZWrite", Float) = 0
+		[Enum(Off,0,On,1)] _ZWrite("ZWrite", Float) = 1
 	}
 
 	SubShader
@@ -188,15 +188,15 @@ Shader "Grass Ethereal"
 				colour *= ao;
 				#endif
 
-				// MainTex is split into 4 columns, so uv0.x picks a per-blade colour variant
-				float variant = floor(saturate(uv0.x) * 3.999);
-				float variantSeed = frac(sin(variant * 12.9898 + 4.1414) * 43758.5453);
+				// uv1 is constant across each blade, so it doubles as a per-blade seed
+				float bladeSeed = frac(sin(dot(uv1, float2(12.9898, 78.233))) * 43758.5453);
 				float patch = tex2D(BakedNoiseTex, uv1 * _GlowVariationScale * 0.15).r;
 
-				float3 glowColour = lerp(_GlowColourA.rgb, _GlowColourB.rgb, frac(variantSeed + patch));
-				float shimmerPhase = (variantSeed + patch) * 6.2832;
+				float3 glowColour = lerp(_GlowColourA.rgb, _GlowColourB.rgb, saturate(bladeSeed * 0.7 + patch * 0.6 - 0.15));
+				float shimmerPhase = bladeSeed * 6.2832;
 				float shimmer = 1 - _ShimmerAmount * (0.5 + 0.5 * sin(_TimeParameters.x * _ShimmerSpeed + shimmerPhase));
-				float3 glow = glowColour * pow(height, _GlowPower) * _GlowIntensity * shimmer;
+				float bladeBrightness = lerp(0.4, 1.4, frac(bladeSeed * 7.31));
+				float3 glow = glowColour * pow(height, _GlowPower) * _GlowIntensity * bladeBrightness * shimmer;
 
 				float alpha = lerp(_BaseAlpha, _TipAlpha, pow(height, _AlphaFadePower));
 
