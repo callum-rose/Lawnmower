@@ -17,10 +17,10 @@ import bpy
 from mathutils import Vector
 
 TILES = [
-	# name, height, xy offset (matches the original grass_n meshes), seed
-	("grass_thin_1", 0.40, 0.0, 1),
-	("grass_thin_2", 0.50, -0.1, 2),
-	("grass_thin_3", 0.60, 0.0, 3),
+	# name, height, xy offset (matches the original grass_n meshes), seed, blade width scale (shorter grass is thinner)
+	("grass_thin_1", 0.40, 0.0, 1, 0.5),
+	("grass_thin_2", 0.50, -0.1, 2, 0.75),
+	("grass_thin_3", 0.60, 0.0, 3, 1.0),
 ]
 
 REFERENCE_BLADES_PER_SIDE = 14
@@ -195,8 +195,8 @@ def main():
 
 	bpy.ops.wm.read_factory_settings(use_empty=True)
 
-	for name, height, offset, seed in TILES:
-		obj = build_tile(name, height, offset, seed, blades_per_side, width_scale)
+	for name, height, offset, seed, tile_width_scale in TILES:
+		obj = build_tile(name, height, offset, seed, blades_per_side, width_scale * tile_width_scale)
 		bpy.ops.object.select_all(action="DESELECT")
 		obj.select_set(True)
 		bpy.context.view_layer.objects.active = obj

@@ -25,6 +25,11 @@ Shader "Grass Ethereal"
 		_TipAlpha("Tip Alpha", Range(0, 1)) = 0.35
 		_AlphaFadePower("Alpha Fade Power", Range(0.1, 8)) = 4
 
+		[Header(Gradient Colours)]
+		_GradientAmount("Use Gradient Colours", Range(0, 1)) = 0
+		_BaseColour("Base Colour", Color) = (0.05,0.2,0.12,1)
+		_TipColour("Tip Colour", Color) = (0.25,0.62,0.35,1)
+
 		[Header(Variation)]
 		_BodyColumn("Body Colour Column", Range(0, 1)) = 0.375
 		_BodyVariation("Body Colour Variation", Range(0, 1)) = 0.25
@@ -114,6 +119,9 @@ Shader "Grass Ethereal"
 		float _GlowBrightnessVariation;
 		float _SparkleBoost;
 		float _GlowFromBody;
+		float _GradientAmount;
+		float4 _BaseColour;
+		float4 _TipColour;
 		float _FlowerChance;
 		float4 _FlowerColour;
 		float _FlowerIntensity;
@@ -276,7 +284,13 @@ Shader "Grass Ethereal"
 			// Pull each blade's colour column towards one shared column so a tile reads as a single lawn type
 			float bodyU = isFlowerPart ? _BodyColumn : lerp(_BodyColumn, uv0.x, _BodyVariation);
 			float2 bodyUV = float2(bodyU, uv0.y);
-			float3 colour = tex2D(_MainTex2, bodyUV * _MainTex2_ST.xy + _MainTex2_ST.zw).rgb * _Tint2.rgb * diffuse
+
+			// Body colour from the gradient texture, or from Base/Tip colours when Use Gradient Colours is up;
+			// the gradient path keeps a little per-blade brightness variation in place of the texture columns
+			float gradientJitter = 1 + (frac(sin(dot(uv1, float2(12.9898, 78.233))) * 43758.5453) - 0.5) * 0.3 * _BodyVariation;
+			float3 textureColour = tex2D(_MainTex2, bodyUV * _MainTex2_ST.xy + _MainTex2_ST.zw).rgb;
+			float3 gradientColour = lerp(_BaseColour.rgb, _TipColour.rgb, uv0.y) * gradientJitter;
+			float3 colour = lerp(textureColour, gradientColour, _GradientAmount) * _Tint2.rgb * diffuse
 				+ highlight * _Highlight2 - shadow * _Shadow2;
 
 			#ifdef _USEAO2_ON
@@ -295,7 +309,8 @@ Shader "Grass Ethereal"
 				: lerp(_GlowColourC.rgb, _GlowColourA.rgb, hue - 2);
 			float3 paletteGlow = lerp(_GlowColourB.rgb, glowPalette, _GlowHueVariation);
 			// The body's own colour at the tip, so the glow is just a brighter shade of the lawn
-			float3 bodyTipColour = tex2D(_MainTex2, float2(bodyU, 1) * _MainTex2_ST.xy + _MainTex2_ST.zw).rgb * _Tint2.rgb;
+			float3 textureTipColour = tex2D(_MainTex2, float2(bodyU, 1) * _MainTex2_ST.xy + _MainTex2_ST.zw).rgb;
+			float3 bodyTipColour = lerp(textureTipColour, _TipColour.rgb * gradientJitter, _GradientAmount) * _Tint2.rgb;
 			float3 glowColour = lerp(paletteGlow, bodyTipColour, _GlowFromBody);
 			float shimmerPhase = bladeSeed * 6.2832;
 			float shimmer = 1 - _ShimmerAmount * (0.5 + 0.5 * sin(_TimeParameters.x * _ShimmerSpeed + shimmerPhase));
