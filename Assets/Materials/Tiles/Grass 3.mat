@@ -2,20 +2,24 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!21 &2100000
 Material:
-  serializedVersion: 6
+  serializedVersion: 8
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Grass 3
-  m_Shader: {fileID: 4800000, guid: d0bd8c7e401cad5428973d3370c96fc1, type: 3}
-  m_ShaderKeywords: 
+  m_Shader: {fileID: 4800000, guid: b9af56ca7bac456aa4d9ebe2aef58034, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses: []
+  m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
@@ -87,21 +91,26 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    m_Ints: []
     m_Floats:
     - _AOStrength: 0
     - _AOStrength2: 0
     - _AlphaClip: 0
     - _AlphaCutoff: 0.5
+    - _AlphaFadePower: 4
+    - _BaseAlpha: 1
     - _BendMagnitude: 0
     - _BendNoiseScale: 1
     - _BendOffsetMagnitude: 0.00103
     - _Blend: 0
+    - _BodyColumn: 0.375
+    - _BodyVariation: 0.25
     - _BoundarySmoothness: 0.923
     - _BoundarySmoothness2: 1
     - _BumpScale: 1
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
-    - _Cull: 2
+    - _Cull: 0
     - _Cutoff: 0.5
     - _DetailAlbedoMapScale: 1
     - _DetailNormalMapScale: 1
@@ -111,9 +120,21 @@ Material:
     - _EnvironmentReflections: 1
     - _Float0: 0.001
     - _Float1: 1
+    - _FlowerChance: 0
+    - _FlowerHaloIntensity: 0.9
+    - _FlowerHaloSize: 0.3
+    - _FlowerIntensity: 1.6
+    - _FlowerPulseSpeed: 1.2
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
+    - _GlowBrightnessVariation: 0.35
+    - _GlowFromBody: 1
+    - _GlowHueVariation: 0.3
+    - _GlowIntensity: 1.4
+    - _GlowPower: 4.5
+    - _GlowVariationScale: 4
+    - _GradientAmount: 1
     - _HighlightCutoff: 1
     - _HighlightCutoff2: 1
     - _MaxWindFactor: 0.001
@@ -124,11 +145,16 @@ Material:
     - _ReceiveShadows: 1
     - _ShadowCutoff: 0
     - _ShadowCutoff2: 0
+    - _ShimmerAmount: 0.35
+    - _ShimmerSpeed: 1.5
     - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0
+    - _SparkleBoost: 0.7
+    - _SparkleChance: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _Surface: 0
+    - _TipAlpha: 0.35
     - _UseAO: 0
     - _UseAO2: 0
     - _VertexOffsetMaxOffset: 0.0008
@@ -139,19 +165,26 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
+    - _BaseColour: {r: 0.32, g: 0.32, b: 0.13, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _FlowerColour: {r: 1, g: 0.95, b: 0.6, a: 1}
+    - _GlowColourA: {r: 0.15, g: 1, b: 0.85, a: 1}
+    - _GlowColourB: {r: 0.15, g: 0.85, b: 1, a: 1}
+    - _GlowColourC: {r: 0.3, g: 0.7, b: 1, a: 1}
     - _Highlight: {r: 0.1, g: 0.1, b: 0.1, a: 0}
     - _Highlight2: {r: 0.1, g: 0.1, b: 0.1, a: 0}
     - _Shadow: {r: 0.1, g: 0.1, b: 0.1, a: 0}
     - _Shadow2: {r: 0.1, g: 0.1, b: 0.1, a: 0}
     - _SpecColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}
     - _Tint: {r: 1, g: 1, b: 1, a: 0}
-    - _Tint2: {r: 1, g: 1, b: 1, a: 0}
+    - _Tint2: {r: 0.72, g: 0.8, b: 0.85, a: 0}
+    - _TipColour: {r: 0.8, g: 0.82, b: 0.45, a: 1}
     - _VertexOffsetNoiseFactorYRange: {r: 0, g: 1, b: 0, a: 0}
     - _VertexOffsetNoiseVelocity: {r: 0.5, g: 0, b: 0, a: 0}
     - _WindNoiseVelocity: {r: 1, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!114 &6029103980167505221
 MonoBehaviour:
   m_ObjectHideFlags: 11
