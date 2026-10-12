@@ -94,9 +94,11 @@ namespace BunnyHeaven.UI.Editor
 
         private static void CreateFont(string name, int samplingSize)
         {
+            // Existing font assets are kept so their GUIDs (and every reference to them) stay stable.
+            // Delete one by hand to regenerate it.
             var assetPath = $"{FontsDir}/{name} SDF.asset";
             if (AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(assetPath) != null)
-                AssetDatabase.DeleteAsset(assetPath);
+                return;
 
             var source = AssetDatabase.LoadAssetAtPath<Font>($"{FontsDir}/{name}.ttf");
             var asset = TMP_FontAsset.CreateFontAsset(source, samplingSize, 9, GlyphRenderMode.SDFAA, 1024, 1024,
@@ -119,15 +121,22 @@ namespace BunnyHeaven.UI.Editor
         private static void CreateHeadingShadowMaterial()
         {
             var font = Font("LondrinaSolid-Black");
-            var material = new Material(font.material) { name = "LondrinaSolid-Black SDF - Ink Shadow" };
+            var material = AssetDatabase.LoadAssetAtPath<Material>(HeadingShadowMaterialPath);
+            if (material == null)
+            {
+                material = new Material(font.material) { name = "LondrinaSolid-Black SDF - Ink Shadow" };
+                AssetDatabase.CreateAsset(material, HeadingShadowMaterialPath);
+            }
+
             material.EnableKeyword("UNDERLAY_ON");
             material.SetColor("_UnderlayColor", UiTheme.Hex(0x3B2A20));
             material.SetFloat("_UnderlayOffsetX", 0f);
             material.SetFloat("_UnderlayOffsetY", -0.75f);
             material.SetFloat("_UnderlayDilate", 0.6f);
             material.SetFloat("_UnderlaySoftness", 0f);
-            AssetDatabase.DeleteAsset(HeadingShadowMaterialPath);
-            AssetDatabase.CreateAsset(material, HeadingShadowMaterialPath);
+            ShaderUtilities.UpdateShaderRatios(material);
+            EditorUtility.SetDirty(material);
+            AssetDatabase.SaveAssetIfDirty(material);
         }
 
         [MenuItem("Bunny Heaven/UI Kit/Create Theme")]
