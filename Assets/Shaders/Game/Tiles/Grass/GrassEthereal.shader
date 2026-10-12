@@ -43,7 +43,7 @@ Shader "Grass Ethereal"
 		_SparkleBoost("Sparkle Boost", Range(0, 4)) = 0.7
 
 		[Header(Flowers)]
-		_FlowerChance("Flower Chance", Range(0, 1)) = 0.3
+		_FlowerChance("Flower Chance", Range(0, 1)) = 0.15
 		_FlowerColour("Flower Colour", Color) = (1,0.95,0.6,1)
 		_FlowerIntensity("Flower Intensity", Range(0, 4)) = 1.6
 		_FlowerPulseSpeed("Flower Pulse Speed", Float) = 1.2
@@ -186,41 +186,44 @@ Shader "Grass Ethereal"
 			if ((input.uv0.x > 19.5) != haloPass)
 			{
 				output.positionCS = float4(0, 0, 0, 1);
-				return output;
 			}
-
-			// Every tile shares one mesh, so each candidate flower is shown or hidden per tile from the tile's position
-			bool flowerHidden = false;
-			if (input.uv0.x > 1.5)
+			else
 			{
-				float3 tileOrigin = TransformObjectToWorld(float3(0, 0, 0));
-				float flowerRoll = Hash(tileOrigin.xz + GetFlowerIndex(input.uv0.x) * 17.13);
-				flowerHidden = flowerRoll >= _FlowerChance;
-				if (flowerHidden)
+				// Every tile shares one mesh, so each candidate flower is shown or hidden per tile from the tile's position
+				bool flowerHidden = false;
+				if (input.uv0.x > 1.5)
 				{
-					input.positionOS.xyz = 0;
+					// Key on the tile's grid cell (the grass meshes' origins differ slightly per height) so the roll is the
+					// same at every height; with Flower Chance rising as grass gets shorter, mowing only ever adds flowers
+					float3 tileOrigin = TransformObjectToWorld(float3(0, 0, 0));
+					float2 tileCell = round(tileOrigin.xz + 0.5);
+					float flowerRoll = Hash(tileCell + GetFlowerIndex(input.uv0.x) * 17.13);
+					flowerHidden = flowerRoll >= _FlowerChance;
+					if (flowerHidden)
+					{
+						input.positionOS.xyz = 0;
+					}
+				}
+
+				float3 positionWS = TransformObjectToWorld(input.positionOS.xyz);
+				input.positionOS.xyz += GetVertexOffset(positionWS, input.uv0, input.uv1);
+
+				output.positionWS = TransformObjectToWorld(input.positionOS.xyz);
+				output.uv = float4(input.uv0, input.uv1);
+				output.positionCS = TransformObjectToHClip(input.positionOS.xyz);
+				output.normalWS = TransformObjectToWorldNormal(input.normalOS);
+
+				if (haloPass && !flowerHidden)
+				{
+					// Halo: expand the quad around the bulb centre so it always faces the camera
+					float2 corner = float2(sign(input.normalOS.x), sign(input.normalOS.y + input.normalOS.z));
+					float3 positionVS = TransformWorldToView(output.positionWS);
+					positionVS.xy += corner * _FlowerHaloSize;
+					output.positionCS = TransformWViewToHClip(positionVS);
+					output.normalWS = float3(corner, 0);
 				}
 			}
 
-			float3 positionWS = TransformObjectToWorld(input.positionOS.xyz);
-			input.positionOS.xyz += GetVertexOffset(positionWS, input.uv0, input.uv1);
-
-			output.positionWS = TransformObjectToWorld(input.positionOS.xyz);
-			output.uv = float4(input.uv0, input.uv1);
-
-			if (input.uv0.x > 19.5 && !flowerHidden)
-			{
-				// Halo: expand the quad around the bulb centre so it always faces the camera
-				float2 corner = float2(sign(input.normalOS.x), sign(input.normalOS.y + input.normalOS.z));
-				float3 positionVS = TransformWorldToView(output.positionWS);
-				positionVS.xy += corner * _FlowerHaloSize;
-				output.positionCS = TransformWViewToHClip(positionVS);
-				output.normalWS = float3(corner, 0);
-				return output;
-			}
-
-			output.positionCS = TransformObjectToHClip(input.positionOS.xyz);
-			output.normalWS = TransformObjectToWorldNormal(input.normalOS);
 			return output;
 		}
 

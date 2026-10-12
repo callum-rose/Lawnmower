@@ -37,7 +37,9 @@ NORMAL_UP_BIAS = 2.5
 
 FLOWER_CANDIDATES = 4
 FLOWER_AREA = (0.15, 0.85)
-FLOWER_HEIGHT_RANGE = (1.1, 1.3)
+# Same seed and absolute heights for every grass height, so a flower stays put when its tile is mowed
+FLOWER_SEED = 100
+FLOWER_HEIGHT_RANGE = (0.55, 0.68)
 FLOWER_STEM_WIDTH = 0.018
 FLOWER_STEM_SEGMENTS = 3
 FLOWER_LEAN_RANGE = (0.02, 0.08)
@@ -97,7 +99,7 @@ def build_tile(name, tile_height, offset, seed, blades_per_side, width_scale):
 			left = start + SEGMENTS * 2
 			faces.append((left, left + 1, *range(left + 2, left + 2 + CAP_POINTS)))
 
-	add_flowers(random.Random(seed + 100), tile_height, offset, verts, faces, uv0s, uv1s, normals)
+	add_flowers(random.Random(FLOWER_SEED), offset, verts, faces, uv0s, uv1s, normals)
 
 	mesh = bpy.data.meshes.new(name)
 	mesh.from_pydata([tuple(v) for v in verts], [], faces)
@@ -116,12 +118,12 @@ def build_tile(name, tile_height, offset, seed, blades_per_side, width_scale):
 	return obj
 
 
-def add_flowers(rng, tile_height, offset, verts, faces, uv0s, uv1s, normals):
+def add_flowers(rng, offset, verts, faces, uv0s, uv1s, normals):
 	for index in range(FLOWER_CANDIDATES):
 		bx = rng.uniform(*FLOWER_AREA)
 		by = rng.uniform(*FLOWER_AREA)
 		base = Vector((bx + offset, by + offset, 0))
-		height = tile_height * rng.uniform(*FLOWER_HEIGHT_RANGE)
+		height = rng.uniform(*FLOWER_HEIGHT_RANGE)
 		yaw = rng.uniform(0, math.tau)
 		side = Vector((math.cos(yaw), math.sin(yaw), 0))
 		lean_yaw = rng.uniform(0, math.tau)

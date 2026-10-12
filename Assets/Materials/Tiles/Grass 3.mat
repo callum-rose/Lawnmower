@@ -120,7 +120,7 @@ Material:
     - _EnvironmentReflections: 1
     - _Float0: 0.001
     - _Float1: 1
-    - _FlowerChance: 0.35
+    - _FlowerChance: 0
     - _FlowerHaloIntensity: 0.9
     - _FlowerHaloSize: 0.3
     - _FlowerIntensity: 1.6
