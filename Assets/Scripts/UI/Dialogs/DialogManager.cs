@@ -1,5 +1,4 @@
 using Core;
-using Sirenix.OdinInspector;
 using System.Collections.Generic;
 using Core.EventChannels;
 using UnityEngine;
@@ -11,9 +10,9 @@ namespace UI.Dialogs
 	[CreateAssetMenu(fileName = nameof(DialogManager), menuName = SoNames.GameDir + nameof(DialogManager))]
 	internal class DialogManager : ScriptableObject
 	{
-		[SerializeField, AssetsOnly] private Dialog dialogPrefab;
-		[SerializeField, AssetsOnly] private OpenDialogEventChannel openDialogEventChannel;
-		[SerializeField, AssetsOnly] private CloseDialogEventChannel closeDialogEventChannel;
+		[SerializeField] private Dialog dialogPrefab;
+		[SerializeField] private OpenDialogEventChannel openDialogEventChannel;
+		[SerializeField] private CloseDialogEventChannel closeDialogEventChannel;
 
 		private int _currentDialogId = 0;
 		private readonly Dictionary<int, Dialog> _idToDialogDict = new Dictionary<int, Dialog>();

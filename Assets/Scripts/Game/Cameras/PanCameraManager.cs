@@ -4,7 +4,6 @@ using Core.EventChannels;
 using Game.Core;
 using Game.Levels;
 using Game.Mowers.Input;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Game.Cameras
@@ -19,7 +18,7 @@ namespace Game.Cameras
 		[SerializeField, Min(0)] private float snapToMowerThresholdTileWidths = 1;
 		[SerializeField, Min(0)] private float snapAnimDuration = 0.5f;
 
-		[TitleGroup("Event Channels")]
+		[Header("Event Channels")]
 		[SerializeField] private IMowerInputEventChannelListenerContainer mowerInputEventChannel;
 
 		[SerializeField] private IBoolEventChannelListenerContainer canPanCameraEventChannel;

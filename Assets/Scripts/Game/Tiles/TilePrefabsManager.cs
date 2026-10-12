@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Core;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Game.Tiles
@@ -16,7 +15,7 @@ namespace Game.Tiles
 		{
 		}
 
-		[SerializeField, ValidateInput(nameof(ValidatePrefabsDict))]
+		[SerializeField]
 		private StringGameObjectDictionary tilePrefabs;
 
 		private readonly IReadOnlyDictionary<Type, Type> _tileToObjectTypeDict = new Dictionary<Type, Type>()
@@ -37,6 +36,7 @@ namespace Game.Tiles
 			UpdateDict();
 #endif
 		}
+
 
 		#endregion
 
@@ -59,7 +59,7 @@ namespace Game.Tiles
 
 		#region Methods
 
-		[Button("Update Dictionary Keys")]
+		[ContextMenu("Update Dictionary Keys")]
 		private void UpdateDict()
 		{
 			//tilePrefabs ??= new StringGameObjectDictionary();

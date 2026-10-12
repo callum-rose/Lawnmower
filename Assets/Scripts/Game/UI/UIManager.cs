@@ -1,7 +1,6 @@
 ﻿using Core;
 using System.Collections;
 using Core.EventChannels;
-using Sirenix.OdinInspector;
 using UI.Buttons;
 using UI.Dialogs;
 using UnityEngine;
@@ -13,7 +12,7 @@ namespace Game.UI
 		[SerializeField] private ButtonResizer quitButtonResizer, undoButtonResizer;
         [SerializeField] private float buttonShrinkPause = 3;
 
-        [TitleGroup("Event Channels")]
+        [Header("Event Channels")]
         [SerializeField] private OpenDialogEventChannel openDialogEventChannel;
         
         #region Unity

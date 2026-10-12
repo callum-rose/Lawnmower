@@ -1,52 +1,55 @@
-﻿using BalsamicBits.Extensions;
-using Core;
-using Sirenix.OdinInspector;
 using System.Collections.Generic;
-using System.Linq;
+using BalsamicBits.Extensions;
+using Core;
 using UnityEngine;
 
 namespace UI.Buttons
 {
-    [CreateAssetMenu(fileName = nameof(IconDataHolder), menuName = SoNames.UIDir + nameof(IconDataHolder))]
-	internal class IconDataHolder : SerializedScriptableObject
+	[System.Serializable]
+	internal struct IconSprite
 	{
-		[SerializeField] private Dictionary<IconType, Sprite> iconToSpriteDict;
+		public IconType icon;
+		public Sprite sprite;
+	}
 
-        #region Unity
+	[CreateAssetMenu(fileName = nameof(IconDataHolder), menuName = SoNames.UIDir + nameof(IconDataHolder))]
+	internal class IconDataHolder : ScriptableObject
+	{
+		[SerializeField] private List<IconSprite> icons = new List<IconSprite>();
 
-        private void Awake()
-        {
-            if (iconToSpriteDict == null || iconToSpriteDict.Count == 0)
-            {
-                iconToSpriteDict = EnumExtensions.GetValues<IconType>().ToDictionary(i => i, i => (Sprite)null);
-            }
+		#region Unity
 
-            foreach (IconType i in EnumExtensions.GetValues<IconType>())
-            {
-                if (!iconToSpriteDict.ContainsKey(i))
-                {
-                    iconToSpriteDict.Add(i, null);
-                }
-            }
-        }
+#if UNITY_EDITOR
+		private void OnValidate()
+		{
+			// Back-fill an entry for every icon type so new enum values show up in the inspector.
+			foreach (IconType i in EnumExtensions.GetValues<IconType>())
+			{
+				if (!icons.Exists(e => e.icon == i))
+				{
+					icons.Add(new IconSprite { icon = i });
+				}
+			}
+		}
+#endif
 
-        #endregion
+		#endregion
 
-        #region API
+		#region API
 
-        public Sprite GetIcon(IconType icon)
-        {
-            return iconToSpriteDict[icon];
-        }
+		public Sprite GetIcon(IconType icon)
+		{
+			foreach (IconSprite entry in icons)
+			{
+				if (entry.icon == icon)
+				{
+					return entry.sprite;
+				}
+			}
 
-        #endregion
+			return null;
+		}
 
-        #region Events
-
-        #endregion
-
-        #region Methods
-
-        #endregion
-    }
+		#endregion
+	}
 }

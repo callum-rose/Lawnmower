@@ -1,5 +1,4 @@
 using Newtonsoft.Json;
-using Sirenix.OdinInspector;
 using System;
 using UnityEngine;
 
@@ -12,10 +11,10 @@ namespace Core
             TypeNameHandling = TypeNameHandling.All
         };
 
-        [ShowInInspector] private readonly string _key;
-        [ShowInInspector] private readonly T _defaultValue;
+        private readonly string _key;
+        private readonly T _defaultValue;
 
-        [ShowInInspector] private string Value => Load().ToString();
+        private string Value => Load().ToString();
 
         public PlayerPrefsItem(string key, T defaultValue)
         {

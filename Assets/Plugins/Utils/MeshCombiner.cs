@@ -1,5 +1,4 @@
-﻿using Sirenix.OdinInspector;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -11,15 +10,15 @@ namespace Utils
     class MeshCombiner : MonoBehaviour
     {
         [SerializeField] private GameObject[] gameObjects;
-        [SerializeField, InlineProperty] private List<MeshModifier> modifiers;
+        [SerializeField] private List<MeshModifier> modifiers;
 
-        [Button]
+        [ContextMenu("Get All Children")]
         public void GetAllChildren()
         {
             gameObjects = (transform as IEnumerable).Cast<Transform>().Select(t => t.gameObject).ToArray();
         }
 
-        [Button]
+        [ContextMenu("Combine")]
         public void Combine()
         {
             List<MeshFilter> meshFilters = new List<MeshFilter>();
@@ -64,7 +63,7 @@ namespace Utils
         }
 
 
-        [Button]
+        [ContextMenu("Combine All")]
         private void CombineAll()
         {
             var combiners = FindObjectsOfType<MeshCombiner>();
@@ -74,7 +73,7 @@ namespace Utils
             }
         }
 
-        [Button]
+        [ContextMenu("Share Mesh")]
         private void ShareMesh()
         {
             var combiners = FindObjectsOfType<MeshCombiner>();

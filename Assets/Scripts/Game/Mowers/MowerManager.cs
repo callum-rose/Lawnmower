@@ -3,7 +3,6 @@ using Game.UndoSystem;
 using System.Linq;
 using Core.EventChannels;
 using Game.Levels;
-using Sirenix.OdinInspector;
 using UnityEngine;
 using static Game.Levels.LevelDimensions;
 
@@ -11,12 +10,12 @@ namespace Game.Mowers
 {
 	internal class MowerManager : MonoBehaviour
 	{
-		[TitleGroup("Scene")]
+		[Header("Scene")]
 		[SerializeField] private MowerObjectCreator mowerObjectCreator;
 		[SerializeField] private INeedMowerPositionContainer[] mowerPositionRequirers;
 		[SerializeField] private HeadlessMowerManager headlessMowerManager;
 
-		[TitleGroup("Event Channels")]
+		[Header("Event Channels")]
 		[SerializeField] private IGameObjectEventChannelTransmitterContainer mowerCreatedEventChannelContainer;
 		[SerializeField] private IGameObjectEventChannelTransmitterContainer mowerWillBeDestroyedEventChannelContainer;
 

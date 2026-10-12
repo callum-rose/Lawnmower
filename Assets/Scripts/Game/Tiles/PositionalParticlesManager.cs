@@ -1,6 +1,5 @@
 using Core;
 using Core.EventChannels;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Game.Tiles
@@ -9,7 +8,7 @@ namespace Game.Tiles
 	[CreateAssetMenu(fileName = nameof(PositionalParticlesManager), menuName = SoNames.GameDir + nameof(PositionalParticlesManager))]
 	internal sealed class PositionalParticlesManager : BaseParticlesManager
 	{
-		[SerializeField, AssetsOnly] private Vector3EventChannel particlesEventChannel;
+		[SerializeField] private Vector3EventChannel particlesEventChannel;
 
 		private void OnEnable()
 		{

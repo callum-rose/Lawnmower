@@ -1,5 +1,4 @@
 using Core.EventChannels;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Game.Cameras
@@ -10,7 +9,7 @@ namespace Game.Cameras
 		[SerializeField] private int levelCamIndex;
 		[SerializeField] private int gameCamIndex;
 
-		[TitleGroup("Event Channels")]
+		[Header("Event Channels")]
 		[SerializeField] private IBoolEventChannelTransmitterContainer canPanCameraEventChannel;
 
 		private bool _currentLookAt;

@@ -2,17 +2,16 @@ using System;
 using System.Linq;
 using Game.Core;
 using Game.UndoSystem;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Game.Levels
 {
 	internal class LevelManager : MonoBehaviour, ILevelManager
 	{
-		[TitleGroup("Scene")] [SerializeField, Required]
+		[Header("Scene")] [SerializeField]
 		private LevelObjectFactory levelFactory;
 
-		[TitleGroup("Assets"), SerializeField] 
+		[Header("Assets"), SerializeField] 
 		private HeadlessLevelManager headlessLevelManager;
 
 		public bool IsEditMode

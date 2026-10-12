@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Core;
 using Game.Core;
 using Game.Mowers.Input;
-using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -11,18 +10,18 @@ namespace Game.Tutorial
 {
 	internal partial class TutorialManager : MonoBehaviour
 	{
-		[TitleGroup("Tap Arrows")]
+		[Header("Tap Arrows")]
 		[SerializeField] private UnityEvent tapArrowsStartEvent;
 		[SerializeField] private UnityEvent tapArrowsEndEvent;
 		
-		[TitleGroup("Swipe")]
+		[Header("Swipe")]
 		[SerializeField] private UnityEvent swipeSequenceStartEvent;
 		[SerializeField] private UnityEvent swipeSequenceEndEvent;	
 		
-		[TitleGroup("Mow Lawn Message")]
+		[Header("Mow Lawn Message")]
 		[SerializeField] private UnityEvent mowLawnSequenceStartEvent;
 		
-		[TitleGroup("Event Channels")]
+		[Header("Event Channels")]
 		[SerializeField] private MowerInputEventChannel mowerInputEventChannel;
 
 		private StageHandler _currentStageHandler;
@@ -41,7 +40,7 @@ namespace Game.Tutorial
 			}
 		}
 
-		[Button]
+		[ContextMenu("Begin")]
 		private void Begin()
 		{
 			Debug.Log("Tutorial started");

@@ -1,5 +1,4 @@
 using Game.Core;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Game.Levels
@@ -9,7 +8,6 @@ namespace Game.Levels
         [SerializeField] private BoxCollider boxCollider;
         [SerializeField] private Positioner positioner;
 
-        [Button(Expanded = true), BoxGroup("Debug")]
         public void SetSize(int levelWidth, int levelDepth)
         {
             GridVector bottomLeft = new GridVector(0, 0);

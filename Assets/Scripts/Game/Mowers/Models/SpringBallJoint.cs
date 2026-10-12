@@ -1,4 +1,3 @@
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Game.Mowers.Models
@@ -39,7 +38,7 @@ namespace Game.Mowers.Models
 			_lastSourcePosition = sourceTransform.position;
 		}
 
-		[Button]
+		[ContextMenu("Apply Target Angle")]
 		private void ApplyTargetAngle()
 		{
 			targetRotation = transform.localRotation;

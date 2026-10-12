@@ -1,4 +1,3 @@
-using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -6,15 +5,15 @@ namespace MainMenu
 {
 	public class RenderTextureCreator : MonoBehaviour
 	{
-		[TitleGroup("Targets")] [SerializeField]
+		[Header("Targets")] [SerializeField]
 		private Camera targetCamera;
 
 		[SerializeField] private RawImage targetImage;
 
-		[TitleGroup("Parameters")] [SerializeField]
+		[Header("Parameters")] [SerializeField]
 		private bool useScreenSize = true;
 
-		[SerializeField, HideIf(nameof(useScreenSize))]
+		[SerializeField]
 		private Vector2Int resolution;
 
 		private RenderTexture _renderTexture;

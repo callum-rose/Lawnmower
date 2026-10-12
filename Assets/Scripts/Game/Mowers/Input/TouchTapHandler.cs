@@ -2,7 +2,6 @@ using BalsamicBits.Extensions;
 using Game.Core;
 using Game.Levels;
 using Lean.Touch;
-using Sirenix.OdinInspector;
 using System;
 using UnityEngine;
 
@@ -14,11 +13,10 @@ namespace Game.Mowers.Input
         [SerializeField] private Positioner positioner;
         [SerializeField, Range(0, 45)] private float toleranceAngle = 45;
         [SerializeField] private bool unlimitedDistance;
-        [SerializeField, Min(0), HideIf(nameof(unlimitedDistance))] private float maxDistanceFromMower;
+        [SerializeField, Min(0)] private float maxDistanceFromMower;
 
 #if UNITY_EDITOR
-        [ShowInInspector, DisableIf(nameof(DisableFakeMowerPos))] private GridVector fakeMowerPos;
-        private bool DisableFakeMowerPos => _mowerPosition != null;
+        private GridVector fakeMowerPos;
 #endif
 
         public event Action<GridVector> Move;

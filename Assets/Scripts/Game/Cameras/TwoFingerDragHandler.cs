@@ -2,7 +2,6 @@ using BalsamicBits.Extensions;
 using Core.EventChannels;
 using Game.Core;
 using Game.Levels;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Game.Cameras
@@ -18,7 +17,7 @@ namespace Game.Cameras
 		[SerializeField, Min(0)] private float tileWidthsRadialOffset = 1;
 		[SerializeField, Min(0)] private float outsideBoundaryForceMultiplier = 0.1f;
 
-		[TitleGroup("Event Channels")]
+		[Header("Event Channels")]
 		[SerializeField] private ILevelDataEventChannelListenerContainer levelDataEventChannel;
 		[SerializeField] private IBoolEventChannelListenerContainer canPanCameraEventChannel;
 		

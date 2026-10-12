@@ -1,6 +1,4 @@
 using System.Collections.Generic;
-using Sirenix.OdinInspector;
-using Sirenix.Utilities;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -37,20 +35,17 @@ namespace Lean.Touch
 			"If you want this component to change smoothly over time, then this allows you to control how quick the changes reach their target value.\n\n-1 = Instantly change.\n\n1 = Slowly change.\n\n10 = Quickly change.")]
 		public float Dampening = -1.0f;
 
-		[TitleGroup("Custom Stuff")]
+		[Header("Custom Stuff")]
 		[SerializeField] private Mode mode;
 
 		[SerializeField] private UnityEvent<float> rotationEvent;
 
 		[SerializeField, Min(0)] private float twistStartThresholdDegrees;
 
-		[ShowInInspector, Sirenix.OdinInspector.ReadOnly]
 		private bool _isPotentiallyTwisting;
 
-		[ShowInInspector, Sirenix.OdinInspector.ReadOnly]
 		private bool _isTwisting;
 
-		[ShowInInspector, Sirenix.OdinInspector.ReadOnly]
 		private float _cumulativeTwistDegrees;
 		
 		[HideInInspector]
@@ -100,7 +95,7 @@ namespace Lean.Touch
 			// Get the fingers we want to use
 			List<LeanFinger> fingers = Use.GetFingers();
 
-			if (fingers.IsNullOrEmpty())
+			if (fingers == null || fingers.Count == 0)
 			{
 				_isPotentiallyTwisting = false;
 				_isTwisting = false;

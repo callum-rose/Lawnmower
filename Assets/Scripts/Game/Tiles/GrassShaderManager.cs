@@ -1,8 +1,6 @@
 using Core;
 using Core.EventChannels;
-using Sirenix.OdinInspector;
 using UnityEngine;
-using ReadOnly = Sirenix.OdinInspector.ReadOnlyAttribute;
 
 namespace Game.Tiles
 {
@@ -10,18 +8,18 @@ namespace Game.Tiles
 	[CreateAssetMenu(fileName = nameof(GrassShaderManager), menuName = SoNames.GameDir + nameof(GrassShaderManager))]
 	internal class GrassShaderManager : ScriptableObject
 	{
-		[TitleGroup("Wind")]
+		[Header("Wind")]
 		[SerializeField]
 		private ShaderProperty<float> windNoiseScale;
 
 		[SerializeField]
 		private ShaderProperty<Vector2> windNoiseVelocity;
 
-		[TitleGroup("Bend")]
+		[Header("Bend")]
 		[SerializeField]
 		private ShaderProperty<float> bendNoiseScale;
 
-		[TitleGroup("Mower Wind")]
+		[Header("Mower Wind")]
 		[SerializeField]
 		private ShaderProperty<Vector3> mowerPosition;
 
@@ -34,7 +32,7 @@ namespace Game.Tiles
 		[SerializeField]
 		private ShaderProperty<float> mowerWindFlutterSpeed;
 
-		[TitleGroup("Event Channels")]
+		[Header("Event Channels")]
 		[SerializeField] private Vector3EventChannel mowerObjectMovedEventChannel;
 		
 		private ShaderPropertyBase[] _allProperties;
@@ -74,7 +72,7 @@ namespace Game.Tiles
 			}
 		}
 
-		[Button]
+		[ContextMenu("Set Ids")]
 		private void SetIds()
 		{
 			foreach (ShaderPropertyBase property in _allProperties)

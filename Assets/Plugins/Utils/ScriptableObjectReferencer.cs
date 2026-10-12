@@ -1,5 +1,4 @@
 using System;
-using Sirenix.OdinInspector;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -11,12 +10,6 @@ namespace Plugins.Utils
 		menuName = "Utils/" + nameof(ScriptableObjectReferencer))]
 	public class ScriptableObjectReferencer : ScriptableObject
 	{
-#if UNITY_EDITOR
-		[InfoBox("This objects should be stored in a resources folder to reference all scriptable objects that will be destroyed by the build",
-			VisibleIf = nameof(IsInResourcesFolder))]
-		[InfoBox("This objects should be stored in a resources folder to reference all scriptable objects that will be destroyed by the build",
-			VisibleIf = nameof(IsNotInResourcesFolder), InfoMessageType = InfoMessageType.Error)]
-#endif
 		[SerializeField] private ScriptableObject[] references;
 
 #if UNITY_EDITOR

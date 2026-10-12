@@ -1,6 +1,5 @@
 using UnityEngine;
 using TMPro;
-using Sirenix.OdinInspector;
 using System;
 using UI.Buttons;
 
@@ -10,7 +9,7 @@ namespace UI.Dialogs
     {
         [SerializeField] private TextMeshProUGUI headerText;
         [SerializeField] private TextMeshProUGUI bodyText;
-        [SerializeField, AssetsOnly] private Button buttonPrefab;
+        [SerializeField] private Button buttonPrefab;
         [SerializeField] private Transform buttonContainer;
 
         public event Action<Dialog> Hidden;

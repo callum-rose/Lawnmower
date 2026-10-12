@@ -1,6 +1,5 @@
 using System;
 using Game.Core;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Game.Tiles
@@ -10,7 +9,6 @@ namespace Game.Tiles
 		[Serializable]
 		internal struct ChannelSetup
 		{
-			[ShowInInspector, HideLabel, DisplayAsString, PropertyOrder(1)]
 			private string Desciption => "In: " + inDirection + " --> Out: " + outDirection;
 
 			// [
@@ -27,12 +25,9 @@ namespace Game.Tiles
 			// 	LabelText("Out")]
 			[HideInInspector] public GridVector outDirection;
 
-			[PropertyOrder(2)] public DirtAppearanceSetter.ChannelType type;
+			public DirtAppearanceSetter.ChannelType type;
 
-			[ValueDropdown(nameof(Angles), HideChildProperties = true), PropertyOrder(2)]
 			public float angle;
-
-			private static readonly float[] Angles = {0, 90, 180, 270};
 
 			public ChannelSetup(GridVector inDirection, GridVector outDirection)
 			{

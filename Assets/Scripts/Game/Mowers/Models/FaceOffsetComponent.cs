@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using BalsamicBits.Extensions;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Game.Mowers.Models
@@ -10,7 +9,7 @@ namespace Game.Mowers.Models
 	{
 		[SerializeField] private Material material;
 
-		[SerializeField, ValueDropdown(nameof(ShaderPropertyNames), HideChildProperties = true), Required]
+		[SerializeField]
 		private string texturePropertyName;
 
 		[SerializeField] private Vector2 baseOffset;

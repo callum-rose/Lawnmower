@@ -4,10 +4,8 @@ using Game.UndoSystem;
 using System;
 using Core;
 using Game.Tiles;
-using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Assertions;
-using R = Sirenix.OdinInspector.RequiredAttribute;
 
 namespace Game.Levels
 {
@@ -15,14 +13,14 @@ namespace Game.Levels
 	[CreateAssetMenu(fileName = nameof(HeadlessLevelManager), menuName = SoNames.GameDir + nameof(HeadlessLevelManager))]
 	internal class HeadlessLevelManager : ScriptableObject, ILevelManager
 	{
-		[TitleGroup("Assets")] 
-		[SerializeField, R] private MowerMovementManager mowerMovementManager;
-		[SerializeField, R] private ILevelTraversalCheckerContainer levelTraversalCheckerContainer;
-		[SerializeField, R] private LevelTileInteractor tileInteractor;
-		[SerializeField, R] private LevelStateChecker levelStateChecker;
+		[Header("Assets")] 
+		[SerializeField] private MowerMovementManager mowerMovementManager;
+		[SerializeField] private ILevelTraversalCheckerContainer levelTraversalCheckerContainer;
+		[SerializeField] private LevelTileInteractor tileInteractor;
+		[SerializeField] private LevelStateChecker levelStateChecker;
 		
-		[TitleGroup("Event Channels")]
-		[SerializeField, R] private ILevelDataEventChannelTransmitterContainer levelStartedEventChannelContainer;
+		[Header("Event Channels")]
+		[SerializeField] private ILevelDataEventChannelTransmitterContainer levelStartedEventChannelContainer;
 
 		private ILevelDataEventChannelTransmitter LevelStartedEventChannel => levelStartedEventChannelContainer?.Result;
 

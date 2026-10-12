@@ -4,14 +4,13 @@ using System.Linq;
 using BalsamicBits.Extensions;
 using Core;
 using Game.Core;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Game.Tiles
 {
 	internal partial class DirtAppearanceSetter : MonoBehaviour
 	{
-		[TitleGroup("Setup"), SerializeField]
+		[Header("Setup"), SerializeField]
 		private SerialisedDictionary<ChannelType, GameObject> channelToGameObjectDict =
 			new SerialisedDictionary<ChannelType, GameObject>(
 				EnumExtensions.GetValues<ChannelType>().ToDictionary(ct => ct, ct => null as GameObject));
@@ -26,7 +25,6 @@ namespace Game.Tiles
 			Set(inDirection, -inDirection);
 		}
 
-		[Button(Expanded = true)]
 		public void Set(GridVector inDirection, GridVector outDirection)
 		{
 			// if (_lastInDirection == inDirection && _lastOutDirection == outDirection)

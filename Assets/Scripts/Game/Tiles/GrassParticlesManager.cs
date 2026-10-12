@@ -1,6 +1,5 @@
 using Core;
 using Core.EventChannels;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Game.Tiles
@@ -9,7 +8,7 @@ namespace Game.Tiles
 	[CreateAssetMenu(fileName = nameof(GrassParticlesManager), menuName = SoNames.GameDir + nameof(GrassParticlesManager))]
 	internal sealed class GrassParticlesManager : BaseParticlesManager
 	{
-		[SerializeField, AssetsOnly] private Vector3AndIntEventChannel particlesEventChannel;
+		[SerializeField] private Vector3AndIntEventChannel particlesEventChannel;
 
 		protected void OnEnable()
 		{

@@ -1,5 +1,4 @@
-﻿using Sirenix.OdinInspector;
-using System;
+﻿using System;
 using UnityEngine;
 using UnityInput = UnityEngine.Input;
 
@@ -13,13 +12,12 @@ namespace Game.Core
 
         [SerializeField] private bool useTransformXZForPlane;
 
-        [SerializeField, HideIf(nameof(useTransformXZForPlane))] private Vector3 planeNormal;
-        [SerializeField, HideIf(nameof(useTransformXZForPlane))] private float planeDistance;
+        [SerializeField] private Vector3 planeNormal;
+        [SerializeField] private float planeDistance;
 
         [SerializeField] private float gizmoPlaneSize = 10;
 
-        [ShowInInspector] private string ScreenPos => $"x: {UnityInput.mousePosition.x}, y: {UnityInput.mousePosition.y}";
-        [ShowInInspector]
+        private string ScreenPos => $"x: {UnityInput.mousePosition.x}, y: {UnityInput.mousePosition.y}";
         private string WorldPos
         {
             get

@@ -1,7 +1,6 @@
 using Unity.Cinemachine;
 using Core.EventChannels;
 using Game.Core;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Game.Cameras
@@ -11,7 +10,7 @@ namespace Game.Cameras
 		[SerializeField] private GamePlayData gamePlayData;
 		[SerializeField] private CinemachineSequencerCamera blendListCamera;
 
-		[TitleGroup("Event Channels")]
+		[Header("Event Channels")]
 		[SerializeField] private IVoidEventChannelListenerContainer startPlayingEventChannel;
 
 		[SerializeField] private IVoidEventChannelListenerContainer stopPlayingEventChannel;

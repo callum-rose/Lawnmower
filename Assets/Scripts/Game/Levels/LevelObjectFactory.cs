@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using Core.EventChannels;
 using Game.Core;
 using Game.Tiles;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Game.Levels
@@ -12,7 +11,7 @@ namespace Game.Levels
         [SerializeField] private TileObjectFactory tileFactory;
         [SerializeField] private Positioner positioner;
         
-        [TitleGroup("Event Channels")]
+        [Header("Event Channels")]
         [SerializeField] private TileObjectEventChannel tileCreatedEventChannel;
         [SerializeField] private GameObjectEventChannel tileWillBeDestroyedEventChannel;
 
