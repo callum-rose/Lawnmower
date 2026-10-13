@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Core;
+using Game.Cameras;
 using Game.Core;
 using Game.Levels;
 using Game.Mowers;
@@ -238,6 +239,51 @@ namespace Tests.PlayMode
 			Assert.AreEqual(1, requested.Count, "one swipe, one move");
 			Assert.IsTrue(requested[0].IsCardinalUnit);
 			yield return new WaitForSeconds(0.6f);
+			AssertNoErrors();
+		}
+
+		[UnityTest]
+		public IEnumerator TwoFingerPinchAndTwist_ZoomsAndTurnsTheBoard_WithoutMoving()
+		{
+			Touchscreen touchscreen = InputSystem.AddDevice<Touchscreen>();
+			LevelData level = Copy(Load<LevelDataManager>("t:LevelDataManager").GetLevel(0).LevelData);
+			GameManager game = null;
+			yield return StartLevel(level, g => game = g);
+
+			BoardCameraFramer framer = Object.FindAnyObjectByType<BoardCameraFramer>();
+			Assert.IsNotNull(framer, "the Game scene has a board camera");
+			Assert.AreEqual(1, framer.Zoom, 1e-3f);
+
+			List<GridVector> requested = new List<GridVector>();
+			game.MoveInput.MoveRequested += requested.Add;
+
+			Vector2 centre = FindPointOffUi();
+			BeginTouch(1, centre - Vector2.right * 30, queueEventOnly: true, screen: touchscreen);
+			BeginTouch(2, centre + Vector2.right * 30, queueEventOnly: true, screen: touchscreen);
+			yield return null;
+
+			Vector2 arm = Vector2.right * 30;
+			for (int i = 1; i <= 8; i++)
+			{
+				float t = i / 8f;
+				arm = Quaternion.Euler(0, 0, 60 * t) * (Vector2.right * Mathf.Lerp(30, 90, t));
+				MoveTouch(1, centre - arm, queueEventOnly: true, screen: touchscreen);
+				MoveTouch(2, centre + arm, queueEventOnly: true, screen: touchscreen);
+				yield return null;
+			}
+
+			yield return null;
+			Assert.AreEqual(3, framer.Zoom, 0.05f, "spreading the fingers 3x zooms in 3x");
+			Assert.AreEqual(60, framer.YawOffset, 1, "twisting the fingers turns the board");
+
+			EndTouch(1, centre - arm, queueEventOnly: true, screen: touchscreen);
+			EndTouch(2, centre + arm, queueEventOnly: true, screen: touchscreen);
+			yield return new WaitForSeconds(0.5f);
+			game.MoveInput.MoveRequested -= requested.Add;
+
+			Assert.AreEqual(90, framer.YawOffset, 1e-3f, "the turn settles on the nearest quarter turn");
+			Assert.AreEqual(3, framer.Zoom, 0.05f);
+			Assert.IsEmpty(requested, "a two-finger gesture isn't a swipe");
 			AssertNoErrors();
 		}
 

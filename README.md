@@ -41,6 +41,8 @@ about 2 seconds unlocks all of them.
 
 - **Swipe** on the board (default), or **on-screen arrows** (Settings > Movement).
 - **Keyboard** arrows / WASD in the editor.
+- **Pinch** to zoom, **twist** to rotate and **two-finger drag** to pan the board (mouse wheel zooms in the editor).
+  The rotation settles on the nearest quarter turn when you let go; the view resets for each level.
 - Undo / redo / restart from the HUD.
 
 ## Building to an iPhone
