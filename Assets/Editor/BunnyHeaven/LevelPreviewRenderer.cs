@@ -2,6 +2,7 @@ using System.IO;
 using System.Linq;
 using Game.Levels;
 using Game.Tiles;
+using Lawnmower.Model;
 using UnityEditor;
 using UnityEngine;
 
@@ -56,8 +57,8 @@ namespace Lawnmower.Editor.BunnyHeaven
 		{
 			TilePrefabsManager tilePrefabs = LoadFirst<TilePrefabsManager>();
 
-			// Decode a private copy so binding tile views can never touch the asset's cached tiles.
-			LevelData copy = LevelData.CreateFrom(level);
+			// Fresh runtime tiles: the asset itself is never mutated.
+			Level copy = level.CreateLevel();
 
 			using OffscreenRenderer renderer = new OffscreenRenderer();
 			GameObject board = new GameObject("Board");
@@ -97,7 +98,6 @@ namespace Lawnmower.Editor.BunnyHeaven
 			FitOrthographic(camera, BoardBounds(board), Padding);
 
 			Color[] pixels = renderer.RenderStraightAlpha(size, size);
-			Object.DestroyImmediate(copy);
 
 			// Trim the empty band above/below a wide board so the sprite's rect is the board itself.
 			RectInt crop = OffscreenRenderer.OpaqueBounds(pixels, size, size);
