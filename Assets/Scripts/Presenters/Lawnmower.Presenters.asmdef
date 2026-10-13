@@ -1,0 +1,16 @@
+{
+    "name": "Lawnmower.Presenters",
+    "rootNamespace": "Lawnmower.Presenters",
+    "references": [
+        "Lawnmower.Model"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": true
+}
