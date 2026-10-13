@@ -661,7 +661,7 @@ ParticleSystem:
   ShapeModule:
     serializedVersion: 6
     enabled: 1
-    type: 8
+    type: 5
     angle: 34.87
     length: 0.4
     boxThickness: {x: 0, y: 0, z: 0}
@@ -745,7 +745,7 @@ ParticleSystem:
     m_TextureAlphaAffectsParticles: 1
     m_TextureBilinearFiltering: 0
     randomDirectionAmount: 0
-    sphericalDirectionAmount: 0
+    sphericalDirectionAmount: 0.5
     randomPositionAmount: 0
     radius:
       value: 0.5
@@ -4770,7 +4770,7 @@ ParticleSystemRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 30f1cfd116411ba48bc4c83fb63ab5b4, type: 2}
+  - {fileID: 2100000, guid: 6e693e03d38f0432c8f35e23c87652da, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

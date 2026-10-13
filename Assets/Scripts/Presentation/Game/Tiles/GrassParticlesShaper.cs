@@ -20,7 +20,9 @@ namespace Game.Tiles
 		private const float NormalUpBias = 2.5f;
 		private const int Segments = 2;
 		private const int CapPoints = 5;
-		private const int VariantsPerHeight = 8;
+		// ParticleSystemRenderer.SetMeshes only uses the first 4 meshes
+		private const int VariantsPerHeight = 4;
+		private const float TileFootprint = 1;
 
 		private static readonly Dictionary<int, Mesh[]> ClippingMeshes = new Dictionary<int, Mesh[]>();
 
@@ -40,11 +42,14 @@ namespace Game.Tiles
 
 			_renderer.SetMeshes(GetClippingMeshes(grassHeight));
 
-			// Emit from the middle of the removed band of an average blade
-			float averageBladeHeight = (BladeHeightRange.x + BladeHeightRange.y) * 0.5f;
-			float cutBandCentre = (TileHeights[grassHeight] + TileHeights[grassHeight - 1]) * 0.5f * averageBladeHeight;
+			// Emit across the tile from where the removed pieces actually are: the middle of each blade's removed band,
+			// from the shortest blade's up to the tallest's. The box is rotated to point up, so its z is world y.
+			float cutBandCentre = (TileHeights[grassHeight] + TileHeights[grassHeight - 1]) * 0.5f;
+			float lowest = cutBandCentre * BladeHeightRange.x;
+			float highest = cutBandCentre * BladeHeightRange.y;
 			ParticleSystem.ShapeModule shapeModule = _particles.shape;
-			shapeModule.position = Vector3.up * cutBandCentre;
+			shapeModule.position = Vector3.up * (lowest + highest) * 0.5f;
+			shapeModule.scale = new Vector3(TileFootprint, TileFootprint, highest - lowest);
 		}
 
 		private static Mesh[] GetClippingMeshes(int grassHeight)
@@ -66,7 +71,8 @@ namespace Game.Tiles
 		}
 
 		// Same blade shape and UV conventions as generate_thin_grass.py, keeping only the part above the cut.
-		// Particles only receive uv0 (default vertex streams), so uv0.y runs from the cut to 1 to keep the tip colour and glow.
+		// Particles only receive uv0 (default vertex streams). uv0.y runs 0 -> 1 along the clipping, not just over the cut band:
+		// the band is the pale, translucent, glowing tip, so on its own it reads far brighter than the lawn it came from.
 		private static Mesh BuildClippingMesh(int grassHeight, System.Random rng)
 		{
 			float bladeHeight = TileHeights[grassHeight] * Range(rng, BladeHeightRange);
@@ -92,8 +98,8 @@ namespace Game.Tiles
 				float y = bladeHeight * t - centreY;
 				vertices.Add(new Vector3(-halfWidth, y, 0));
 				vertices.Add(new Vector3(halfWidth, y, 0));
-				uvs.Add(new Vector2(u, t));
-				uvs.Add(new Vector2(u, t));
+				uvs.Add(new Vector2(u, ClippingV(t, cutT)));
+				uvs.Add(new Vector2(u, ClippingV(t, cutT)));
 
 				if (s > 0)
 				{
@@ -110,7 +116,7 @@ namespace Game.Tiles
 				float angle = Mathf.PI * i / (CapPoints + 1);
 				float capT = Mathf.Sin(angle) * capHeight;
 				vertices.Add(new Vector3(Mathf.Cos(angle) * shoulderHalfWidth, shoulderY + capT, 0));
-				uvs.Add(new Vector2(u, shoulderT + capT / bladeHeight));
+				uvs.Add(new Vector2(u, ClippingV(shoulderT + capT / bladeHeight, cutT)));
 			}
 
 			// Fan the rounded tip from the shoulder's left corner, as the generator's cap n-gon
@@ -137,6 +143,11 @@ namespace Game.Tiles
 			mesh.normals = normals;
 			mesh.RecalculateBounds();
 			return mesh;
+		}
+
+		private static float ClippingV(float bladeT, float cutT)
+		{
+			return Mathf.InverseLerp(cutT, 1, bladeT);
 		}
 
 		private static float Range(System.Random rng, Vector2 range)
