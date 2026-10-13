@@ -14,8 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sceneToOpen: 0
   gameSetupPassThroughData:
-    mower: {fileID: 11400000, guid: 9d84f272dfc01484eb3161f5466cb403, type: 2}
-    levelDataContainer:
-      ObjectField: {fileID: 11400000, guid: 838755f9d2141f7439d4758da2743aed, type: 2}
-      ResultType: 
+    mower: {fileID: 11400000, guid: 4de52aaac6464994e8d6eff9736edfe2, type: 2}
+    level: {fileID: 11400000, guid: 838755f9d2141f7439d4758da2743aed, type: 2}
     isTutorial: 0

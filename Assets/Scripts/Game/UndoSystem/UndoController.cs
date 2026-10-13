@@ -4,11 +4,14 @@ namespace Game.UndoSystem
 {
     internal class UndoController : MonoBehaviour
     {
-        [SerializeField] private IUndoSystemContainer undoManagerContainer;
-
-        private IUndoSystem UndoManager => undoManagerContainer.Result;
+        private IUndoSystem UndoManager { get; set; }
 
         public bool IsRunning { get; set; }
+
+        public void Bind(IUndoSystem undoSystem)
+        {
+            UndoManager = undoSystem;
+        }
 
         #region Unity
 
@@ -36,22 +39,26 @@ namespace Game.UndoSystem
         [ContextMenu("Undo")]
         public void Undo()
         {
-            UndoManager.Undo();
+            UndoManager?.Undo();
         }
 
         [ContextMenu("Undo All")]
         public void UndoAll()
         {
-            for (int i = 0; i < UndoManager.Count; i++)
+            if (UndoManager == null)
             {
-                UndoManager.Undo();
+                return;
+            }
+
+            while (UndoManager.Undo())
+            {
             }
         }
 
         [ContextMenu("Redo")]
         public void Redo()
         {
-            UndoManager.Redo();
+            UndoManager?.Redo();
         }
 
         #endregion

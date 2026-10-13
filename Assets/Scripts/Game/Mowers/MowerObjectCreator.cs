@@ -8,11 +8,11 @@ namespace Game.Mowers
 		[SerializeField] private Transform container;
 		[SerializeField] private Positioner positioner;
 
-		public MowerObject Create(MowerData mower, MowerMover mowerMover)
+		public MowerObject Create(MowerData mower, IMowerPosition mowerPosition)
 		{
 			MowerObject newMower = Instantiate(mower.Prefab, container);
 			newMower.Init(positioner);
-			newMower.Bind(mowerMover);
+			newMower.Bind(mowerPosition);
 
 			return newMower;
 		}

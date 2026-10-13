@@ -3,6 +3,7 @@ using Core.EventChannels;
 using Game.Core;
 using Game.Levels;
 using UnityEngine;
+using Lawnmower.Model;
 
 namespace Game.Cameras
 {
@@ -100,7 +101,7 @@ namespace Game.Cameras
 			transformToDrag.position += worldDelta.SetY(0);
 		}
 
-		private void OnLevelData(IReadOnlyLevelData levelData)
+		private void OnLevelData(Level levelData)
 		{
 			_levelCenter = positioner.GetLevelWorldCenter(levelData);
 			_levelRadius = positioner.GetMaxDistanceFromLevelCenter(levelData, _levelCenter.Value);

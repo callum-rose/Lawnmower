@@ -58,7 +58,7 @@ namespace Game.Levels
 			return result;
 		}
 
-		public bool GetLevelAfter(IReadOnlyLevelData level, out LevelInfo levelInfo)
+		public bool GetLevelAfter(LevelData level, out LevelInfo levelInfo)
 		{
 			for (int i = 0; i < levelDatas.Length; i++)
 			{
@@ -76,7 +76,7 @@ namespace Game.Levels
 			return false;
 		}
 
-		public void SetLevelCompleted(IReadOnlyLevelData level)
+		public void SetLevelCompleted(LevelData level)
 		{
 			for (int i = 0; i < levelDatas.Length; i++)
 			{
@@ -102,8 +102,7 @@ namespace Game.Levels
 		{
 			if (index < levelDatas.Length)
 			{
-				LevelData clonedLevel = LevelData.CreateFrom(levelDatas[index]);
-				return new LevelInfo(clonedLevel, IsLevelLocked(index));
+				return new LevelInfo(levelDatas[index], IsLevelLocked(index));
 			}
 			else
 			{

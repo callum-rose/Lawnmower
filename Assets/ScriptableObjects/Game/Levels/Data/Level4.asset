@@ -22,96 +22,96 @@ MonoBehaviour:
   - kind: 1
     grassHeight: 2
     stoneDirection: 0
-    springLanding:
+    springOffset:
       x: 0
       y: 0
   - kind: 1
     grassHeight: 2
     stoneDirection: 0
-    springLanding:
+    springOffset:
       x: 0
       y: 0
   - kind: 1
     grassHeight: 2
     stoneDirection: 0
-    springLanding:
+    springOffset:
       x: 0
       y: 0
   - kind: 1
     grassHeight: 2
     stoneDirection: 0
-    springLanding:
+    springOffset:
       x: 0
       y: 0
   - kind: 1
     grassHeight: 2
     stoneDirection: 0
-    springLanding:
+    springOffset:
       x: 0
       y: 0
   - kind: 1
     grassHeight: 3
     stoneDirection: 0
-    springLanding:
+    springOffset:
       x: 0
       y: 0
   - kind: 1
     grassHeight: 3
     stoneDirection: 0
-    springLanding:
+    springOffset:
       x: 0
       y: 0
   - kind: 1
     grassHeight: 2
     stoneDirection: 0
-    springLanding:
+    springOffset:
       x: 0
       y: 0
   - kind: 1
     grassHeight: 2
     stoneDirection: 0
-    springLanding:
+    springOffset:
       x: 0
       y: 0
   - kind: 1
     grassHeight: 3
     stoneDirection: 0
-    springLanding:
+    springOffset:
       x: 0
       y: 0
   - kind: 1
     grassHeight: 3
     stoneDirection: 0
-    springLanding:
+    springOffset:
       x: 0
       y: 0
   - kind: 1
     grassHeight: 2
     stoneDirection: 0
-    springLanding:
+    springOffset:
       x: 0
       y: 0
   - kind: 1
     grassHeight: 2
     stoneDirection: 0
-    springLanding:
+    springOffset:
       x: 0
       y: 0
   - kind: 1
     grassHeight: 2
     stoneDirection: 0
-    springLanding:
+    springOffset:
       x: 0
       y: 0
   - kind: 1
     grassHeight: 2
     stoneDirection: 0
-    springLanding:
+    springOffset:
       x: 0
       y: 0
   - kind: 1
     grassHeight: 2
     stoneDirection: 0
-    springLanding:
+    springOffset:
       x: 0
       y: 0

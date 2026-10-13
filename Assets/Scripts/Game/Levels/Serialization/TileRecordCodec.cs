@@ -1,90 +1,68 @@
 using System;
-using Game.Tiles;
+using Game.Core;
+using Lawnmower.Model;
 
 namespace Game.Levels.Serialization
 {
 	/// <summary>
-	/// Maps between the runtime <see cref="Tile"/> hierarchy and the persisted <see cref="TileRecord"/>.
+	/// Maps between the persisted <see cref="TileRecord"/> and the model's <see cref="TileSpec"/>.
 	/// Pure C#: no Unity serialization or CLR type names involved.
 	/// </summary>
 	internal static class TileRecordCodec
 	{
-		public static Tile ToTile(in TileRecord record)
+		public static TileSpec ToSpec(in TileRecord record)
 		{
 			switch (record.kind)
 			{
 				case TileKind.Empty:
-					return new EmptyTile();
+					return TileSpec.Empty;
 				case TileKind.Grass:
-					return new GrassTile(record.grassHeight);
+					return TileSpec.Grass(record.grassHeight);
 				case TileKind.Stone:
-					return new StoneTile { Direction = record.stoneDirection };
+					return TileSpec.Stone(record.stoneDirection);
 				case TileKind.Water:
-					return new WaterTile();
+					return TileSpec.Water;
 				case TileKind.Wood:
-					return new WoodTile();
+					return TileSpec.Wood;
 				case TileKind.Spring:
-					return new SpringTile { LandingPosition = record.springLanding };
+					return TileSpec.Spring(record.springOffset);
 				default:
 					throw new ArgumentOutOfRangeException(nameof(record), record.kind, "Unknown tile kind");
 			}
 		}
 
-		public static TileRecord FromTile(Tile tile)
+		public static TileRecord FromSpec(in TileSpec spec)
 		{
-			switch (tile)
+			switch (spec.Kind)
 			{
-				case null:
-					throw new ArgumentNullException(nameof(tile));
-				case EmptyTile _:
-					return new TileRecord { kind = TileKind.Empty };
-				case GrassTile grass:
-					return new TileRecord { kind = TileKind.Grass, grassHeight = grass.GrassHeight.Value };
-				case StoneTile stone:
-					return new TileRecord { kind = TileKind.Stone, stoneDirection = stone.Direction };
-				case WaterTile _:
-					return new TileRecord { kind = TileKind.Water };
-				case WoodTile _:
-					return new TileRecord { kind = TileKind.Wood };
-				case SpringTile spring:
-					return new TileRecord { kind = TileKind.Spring, springLanding = spring.LandingPosition };
+				case TileKind.Empty:
+				case TileKind.Water:
+				case TileKind.Wood:
+					return new TileRecord { kind = spec.Kind };
+				case TileKind.Grass:
+					return new TileRecord { kind = TileKind.Grass, grassHeight = spec.GrassHeight };
+				case TileKind.Stone:
+					return new TileRecord { kind = TileKind.Stone, stoneDirection = spec.StoneDirection };
+				case TileKind.Spring:
+					return new TileRecord { kind = TileKind.Spring, springOffset = spec.SpringOffset };
 				default:
-					throw new ArgumentOutOfRangeException(nameof(tile), tile.GetType().Name, "Unknown tile type");
+					throw new ArgumentOutOfRangeException(nameof(spec), spec.Kind, "Unknown tile kind");
 			}
 		}
 
 		/// <summary>Row-major: index = x + y * width.</summary>
-		public static TileRecord[] Encode(Tile[,] tiles)
+		public static TileRecord[] Encode(LevelDefinition level)
 		{
-			int width = tiles.GetLength(0);
-			int depth = tiles.GetLength(1);
-			TileRecord[] records = new TileRecord[width * depth];
-			for (int y = 0; y < depth; y++)
+			TileRecord[] records = new TileRecord[level.Tiles.Count];
+			for (int i = 0; i < records.Length; i++)
 			{
-				for (int x = 0; x < width; x++)
-				{
-					records[x + y * width] = FromTile(tiles[x, y] ?? new EmptyTile());
-				}
+				records[i] = FromSpec(level.Tiles[i]);
 			}
 
 			return records;
 		}
 
-		public static TileRecord[] Encode(IReadOnlyLevelData level)
-		{
-			TileRecord[] records = new TileRecord[level.Width * level.Depth];
-			for (int y = 0; y < level.Depth; y++)
-			{
-				for (int x = 0; x < level.Width; x++)
-				{
-					records[x + y * level.Width] = FromTile(level.GetTile(x, y) ?? new EmptyTile());
-				}
-			}
-
-			return records;
-		}
-
-		public static Tile[,] Decode(TileRecord[] records, int width, int depth)
+		public static LevelDefinition Decode(Guid id, int width, int depth, GridVector startPosition, TileRecord[] records)
 		{
 			records ??= Array.Empty<TileRecord>();
 			if (records.Length != width * depth)
@@ -92,16 +70,13 @@ namespace Game.Levels.Serialization
 				throw new ArgumentException($"Expected {width * depth} tile records for {width}x{depth}, got {records.Length}");
 			}
 
-			Tile[,] tiles = new Tile[width, depth];
-			for (int y = 0; y < depth; y++)
+			TileSpec[] specs = new TileSpec[records.Length];
+			for (int i = 0; i < records.Length; i++)
 			{
-				for (int x = 0; x < width; x++)
-				{
-					tiles[x, y] = ToTile(records[x + y * width]);
-				}
+				specs[i] = ToSpec(records[i]);
 			}
 
-			return tiles;
+			return new LevelDefinition(id, width, depth, startPosition, specs);
 		}
 	}
 }

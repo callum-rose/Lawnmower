@@ -6,7 +6,6 @@ namespace Game.Tiles
 	internal class SpringTileObject : BaseTileObject
 	{
 		private IReadonlySpringTile _data;
-		private Positioner _positioner;
 
 		private void OnDrawGizmos()
 		{
@@ -16,18 +15,8 @@ namespace Game.Tiles
 				return;
 			}
 
-			if (_positioner == null)
-			{
-				_positioner = FindAnyObjectByType<Positioner>();
-
-				if (_positioner == null)
-				{
-					return;
-				}
-			}
-
 			Gizmos.color = Color.yellow;
-			Gizmos.DrawLine(transform.position, _positioner.GetWorldPosition(_data.LandingPosition));
+			Gizmos.DrawLine(transform.position, transform.position + _data.Offset.ToXZ() * Game.Levels.LevelDimensions.TileSize);
 		}
 
 		public override void Bind(IReadonlyTile data)

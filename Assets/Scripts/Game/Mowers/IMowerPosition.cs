@@ -2,7 +2,7 @@
 
 namespace Game.Mowers
 {
-    internal interface IMowerPosition
+    public interface IMowerPosition
     {
         IListenableProperty<GridVector> CurrentPosition { get; }
     }
