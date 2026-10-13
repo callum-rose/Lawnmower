@@ -10,7 +10,8 @@
 // Declare these before including:
 //   float4 _FaceLook;   // xy: gaze (-1..1, +y looks down), z: converge (cross-eyed amount)
 //   float4 _FaceEyes;   // x: left eye open, y: right eye open, z: pupil scale, w: right eye shading
-//   float4 _FaceMouth;  // x: mouth open, y: mouth width scale, z: nose squash (-1..1)
+//   float4 _FaceMouth;  // x: mouth open, y: mouth width scale, z: nose squash (-1..1), w: smile (+) / frown (-)
+//   float4 _FaceLids;   // x: lids lowered (0..1), y: lid tilt (+ angry, - sad), z: happy ^ ^ eyes (0..1), w: eye scale
 //   float4 _FaceDarkColor, _FaceEyeColor, _FaceNoseColor, _FaceTeethColor;
 //
 // Kept to the HLSL/GLSL common subset (float literals, no static consts or structs)
@@ -52,15 +53,33 @@ void BunnyFace_Over(inout float4 acc, float3 color, float coverage)
 	acc.a = acc.a * (1.0 - coverage) + coverage;
 }
 
-void BunnyFace_Eye(inout float4 acc, float2 p, float aa, float centreX, float open, float2 look, float shading)
+void BunnyFace_Eye(inout float4 acc, float2 p, float aa, float centreX, float open, float2 look, float shading, float side)
 {
 	float radius = 72.5;
-	float o = saturate(open);
+	float happy = saturate(_FaceLids.z);
+	float o = min(saturate(open), 1.0 - happy);
+
+	// Scale about the resting eye centre
+	float scale = max(_FaceLids.w, 0.01);
+	p = float2(centreX, 295.0) + (p - float2(centreX, 295.0)) / scale;
+	aa /= scale;
+
+	// Happy eyes bend the closed lid line into an upward arch
+	float bendX = saturate(abs(p.x - centreX) / 82.5);
+	p.y += happy * 32.0 * (1.0 - bendX * bendX);
 
 	// Closing squashes the eye into a pill, then a lid line slightly below centre
 	float2 centre = float2(centreX, lerp(326.0, 295.0, o));
-	float2 halfSize = float2(lerp(82.5, radius, smoothstep(0.0, 1.0, o)), max(radius * o, 9.5));
+	float2 halfSize = float2(lerp(lerp(82.5, 68.0, happy), radius, smoothstep(0.0, 1.0, o)), max(radius * o, 9.5));
 	float eye = BunnyFace_Box(p - centre, halfSize, halfSize.y);
+
+	// Lids cut the eye from the top. Positive tilt lowers the inner corners (angry),
+	// negative lowers the outer corners (sad). side is +1 when the inner corner is at +x.
+	float lidAmount = saturate(_FaceLids.x);
+	float slope = _FaceLids.y * 0.6 * side * saturate(lidAmount * 5.0);
+	float lidY = centre.y - halfSize.y + lidAmount * 2.0 * halfSize.y + slope * (p.x - centreX);
+	float lid = (lidY - p.y) / sqrt(1.0 + slope * slope);
+	float lidLine = max(abs(lid) - 4.5, eye);
 
 	// Contents are drawn in unsquashed space so the pupil squashes with the lid
 	float2 q = p - centre;
@@ -72,12 +91,19 @@ void BunnyFace_Eye(inout float4 acc, float2 p, float aa, float centreX, float op
 	float3 color = lerp(_FaceEyeColor.rgb * (1.0 - shade), _FaceDarkColor.rgb, BunnyFace_Fill(pupil, aa));
 	color = lerp(_FaceDarkColor.rgb, color, smoothstep(0.13, 0.2, o));
 
-	BunnyFace_Over(acc, color, BunnyFace_Fill(eye, aa));
+	BunnyFace_Over(acc, color, BunnyFace_Fill(max(eye, lid), aa));
+	BunnyFace_Over(acc, _FaceDarkColor.rgb, BunnyFace_Fill(lidLine, aa) * saturate(lidAmount * 10.0));
 }
 
 void BunnyFace_Mouth(inout float4 acc, float2 p, float aa)
 {
 	float t = saturate(_FaceMouth.x);
+
+	// Bend the mouth into a smile (ends up) or frown (ends down); teeth follow it partially
+	float bendX = (p.x - 256.0) / 73.0;
+	float bend = _FaceMouth.w * 22.0 * bendX * bendX;
+	float2 toothP = float2(p.x, p.y + bend * 0.35);
+	p.y += bend;
 
 	// Closed: thin capsule behind the teeth. Open: tall rounded rect.
 	float2 centre = lerp(float2(256.0, 385.0), float2(256.0, 434.5), t);
@@ -92,8 +118,8 @@ void BunnyFace_Mouth(inout float4 acc, float2 p, float aa)
 	float toothBottom = mouthTop + lerp(35.0, 38.0, t);
 	float2 toothHalf = float2(23.0, (toothBottom - mouthTop + 10.0) * 0.5);
 	float toothY = toothBottom - toothHalf.y;
-	float teeth = min(BunnyFace_Box(p - float2(229.0, toothY), toothHalf, 1.5),
-	                  BunnyFace_Box(p - float2(283.0, toothY), toothHalf, 1.5));
+	float teeth = min(BunnyFace_Box(toothP - float2(229.0, toothY), toothHalf, 1.5),
+	                  BunnyFace_Box(toothP - float2(283.0, toothY), toothHalf, 1.5));
 
 	// Mouth shape with its bottom pushed far down, so only its top edge clips the teeth
 	float clipHalfY = halfSize.y + 50.0;
@@ -125,8 +151,8 @@ float4 BunnyFace(float2 uv)
 	lookR /= max(1.0, length(lookR));
 
 	float4 acc = float4(0.0, 0.0, 0.0, 0.0);
-	BunnyFace_Eye(acc, p, aa, 160.5, _FaceEyes.x, lookL, 0.0);
-	BunnyFace_Eye(acc, p, aa, 350.5, _FaceEyes.y, lookR, _FaceEyes.w);
+	BunnyFace_Eye(acc, p, aa, 160.5, _FaceEyes.x, lookL, 0.0, 1.0);
+	BunnyFace_Eye(acc, p, aa, 350.5, _FaceEyes.y, lookR, _FaceEyes.w, -1.0);
 	BunnyFace_Mouth(acc, p, aa);
 	BunnyFace_Nose(acc, p, aa);
 

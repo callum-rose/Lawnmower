@@ -21,7 +21,8 @@ Shader "Toon Procedural Bunny Face"
 		_FaceUV("Face UV (xy tiling, zw offset)", Vector) = (1,1,0,-0.05)
 		_FaceLook("Look (xy gaze, z converge)", Vector) = (-0.04,0.69,0.69,0)
 		_FaceEyes("Eyes (x left open, y right open, z pupil scale, w shading)", Vector) = (1,1,1,0.08)
-		_FaceMouth("Mouth (x open, y width, z nose squash)", Vector) = (0,1,0,0)
+		_FaceMouth("Mouth (x open, y width, z nose squash, w smile)", Vector) = (0,1,0,0)
+		_FaceLids("Lids (x lowered, y tilt, z happy eyes, w eye scale)", Vector) = (0,0,0,1)
 		_FaceDarkColor("Dark Colour", Color) = (0,0,0,1)
 		_FaceEyeColor("Eye Colour", Color) = (0.98,0.98,0.98,1)
 		_FaceNoseColor("Nose Colour", Color) = (0.835,0.365,0.255,1)
@@ -221,6 +222,7 @@ Shader "Toon Procedural Bunny Face"
 			float4 _FaceLook;
 			float4 _FaceEyes;
 			float4 _FaceMouth;
+			float4 _FaceLids;
 			float4 _FaceDarkColor;
 			float4 _FaceEyeColor;
 			float4 _FaceNoseColor;
@@ -496,6 +498,7 @@ Shader "Toon Procedural Bunny Face"
 			float4 _FaceLook;
 			float4 _FaceEyes;
 			float4 _FaceMouth;
+			float4 _FaceLids;
 			float4 _FaceDarkColor;
 			float4 _FaceEyeColor;
 			float4 _FaceNoseColor;
