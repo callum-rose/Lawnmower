@@ -12,8 +12,8 @@ tall ears with butter insides, a white tail and four dark feet.
 - toy:     a box with short bevels only (the Taxi's lesson, R7a), chunky upright ears.
 - lop:     the classic body with ears that flop down its sides.
 - sitting: a separate head on a low body, so the head can nod and turn; ears swept back.
-- loplong: between lop and sitting: a long body and a separate, slightly taller head at its front,
-           with lop ears.
+- loplong: the reference's profile on a cube: a big bevel down the back, a separate head slab at the
+           front a voxel taller than the body, and upright ears.
 
 The script follows the bake_shade.py contract: parts are authored in voxels under an empty called
 `root`, the root part is `Body`, there is a shadow-catching `ground`, and it ends in the standard
@@ -325,27 +325,31 @@ elif VARIANT == "toy":
     HEIGHT = 22
 
 elif VARIANT == "loplong":
-    # The lop's long body cut in two: a 10-tall body and a 12-tall head overlapping its front, so the
-    # head stands proud of the back and can nod and turn. The head is 11 wide to the body's 12 (R8).
-    box = (-6, 6, 2, 12, -7, 5)
+    # The reference's profile on a cube: a tall front and a back sloping away through one big 45 deg
+    # bevel (a 7 x 7 wedge, R7b) along the top rear edge; every other edge bevelled by one voxel. The
+    # face is a separate head slab at the front, a voxel taller and narrower than the body (R8), so it
+    # can nod and turn; the ears ride on it, upright.
+    box = (-6, 6, 2, 14, -7, 7)
     body = Part("Body")
     body.box(*box, COAT)
-    round_box(body, box, top=2, side=2, bottom=1)
+    round_box(body, box, top=1, side=1, bottom=1, front_back=False)
+    bevel_edge(body, box, (0, 1, -1), 7)                                         # the sloping back
+    bevel_edge(body, box, (0, -1, -1), 1); bevel_edge(body, box, (0, -1, 1), 1)
     body.build()
-    hbox = (-5.5, 5.5, 4, 16, -0.5, 8.5)
+    hbox = (-5.5, 5.5, 4, 15, 1.5, 8.5)
     head = Part("Head")
     head.box(*hbox, COAT)
-    round_box(head, hbox, top=2, side=2, bottom=1)
-    head.paint(lambda x, y, z: z == 7.5 and -3.5 <= x < 3.5 and 5 <= y < 14, FACE)
-    head_ob = head.build(pivot=(0, 10, 2))                                       # neck, inside the body
-    face_uvs(head_ob, 8.5, 10.5, 10)
-    for sx in (1, -1):                                                           # lop ears, riding on the head
-        e = ear("Ear" + ("R" if sx > 0 else "L"), sx, sx * 3.5, 15, 2.5, 3, 2, 10, 2, pitch=5, splay=135)
+    round_box(head, hbox, top=1, side=1, bottom=1)
+    head.paint(lambda x, y, z: z == 7.5 and -4.5 <= x < 4.5 and 5 <= y < 14, FACE)
+    head_ob = head.build(pivot=(0, 10, 3))                                       # neck, inside the body
+    face_uvs(head_ob, 8.5, 11, 11)
+    for sx in (1, -1):                                                           # upright ears on the head
+        e = ear("Ear" + ("R" if sx > 0 else "L"), sx, sx * 2.5, 15, 2.5, 3, 2, 11, 2, pitch=10, splay=15)
         e.parent = head_ob
         e.location = Vector(e.location) - Vector(head_ob.location)
-    tail(7, -7)
-    feet((-3, 3), (-4.5, 2.5), 3, 4, 3, 1, 2)
-    HEIGHT = 18
+    tail(5, -7)
+    feet((-3, 3), (-4, 4), 3, 4, 3, 1, 2)
+    HEIGHT = 26
 
 else:  # sitting
     # A low body and a separate head that can nod: the classic proportions split at the neck.
