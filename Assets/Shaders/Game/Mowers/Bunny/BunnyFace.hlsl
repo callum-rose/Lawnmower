@@ -86,11 +86,19 @@ void BunnyFace_Mouth(inout float4 acc, float2 p, float aa)
 	float mouth = BunnyFace_Box(p - centre, halfSize, lerp(10.0, 33.0, t));
 	BunnyFace_Over(acc, _FaceDarkColor.rgb, BunnyFace_Fill(mouth, aa));
 
-	// Teeth hang from the top of the mouth
-	float2 toothHalf = float2(23.0, lerp(17.0, 18.5, t));
-	float toothY = centre.y - halfSize.y + 1.0 + toothHalf.y;
+	// Teeth hang from the top of the mouth. They start above it and are clipped to the
+	// mouth's top edge (corners included) so no dark sliver shows above them.
+	float mouthTop = centre.y - halfSize.y;
+	float toothBottom = mouthTop + lerp(35.0, 38.0, t);
+	float2 toothHalf = float2(23.0, (toothBottom - mouthTop + 10.0) * 0.5);
+	float toothY = toothBottom - toothHalf.y;
 	float teeth = min(BunnyFace_Box(p - float2(229.0, toothY), toothHalf, 1.5),
 	                  BunnyFace_Box(p - float2(283.0, toothY), toothHalf, 1.5));
+
+	// Mouth shape with its bottom pushed far down, so only its top edge clips the teeth
+	float clipHalfY = halfSize.y + 50.0;
+	float topClip = BunnyFace_Box(p - float2(centre.x, mouthTop + clipHalfY), float2(halfSize.x, clipHalfY), lerp(10.0, 33.0, t));
+	teeth = max(teeth, topClip);
 	BunnyFace_Over(acc, _FaceTeethColor.rgb, BunnyFace_Fill(teeth, aa));
 }
 
