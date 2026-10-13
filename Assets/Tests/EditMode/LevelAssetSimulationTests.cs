@@ -17,12 +17,14 @@ namespace Tests.EditMode
 	{
 		private const string DataDir = "Assets/ScriptableObjects/Game/Levels/Data";
 		private const string ManagerPath = "Assets/ScriptableObjects/Game/Levels/Functionals/LevelDataManager.asset";
-		private const string SpringTest = "Level Spring Test";
+		private const string ArchiveDir = DataDir + "/Archive";
+		private const string SpringTest = "Archive/Level Spring Test";
 
+		/// <summary>Every level asset under <see cref="DataDir"/> (retired ones included), as a path relative to it without ".asset".</summary>
 		private static IEnumerable<string> LevelNames() =>
 			AssetDatabase.FindAssets("t:LevelData", new[] { DataDir })
 				.Select(AssetDatabase.GUIDToAssetPath)
-				.Select(Path.GetFileNameWithoutExtension)
+				.Select(p => p.Substring(DataDir.Length + 1, p.Length - DataDir.Length - 1 - ".asset".Length))
 				.OrderBy(n => n, StringComparer.Ordinal);
 
 		private static IEnumerable<TestCaseData> LevelsAndSeeds() =>
@@ -47,7 +49,11 @@ namespace Tests.EditMode
 		public void FindsEveryShippedLevel()
 		{
 			CollectionAssert.AreEqual(
-				new[] { "Level Spring Test", "Level1", "Level3", "Level4", "Level5", "Level6", "Level7", "Level8", "Level9" },
+				new[]
+				{
+					"Archive/Level Spring Test", "Archive/Level3", "Archive/Level5", "Archive/Level6", "Archive/Level7", "Archive/Level8",
+					"Level01", "Level02", "Level03", "Level04", "Level05", "Level06", "Level07", "Level08", "Level09", "Level10"
+				},
 				LevelNames().ToArray());
 		}
 
@@ -86,7 +92,7 @@ namespace Tests.EditMode
 		}
 
 		[Test]
-		public void LevelList_HasEightDistinctLevelsFromData_WithoutSpringTest()
+		public void LevelList_IsTheTenCurveLevels_InOrder()
 		{
 			SerializedProperty list = new SerializedObject(AssetDatabase.LoadMainAssetAtPath(ManagerPath)).FindProperty("levelDatas");
 			Assert.IsNotNull(list);
@@ -99,11 +105,9 @@ namespace Tests.EditMode
 				paths.Add(AssetDatabase.GetAssetPath(entry));
 			}
 
-			// S2 replaces this list; change this test with it.
-			Assert.AreEqual(8, paths.Count);
-			CollectionAssert.AllItemsAreUnique(paths);
-			Assert.That(paths, Has.All.StartsWith(DataDir + "/"));
-			CollectionAssert.DoesNotContain(paths, PathOf(SpringTest));
+			// Bunny Heaven ships the ten curve levels (Assets/Docs/LEVELS.md); retired levels stay in Archive/.
+			CollectionAssert.AreEqual(Enumerable.Range(1, 10).Select(i => PathOf($"Level{i:00}")).ToArray(), paths);
+			Assert.That(paths, Has.None.StartsWith(ArchiveDir + "/"));
 		}
 
 		#endregion
@@ -193,7 +197,7 @@ namespace Tests.EditMode
 			AssertSolves(asset, asset.Solution);
 		}
 
-		[TestCase("Level1", "RRRULLLURRRULLL")]
+		[TestCase("Level03", "RRRULLLURRRULLL")]
 		[TestCase(SpringTest, "URURLL")]
 		public void GoldenSolution_IsRecorded_AndSolves(string name, string golden)
 		{
