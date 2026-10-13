@@ -1,7 +1,6 @@
 using BunnyHeaven.UI;
 using BunnyHeaven.UI.Editor;
 using Game.UI.Screens;
-using MainMenu;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
@@ -59,7 +58,7 @@ namespace Lawnmower.Editor.GameScreens
 
 			RectTransform safe = NewUI("SafeArea", rootRect);
 			Stretch(safe, 0, 0, 0, 0);
-			safe.gameObject.AddComponent<SafeAreaFitter>();
+			safe.gameObject.AddComponent<Lawnmower.Screens.SafeAreaPanel>().SetMinInsets(0f, 0f);
 
 			GameHudView hud = BuildHud(safe);
 			ArrowPadView arrows = BuildArrowPad(safe);

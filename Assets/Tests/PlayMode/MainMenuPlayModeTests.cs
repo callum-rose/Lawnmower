@@ -7,6 +7,7 @@ using Core;
 using Game.Core;
 using Game.Levels;
 using Lawnmower.Presenters;
+using Lawnmower.Screens;
 using Lawnmower.Services;
 using MainMenu;
 using NUnit.Framework;
@@ -31,7 +32,6 @@ namespace Tests.PlayMode
 
 		private static bool IsRenderNoise(string message, string stackTrace) =>
 			message.Contains("Fake or uninitialized surface") || message.Contains("Renderpass")
-			|| message.StartsWith("Shader error in 'Ocean'")
 			|| stackTrace.Contains("ScriptableRenderContext") || stackTrace.Contains("UnityEngine.Rendering.");
 
 		[SetUp]
@@ -119,23 +119,53 @@ namespace Tests.PlayMode
 		}
 
 		[UnityTest]
-		public IEnumerator SettingsAndHowToPlay_RaiseThePresenterHooks()
+		public IEnumerator Settings_OpensTheSettingsOverlay_WithReplayTutorialWired()
 		{
 			MainMenuView menu = null;
 			yield return OpenMainMenu(m => menu = m);
-			MainMenuPresenter presenter = Object.FindAnyObjectByType<MainMenuSceneManager>().Presenter;
-			int settings = 0, howToPlay = 0;
-			presenter.SettingsRequested += () => settings++;
-			presenter.HowToPlayRequested += () => howToPlay++;
 
+			Assert.IsNotNull(SettingsOverlay.ReplayTutorialHook, "Settings > Replay tutorial is wired on the Main Menu");
 			menu.SettingsButton.Button.onClick.Invoke();
-			menu.HowToPlayButton.Button.onClick.Invoke();
 			yield return null;
 
-			Assert.AreEqual(1, settings);
-			Assert.AreEqual(1, howToPlay);
+			Assert.IsTrue(SettingsOverlay.IsOpen, "Settings opens over the menu");
 			Assert.AreEqual("MainMenu", Object.FindAnyObjectByType<MainMenuSceneManager>().gameObject.scene.name, "stays on the menu");
+			SettingsOverlay.Hide();
+			yield return new WaitForSecondsRealtime(0.5f);
+			Assert.IsFalse(SettingsOverlay.IsOpen);
 			AssertNoErrors();
+		}
+
+		[UnityTest]
+		public IEnumerator HowToPlay_StartsLevelOne_WithTheTutorial()
+		{
+			bool seenBefore = PersistantData.LevelModule.TutorialCompleted.Load();
+			PersistantData.LevelModule.TutorialCompleted.Save(true);
+			try
+			{
+				LevelDataManager levels = Load<LevelDataManager>("t:LevelDataManager");
+				MainMenuView menu = null;
+				yield return OpenMainMenu(m => menu = m);
+
+				menu.HowToPlayButton.Button.onClick.Invoke();
+				yield return WaitForGame(levels.GetLevel(0).LevelData.Id);
+
+				// The tutorial shows even though it has been seen before: How to play asked for it.
+				GameManager game = Object.FindAnyObjectByType<GameManager>();
+				float end = Time.realtimeSinceStartup + Timeout;
+				while (Time.realtimeSinceStartup < end && game.Tutorial == null)
+				{
+					yield return null;
+				}
+
+				Assert.IsNotNull(game.Tutorial, "How to play shows the tutorial");
+				AssertNoErrors();
+			}
+			finally
+			{
+				TutorialLauncher.CancelRequest();
+				PersistantData.LevelModule.TutorialCompleted.Save(seenBefore);
+			}
 		}
 
 		#region Helpers

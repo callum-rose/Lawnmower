@@ -24,17 +24,18 @@ namespace Tests.PlayMode
 		private InMemoryProgressStore _progress;
 		private InMemorySettingsStore _settings;
 		private MovementScheme _schemeBefore;
+		private Action _replayHookBefore;
 		private readonly List<string> _errors = new List<string>();
 
 		private static bool IsRenderNoise(string message, string stackTrace) =>
 			message.Contains("Fake or uninitialized surface") || message.Contains("Renderpass")
-			|| message.StartsWith("Shader error in 'Ocean'")
 			|| stackTrace.Contains("ScriptableRenderContext") || stackTrace.Contains("UnityEngine.Rendering.");
 
 		[SetUp]
 		public void SetUp()
 		{
 			_schemeBefore = MovementSchemeSetting.Current;
+			_replayHookBefore = SettingsOverlay.ReplayTutorialHook;
 			_errors.Clear();
 			Application.logMessageReceived += OnLog;
 			_progress = new InMemoryProgressStore();
@@ -46,7 +47,7 @@ namespace Tests.PlayMode
 		public void TearDown()
 		{
 			Application.logMessageReceived -= OnLog;
-			SettingsOverlay.ReplayTutorialHook = null;
+			SettingsOverlay.ReplayTutorialHook = _replayHookBefore;
 			if (SettingsOverlay.Current != null)
 			{
 				Object.Destroy(SettingsOverlay.Current.gameObject);

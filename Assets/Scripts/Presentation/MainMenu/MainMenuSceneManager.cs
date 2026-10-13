@@ -4,7 +4,9 @@ using Core;
 using Game.Core;
 using Game.Levels;
 using Game.Mowers;
+using Game.Tutorial;
 using Lawnmower.Presenters;
+using Lawnmower.Screens;
 using Lawnmower.Services;
 using UnityEngine;
 
@@ -46,21 +48,9 @@ namespace MainMenu
 
 		#endregion
 
-		#region Placeholder hooks (wired at Final integration)
+		private static void OpenSettings() => SettingsOverlay.Show();
 
-		// TODO(Final): open G4's Settings prefab here.
-		private void OpenSettings()
-		{
-			Debug.Log("[MainMenu] Settings requested: not wired yet (Final integration opens G4's Settings prefab).");
-		}
-
-		// TODO(Final): open G3's tutorial here (the same flow as Settings > Replay tutorial).
-		private void OpenHowToPlay()
-		{
-			Debug.Log("[MainMenu] How to play requested: not wired yet (Final integration opens G3's tutorial).");
-		}
-
-		#endregion
+		private static void OpenHowToPlay() => TutorialEntry.PlayTutorial();
 
 		private sealed class MainMenuNavigator : IMainMenuNavigator
 		{

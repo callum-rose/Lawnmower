@@ -7,7 +7,7 @@
 # script works from any worktree. Steps:
 #   1. Unity iOS build -> Builds/iOS/Unity-iPhone.xcodeproj
 #      (through the live editor if one has this project open, otherwise `unity build` in batch mode)
-#   2. xcodebuild, automatic signing -> Builds/DerivedData/.../Bunny Heaven.app
+#   2. xcodebuild, automatic signing -> Builds/DerivedData/.../BunnyHeaven.app
 #   3. devicectl install (retried; the phone drops connections)
 #   4. devicectl launch (a launch failure is reported but does not fail the script)
 #
