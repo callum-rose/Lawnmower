@@ -343,14 +343,55 @@ def fillet_all(width=FILLET):
     the bevel, with hardened normals so the flat faces stay flat."""
     dg = bpy.context.evaluated_depsgraph_get()
     for o in [o for o in bpy.data.objects if o.type == "MESH" and not o.name.startswith("Plate")]:
+        round_tip = o.name.startswith("Ear") and VARIANT == "egg"
         o.data.shade_smooth()
         m = o.modifiers.new("fillet", "BEVEL")
         m.width, m.segments, m.limit_method, m.angle_limit = width, 3, "ANGLE", math.radians(20)
-        m.harden_normals = True                       # flat faces keep their own normal; only the fillet curves
+        m.harden_normals = not round_tip              # flat faces keep their own normal; only the fillet curves
         dg.update()
         me = bpy.data.meshes.new_from_object(o.evaluated_get(dg))
         o.modifiers.clear()
         o.data = me
+        if round_tip:                                 # smooth across the tip's facets and the fillets, flat faces
+            me.set_sharp_from_angle(angle=math.radians(35))       # stay flat by area weighting
+            w = o.modifiers.new("weighted", "WEIGHTED_NORMAL")
+            w.mode, w.keep_sharp, w.weight = "FACE_AREA", True, 100
+            dg.update()
+            me2 = bpy.data.meshes.new_from_object(o.evaluated_get(dg))
+            o.modifiers.clear()
+            o.data = me2
+
+def ear_round(name, sx, x_c, base_y, z0, w, d, h, bury, pitch, splay, segments=16):
+    """An ear as a clean mesh: a w-wide slab, d deep, with a semicircular tip, h tall of which `bury` sits
+    inside the parent; a stadium-shaped inner patch on its front. Its edges are rounded by fillet_all."""
+    y0, r = base_y - bury, w / 2
+    yc = y0 + h - r
+    prof = [(x_c + r, y0)] + [(x_c + r * math.cos(math.pi * i / segments), yc + r * math.sin(math.pi * i / segments))
+                              for i in range(segments + 1)] + [(x_c - r, y0)]
+    pivot = (x_c, base_y, z0 + d / 2)
+    px, py, pz = pivot
+    bm = bmesh.new()
+    front = [bm.verts.new(B((x - px, y - py, z0 + d - pz))) for x, y in prof]
+    back = [bm.verts.new(B((x - px, y - py, z0 - pz))) for x, y in prof]
+    bm.faces.new(front); bm.faces.new(back[::-1])
+    n = len(prof)
+    for i in range(n):
+        bm.faces.new([front[i], back[i], back[(i + 1) % n], front[(i + 1) % n]])
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    idx = mat(COAT)
+    me = bpy.data.meshes.new(name)
+    bm.to_mesh(me)
+    for m in MATS.values():
+        me.materials.append(m)
+    for f in me.polygons:
+        f.material_index = idx
+    ob = bpy.data.objects.new(name, me)
+    sc.collection.objects.link(ob)
+    ob.location = B(pivot)
+    ob.parent = root
+    plate("Plate" + name, ob, pivot, x_c - r + 1, x_c + r - 1, base_y + 1, yc + r - 2, z0 + d, r - 1, FACE, segments=12)
+    rot(ob, pitch=pitch, splay=sx * splay)
+    return ob
 
 def ear(name, sx, x_c, base_y, z0, w, d, h, bury, pitch, splay, pivot_y=None, tip=1, col=None, tip_col=None, tip_rows=0,
         tip_round=None, plate_inner=False, plate_radius=0.7):
@@ -511,7 +552,7 @@ elif VARIANT == "egg":
     # r(t) = 6.3 (1 - |t|^2.4)^(1/2.4) (1 - 0.12 t): fat, widest a little below the middle, a blunt top, cut flat at y = 2 to sit on.
     # 12.8 tall above the seat. The face colour is a smooth oval on the front; the face decal is pressed onto
     # it, eye line at 1/phi of the body's height. Hind feet phi times the front paws' length, in line with
-    # them seen from the front; upright ears with round tips in the crown; a tail.
+    # them seen from the front, tops hidden in the body; upright ears with round tips in the crown; a tail.
     EGG_YC, EGG_A, EGG_B, EGG_K, EGG_P, SEAT = 7.6, 7.2, 6.3, 0.12, 2.4, 2
     bm = bmesh.new()
     bmesh.ops.create_uvsphere(bm, u_segments=96, v_segments=64, radius=1)
@@ -543,11 +584,12 @@ elif VARIANT == "egg":
         f.material_index = face_idx if f.material_index == 1 else coat_idx
     face_uvs(body_ob, None, eye_y, 10.5, facing=0.5)
     for sx in (1, -1):
-        ear("Ear" + ("R" if sx > 0 else "L"), sx, sx * 3, 13.2, -1.5, 5, 3, 11, 3, pitch=10, splay=15,
-            tip=0, tip_round=(2.5, 8), plate_inner=True, plate_radius=1.5)          # round tips, stadium patches
+        ear_round("Ear" + ("R" if sx > 0 else "L"), sx, sx * 3, 13.2, -1.5, 5, 3, 11, 3, pitch=10, splay=15)
     tail(5.5, -6.1, size=3, proud=2)
-    feet((-3, 3), (-2,), 3, 3 * PHI, 3, 1, 2)                                    # hind feet 3 phi = 4.85 long
-    feet((-3, 3), (3.5,), 2, 3, 3, 1, 2)                                         # front paws 3 long, in line
+    # Hind feet phi times the paws' length; both sunk 2 into the body and set in so their top faces sit
+    # inside the egg (every top corner at least 0.4 inside it), on the same centre lines seen from the front.
+    feet((-2.5, 2.5), (-1.82,), 3, 2.7 * PHI, 3, 2, 2)                           # hind feet 4.37 long
+    feet((-2.5, 2.5), (2.95,), 2, 2.7, 3, 2, 2)                                  # front paws 2.7 long
     HEIGHT = 24
 
 else:  # sitting
