@@ -63,15 +63,15 @@ namespace Core
 
 		private IEnumerator LoadRoutine(LoadData data)
 		{
-			int buildIndex = GetBuildIndex(data.Scene);
+			string sceneName = GetSceneName(data.Scene);
 
-			AsyncOperation op = SceneManager.LoadSceneAsync(buildIndex);
+			AsyncOperation op = SceneManager.LoadSceneAsync(sceneName);
 			op.allowSceneActivation = true;
 			yield return op;
 
 			CurrentScene = data.Scene;
 
-			Scene loadedScene = SceneManager.GetSceneByBuildIndex(buildIndex);
+			Scene loadedScene = SceneManager.GetSceneByName(sceneName);
 
 			try
 			{
@@ -90,12 +90,17 @@ namespace Core
 				yield break;
 			}
 
-			int buildIndex = GetBuildIndex(scene);
+			Scene loaded = SceneManager.GetSceneByName(GetSceneName(scene));
+
+			if (!loaded.isLoaded)
+			{
+				yield break;
+			}
 
 			AsyncOperation op = null;
 			try
 			{
-				op = SceneManager.UnloadSceneAsync(buildIndex);
+				op = SceneManager.UnloadSceneAsync(loaded);
 			}
 			catch (Exception e)
 			{
@@ -127,9 +132,10 @@ namespace Core
 			}
 		}
 
-		private static int GetBuildIndex(UnityScene scene)
+		/// <summary>Scenes are loaded by name (the enum name), not by build index.</summary>
+		private static string GetSceneName(UnityScene scene)
 		{
-			return (int) scene;
+			return scene.ToString();
 		}
 
 #endregion
