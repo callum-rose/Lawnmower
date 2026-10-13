@@ -1,4 +1,5 @@
 using Core;
+using Lawnmower.Services;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,22 +9,19 @@ namespace Game.Levels
 	[CreateAssetMenu(fileName = nameof(LevelDataManager), menuName = SoNames.GameDir + nameof(LevelDataManager))]
 	internal partial class LevelDataManager : ScriptableObject
 	{
-		public int LevelsCompleted { get; private set; }
-
-		[SerializeField] private bool unlockAllLevels;
-
 		[SerializeField] private LevelData[] levelDatas;
 
 		private List<LevelData> _notIncludedLevels;
 
 		public int LevelCount => levelDatas.Length;
 
+		/// <summary>The level list in play order.</summary>
+		public IReadOnlyList<LevelData> Levels => levelDatas;
+
 		#region Unity
 
 		private void Awake()
 		{
-			LevelsCompleted = PersistantData.LevelModule.LevelsCompleted.Load();
-
 			if (levelDatas.Any(l => l == null))
 			{
 				Debug.LogError("Level is null in " + nameof(LevelDataManager));
@@ -76,24 +74,6 @@ namespace Game.Levels
 			return false;
 		}
 
-		public void SetLevelCompleted(LevelData level)
-		{
-			for (int i = 0; i < levelDatas.Length; i++)
-			{
-				bool isIndexOfInputLevel = levelDatas[i].Id == level.Id;
-				if (!isIndexOfInputLevel)
-				{
-					continue;
-				}
-
-				LevelsCompleted = i;
-					
-				PersistantData.LevelModule.LevelsCompleted.Save(LevelsCompleted);
-					
-				return;
-			}
-		}
-
 		#endregion
 
 		#region Methods
@@ -110,7 +90,8 @@ namespace Game.Levels
 			}
 		}
 
-		private bool IsLevelLocked(int index) => index > LevelsCompleted;
+		/// <summary>Locks come from the saved progression (levels unlock in order; unlock-all opens them all).</summary>
+		private bool IsLevelLocked(int index) => index > 0 && !GameServices.Progression.IsUnlocked(levelDatas[index].Id);
 
 		#endregion
 	}

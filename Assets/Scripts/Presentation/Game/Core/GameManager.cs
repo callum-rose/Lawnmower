@@ -8,6 +8,7 @@ using Game.UndoSystem;
 using Core.EventChannels;
 using Lawnmower.Model;
 using Lawnmower.Presenters;
+using Lawnmower.Services;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -39,6 +40,7 @@ namespace Game.Core
 		private IVoidEventChannelTransmitter StopPlayingEventChannel => stopPlayingEventChannel.Result;
 
 		private GamePresenter _presenter;
+		private GameFeedbackPresenter _feedback;
 		private DialogGameScreenView _screen;
 		private Coroutine _startPlayingTimer;
 
@@ -51,9 +53,6 @@ namespace Game.Core
 		internal DialogGameScreenView Screen => _screen;
 
 		internal MoveInputController MoveInput => moveInput;
-
-		/// <summary>Play-through tests set this so they don't write the player's saved progress.</summary>
-		internal static ILevelProgress ProgressOverrideForTests { get; set; }
 
 		#region Unity
 
@@ -86,11 +85,12 @@ namespace Game.Core
 				mowerManager,
 				_screen,
 				new GameNavigator(levelDataManager, input),
-				ProgressOverrideForTests ?? new LevelProgressStore(levelDataManager, level),
+				GameServices.Progression,
 				new UnityClock());
 
 			_presenter.AttachInput(moveInput.Input);
 			_presenter.Start();
+			_feedback = GameServices.CreateFeedback(_presenter.Simulation);
 
 			_startPlayingTimer = StartCoroutine(IntroRoutine());
 		}
@@ -105,6 +105,8 @@ namespace Game.Core
 				_startPlayingTimer = null;
 			}
 
+			_feedback?.Dispose();
+			_feedback = null;
 			_presenter?.DetachInput(moveInput.Input);
 			_presenter?.Dispose();
 			_presenter = null;

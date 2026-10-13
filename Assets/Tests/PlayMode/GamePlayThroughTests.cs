@@ -10,6 +10,7 @@ using Game.Mowers;
 using Game.Input;
 using Lawnmower.Model;
 using Lawnmower.Presenters;
+using Lawnmower.Services;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
@@ -29,20 +30,20 @@ namespace Tests.PlayMode
 	/// </summary>
 	public class GamePlayThroughTests : InputTestFixture
 	{
-		private sealed class NoProgress : ILevelProgress
-		{
-			public int Completed;
-			public void RecordCompleted(Guid levelId, AttemptStats stats, int par) => Completed++;
-		}
-
 		private const float Timeout = 20;
 
-		private NoProgress _progress;
+		private InMemoryProgressStore _progress;
 		private Keyboard _keyboard;
 		private MovementScheme _schemeBefore;
 		private MowerData _mower;
 		private readonly List<Object> _created = new List<Object>();
 		private readonly List<string> _errors = new List<string>();
+
+		private sealed class SoundRecorder : ISoundEffects
+		{
+			public readonly List<SoundEffect> Played = new List<SoundEffect>();
+			public void Play(SoundEffect effect) => Played.Add(effect);
+		}
 
 		/// <summary>
 		/// URP render-pass noise when the editor's Game view isn't drawing (unfocused editor), and the known
@@ -63,8 +64,8 @@ namespace Tests.PlayMode
 			_errors.Clear();
 			Application.logMessageReceived += OnLog;
 
-			_progress = new NoProgress();
-			GameManager.ProgressOverrideForTests = _progress;
+			_progress = new InMemoryProgressStore();
+			GameServices.InitialiseForTests(_progress);
 			_mower = Load<MowerData>("RegularBunny t:MowerData");
 		}
 
@@ -75,7 +76,8 @@ namespace Tests.PlayMode
 			// ignoreFailingMessages belongs to this test's log scope; resetting it here would re-check the render noise.
 			Application.logMessageReceived -= OnLog;
 
-			GameManager.ProgressOverrideForTests = null;
+			GameServices.SoundEffectsOverrideForTests = null;
+			GameServices.Shutdown();
 
 			foreach (Object o in _created)
 			{
@@ -93,11 +95,18 @@ namespace Tests.PlayMode
 			GameManager game = null;
 			yield return StartLevel(level, g => game = g);
 
-			yield return Play(game, MoveNotation.Parse(level.Solution));
+			SoundRecorder sounds = new SoundRecorder();
+			GameServices.SoundEffectsOverrideForTests = sounds;
+			IReadOnlyList<GridVector> solution = MoveNotation.Parse(level.Solution).ToList();
+			yield return Play(game, solution);
 
 			Assert.AreEqual(LevelStatus.Completed, game.Simulation.Status);
+			Assert.AreEqual(solution.Count, sounds.Played.Count(s => s == SoundEffect.Move), "one move sound per move");
+			Assert.AreEqual(SoundEffect.Win, sounds.Played.Last());
 			Assert.IsTrue(game.Screen.IsCompletedShown);
-			Assert.AreEqual(1, _progress.Completed);
+			Assert.AreEqual(1, _progress.SaveCount);
+			Assert.IsTrue(GameServices.Progression.IsCompleted(level.Id));
+			Assert.IsTrue(GameServices.Progression.IsUnlocked(GameServices.Progression.Levels[1]), "completing level 1 unlocks level 2");
 		}
 
 		/// <summary>The first stone level and the first spring level, replaying their recorded shortest solutions.</summary>

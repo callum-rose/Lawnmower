@@ -9,7 +9,10 @@
         "Lawnmower.Model.Tests",
         "Lawnmower.Solver",
         "Lawnmower.Infrastructure",
-        "Lawnmower.Presenters"
+        "Lawnmower.Presenters",
+        "Lawnmower.Haptics",
+        "Unity.RenderPipelines.Universal.Runtime",
+        "Unity.RenderPipelines.Core.Runtime"
     ],
     "includePlatforms": [
         "Editor"

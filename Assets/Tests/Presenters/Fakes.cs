@@ -120,13 +120,6 @@ namespace Lawnmower.Presenters.Tests
 		public void LoadLevelSelect() => _log.Add("nav level select");
 	}
 
-	public sealed class FakeProgress : ILevelProgress
-	{
-		public List<(Guid id, AttemptStats stats, int par)> Records { get; } = new List<(Guid, AttemptStats, int)>();
-
-		public void RecordCompleted(Guid levelId, AttemptStats stats, int par) => Records.Add((levelId, stats, par));
-	}
-
 	public sealed class FakeClock : IClock
 	{
 		public double Now { get; set; }

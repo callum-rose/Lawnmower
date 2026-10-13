@@ -22,8 +22,8 @@ namespace Lawnmower.Presenters
 		private readonly IMowerView _mower;
 		private readonly IGameScreenView _screen;
 		private readonly IGameNavigator _navigator;
-		private readonly ILevelProgress _progress;
-		private readonly IClock _clock;
+		private readonly Progression _progression;
+		private readonly AttemptTracker _attempt;
 		private readonly IUndoSystem _undoSystem;
 
 		private readonly List<IMoveInput> _inputs = new List<IMoveInput>();
@@ -31,32 +31,44 @@ namespace Lawnmower.Presenters
 
 		private bool _isRunningCommand;
 		private bool _isDisposed;
-		private int _moves;
-		private int _undos;
-		private double? _startTime;
+		private bool _hasBegun;
 		private (LevelStatus from, LevelStatus to, Xor inverted)? _pendingStatusChange;
 
 		/// <summary>Null until <see cref="Start"/>.</summary>
 		public LevelSimulation Simulation { get; private set; }
 
-		/// <summary>False until <see cref="BeginPlay"/> (the level intro) and after <see cref="Dispose"/>.</summary>
-		public bool IsAcceptingInput { get; private set; }
+		/// <summary>False until <see cref="BeginPlay"/> (the level intro), while paused and after <see cref="Dispose"/>.</summary>
+		public bool IsAcceptingInput => _hasBegun && !_isDisposed && !IsPaused;
+
+		/// <summary>The Pause card is open: moves, undo and redo are ignored and the attempt clock stops.</summary>
+		public bool IsPaused => _attempt.IsPaused;
 
 		public int Par => _setup.Par;
 
-		public AttemptStats Stats =>
-			new AttemptStats(_moves, _undos, _startTime.HasValue ? _clock.Now - _startTime.Value : 0);
+		public Guid LevelId => _setup.Definition.Id;
+
+		/// <summary>The current attempt: moves (bumps don't count, an undo takes one off), undos, and time not paused.</summary>
+		public AttemptStats Stats => _attempt.Stats;
+
+		/// <summary>Raised after the move count changes (a move, an undo or a redo), with the new stats.</summary>
+		public event Action<AttemptStats> StatsChanged;
+
+		/// <summary>Raised when the Pause card opens (true) or closes (false).</summary>
+		public event Action<bool> PausedChanged;
+
+		/// <summary>Raised when the level is completed, after progress is saved and before the card is shown.</summary>
+		public event Action<LevelCompletedInfo> Completed;
 
 		public GamePresenter(GameSessionSetup setup, IBoardView board, IMowerView mower, IGameScreenView screen,
-			IGameNavigator navigator, ILevelProgress progress, IClock clock, IUndoSystem undoSystem = null)
+			IGameNavigator navigator, Progression progression, IClock clock, IUndoSystem undoSystem = null)
 		{
 			_setup = setup ?? throw new ArgumentNullException(nameof(setup));
 			_board = board ?? throw new ArgumentNullException(nameof(board));
 			_mower = mower ?? throw new ArgumentNullException(nameof(mower));
 			_screen = screen ?? throw new ArgumentNullException(nameof(screen));
 			_navigator = navigator ?? throw new ArgumentNullException(nameof(navigator));
-			_progress = progress ?? throw new ArgumentNullException(nameof(progress));
-			_clock = clock ?? throw new ArgumentNullException(nameof(clock));
+			_progression = progression ?? throw new ArgumentNullException(nameof(progression));
+			_attempt = new AttemptTracker(clock ?? throw new ArgumentNullException(nameof(clock)));
 			_undoSystem = undoSystem ?? new UndoSystem();
 		}
 
@@ -85,7 +97,7 @@ namespace Lawnmower.Presenters
 
 			_board.Show(Simulation.Level);
 			_mower.Show(Simulation.Level.StartPosition);
-			_screen.ShowProgress(_moves, Par);
+			_screen.ShowProgress(_attempt.Moves, Par);
 
 			if (Simulation.Status == LevelStatus.Failed)
 			{
@@ -103,8 +115,31 @@ namespace Lawnmower.Presenters
 				throw new InvalidOperationException("Start must be called before BeginPlay");
 			}
 
-			IsAcceptingInput = true;
-			_startTime ??= _clock.Now;
+			_hasBegun = true;
+			_attempt.Start();
+		}
+
+		/// <summary>Opens the pause state (the Pause card): input is ignored and the attempt clock stops.</summary>
+		public void Pause()
+		{
+			if (_isDisposed || IsPaused)
+			{
+				return;
+			}
+
+			_attempt.Pause();
+			PausedChanged?.Invoke(true);
+		}
+
+		public void Resume()
+		{
+			if (_isDisposed || !IsPaused)
+			{
+				return;
+			}
+
+			_attempt.Resume();
+			PausedChanged?.Invoke(false);
 		}
 
 		public void AttachInput(IMoveInput input)
@@ -152,7 +187,7 @@ namespace Lawnmower.Presenters
 			{
 				if (_undoSystem.Undo())
 				{
-					_undos++;
+					_attempt.CountUndo();
 				}
 			});
 		}
@@ -180,7 +215,6 @@ namespace Lawnmower.Presenters
 			}
 
 			_isDisposed = true;
-			IsAcceptingInput = false;
 			_pendingCommands.Clear();
 
 			foreach (IMoveInput input in _inputs)
@@ -222,16 +256,17 @@ namespace Lawnmower.Presenters
 		{
 			if (inverted)
 			{
-				_moves--;
+				_attempt.CountMoveUndone();
 				_mower.RewindMove(move);
 			}
 			else
 			{
-				_moves++;
+				_attempt.CountMove();
 				_mower.PlayMove(move);
 			}
 
-			_screen.ShowProgress(_moves, Par);
+			_screen.ShowProgress(_attempt.Moves, Par);
+			StatsChanged?.Invoke(_attempt.Stats);
 
 			if (_pendingStatusChange.HasValue)
 			{
@@ -250,6 +285,7 @@ namespace Lawnmower.Presenters
 		{
 			if (from == LevelStatus.Completed && inverted)
 			{
+				_attempt.SetFinished(false);
 				_screen.HideCompleted();
 			}
 
@@ -260,9 +296,13 @@ namespace Lawnmower.Presenters
 
 			if (to == LevelStatus.Completed && !inverted)
 			{
+				_attempt.SetFinished(true);
 				AttemptStats stats = Stats;
-				_progress.RecordCompleted(_setup.Definition.Id, stats, Par);
-				_screen.ShowCompleted(new LevelCompletedInfo(stats.Moves, Par, _navigator.HasNextLevel));
+				bool isPerfect = LevelCompletedInfo.IsPerfectScore(stats.Moves, Par);
+				CompletionResult result = _progression.MarkCompleted(_setup.Definition.Id, stats.Moves, isPerfect);
+				LevelCompletedInfo info = new LevelCompletedInfo(stats, Par, _navigator.HasNextLevel, result);
+				Completed?.Invoke(info);
+				_screen.ShowCompleted(info);
 			}
 
 			if (to == LevelStatus.Failed && !inverted)

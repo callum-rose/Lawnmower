@@ -10,7 +10,11 @@
         "Lawnmower.Model",
         "Lawnmower.Infrastructure",
         "Lawnmower.Presenters",
-        "Unity.InputSystem"
+        "Unity.InputSystem",
+        "Lawnmower.Haptics",
+        "BunnyHeaven.UI",
+        "Unity.RenderPipelines.Universal.Runtime",
+        "Unity.RenderPipelines.Core.Runtime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

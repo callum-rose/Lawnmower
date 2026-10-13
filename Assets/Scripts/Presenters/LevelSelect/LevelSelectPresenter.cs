@@ -9,14 +9,29 @@ namespace Lawnmower.Presenters
 		public int Index { get; }
 		public Guid Id { get; }
 		public bool IsLocked { get; }
+		public bool IsCompleted { get; }
+
+		/// <summary>Completed at or under par at least once.</summary>
+		public bool IsPerfect { get; }
+
+		/// <summary>Fewest moves it's been completed in; null if it hasn't been.</summary>
+		public int? Best { get; }
+
+		/// <summary>The first unlocked level not yet completed: the big "NEXT!" node.</summary>
+		public bool IsNext { get; }
 
 		public int Number => Index + 1;
 
-		public LevelSummary(int index, Guid id, bool isLocked)
+		public LevelSummary(int index, Guid id, bool isLocked, bool isCompleted = false, bool isPerfect = false,
+			int? best = null, bool isNext = false)
 		{
 			Index = index;
 			Id = id;
 			IsLocked = isLocked;
+			IsCompleted = isCompleted;
+			IsPerfect = isPerfect;
+			Best = best;
+			IsNext = isNext;
 		}
 	}
 
