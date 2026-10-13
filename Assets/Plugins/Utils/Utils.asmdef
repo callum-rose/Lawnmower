@@ -1,3 +1,6 @@
-﻿{
-	"name": "Utils"
+{
+	"name": "Utils",
+	"references": [
+		"Unity.InputSystem"
+	]
 }

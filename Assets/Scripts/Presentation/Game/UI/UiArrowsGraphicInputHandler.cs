@@ -1,7 +1,5 @@
 using BalsamicBits.Extensions;
 using DG.Tweening;
-using Game.Core;
-using Game.Mowers.Input;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -19,20 +17,12 @@ namespace Game.UI
 		[SerializeField] private RawImage image;
 
 		[SerializeField] private Color beingUsedColour;
-		[SerializeField] private Color notBeingUsedColour;
-		[SerializeField] private float colourChangeDuration;
 
 		[Header("Dragging")]
 		[SerializeField] private bool isDraggable;
 
 		[SerializeField, Min(0)] private float padding;
 		[SerializeField, Min(0)] private float dragTransformScaleFactor = 1.2f;
-
-		[Header("Event Channels")]
-		[SerializeField] private IMowerInputEventChannelListenerContainer mowerInputEventChannelContainer;
-
-		private IMowerInputEventChannelListener MowerInputEventChannelListener =>
-			mowerInputEventChannelContainer.Result;
 
 		private RectTransform _rectTransform;
 		private Canvas _parentCanvas;
@@ -42,8 +32,6 @@ namespace Game.UI
 		private Tween _dragScaleUpTween;
 		private Vector2 _preDragPosition;
 
-		private int _lastInputFrame;
-		private bool _isBeingUsed;
 
 		private void Awake()
 		{
@@ -53,8 +41,6 @@ namespace Game.UI
 			_rootCanvasScaler = _parentCanvas.rootCanvas.GetComponent<CanvasScaler>();
 
 			_initialScale = transform.localScale;
-
-			MowerInputEventChannelListener.EventRaised += MowerInputEventChannelOnEventRaised;
 		}
 
 		private void Start()
@@ -74,13 +60,9 @@ namespace Game.UI
 
 		private void OnEnable()
 		{
-			_isBeingUsed = true;
-			SetBeingUsedAppearance(true);
-		}
-
-		private void OnDestroy()
-		{
-			MowerInputEventChannelListener.EventRaised -= MowerInputEventChannelOnEventRaised;
+			// Only shown while the Arrows scheme is active, so always in use.
+			image.DOKill();
+			image.color = beingUsedColour;
 		}
 
 		public void OnPointerClick(PointerEventData eventData)
@@ -90,8 +72,6 @@ namespace Game.UI
 			{
 				return;
 			}
-
-			_lastInputFrame = Time.frameCount;
 
 			Rect rect = RectTransformUtility.PixelAdjustRect(_rectTransform, _parentCanvas);
 			Vector2 pivot = _rectTransform.pivot;
@@ -151,26 +131,6 @@ namespace Game.UI
 			_dragScaleUpTween = transform
 				.DOScale(_initialScale, 0.25f)
 				.OnComplete(() => _dragScaleUpTween = null);
-		}
-
-		private void MowerInputEventChannelOnEventRaised(GridVector _)
-		{
-			SetBeingUsedAppearance();
-		}
-
-		private void SetBeingUsedAppearance(bool force = false)
-		{
-			bool lastLocalInputWasThisFrame = Time.frameCount == _lastInputFrame;
-
-			if (!force && lastLocalInputWasThisFrame == _isBeingUsed)
-			{
-				return;
-			}
-
-			image.DOKill();
-			image.DOColor(lastLocalInputWasThisFrame ? beingUsedColour : notBeingUsedColour, colourChangeDuration);
-
-			_isBeingUsed = lastLocalInputWasThisFrame;
 		}
 	}
 }

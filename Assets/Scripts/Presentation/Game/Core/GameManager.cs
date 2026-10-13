@@ -3,7 +3,7 @@ using Core;
 using Exceptions;
 using Game.Levels;
 using Game.Mowers;
-using Game.Mowers.Input;
+using Game.Input;
 using Game.UndoSystem;
 using Core.EventChannels;
 using Lawnmower.Model;
@@ -26,13 +26,13 @@ namespace Game.Core
 		[SerializeField] private LevelDataManager levelDataManager;
 		[SerializeField] private UndoController undoController;
 		[SerializeField] private GamePlayData gamePlayData;
+		[SerializeField] private MoveInputController moveInput;
 
 		[Header("Event Channels")]
 		[SerializeField] private OpenDialogEventChannel openDialogEventChannel;
 		[SerializeField] private CloseDialogEventChannel closeDialogEventChannel;
 		[SerializeField] private IVoidEventChannelTransmitterContainer startPlayingEventChannel;
 		[SerializeField] private IVoidEventChannelTransmitterContainer stopPlayingEventChannel;
-		[SerializeField] private MowerInputEventChannel mowerInputEventChannel;
 		[SerializeField] private UndoableEventChannel levelFailedChannel;
 
 		private IVoidEventChannelTransmitter StartPlayingEventChannel => startPlayingEventChannel.Result;
@@ -40,7 +40,6 @@ namespace Game.Core
 
 		private GamePresenter _presenter;
 		private DialogGameScreenView _screen;
-		private MowerInputChannelSource _input;
 		private Coroutine _startPlayingTimer;
 
 		/// <summary>The current session's presenter, or null between levels.</summary>
@@ -50,6 +49,8 @@ namespace Game.Core
 		public LevelSimulation Simulation => _presenter?.Simulation;
 
 		internal DialogGameScreenView Screen => _screen;
+
+		internal MoveInputController MoveInput => moveInput;
 
 		/// <summary>Play-through tests set this so they don't write the player's saved progress.</summary>
 		internal static ILevelProgress ProgressOverrideForTests { get; set; }
@@ -88,8 +89,7 @@ namespace Game.Core
 				ProgressOverrideForTests ?? new LevelProgressStore(levelDataManager, level),
 				new UnityClock());
 
-			_input = new MowerInputChannelSource(mowerInputEventChannel);
-			_presenter.AttachInput(_input);
+			_presenter.AttachInput(moveInput.Input);
 			_presenter.Start();
 
 			_startPlayingTimer = StartCoroutine(IntroRoutine());
@@ -105,6 +105,7 @@ namespace Game.Core
 				_startPlayingTimer = null;
 			}
 
+			_presenter?.DetachInput(moveInput.Input);
 			_presenter?.Dispose();
 			_presenter = null;
 
@@ -113,9 +114,6 @@ namespace Game.Core
 				levelManager.Clear();
 				mowerManager.Hide();
 			}
-
-			_input?.Dispose();
-			_input = null;
 
 			_screen?.Dispose();
 			_screen = null;

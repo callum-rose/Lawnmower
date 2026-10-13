@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Core;
 using Game.Core;
-using Game.Mowers.Input;
+using Game.Input;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -21,8 +21,8 @@ namespace Game.Tutorial
 		[Header("Mow Lawn Message")]
 		[SerializeField] private UnityEvent mowLawnSequenceStartEvent;
 		
-		[Header("Event Channels")]
-		[SerializeField] private MowerInputEventChannel mowerInputEventChannel;
+		[Header("Input")]
+		[SerializeField] private MoveInputController moveInput;
 
 		private StageHandler _currentStageHandler;
 		private Queue<StageHandler> _stageQueue;
@@ -45,7 +45,7 @@ namespace Game.Tutorial
 		{
 			Debug.Log("Tutorial started");
 
-			mowerInputEventChannel.EventRaised += OnMowerInput;
+			moveInput.MoveRequested += OnMowerInput;
 
 			StageHandler tapStageHandler = new StageHandler(
 				() => tapArrowsStartEvent.Invoke(),
@@ -93,7 +93,7 @@ namespace Game.Tutorial
 		{
 			Debug.Log("Tutorial ended");
 
-			mowerInputEventChannel.EventRaised -= OnMowerInput;
+			moveInput.MoveRequested -= OnMowerInput;
 			
 			PersistantData.LevelModule.TutorialCompleted.Save(true);
 		}

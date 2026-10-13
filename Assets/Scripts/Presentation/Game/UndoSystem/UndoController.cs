@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace Game.UndoSystem
 {
@@ -14,11 +15,17 @@ namespace Game.UndoSystem
 
         private void Update()
         {
-            if (UnityEngine.Input.GetKeyDown(KeyCode.Z))
+            Keyboard keyboard = Keyboard.current;
+            if (keyboard == null)
+            {
+                return;
+            }
+
+            if (keyboard.zKey.wasPressedThisFrame)
             {
                 Undo();
             }
-            if (UnityEngine.Input.GetKeyDown(KeyCode.Y))
+            if (keyboard.yKey.wasPressedThisFrame)
             {
                 Redo();
             }

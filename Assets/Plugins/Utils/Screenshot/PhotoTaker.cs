@@ -11,10 +11,7 @@ namespace Utils.Screenshot
 
         private void Update()
         {
-            //if (Input.GetKeyDown(KeyCode.P))
-            //    TakePhoto();
-
-            if (Input.GetKeyDown(KeyCode.S))
+            if (UnityEngine.InputSystem.Keyboard.current?.sKey.wasPressedThisFrame == true)
                 TakeScreenShot();
         }
 

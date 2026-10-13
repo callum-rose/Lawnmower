@@ -17,7 +17,7 @@ namespace Game.Tiles
 
         public void OnBeginDrag(PointerEventData eventData)
         {
-            Dragging.Invoke(true);
+            Dragging?.Invoke(true);
             OnDrag_Internal(eventData);
         }
 
@@ -28,7 +28,7 @@ namespace Game.Tiles
 
         public void OnEndDrag(PointerEventData eventData)
         {
-            Dragging.Invoke(false);
+            Dragging?.Invoke(false);
             OnDrag_Internal(eventData);
         }
 
@@ -47,7 +47,7 @@ namespace Game.Tiles
                 return;
             }
 
-            Selected.Invoke(position);
+            Selected?.Invoke(position);
 
             _lastDraggedOverPosition = position;
         }

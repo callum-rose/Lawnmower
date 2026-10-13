@@ -254,8 +254,7 @@ Transform:
   - {fileID: 57374274}
   - {fileID: 83278715}
   - {fileID: 165245710}
-  - {fileID: 170081299}
-  - {fileID: 1028350302}
+  - {fileID: 590363836}
   - {fileID: 1884422177}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -304,9 +303,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mowerObjectCreator: {fileID: 83278716}
-  mowerPositionRequirers:
-  - ObjectField: {fileID: 1028350308}
-    ResultType: 
+  mowerPositionRequirers: []
   mowerCreatedEventChannelContainer:
     ObjectField: {fileID: 11400000, guid: 12a07be353cc1b842a6e74de6d86c941, type: 2}
     ResultType: 
@@ -787,70 +784,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 46.323, y: 0, z: -33.789}
---- !u!1 &170081298
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 170081299}
-  - component: {fileID: 170081301}
-  - component: {fileID: 170081300}
-  m_Layer: 0
-  m_Name: Controls
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &170081299
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 170081298}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 12490847}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &170081300
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 170081298}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 10667c3528ac2fc49a983eaf6b4322f6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  mowerInputEventChannel: {fileID: 11400000, guid: 493087ea426ec094fa4aa264e865b8fe, type: 2}
---- !u!114 &170081301
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 170081298}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 023bfb22f6ce8ee40b1bcac829123405, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _gestureHandlerContainers:
-  - ObjectField: {fileID: 1028350304}
-    ResultType: 
-  - ObjectField: {fileID: 1028350308}
-    ResultType: 
-  mowerInputEventChannel: {fileID: 11400000, guid: 493087ea426ec094fa4aa264e865b8fe, type: 2}
 --- !u!1 &174662416
 GameObject:
   m_ObjectHideFlags: 0
@@ -1615,14 +1548,9 @@ MonoBehaviour:
   renderTexture: {fileID: 8400000, guid: 2c527a97f357f4d41aa8977bb9167adf, type: 2}
   image: {fileID: 387251411}
   beingUsedColour: {r: 1, g: 1, b: 1, a: 0.7490196}
-  notBeingUsedColour: {r: 1, g: 1, b: 1, a: 0.2509804}
-  colourChangeDuration: 0.5
   isDraggable: 0
   padding: 20
   dragTransformScaleFactor: 1.2
-  mowerInputEventChannelContainer:
-    ObjectField: {fileID: 11400000, guid: 493087ea426ec094fa4aa264e865b8fe, type: 2}
-    ResultType: 
 --- !u!95 &387251414
 Animator:
   serializedVersion: 7
@@ -4634,6 +4562,7 @@ MonoBehaviour:
   levelDataManager: {fileID: 11400000, guid: aa70aff86d447fa4ea3762dc62345078, type: 2}
   undoController: {fileID: 165245711}
   gamePlayData: {fileID: 11400000, guid: 123151afb2fdd074f9d46e345d51c0f4, type: 2}
+  moveInput: {fileID: 590363835}
   openDialogEventChannel: {fileID: 11400000, guid: 0611004ef216acb40ae7cf58c8128b48, type: 2}
   closeDialogEventChannel: {fileID: 11400000, guid: f34ff3e23ec36c247b8992dc19da2023, type: 2}
   startPlayingEventChannel:
@@ -4642,7 +4571,6 @@ MonoBehaviour:
   stopPlayingEventChannel:
     ObjectField: {fileID: 11400000, guid: 0c0bdcfee7c27f44bb674cb0d325eb33, type: 2}
     ResultType: 
-  mowerInputEventChannel: {fileID: 11400000, guid: 493087ea426ec094fa4aa264e865b8fe, type: 2}
   levelFailedChannel: {fileID: 11400000, guid: a09acfa985ce96e439eaaca03db88ca7, type: 2}
 --- !u!1001 &581798740
 PrefabInstance:
@@ -4858,6 +4786,57 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 4163151605430347187, guid: 92f3ec301908e9840ae4d2c881aba10a, type: 3}
   m_PrefabInstance: {fileID: 581798740}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &590363834
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 590363836}
+  - component: {fileID: 590363835}
+  m_Layer: 0
+  m_Name: MoveInput
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &590363835
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 590363834}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1add8890d24c44ddb14036b1ee31d4f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Lawnmower.Presentation::Game.Input.MoveInputController
+  screenToBoard: {fileID: 120270604}
+  arrows: {fileID: 1529931566}
+  arrowsObjects:
+  - {fileID: 387251409}
+  - {fileID: 2576570993781950615}
+  swipeMinDistanceInches: 0.2
+  swipeMinStraightness: 0.8
+--- !u!4 &590363836
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 590363834}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 12490847}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &607919052
 GameObject:
   m_ObjectHideFlags: 0
@@ -6097,466 +6076,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!1 &1028350301
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1028350302}
-  - component: {fileID: 1028350307}
-  - component: {fileID: 1028350303}
-  - component: {fileID: 1028350305}
-  - component: {fileID: 1028350304}
-  - component: {fileID: 1028350309}
-  - component: {fileID: 1028350308}
-  - component: {fileID: 1028350311}
-  - component: {fileID: 1028350310}
-  - component: {fileID: 1028350312}
-  - component: {fileID: 1028350306}
-  - component: {fileID: 1028350313}
-  m_Layer: 0
-  m_Name: Input
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1028350302
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1028350301}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 12490847}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1028350303
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1028350301}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1fc98219a83dff145947365dc914d06e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  TapThreshold: 1
-  SwipeThreshold: 100
-  ReferenceDpi: 266
-  GuiLayers:
-    serializedVersion: 2
-    m_Bits: 32
-  RecordFingers: 1
-  RecordThreshold: 5
-  RecordLimit: 10
-  SimulateMultiFingers: 0
-  PinchTwistKey: 306
-  MovePivotKey: 308
-  MultiDragKey: 308
-  FingerTexture: {fileID: 2800000, guid: 25c48be3a87ea0f489a6d41c9c9a2194, type: 3}
---- !u!114 &1028350304
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1028350301}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3a9cd8df093ed70438d441fe7f583420, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  screenToWorldConverter: {fileID: 120270604}
---- !u!114 &1028350305
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1028350301}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7753240a3b724944fbeb66563ac87bc2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  RequiredAngle: 0
-  RequiredArc: -1
-  onFinger:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1028350306}
-        m_TargetAssemblyTypeName: Game.Core.GestureHandler, Scripts
-        m_MethodName: OnSwipe
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-  Modify: 0
-  Coordinate: 0
-  Multiplier: 1
-  onDelta:
-    m_PersistentCalls:
-      m_Calls: []
-  onDistance:
-    m_PersistentCalls:
-      m_Calls: []
-  ScreenDepth:
-    Conversion: 1
-    Camera: {fileID: 0}
-    Object: {fileID: 0}
-    Layers:
-      serializedVersion: 2
-      m_Bits: 4294967291
-    Distance: 0
-  onWorldFrom:
-    m_PersistentCalls:
-      m_Calls: []
-  onWorldTo:
-    m_PersistentCalls:
-      m_Calls: []
-  onWorldDelta:
-    m_PersistentCalls:
-      m_Calls: []
-  onWorldFromTo:
-    m_PersistentCalls:
-      m_Calls: []
-  IgnoreStartedOverGui: 0
-  IgnoreIsOverGui: 0
-  RequiredSelectable: {fileID: 0}
-  swipeMinStraightnessThreshold: 0.8
-  snapShotSkips: 2
---- !u!114 &1028350306
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1028350301}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a87d6988b15056b4dbd401c8e47cff71, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  allowedSimultaneousGestures:
-  - a: 1
-    b: 2
-  - a: 1
-    b: 5
-  - a: 2
-    b: 5
-  cancelCurrentAfterFrames: 2
-  logCurrentGestures: 0
-  pinchEvent:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 66872178}
-        m_TargetAssemblyTypeName: Game.Cameras.ZoomHandler, Scripts
-        m_MethodName: OnPinchGesture
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-  twistEvent:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 66872177}
-        m_TargetAssemblyTypeName: Game.Cameras.RotationHandler, Scripts
-        m_MethodName: OnTwistGesture
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-  swipeEvent:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1028350304}
-        m_TargetAssemblyTypeName: Game.Mowers.Input.TouchSwipeHandler, Scripts
-        m_MethodName: OnFingerMove
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-  tapEvent:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1028350308}
-        m_TargetAssemblyTypeName: Game.Mowers.Input.TouchTapHandler, Scripts
-        m_MethodName: OnFingerMove
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-  twoFingerDragEvent:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 66872179}
-        m_TargetAssemblyTypeName: Game.Cameras.TwoFingerDragHandler, Scripts
-        m_MethodName: OnDragGesture
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 2025144735}
-        m_TargetAssemblyTypeName: Game.Cameras.PanCameraManager, Scripts
-        m_MethodName: OnDragGesture
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
---- !u!114 &1028350307
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1028350301}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e25ec23ca72d184dbc04402aa4aa4c7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &1028350308
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1028350301}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8cd9717d880d06f409f91d06ed4d936b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  screenToWorldConverter: {fileID: 120270604}
-  positioner: {fileID: 2014382489}
-  toleranceAngle: 15
-  unlimitedDistance: 0
-  maxDistanceFromMower: 3.11
---- !u!114 &1028350309
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1028350301}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f7c1c71d8ad5da9438de3b2e5990763f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  IgnoreStartedOverGui: 1
-  IgnoreIsOverGui: 1
-  RequiredSelectable: {fileID: 0}
-  RequiredTapCount: 0
-  RequiredTapInterval: 0
-  onFinger:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1028350306}
-        m_TargetAssemblyTypeName: Game.Core.GestureHandler, Scripts
-        m_MethodName: OnTap
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-  onCount:
-    m_PersistentCalls:
-      m_Calls: []
-  ScreenDepth:
-    Conversion: 1
-    Camera: {fileID: 0}
-    Object: {fileID: 0}
-    Layers:
-      serializedVersion: 2
-      m_Bits: 4294967291
-    Distance: 0
-  onWorld:
-    m_PersistentCalls:
-      m_Calls: []
---- !u!114 &1028350310
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1028350301}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 52d72cc6210cb7144a24acb7402222a6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Use:
-    Filter: 0
-    IgnoreStartedOverGui: 0
-    RequiredFingerCount: 2
-    RequiredMouseButtons: 0
-    RequiredSelectable: {fileID: 0}
-  Camera: {fileID: 0}
-  Relative: 1
-  Dampening: -1
-  mode: 1
-  rotationEvent:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1028350306}
-        m_TargetAssemblyTypeName: Game.Core.GestureHandler, Scripts
-        m_MethodName: OnTwist
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-  twistStartThresholdDegrees: 8
-  remainingTranslation: {x: 0, y: 0, z: 0}
-  remainingRotation: {x: 0, y: 0, z: 0, w: 1}
---- !u!114 &1028350311
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1028350301}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7c73c1ab94e28d244827af556dca1ed2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Use:
-    Filter: 0
-    IgnoreStartedOverGui: 0
-    RequiredFingerCount: 2
-    RequiredMouseButtons: 0
-    RequiredSelectable: {fileID: 0}
-  Camera: {fileID: 0}
-  Relative: 0
-  Sensitivity: 1
-  Dampening: -1
-  Scale:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1028350306}
-        m_TargetAssemblyTypeName: Game.Core.GestureHandler, Scripts
-        m_MethodName: OnPinch
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-  pinchStartThresholdFactor: 1.1
-  remainingScale: {x: 0, y: 0, z: 0}
---- !u!114 &1028350312
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1028350301}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4eda371e5375f454490a86f21559ee38, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Use:
-    Filter: 0
-    IgnoreStartedOverGui: 0
-    RequiredFingerCount: 2
-    RequiredMouseButtons: 0
-    RequiredSelectable: {fileID: 0}
-  Camera: {fileID: 0}
-  Sensitivity: 1
-  Dampening: -1
-  Inertia: 0
-  mode: 2
-  dragDeltaEvent:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1028350306}
-        m_TargetAssemblyTypeName: Game.Core.GestureForwardingHandler, Scripts
-        m_MethodName: OnTwoFingerDrag
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-  dragStartScreenDistanceThreshold: 50
-  remainingTranslation: {x: 0, y: 0, z: 0}
---- !u!114 &1028350313
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1028350301}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 70a181840d1abe14c8ab86e2a778667f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  size: 100
-  texture: {fileID: 2800000, guid: bc77dcf2f5200044887f9dd7d4fed1ca, type: 3}
 --- !u!1 &1064352648
 GameObject:
   m_ObjectHideFlags: 0
@@ -7394,7 +6913,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1406978897}
   - component: {fileID: 1406978896}
-  - component: {fileID: 1406978895}
+  - component: {fileID: 1406978898}
   m_Layer: 0
   m_Name: EventSystem
   m_TagString: Untagged
@@ -7402,26 +6921,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1406978895
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1406978894}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4f231c4fb786f3946a6b90b886c48677, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_SendPointerHoverToParent: 1
-  m_HorizontalAxis: Horizontal
-  m_VerticalAxis: Vertical
-  m_SubmitButton: Submit
-  m_CancelButton: Cancel
-  m_InputActionsPerSecond: 10
-  m_RepeatDelay: 0.5
-  m_ForceModuleActive: 0
 --- !u!114 &1406978896
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7452,6 +6951,37 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1406978898
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1406978894}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 01614664b831546d2ae94a42149d80ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.UI.InputSystemUIInputModule
+  m_SendPointerHoverToParent: 1
+  m_MoveRepeatDelay: 0.5
+  m_MoveRepeatRate: 0.1
+  m_XRTrackingOrigin: {fileID: 0}
+  m_ActionsAsset: {fileID: -944628639613478452, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  m_PointAction: {fileID: 1054132383583890850, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  m_MoveAction: {fileID: 3710738434707379630, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  m_SubmitAction: {fileID: 2064916234097673511, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  m_CancelAction: {fileID: -1967631576421560919, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  m_LeftClickAction: {fileID: 8056856818456041789, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  m_MiddleClickAction: {fileID: 3279352641294131588, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  m_RightClickAction: {fileID: 3837173908680883260, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  m_ScrollWheelAction: {fileID: 6240969308177333660, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  m_TrackedDevicePositionAction: {fileID: 6564999863303420839, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  m_TrackedDeviceOrientationAction: {fileID: 1025543830046995696, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  m_DeselectOnBackgroundClick: 1
+  m_PointerBehavior: 0
+  m_CursorLockBehavior: 0
+  m_ScrollDeltaPerTick: 6
 --- !u!1001 &1521987312
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7687,7 +7217,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3204528599622103587, guid: 07bf993209eaf6b459da13f94a3dd7d0, type: 3}
   m_PrefabInstance: {fileID: 2576570993781950614}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 2576570993781950615}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d26d01a6aa2c42f7bbdacd295b19bb81, type: 3}
@@ -8469,7 +7999,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-  mowerInputEventChannel: {fileID: 11400000, guid: 493087ea426ec094fa4aa264e865b8fe, type: 2}
+  moveInput: {fileID: 590363835}
 --- !u!1 &2014382484
 GameObject:
   m_ObjectHideFlags: 0
@@ -8605,9 +8135,6 @@ MonoBehaviour:
   dragCamMixIndex: 1
   snapToMowerThresholdTileWidths: 2
   snapAnimDuration: 0.5
-  mowerInputEventChannel:
-    ObjectField: {fileID: 11400000, guid: 493087ea426ec094fa4aa264e865b8fe, type: 2}
-    ResultType: 
   canPanCameraEventChannel:
     ObjectField: {fileID: 11400000, guid: b7c9d7f3095fd5f4785c2f6f6e4aa1ed, type: 2}
     ResultType: 
@@ -8929,6 +8456,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 07bf993209eaf6b459da13f94a3dd7d0, type: 3}
+--- !u!1 &2576570993781950615 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2576570993714188291, guid: 07bf993209eaf6b459da13f94a3dd7d0, type: 3}
+  m_PrefabInstance: {fileID: 2576570993781950614}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &2823078578957743875
 PrefabInstance:
   m_ObjectHideFlags: 0
