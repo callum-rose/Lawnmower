@@ -63,12 +63,18 @@ namespace Game.Mowers
 			MowerObjectMovedEventChannel.EventRaised += OnMowerMoved;
 			TileAnimationsFinishedEventChannel.EventRaised += OnTileAnimationsFinished;
 
-			bool CanAnimate() => mowerPosition.HasValue && tileAnimationsFinished;
+			// The mower can be destroyed before this finishes (level left during the intro).
+			bool CanAnimate() => mower == null || mowerPosition.HasValue && tileAnimationsFinished;
 
 			yield return new WaitUntil(CanAnimate);
 
 			MowerObjectMovedEventChannel.EventRaised -= OnMowerMoved;
 			TileAnimationsFinishedEventChannel.EventRaised -= OnTileAnimationsFinished;
+
+			if (mower == null)
+			{
+				yield break;
+			}
 
 			mower.SetActive(true);			
 			AnimateMower(mower, mowerPosition.Value);
