@@ -1,4 +1,3 @@
-using System;
 using Core;
 using Game.Core;
 using Game.Levels;
@@ -55,21 +54,7 @@ namespace LevelSelect
 				ViewManager.Instance.Load(UnityScene.Game, new GameSetupPassThroughData(_mowers.GetCurrent(), level));
 			}
 
-			/// <summary>
-			/// By name, so this compiles before and after the MainMenu entry is (re-)enabled in <see cref="UnityScene"/>
-			/// (G2 owns that change).
-			/// </summary>
-			public void GoToMainMenu()
-			{
-				if (Enum.TryParse("MainMenu", out UnityScene mainMenu) && mainMenu != UnityScene.None)
-				{
-					ViewManager.Instance.Load(mainMenu);
-				}
-				else
-				{
-					Debug.LogWarning("[LevelSelect] Back: UnityScene has no MainMenu entry yet, so there's nowhere to go back to.");
-				}
-			}
+			public void GoToMainMenu() => ViewManager.Instance.Load(UnityScene.MainMenu);
 		}
 	}
 }

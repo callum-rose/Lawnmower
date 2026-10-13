@@ -59,32 +59,20 @@ namespace Tests.PlayMode
 
 			menu.LevelsButton.Button.onClick.Invoke();
 
-			// Level Select (the pre-G4 screen: a Play button opens the level list).
-			float end = Time.realtimeSinceStartup + Timeout;
-			UI.Buttons.Button play = null;
-			while (Time.realtimeSinceStartup < end && play == null)
-			{
-				play = Object.FindObjectsByType<UI.Buttons.Button>(FindObjectsSortMode.None)
-					.FirstOrDefault(b => b.gameObject.scene.name == "LevelSelect");
-				yield return null;
-			}
-
-			Assert.IsNotNull(play, "Level Select never opened");
-			yield return null;
-			play.OnPointerClick(null);
-
+			// Level Select: the garden path of level nodes; level 1 is the NEXT! node on fresh progress.
 			LevelDataManager levels = Load<LevelDataManager>("t:LevelDataManager");
-			end = Time.realtimeSinceStartup + Timeout;
+			float end = Time.realtimeSinceStartup + Timeout;
 			while (Time.realtimeSinceStartup < end &&
-			       Object.FindObjectsByType<LevelSelect.LevelTile>(FindObjectsSortMode.None).Length < levels.LevelCount)
+			       Object.FindObjectsByType<LevelSelect.LevelNodeView>(FindObjectsSortMode.None).Length < levels.LevelCount)
 			{
 				yield return null;
 			}
 
-			LevelSelect.LevelTile first = Object.FindObjectsByType<LevelSelect.LevelTile>(FindObjectsSortMode.None)
-				.OrderBy(t => t.transform.GetSiblingIndex()).FirstOrDefault();
-			Assert.IsNotNull(first, "Level Select shows no levels");
-			first.OnPointerClick(null);
+			LevelSelect.LevelNodeView first = Object.FindObjectsByType<LevelSelect.LevelNodeView>(FindObjectsSortMode.None)
+				.FirstOrDefault(n => n.Number == 1);
+			Assert.IsNotNull(first, "Level Select never showed its levels");
+			yield return null;
+			first.Button.onClick.Invoke();
 
 			yield return WaitForGame(levels.GetLevel(0).LevelData.Id);
 		}

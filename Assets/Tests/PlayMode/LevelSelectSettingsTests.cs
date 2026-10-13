@@ -115,6 +115,25 @@ namespace Tests.PlayMode
 		}
 
 		[UnityTest]
+		public IEnumerator LevelSelect_Back_OpensTheMainMenu()
+		{
+			LogAssert.ignoreFailingMessages = true;
+			LevelSelectScreenView screen = null;
+			yield return OpenLevelSelect(s => screen = s);
+
+			screen.BackButton.Button.onClick.Invoke();
+			float end = Time.realtimeSinceStartup + Timeout;
+			while (Time.realtimeSinceStartup < end && Object.FindAnyObjectByType<MainMenu.MainMenuView>() == null)
+			{
+				yield return null;
+			}
+
+			Assert.IsNotNull(Object.FindAnyObjectByType<MainMenu.MainMenuView>(), "Back never reached the Main Menu");
+			yield return null;
+			AssertNoErrors();
+		}
+
+		[UnityTest]
 		public IEnumerator Settings_ResetProgress_AsksForConfirmationFirst()
 		{
 			LogAssert.ignoreFailingMessages = true;
@@ -190,11 +209,13 @@ namespace Tests.PlayMode
 
 		private static IEnumerator OpenLevelSelect(Action<LevelSelectScreenView> found)
 		{
+			// A Level Select left open by an earlier test is still around until the new scene replaces it.
+			LevelSelectScreenView previous = Object.FindAnyObjectByType<LevelSelectScreenView>();
 			ViewManager.Instance.Load(UnityScene.LevelSelect);
 			float end = Time.realtimeSinceStartup + Timeout;
 			LevelSelectScreenView screen = null;
 
-			while (Time.realtimeSinceStartup < end && (screen == null || screen.Nodes.Count == 0))
+			while (Time.realtimeSinceStartup < end && (screen == null || screen == previous || screen.Nodes.Count == 0))
 			{
 				screen = Object.FindAnyObjectByType<LevelSelectScreenView>();
 				yield return null;
