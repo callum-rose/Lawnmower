@@ -1,7 +1,7 @@
 """Builds a big fat toad in the voxel style (Assembler Assets/docs/VoxelStyle.md): a hop, then a tongue flick.
 
-python build_toad.py -- [out=<render prefix>] [video=<frame prefix>]   (with `bpy`, or `blender --background --python`)
-blender --background --factory-startup --python bake_shade.py -- build_toad.py <fbx_out> Body
+python build_toad.py -- [out=<render prefix>] [frames=<f,f,...>] [video=<frame prefix>] [blend=<.blend out>]
+blender --background --factory-startup --python bake_shade.py -- build_toad.py <fbx_out> Body [blend=<.blend out>]
 
 Design note (R3a), no reference image:
 - Keep: a squat, wide, humped body that reads as fat; a broad flat head set lower than the hump; eye domes;
@@ -14,7 +14,7 @@ Design note (R3a), no reference image:
   rest; it flips forward out of the open mouth (R16: it only rotates).
 Origin: the centre between the four feet at ground level (R2). Forward +Z.
 """
-import sys
+import os, sys
 from voxel_common import *
 
 argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
@@ -22,6 +22,7 @@ kv = dict(a.split("=", 1) for a in argv if "=" in a)
 OUT = kv.pop("out", "/tmp/toad")
 VIDEO = kv.pop("video", None)
 STILLS = kv.pop("frames", None)      # comma-separated frames to render from the video camera
+BLEND = kv.pop("blend", None)        # save the built scene as a .blend
 
 SKIN, WART, BELLY, TONGUE = "P20", "P14", "P09", "P46"   # Olive, Brown, Cream, Pink (+ Ink, Mouth): 6 colours (R11)
 Z0 = -3                                                  # shifts the model so the origin falls between the feet (R2)
@@ -159,7 +160,6 @@ flatten()
 # ---- preview ---------------------------------------------------------------------------------------------
 ground, cam = make_preview(ground_y=0)
 target = Vector((0, 0.1, 0.75))
-VIEWS = {"three": (-45, 30, 4.6), "side": (-90, 10, 4.6), "front": (0, 10, 4.6), "top": (0, 89, 4.6)}
 
 
 def aim(az, el, scale):
@@ -170,20 +170,22 @@ def aim(az, el, scale):
     cam.data.ortho_scale = scale
 
 
+aim(-35, 22, 5.2)                                                         # the video camera
+if BLEND:   # the built scene, animation and preview rig included; bake_shade.py passes this through
+    bpy.ops.wm.save_as_mainfile(filepath=os.path.abspath(BLEND))
 if STILLS:
-    aim(-35, 22, 5.2)
     for f in map(int, STILLS.split(",")):
         sc.frame_set(f)
         sc.render.filepath = f"{OUT}_f{f:02d}.png"
         bpy.ops.render.render(write_still=True)
-elif VIDEO:   # every frame of the loop from the three-quarter camera, for ffmpeg
-    aim(-35, 22, 5.2)
+if VIDEO:   # every frame of the loop, for ffmpeg
     sc.cycles.samples = 48
     sc.frame_end = FRAMES - 1                                             # frame 64 repeats frame 0
     sc.render.filepath = VIDEO
     bpy.ops.render.render(animation=True)
-else:
-    for name, (az, el, scale) in VIEWS.items():
-        aim(az, el, scale)
-        sc.render.filepath = f"{OUT}_{name}.png"
-        bpy.ops.render.render(write_still=True)
+
+VIEWS = {} if STILLS or VIDEO else {"three": (-45, 30, 4.6), "side": (-90, 10, 4.6), "front": (0, 10, 4.6), "top": (0, 89, 4.6)}
+for name, (az, el, scale) in VIEWS.items():
+    aim(az, el, scale)
+    sc.render.filepath = f"{OUT}_{name}.png"
+    bpy.ops.render.render(write_still=True)

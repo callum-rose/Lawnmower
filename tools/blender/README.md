@@ -6,14 +6,16 @@ Models built to the house voxel style in Assembler's `Assets/docs/VoxelStyle.md`
 |---|---|
 | `build_carp.py` | `Assets/Models/Creatures/carp.fbx` |
 | `build_frog.py` | `Assets/Models/Creatures/frog.fbx` |
-| `build_toad.py` | Preview renders and video frames only (no FBX exported yet) |
+| `build_toad.py` | `Assets/Models/Creatures/toad.fbx` and `toad.blend` |
 
 `voxel_common.py` is the shared part builder (ported from Assembler's `Tools/blender/build_human.py`);
 `bake_shade.py` is copied from Assembler's `Tools/blender/` unchanged.
 
 Preview renders (Cycles, four views). If Blender can't find `voxel_common`, run from this folder with
 `--python-expr "import sys; sys.path.insert(0, '.'); exec(open('build_toad.py').read())"` in place of `--python`.
-The toad also takes `frames=0,14,44` (stills from the video camera) or `video=<frame prefix>` (every frame of the loop).
+The toad also takes `frames=0,14,44` (stills from the video camera), `video=<frame prefix>` (every frame of the loop) and
+`blend=<path>` (saves the built scene). Pass `blend=` through `bake_shade.py` to write the `.blend` alongside the FBX:
+`... bake_shade.py -- build_toad.py ../../Assets/Models/Creatures/toad.fbx Body blend=../../Assets/Models/Creatures/toad.blend`.
 
 ```bash
 blender --background --factory-startup --python build_carp.py -- out=/tmp/carp
