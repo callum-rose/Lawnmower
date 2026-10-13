@@ -340,14 +340,11 @@ namespace Tests.PlayMode
 			GameManager game = null;
 			yield return StartLevel(level, g => game = g);
 			GameScreenView screen = game.Screen;
-			Assert.AreEqual("LEVEL 1", screen.Hud.LevelText);
-			Assert.AreEqual($"0/{level.Par}", screen.Hud.ProgressText);
 			Assert.IsFalse(GameServices.Progression.IsUnlocked(GameServices.Progression.Levels[1]));
 
 			IReadOnlyList<GridVector> solution = MoveNotation.Parse(level.Solution);
 			yield return Play(game, solution);
 
-			Assert.AreEqual($"{solution.Count}/{level.Par}", screen.Hud.ProgressText);
 			Assert.IsTrue(screen.IsCompletedShown, "Level Complete shows");
 			Assert.IsTrue(screen.CompleteCard.IsPerfectShown, "at par: the perfect variant with the tick badge");
 			Assert.AreEqual("PERFECT!", screen.CompleteCard.Headline);
@@ -399,7 +396,7 @@ namespace Tests.PlayMode
 			yield return null;
 			Assert.IsTrue(game.Presenter.IsPaused);
 			Assert.IsTrue(game.Screen.IsPausedShown);
-			StringAssert.StartsWith("Level 1 · ", game.Screen.PauseCard.Subtitle);
+			Assert.AreEqual("Level 1", game.Screen.PauseCard.Subtitle);
 
 			yield return Play(game, new[] { solution[0] });
 			Assert.AreEqual(0, game.Presenter.Stats.Moves, "paused: moves are ignored");
@@ -419,6 +416,45 @@ namespace Tests.PlayMode
 
 			yield return Play(game, new[] { solution[0] });
 			Assert.AreEqual(1, game.Presenter.Stats.Moves);
+		}
+
+		[UnityTest]
+		public IEnumerator Pause_TappingOutsideTheCard_Resumes()
+		{
+			LevelData level = Copy(Load<LevelDataManager>("t:LevelDataManager").GetLevel(0).LevelData);
+			GameManager game = null;
+			yield return StartLevel(level, g => game = g);
+
+			game.Screen.Hud.PauseButton.Button.onClick.Invoke();
+			yield return null;
+			Assert.IsTrue(game.Screen.IsPausedShown);
+
+			game.Screen.PauseCard.OutsideButton.onClick.Invoke();
+			yield return new WaitForSeconds(0.3f);
+			Assert.IsFalse(game.Presenter.IsPaused);
+			Assert.IsFalse(game.Screen.IsPausedShown);
+		}
+
+		[UnityTest]
+		public IEnumerator Redo_ShowsOnlyWhileThereIsSomethingToRedo()
+		{
+			LevelData level = Copy(Load<LevelDataManager>("t:LevelDataManager").GetLevel(0).LevelData);
+			IReadOnlyList<GridVector> solution = MoveNotation.Parse(level.Solution);
+			GameManager game = null;
+			yield return StartLevel(level, g => game = g);
+			GameHudView hud = game.Screen.Hud;
+			Assert.IsFalse(hud.IsRedoShown, "nothing to redo at the start");
+			Assert.IsFalse(hud.RedoButton.Interactable);
+
+			yield return Play(game, new[] { solution[0] });
+			hud.UndoButton.Button.onClick.Invoke();
+			yield return null;
+			Assert.IsTrue(hud.IsRedoShown, "an undo leaves something to redo");
+			Assert.IsTrue(hud.RedoButton.Interactable);
+
+			hud.RedoButton.Button.onClick.Invoke();
+			yield return null;
+			Assert.IsFalse(hud.IsRedoShown, "redone: Redo hides behind Undo again");
 		}
 
 		[UnityTest]

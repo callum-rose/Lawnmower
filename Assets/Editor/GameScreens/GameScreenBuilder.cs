@@ -21,9 +21,14 @@ namespace Lawnmower.Editor.GameScreens
 		private const float FrameWidth = 390;
 		private const float FrameHeight = 844;
 
-		// Figma frames include a mock 47pt status bar and a 34pt home indicator; the safe area replaces both.
-		private const float SafeTop = 47;
+		// Figma frames include a mock 34pt home indicator; the safe area replaces it.
 		private const float SafeBottom = 810;
+
+		// Every on-screen HUD button is a circle of this size.
+		private const float HudButton = 62;
+		private const float HudIcon = 28;
+		private const float HudMargin = 18;
+		private const float HudGap = 14;
 
 		private static readonly Vector4 Overhang = new(8, 8, 8, 12);
 
@@ -60,7 +65,7 @@ namespace Lawnmower.Editor.GameScreens
 			Stretch(safe, 0, 0, 0, 0);
 			safe.gameObject.AddComponent<Lawnmower.Screens.SafeAreaPanel>().SetMinInsets(0f, 0f);
 
-			GameHudView hud = BuildHud(safe);
+			GameHudView hud = BuildHud(safe, rootRect);
 			ArrowPadView arrows = BuildArrowPad(safe);
 			TutorialOverlayView tutorial = BuildTutorial(safe);
 			LevelFailedSheetView failed = BuildFailedSheet(rootRect);
@@ -83,73 +88,62 @@ namespace Lawnmower.Editor.GameScreens
 			return root;
 		}
 
-		// ---------- HUD (12:330) ----------
+		// ---------- HUD ----------
 
-		private static GameHudView BuildHud(RectTransform parent)
+		/// <summary>
+		/// Pause in the top-right corner (beside a central notch when there is one, so it sits on the full-screen root);
+		/// Undo bottom-right with Restart above it; Redo bottom-left, hiding behind Undo when there's nothing to redo.
+		/// </summary>
+		private static GameHudView BuildHud(RectTransform parent, RectTransform screen)
 		{
 			RectTransform hudRect = NewUI("Hud", parent);
 			Stretch(hudRect, 0, 0, 0, 0);
 
-			RectTransform topBar = NewUI("TopBar", hudRect);
-			topBar.anchorMin = new Vector2(0, 1);
-			topBar.anchorMax = new Vector2(1, 1);
-			topBar.pivot = new Vector2(0.5f, 1);
-			topBar.sizeDelta = new Vector2(0, 52);
-			topBar.anchoredPosition = new Vector2(0, -(54 - SafeTop));
+			// Just above the safe area, so the cards still cover it.
+			RectTransform corner = NewUI("PauseCorner", screen);
+			corner.SetSiblingIndex(parent.GetSiblingIndex() + 1);
+			corner.anchorMin = corner.anchorMax = corner.pivot = Vector2.one;
+			corner.sizeDelta = new Vector2(HudButton, HudButton);
+			corner.gameObject.AddComponent<Lawnmower.Screens.SafeCornerAnchor>();
 
-			ButtonView pause = RoundButton(topBar, "PauseButton", ButtonColor.WhiteOnTeal, "pause", null, 52, 23, 0);
-			var pauseRect = (RectTransform)pause.transform;
-			pauseRect.anchorMin = pauseRect.anchorMax = new Vector2(0, 1);
-			pauseRect.pivot = new Vector2(0, 1);
-			pauseRect.anchoredPosition = new Vector2(18, 0);
+			ButtonView pause = RoundButton(corner, "PauseButton", ButtonColor.WhiteOnTeal, "pause", null, HudButton, HudIcon, 0);
+			CentreIn(pause, Vector2.one * 0.5f, Vector2.zero);
 
-			PillView level = Pill(topBar, "LevelPill", ThemeColor.Green, "flag", "LEVEL 1", 24);
-			var levelRect = (RectTransform)level.transform;
-			levelRect.anchorMin = levelRect.anchorMax = new Vector2(0, 1);
-			levelRect.pivot = new Vector2(0, 1);
-			levelRect.anchoredPosition = new Vector2(82, -4);
-
-			PillView progress = Pill(topBar, "ProgressPill", ThemeColor.Blue, "check", "0/7", 22);
-			var progressRect = (RectTransform)progress.transform;
-			progressRect.anchorMin = progressRect.anchorMax = new Vector2(1, 1);
-			progressRect.pivot = new Vector2(1, 1);
-			progressRect.anchoredPosition = new Vector2(-18, -4);
-
-			// Controls: captions share a baseline; Undo is the big primary button in the middle.
 			RectTransform controls = NewUI("Controls", hudRect);
-			controls.anchorMin = controls.anchorMax = new Vector2(0.5f, 0);
+			controls.anchorMin = new Vector2(0, 0);
+			controls.anchorMax = new Vector2(1, 0);
 			controls.pivot = new Vector2(0.5f, 0);
-			controls.sizeDelta = new Vector2(252, 111);
-			controls.anchoredPosition = new Vector2(0, 0);
+			controls.sizeDelta = new Vector2(0, HudMargin + HudButton * 2 + HudGap);
+			controls.anchoredPosition = Vector2.zero;
 
-			ButtonView restart = RoundButton(controls, "RestartButton", ButtonColor.Blue, "restart", "RESTART", 58, 26, 16);
-			ButtonView undo = RoundButton(controls, "UndoButton", ButtonColor.Yellow, "undo", "UNDO", 84, 37, 18);
-			ButtonView redo = RoundButton(controls, "RedoButton", ButtonColor.Blue, "redo", "REDO", 58, 26, 16);
-			BottomAt(restart, -97);
-			BottomAt(undo, 0);
-			BottomAt(redo, 97);
+			// Redo first so Undo draws over it while it hides.
+			const float centre = HudMargin + HudButton / 2;
+			ButtonView redo = RoundButton(controls, "RedoButton", ButtonColor.Yellow, "redo", null, HudButton, HudIcon, 0);
+			CentreIn(redo, new Vector2(0, 0), new Vector2(centre, centre));
+			ButtonView undo = RoundButton(controls, "UndoButton", ButtonColor.Yellow, "undo", null, HudButton, HudIcon, 0);
+			CentreIn(undo, new Vector2(1, 0), new Vector2(-centre, centre));
+			ButtonView restart = RoundButton(controls, "RestartButton", ButtonColor.Blue, "restart", null, HudButton, HudIcon, 0);
+			CentreIn(restart, new Vector2(1, 0), new Vector2(-centre, centre + HudButton + HudGap));
 			undo.gameObject.AddComponent<CanvasGroup>();
 			redo.gameObject.AddComponent<CanvasGroup>();
 
 			var hud = hudRect.gameObject.AddComponent<GameHudView>();
 			SetRefs(hud,
 				("pauseButton", pause),
-				("levelPill", level),
-				("progressPill", progress),
 				("restartButton", restart),
 				("undoButton", undo),
 				("redoButton", redo),
-				("topBar", topBar),
+				("topBar", corner),
 				("controls", controls));
 			return hud;
 		}
 
-		private static void BottomAt(ButtonView button, float x)
+		private static void CentreIn(ButtonView button, Vector2 anchor, Vector2 position)
 		{
 			var rect = (RectTransform)button.transform;
-			rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0);
-			rect.pivot = new Vector2(0.5f, 0);
-			rect.anchoredPosition = new Vector2(x, 0);
+			rect.anchorMin = rect.anchorMax = anchor;
+			rect.pivot = new Vector2(0.5f, 0.5f);
+			rect.anchoredPosition = position;
 		}
 
 		/// <summary>The Arrows scheme's on-screen arrows: a cross of white kit buttons above the controls.</summary>
@@ -183,7 +177,7 @@ namespace Lawnmower.Editor.GameScreens
 			return view;
 		}
 
-		/// <summary>The tutorial hint: a white card with a green icon chip, just under the top bar. Never blocks touches.</summary>
+		/// <summary>The tutorial hint: a white card with a green icon chip, below the pause button. Never blocks touches.</summary>
 		private static TutorialOverlayView BuildTutorial(RectTransform parent)
 		{
 			RectTransform root = NewUI("Tutorial", parent);
@@ -191,7 +185,7 @@ namespace Lawnmower.Editor.GameScreens
 			root.anchorMax = new Vector2(1, 1);
 			root.pivot = new Vector2(0.5f, 1);
 			root.sizeDelta = new Vector2(0, 64);
-			root.anchoredPosition = new Vector2(0, -(118 - SafeTop));
+			root.anchoredPosition = new Vector2(0, -(HudMargin + HudButton + HudGap));
 			var group = root.gameObject.AddComponent<CanvasGroup>();
 			group.blocksRaycasts = false;
 			group.interactable = false;
@@ -233,7 +227,7 @@ namespace Lawnmower.Editor.GameScreens
 			return view;
 		}
 
-		// ---------- Pause (12:531) ----------
+		// ---------- Pause ----------
 
 		private static PauseCardView BuildPauseCard(RectTransform parent)
 		{
@@ -243,24 +237,21 @@ namespace Lawnmower.Editor.GameScreens
 			var modalView = modal.GetComponent<ModalCardView>();
 			RectTransform card = (RectTransform)modal.Find("Card");
 			var column = card.GetComponent<VerticalLayoutGroup>();
-			column.padding = new RectOffset(22, 22, 44, 24);
+			column.padding = new RectOffset(22, 22, 22, 24);
 			column.spacing = 12;
 
-			modalView.Title.text = "PAUSED";
-			modalView.Title.fontSize = 52;
-			modalView.Title.characterSpacing = 3;
-			modalView.Message.fontSize = 15;
-			modalView.Message.text = "Level 1 · 0 of 10 perfect";
+			// The card hugs its contents: the level line, RESUME and the button row.
+			card.GetComponent<ContentSizeFitter>().horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+			modalView.SetTitle(null);
+			modalView.Message.fontSize = 20;
+			modalView.Message.text = "Level 1";
 
-			// The badge sits over the card's top edge.
-			RectTransform badge = NewUI("Badge", card);
-			badge.gameObject.AddComponent<LayoutElement>().ignoreLayout = true;
-			badge.anchorMin = badge.anchorMax = new Vector2(0.5f, 1);
-			badge.pivot = new Vector2(0.5f, 0.5f);
-			badge.sizeDelta = new Vector2(70, 70);
-			badge.anchoredPosition = new Vector2(0, 2);
-			Frame(badge, "Circle", ThemeColor.Red, ThemeColor.RedShadow, sliced: false);
-			Icon(badge, "pause", 30, ThemeColor.White);
+			// Taps on the card itself stop there; taps on the scrim around it dismiss the card.
+			var cardBlocker = card.gameObject.AddComponent<Image>();
+			cardBlocker.color = Color.clear;
+			var outside = modal.Find("Scrim").gameObject.AddComponent<Button>();
+			outside.transition = Selectable.Transition.None;
+			outside.navigation = new Navigation { mode = Navigation.Mode.None };
 
 			ButtonView resume = BigButton(modalView.Content, "ResumeButton", "BigButton_Green", "play", "RESUME", 266, 66, 28, 24);
 
@@ -283,12 +274,12 @@ namespace Lawnmower.Editor.GameScreens
 			var view = modal.gameObject.AddComponent<PauseCardView>();
 			SetRefs(view,
 				("modal", modalView),
-				("subtitle", modalView.Message),
 				("resumeButton", resume),
 				("restartButton", restart),
 				("settingsButton", settings),
 				("levelsButton", levels),
-				("menuButton", menu));
+				("menuButton", menu),
+				("outsideButton", outside));
 			return view;
 		}
 
@@ -526,20 +517,6 @@ namespace Lawnmower.Editor.GameScreens
 			Fixed((RectTransform)button.transform, width, height);
 			RecordAll(button.gameObject);
 			return button;
-		}
-
-		private static PillView Pill(RectTransform parent, string name, ThemeColor chip, string icon, string text, float size)
-		{
-			var pill = Kit("Pill", parent).GetComponent<PillView>();
-			pill.name = name;
-			pill.SetChipColor(chip);
-			pill.SetIcon(KitAssets.Icon(icon));
-			pill.SetText(text);
-			pill.SetShadow(ThemeColor.TealShadow);
-			pill.Label.fontSize = size;
-			((RectTransform)pill.transform).sizeDelta = new Vector2(144, 48);
-			RecordAll(pill.gameObject);
-			return pill;
 		}
 
 		private static Image Chip(RectTransform parent, float size, ThemeColor color, string icon, float iconSize)
