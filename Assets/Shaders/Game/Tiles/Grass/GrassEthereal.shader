@@ -59,6 +59,9 @@ Shader "Grass Ethereal"
 		_ShimmerAmount("Shimmer Amount", Range(0, 1)) = 0.35
 		_ShimmerSpeed("Shimmer Speed", Float) = 1.5
 
+		// Set per renderer (property block) to fade the whole tile, e.g. while it changes grass height
+		[HideInInspector] _Fade("Fade", Range(0, 1)) = 1
+
 		[Enum(Off,0,On,1)] _ZWrite("ZWrite", Float) = 1
 		[Enum(UnityEngine.Rendering.CullMode)] _Cull("Cull", Float) = 0
 	}
@@ -132,6 +135,7 @@ Shader "Grass Ethereal"
 		float _ShimmerSpeed;
 		float _ZWrite;
 		float _Cull;
+		float _Fade;
 		CBUFFER_END
 
 		sampler2D BakedNoiseTex;
@@ -253,7 +257,7 @@ Shader "Grass Ethereal"
 			// Soft additive disc; normalWS carries the quad corner
 			float falloff = saturate(1 - length(input.normalWS.xy));
 			float pulse = 0.85 + 0.15 * sin(_TimeParameters.x * _FlowerPulseSpeed + Hash(input.uv.zw) * 6.2832);
-			return half4(_FlowerColour.rgb * falloff * falloff * _FlowerHaloIntensity * pulse, 1);
+			return half4(_FlowerColour.rgb * falloff * falloff * _FlowerHaloIntensity * pulse * _Fade, 1);
 		}
 
 		half4 FragForward(Varyings input) : SV_Target
@@ -272,7 +276,7 @@ Shader "Grass Ethereal"
 				float3 viewDir = normalize(_WorldSpaceCameraPos - input.positionWS);
 				float core = saturate(dot(normalize(input.normalWS), viewDir));
 				float pulse = 0.85 + 0.15 * sin(_TimeParameters.x * _FlowerPulseSpeed + Hash(uv1) * 6.2832);
-				return half4(_FlowerColour.rgb * (0.55 + 0.45 * core * core) * _FlowerIntensity * pulse, 1);
+				return half4(_FlowerColour.rgb * (0.55 + 0.45 * core * core) * _FlowerIntensity * pulse, 1) * _Fade;
 			}
 
 			// Toon lighting, as in Grass.shader
@@ -322,11 +326,11 @@ Shader "Grass Ethereal"
 
 			if (isFlowerPart)
 			{
-				return half4(colour, 1);
+				return half4(colour, 1) * _Fade;
 			}
 
 			// Premultiplied: the body fades out towards the tip while the glow stays additive
-			return half4(colour * alpha + glow, alpha);
+			return half4(colour * alpha + glow, alpha) * _Fade;
 		}
 		ENDHLSL
 
