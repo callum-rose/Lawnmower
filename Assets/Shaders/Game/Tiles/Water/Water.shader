@@ -1,833 +1,503 @@
-// Made with Amplify Shader Editor
-// Available at the Unity Asset Store - http://u3d.as/y3X 
+// Clear, glowing, heavily refractive water.
+// Everything under or around the water is read back from URP's Opaque and Depth textures (both must be enabled on the
+// pipeline asset), so rocks, fish, plants and lily pads must render in the opaque queue to be refracted and reflected.
+// Floating things (lily pads) should sit just above the surface; the edge glow rings them where they cut through it.
+// All effects are computed in world space so neighbouring water tiles join seamlessly.
 Shader "Water"
 {
 	Properties
 	{
-		[HideInInspector] _AlphaCutoff("Alpha Cutoff ", Range(0, 1)) = 0.5
-		[HideInInspector] _EmissionColor("Emission Color", Color) = (1,1,1,1)
-		[ASEBegin]_Color0("Color 0", Color) = (0.345098,0.6980392,0.8196079,0)
-		_Color1("Color 1", Color) = (0.2416842,0.4888612,0.574,0)
-		[HDR]_Color2("Color 2", Color) = (1,1,1,0)
-		_Speed("Speed", Vector) = (0,0,0,0)
-		_Speed1("Speed", Vector) = (0,0,0,0)
-		_WaveHeight("WaveHeight", Float) = 0
-		[ASEEnd]_VoronoiScale("VoronoiScale", Float) = 1
+		[Header(Colour)]
+		_ShallowTint("Shallow Tint", Color) = (0.93,0.98,1,1)
+		_DeepColour("Deep Colour", Color) = (0.5,0.72,1,1)
+		_Absorption("Absorption Per Unit (RGB)", Vector) = (0.6,0.32,0.2,0)
+		_AbsorptionScale("Absorption Scale", Range(0, 8)) = 1
+		_InscatterAmount("Haze Amount", Range(0, 1)) = 0.7
+		_HazeDensity("Haze Density", Range(0, 10)) = 1.8
+		_DepthBlur("Depth Blur (world units per unit depth)", Range(0, 0.5)) = 0.12
+		_DepthBlurMax("Depth Blur Max (world units)", Range(0, 0.5)) = 0.2
 
-		//_TessPhongStrength( "Tess Phong Strength", Range( 0, 1 ) ) = 0.5
-		//_TessValue( "Tess Max Tessellation", Range( 1, 32 ) ) = 16
-		//_TessMin( "Tess Min Distance", Float ) = 10
-		//_TessMax( "Tess Max Distance", Float ) = 25
-		//_TessEdgeLength ( "Tess Edge length", Range( 2, 50 ) ) = 16
-		//_TessMaxDisp( "Tess Max Displacement", Float ) = 25
+		[Header(Surface Flow)]
+		_AnimationSpeed("Animation Speed", Range(0, 2)) = 0.5
+		_FlowWaveAmount("Flow Waves Amount", Range(0, 1)) = 0
+		_WaveScale("Wave Scale", Float) = 0.75
+		_WaveStrength("Wave Strength", Range(0, 4)) = 1
+		_FlowDirection("Flow Direction (XY)", Vector) = (0.35,0.2,0,0)
+		_FlowSpeed("Flow Speed", Float) = 0.35
+		_SwirlStrength("Swirl Strength", Range(0, 2)) = 0.7
+		_SwirlScale("Swirl Scale", Float) = 0.45
+		_SwirlSpeed("Swirl Speed", Float) = 0.25
+
+		[Header(Ripples)]
+		_RippleAmplitude("Ripple Amplitude", Range(0, 0.5)) = 0.2
+
+		[Header(Refraction)]
+		_RefractionStrength("Refraction Strength", Range(0, 2)) = 0.45
+		_ChromaticAberration("Chromatic Aberration", Range(0, 1)) = 0.35
+
+		[Header(Caustics)]
+		[HDR] _CausticColour("Caustic Colour", Color) = (1.3,1.12,0.75,1)
+		_CausticIntensity("Caustic Intensity", Range(0, 4)) = 1
+		_CausticFocusDepth("Caustic Focus Depth", Range(0.05, 2)) = 0.5
+		_CausticDepthFade("Caustic Depth Fade", Range(0, 4)) = 0.5
+		_UnderwaterShadow("Underwater Shadow Darkening", Range(0, 1)) = 0.35
+
+		[Header(Reflection)]
+		_SkyHorizon("Sky Horizon", Color) = (0.95,0.96,1,1)
+		_SkyZenith("Sky Zenith", Color) = (0.7,0.83,1,1)
+		_FresnelBias("Fresnel Bias", Range(0, 1)) = 0.12
+		_FresnelPower("Fresnel Power", Range(0.5, 8)) = 2.5
+		_ReflectionStrength("Reflection Strength", Range(0, 2)) = 1
+		_ObjectReflectionStrength("Object Reflection Strength", Range(0, 1)) = 0.55
+		_ReflectionDistortion("Object Reflection Distortion", Range(0, 1)) = 0.15
+		_ReflectionBlur("Object Reflection Blur (mip level)", Range(0, 5)) = 1.5
+		[HDR] _SpecularColour("Specular Colour", Color) = (1.2,1.15,1,1)
+		_SpecularPower("Specular Power", Range(8, 2048)) = 400
+		_SparkleDensity("Sparkle Density", Float) = 9
+		_SparkleAmount("Sparkle Amount", Range(0, 1)) = 0.3
+		_SparkleIntensity("Sparkle Intensity", Range(0, 4)) = 2
+
+		[Header(Edge And Glow)]
+		[HDR] _EdgeColour("Edge Glow Colour", Color) = (1.1,1.05,0.95,1)
+		_EdgeWidth("Edge Glow Width", Range(0.001, 1)) = 0.2
+		_EdgeIntensity("Edge Glow Intensity", Range(0, 2)) = 0.45
+		_EdgeNoiseScale("Edge Noise Scale", Float) = 4
+		_EdgeNoiseStrength("Edge Noise Strength", Range(0, 2)) = 1
+		_EdgeBreakup("Edge Breakup", Range(0, 1)) = 0.7
+		_EdgeRippleInfluence("Edge Ripple Influence", Range(0, 2)) = 0.6
+		_EdgeNoiseSpeed("Edge Noise Speed", Float) = 0.35
+		[HDR] _GlowColour("Glow Colour", Color) = (0.9,0.95,1,1)
+		_GlowAmount("Glow Amount", Range(0, 1)) = 0.12
+		_CrestGlow("Crest Glow", Range(0, 2)) = 0.9
+
+		[Header(Toon)]
+		_ToonSteps("Toon Steps (0 is smooth)", Range(0, 8)) = 0
 	}
 
 	SubShader
 	{
-		LOD 0
+		Tags { "RenderPipeline"="UniversalPipeline" "RenderType"="Transparent" "Queue"="Transparent-10" }
 
-		
-		Tags { "RenderPipeline"="UniversalPipeline" "RenderType"="Transparent" "Queue"="Transparent" }
-		
-		Cull Back
-		AlphaToMask Off
-		HLSLINCLUDE
-		#pragma target 2.0
-
-		float4 FixedTess( float tessValue )
-		{
-			return tessValue;
-		}
-		
-		float CalcDistanceTessFactor (float4 vertex, float minDist, float maxDist, float tess, float4x4 o2w, float3 cameraPos )
-		{
-			float3 wpos = mul(o2w,vertex).xyz;
-			float dist = distance (wpos, cameraPos);
-			float f = clamp(1.0 - (dist - minDist) / (maxDist - minDist), 0.01, 1.0) * tess;
-			return f;
-		}
-
-		float4 CalcTriEdgeTessFactors (float3 triVertexFactors)
-		{
-			float4 tess;
-			tess.x = 0.5 * (triVertexFactors.y + triVertexFactors.z);
-			tess.y = 0.5 * (triVertexFactors.x + triVertexFactors.z);
-			tess.z = 0.5 * (triVertexFactors.x + triVertexFactors.y);
-			tess.w = (triVertexFactors.x + triVertexFactors.y + triVertexFactors.z) / 3.0f;
-			return tess;
-		}
-
-		float CalcEdgeTessFactor (float3 wpos0, float3 wpos1, float edgeLen, float3 cameraPos, float4 scParams )
-		{
-			float dist = distance (0.5 * (wpos0+wpos1), cameraPos);
-			float len = distance(wpos0, wpos1);
-			float f = max(len * scParams.y / (edgeLen * dist), 1.0);
-			return f;
-		}
-
-		float DistanceFromPlane (float3 pos, float4 plane)
-		{
-			float d = dot (float4(pos,1.0f), plane);
-			return d;
-		}
-
-		bool WorldViewFrustumCull (float3 wpos0, float3 wpos1, float3 wpos2, float cullEps, float4 planes[6] )
-		{
-			float4 planeTest;
-			planeTest.x = (( DistanceFromPlane(wpos0, planes[0]) > -cullEps) ? 1.0f : 0.0f ) +
-						  (( DistanceFromPlane(wpos1, planes[0]) > -cullEps) ? 1.0f : 0.0f ) +
-						  (( DistanceFromPlane(wpos2, planes[0]) > -cullEps) ? 1.0f : 0.0f );
-			planeTest.y = (( DistanceFromPlane(wpos0, planes[1]) > -cullEps) ? 1.0f : 0.0f ) +
-						  (( DistanceFromPlane(wpos1, planes[1]) > -cullEps) ? 1.0f : 0.0f ) +
-						  (( DistanceFromPlane(wpos2, planes[1]) > -cullEps) ? 1.0f : 0.0f );
-			planeTest.z = (( DistanceFromPlane(wpos0, planes[2]) > -cullEps) ? 1.0f : 0.0f ) +
-						  (( DistanceFromPlane(wpos1, planes[2]) > -cullEps) ? 1.0f : 0.0f ) +
-						  (( DistanceFromPlane(wpos2, planes[2]) > -cullEps) ? 1.0f : 0.0f );
-			planeTest.w = (( DistanceFromPlane(wpos0, planes[3]) > -cullEps) ? 1.0f : 0.0f ) +
-						  (( DistanceFromPlane(wpos1, planes[3]) > -cullEps) ? 1.0f : 0.0f ) +
-						  (( DistanceFromPlane(wpos2, planes[3]) > -cullEps) ? 1.0f : 0.0f );
-			return !all (planeTest);
-		}
-
-		float4 DistanceBasedTess( float4 v0, float4 v1, float4 v2, float tess, float minDist, float maxDist, float4x4 o2w, float3 cameraPos )
-		{
-			float3 f;
-			f.x = CalcDistanceTessFactor (v0,minDist,maxDist,tess,o2w,cameraPos);
-			f.y = CalcDistanceTessFactor (v1,minDist,maxDist,tess,o2w,cameraPos);
-			f.z = CalcDistanceTessFactor (v2,minDist,maxDist,tess,o2w,cameraPos);
-
-			return CalcTriEdgeTessFactors (f);
-		}
-
-		float4 EdgeLengthBasedTess( float4 v0, float4 v1, float4 v2, float edgeLength, float4x4 o2w, float3 cameraPos, float4 scParams )
-		{
-			float3 pos0 = mul(o2w,v0).xyz;
-			float3 pos1 = mul(o2w,v1).xyz;
-			float3 pos2 = mul(o2w,v2).xyz;
-			float4 tess;
-			tess.x = CalcEdgeTessFactor (pos1, pos2, edgeLength, cameraPos, scParams);
-			tess.y = CalcEdgeTessFactor (pos2, pos0, edgeLength, cameraPos, scParams);
-			tess.z = CalcEdgeTessFactor (pos0, pos1, edgeLength, cameraPos, scParams);
-			tess.w = (tess.x + tess.y + tess.z) / 3.0f;
-			return tess;
-		}
-
-		float4 EdgeLengthBasedTessCull( float4 v0, float4 v1, float4 v2, float edgeLength, float maxDisplacement, float4x4 o2w, float3 cameraPos, float4 scParams, float4 planes[6] )
-		{
-			float3 pos0 = mul(o2w,v0).xyz;
-			float3 pos1 = mul(o2w,v1).xyz;
-			float3 pos2 = mul(o2w,v2).xyz;
-			float4 tess;
-
-			if (WorldViewFrustumCull(pos0, pos1, pos2, maxDisplacement, planes))
-			{
-				tess = 0.0f;
-			}
-			else
-			{
-				tess.x = CalcEdgeTessFactor (pos1, pos2, edgeLength, cameraPos, scParams);
-				tess.y = CalcEdgeTessFactor (pos2, pos0, edgeLength, cameraPos, scParams);
-				tess.z = CalcEdgeTessFactor (pos0, pos1, edgeLength, cameraPos, scParams);
-				tess.w = (tess.x + tess.y + tess.z) / 3.0f;
-			}
-			return tess;
-		}
-		ENDHLSL
-
-		
 		Pass
 		{
-			
 			Name "Forward"
 			Tags { "LightMode"="UniversalForward" }
-			
-			Blend SrcAlpha OneMinusSrcAlpha, One OneMinusSrcAlpha
+
+			Blend One Zero
 			ZWrite Off
-			ZTest LEqual
-			Offset 0 , 0
-			ColorMask RGBA
-			
+			Cull Back
 
 			HLSLPROGRAM
-			#define _RECEIVE_SHADOWS_OFF 1
+			#pragma target 3.0
+			#pragma vertex Vert
+			#pragma fragment Frag
 			#pragma multi_compile_instancing
-			#define ASE_SRP_VERSION 999999
-
-			#pragma prefer_hlslcc gles
-			#pragma exclude_renderers d3d11_9x
-
-			#pragma vertex vert
-			#pragma fragment frag
 
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
-			#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
-			#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/UnityInstancing.hlsl"
-			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderGraphFunctions.hlsl"
+			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
+			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareOpaqueTexture.hlsl"
 
-			#if ASE_SRP_VERSION <= 70108
-			#define REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR
-			#endif
+			CBUFFER_START(UnityPerMaterial)
+			float4 _ShallowTint;
+			float4 _DeepColour;
+			float4 _Absorption;
+			float _AbsorptionScale;
+			float _InscatterAmount;
+			float _HazeDensity;
+			float _DepthBlur;
+			float _DepthBlurMax;
+			float _FlowWaveAmount;
+			float _WaveScale;
+			float _WaveStrength;
+			float4 _FlowDirection;
+			float _FlowSpeed;
+			float _SwirlStrength;
+			float _SwirlScale;
+			float _SwirlSpeed;
+			float _RefractionStrength;
+			float _ChromaticAberration;
+			float4 _CausticColour;
+			float _CausticIntensity;
+			float _CausticFocusDepth;
+			float _CausticDepthFade;
+			float _UnderwaterShadow;
+			float4 _SkyHorizon;
+			float4 _SkyZenith;
+			float _FresnelBias;
+			float _FresnelPower;
+			float _ReflectionStrength;
+			float _ObjectReflectionStrength;
+			float _ReflectionDistortion;
+			float _ReflectionBlur;
+			float _AnimationSpeed;
+			float _RippleAmplitude;
+			float4 _SpecularColour;
+			float _SpecularPower;
+			float _SparkleDensity;
+			float _SparkleAmount;
+			float _SparkleIntensity;
+			float4 _EdgeColour;
+			float _EdgeWidth;
+			float _EdgeIntensity;
+			float _EdgeNoiseScale;
+			float _EdgeNoiseStrength;
+			float _EdgeBreakup;
+			float _EdgeRippleInfluence;
+			float _EdgeNoiseSpeed;
+			float4 _GlowColour;
+			float _GlowAmount;
+			float _CrestGlow;
+			float _ToonSteps;
+			CBUFFER_END
 
-			#define ASE_NEEDS_FRAG_WORLD_POSITION
+			TEXTURE2D(_PlanarReflectionTexture);
+			float _PlanarReflectionEnabled;
 
+			// Ripple height field from WaterRippleSimulation; rect is world xz origin and size.
+			TEXTURE2D(_WaterRippleSimTex);
+			float4 _WaterRippleSimRect;
+			float _WaterRippleSimEnabled;
 
-			struct VertexInput
+			struct Attributes
 			{
-				float4 vertex : POSITION;
-				float3 ase_normal : NORMAL;
-				
+				float4 positionOS : POSITION;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 			};
 
-			struct VertexOutput
+			struct Varyings
 			{
-				float4 clipPos : SV_POSITION;
-				#if defined(ASE_NEEDS_FRAG_WORLD_POSITION)
-				float3 worldPos : TEXCOORD0;
-				#endif
-				#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR) && defined(ASE_NEEDS_FRAG_SHADOWCOORDS)
-				float4 shadowCoord : TEXCOORD1;
-				#endif
-				#ifdef ASE_FOG
-				float fogFactor : TEXCOORD2;
-				#endif
-				
+				float4 positionCS : SV_POSITION;
+				float3 positionWS : TEXCOORD0;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 				UNITY_VERTEX_OUTPUT_STEREO
 			};
 
-			CBUFFER_START(UnityPerMaterial)
-			float4 _Color1;
-			float4 _Color0;
-			float4 _Color2;
-			float2 _Speed;
-			float2 _Speed1;
-			float _VoronoiScale;
-			float _WaveHeight;
-			#ifdef TESSELLATION_ON
-				float _TessPhongStrength;
-				float _TessValue;
-				float _TessMin;
-				float _TessMax;
-				float _TessEdgeLength;
-				float _TessMaxDisp;
-			#endif
-			CBUFFER_END
-			
-
-					float2 voronoihash19( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
-			
-					float voronoi19( float2 v, float time, inout float2 id, inout float2 mr, float smoothness )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0;
-						for ( int j = -1; j <= 1; j++ )
-						{
-							for ( int i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash19( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						 		}
-						 	}
-						}
-						return F1;
-					}
-			
-					float2 voronoihash20( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
-			
-					float voronoi20( float2 v, float time, inout float2 id, inout float2 mr, float smoothness )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0;
-						for ( int j = -1; j <= 1; j++ )
-						{
-							for ( int i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash20( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						 		}
-						 	}
-						}
-						return F1;
-					}
-			
-			
-			VertexOutput VertexFunction ( VertexInput v  )
+			float2 Hash22(float2 p)
 			{
-				VertexOutput o = (VertexOutput)0;
-				UNITY_SETUP_INSTANCE_ID(v);
-				UNITY_TRANSFER_INSTANCE_ID(v, o);
-				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
-
-				float time19 = 0.0;
-				float3 ase_worldPos = mul(GetObjectToWorldMatrix(), v.vertex).xyz;
-				float2 appendResult22 = (float2(ase_worldPos.x , ase_worldPos.z));
-				float2 coords19 = ( appendResult22 + ( _Speed * _TimeParameters.x ) ) * _VoronoiScale;
-				float2 id19 = 0;
-				float2 uv19 = 0;
-				float voroi19 = voronoi19( coords19, time19, id19, uv19, 0 );
-				float time20 = 0.0;
-				float2 coords20 = ( appendResult22 + ( _Speed1 * _TimeParameters.x ) ) * _VoronoiScale;
-				float2 id20 = 0;
-				float2 uv20 = 0;
-				float voroi20 = voronoi20( coords20, time20, id20, uv20, 0 );
-				
-				#ifdef ASE_ABSOLUTE_VERTEX_POS
-					float3 defaultVertexValue = v.vertex.xyz;
-				#else
-					float3 defaultVertexValue = float3(0, 0, 0);
-				#endif
-				float3 vertexValue = ( ( voroi19 + voroi20 ) * float3(0,1,0) * _WaveHeight );
-				#ifdef ASE_ABSOLUTE_VERTEX_POS
-					v.vertex.xyz = vertexValue;
-				#else
-					v.vertex.xyz += vertexValue;
-				#endif
-				v.ase_normal = v.ase_normal;
-
-				float3 positionWS = TransformObjectToWorld( v.vertex.xyz );
-				float4 positionCS = TransformWorldToHClip( positionWS );
-
-				#if defined(ASE_NEEDS_FRAG_WORLD_POSITION)
-				o.worldPos = positionWS;
-				#endif
-				#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR) && defined(ASE_NEEDS_FRAG_SHADOWCOORDS)
-				VertexPositionInputs vertexInput = (VertexPositionInputs)0;
-				vertexInput.positionWS = positionWS;
-				vertexInput.positionCS = positionCS;
-				o.shadowCoord = GetShadowCoord( vertexInput );
-				#endif
-				#ifdef ASE_FOG
-				o.fogFactor = ComputeFogFactor( positionCS.z );
-				#endif
-				o.clipPos = positionCS;
-				return o;
+				float3 p3 = frac(float3(p.xyx) * float3(0.1031, 0.1030, 0.0973));
+				p3 += dot(p3, p3.yzx + 33.33);
+				return frac((p3.xx + p3.yz) * p3.zy);
 			}
 
-			#if defined(TESSELLATION_ON)
-			struct VertexControl
+			float Hash21(float2 p)
 			{
-				float4 vertex : INTERNALTESSPOS;
-				float3 ase_normal : NORMAL;
-				
-				UNITY_VERTEX_INPUT_INSTANCE_ID
-			};
-
-			struct TessellationFactors
-			{
-				float edge[3] : SV_TessFactor;
-				float inside : SV_InsideTessFactor;
-			};
-
-			VertexControl vert ( VertexInput v )
-			{
-				VertexControl o;
-				UNITY_SETUP_INSTANCE_ID(v);
-				UNITY_TRANSFER_INSTANCE_ID(v, o);
-				o.vertex = v.vertex;
-				o.ase_normal = v.ase_normal;
-				
-				return o;
+				float3 p3 = frac(float3(p.xyx) * 0.1031);
+				p3 += dot(p3, p3.yzx + 33.33);
+				return frac((p3.x + p3.y) * p3.z);
 			}
 
-			TessellationFactors TessellationFunction (InputPatch<VertexControl,3> v)
+			// Gradient noise in roughly [-0.7, 0.7].
+			float GradientNoise(float2 p)
 			{
-				TessellationFactors o;
-				float4 tf = 1;
-				float tessValue = _TessValue; float tessMin = _TessMin; float tessMax = _TessMax;
-				float edgeLength = _TessEdgeLength; float tessMaxDisp = _TessMaxDisp;
-				#if defined(ASE_FIXED_TESSELLATION)
-				tf = FixedTess( tessValue );
-				#elif defined(ASE_DISTANCE_TESSELLATION)
-				tf = DistanceBasedTess(v[0].vertex, v[1].vertex, v[2].vertex, tessValue, tessMin, tessMax, GetObjectToWorldMatrix(), _WorldSpaceCameraPos );
-				#elif defined(ASE_LENGTH_TESSELLATION)
-				tf = EdgeLengthBasedTess(v[0].vertex, v[1].vertex, v[2].vertex, edgeLength, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams );
-				#elif defined(ASE_LENGTH_CULL_TESSELLATION)
-				tf = EdgeLengthBasedTessCull(v[0].vertex, v[1].vertex, v[2].vertex, edgeLength, tessMaxDisp, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams, unity_CameraWorldClipPlanes );
-				#endif
-				o.edge[0] = tf.x; o.edge[1] = tf.y; o.edge[2] = tf.z; o.inside = tf.w;
-				return o;
+				float2 i = floor(p);
+				float2 f = frac(p);
+				float2 u = f * f * f * (f * (f * 6 - 15) + 10);
+				float2 ga = Hash22(i) * 2 - 1;
+				float2 gb = Hash22(i + float2(1, 0)) * 2 - 1;
+				float2 gc = Hash22(i + float2(0, 1)) * 2 - 1;
+				float2 gd = Hash22(i + float2(1, 1)) * 2 - 1;
+				float a = dot(ga, f);
+				float b = dot(gb, f - float2(1, 0));
+				float c = dot(gc, f - float2(0, 1));
+				float d = dot(gd, f - float2(1, 1));
+				return lerp(lerp(a, b, u.x), lerp(c, d, u.x), u.y);
 			}
 
-			[domain("tri")]
-			[partitioning("fractional_odd")]
-			[outputtopology("triangle_cw")]
-			[patchconstantfunc("TessellationFunction")]
-			[outputcontrolpoints(3)]
-			VertexControl HullFunction(InputPatch<VertexControl, 3> patch, uint id : SV_OutputControlPointID)
+			float3 Hash33(float3 p)
 			{
-			   return patch[id];
+				p = frac(p * float3(0.1031, 0.1030, 0.0973));
+				p += dot(p, p.yxz + 33.33);
+				return frac((p.xxy + p.yxx) * p.zyx);
 			}
 
-			[domain("tri")]
-			VertexOutput DomainFunction(TessellationFactors factors, OutputPatch<VertexControl, 3> patch, float3 bary : SV_DomainLocation)
+			// 3D gradient noise in roughly [-0.8, 0.8].
+			float GradientNoise3D(float3 p)
 			{
-				VertexInput o = (VertexInput) 0;
-				o.vertex = patch[0].vertex * bary.x + patch[1].vertex * bary.y + patch[2].vertex * bary.z;
-				o.ase_normal = patch[0].ase_normal * bary.x + patch[1].ase_normal * bary.y + patch[2].ase_normal * bary.z;
-				
-				#if defined(ASE_PHONG_TESSELLATION)
-				float3 pp[3];
-				for (int i = 0; i < 3; ++i)
-					pp[i] = o.vertex.xyz - patch[i].ase_normal * (dot(o.vertex.xyz, patch[i].ase_normal) - dot(patch[i].vertex.xyz, patch[i].ase_normal));
-				float phongStrength = _TessPhongStrength;
-				o.vertex.xyz = phongStrength * (pp[0]*bary.x + pp[1]*bary.y + pp[2]*bary.z) + (1.0f-phongStrength) * o.vertex.xyz;
-				#endif
-				UNITY_TRANSFER_INSTANCE_ID(patch[0], o);
-				return VertexFunction(o);
+				float3 i = floor(p);
+				float3 f = frac(p);
+				float3 u = f * f * f * (f * (f * 6 - 15) + 10);
+				float n000 = dot(Hash33(i) * 2 - 1, f);
+				float n100 = dot(Hash33(i + float3(1, 0, 0)) * 2 - 1, f - float3(1, 0, 0));
+				float n010 = dot(Hash33(i + float3(0, 1, 0)) * 2 - 1, f - float3(0, 1, 0));
+				float n110 = dot(Hash33(i + float3(1, 1, 0)) * 2 - 1, f - float3(1, 1, 0));
+				float n001 = dot(Hash33(i + float3(0, 0, 1)) * 2 - 1, f - float3(0, 0, 1));
+				float n101 = dot(Hash33(i + float3(1, 0, 1)) * 2 - 1, f - float3(1, 0, 1));
+				float n011 = dot(Hash33(i + float3(0, 1, 1)) * 2 - 1, f - float3(0, 1, 1));
+				float n111 = dot(Hash33(i + float3(1, 1, 1)) * 2 - 1, f - float3(1, 1, 1));
+				return lerp(
+					lerp(lerp(n000, n100, u.x), lerp(n010, n110, u.x), u.y),
+					lerp(lerp(n001, n101, u.x), lerp(n011, n111, u.x), u.y), u.z);
 			}
-			#else
-			VertexOutput vert ( VertexInput v )
+
+			float3 Quantise(float3 x)
 			{
-				return VertexFunction( v );
+				if (_ToonSteps < 0.5)
+					return x;
+				float3 s = x * _ToonSteps;
+				return (floor(s) + smoothstep(0.4, 0.6, frac(s))) / _ToonSteps;
 			}
-			#endif
 
-			half4 frag ( VertexOutput IN  ) : SV_Target
+			// Slowly evolving vector field that bends the flow into eddies.
+			float2 Swirl(float2 p, float t)
 			{
-				UNITY_SETUP_INSTANCE_ID( IN );
-				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX( IN );
+				float2 q = p * _SwirlScale;
+				float ts = t * _SwirlSpeed;
+				return float2(
+					GradientNoise(q + float2(0, ts)),
+					GradientNoise(q + float2(5.2, 1.3) - float2(ts, 0)));
+			}
 
-				#if defined(ASE_NEEDS_FRAG_WORLD_POSITION)
-				float3 WorldPosition = IN.worldPos;
-				#endif
-				float4 ShadowCoords = float4( 0, 0, 0, 0 );
+			float Ripples(float2 p)
+			{
+				if (_WaterRippleSimEnabled < 0.5)
+					return 0;
+				float2 uv = (p - _WaterRippleSimRect.xy) / _WaterRippleSimRect.zw;
+				if (any(uv < 0) || any(uv > 1))
+					return 0;
+				return SAMPLE_TEXTURE2D_LOD(_WaterRippleSimTex, sampler_LinearClamp, uv, 0).r * _RippleAmplitude;
+			}
 
-				#if defined(ASE_NEEDS_FRAG_SHADOWCOORDS)
-					#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
-						ShadowCoords = IN.shadowCoord;
-					#elif defined(MAIN_LIGHT_CALCULATE_SHADOWS)
-						ShadowCoords = TransformWorldToShadowCoord( WorldPosition );
+			float WaterHeight(float2 p, float t)
+			{
+				float ripples = Ripples(p);
+				float2 flow = _FlowDirection.xy * _FlowSpeed * t;
+				p += Swirl(p, t) * _SwirlStrength;
+				float2 q = (p - flow) * _WaveScale;
+				float h = GradientNoise(q) * 0.5;
+				q = mul(float2x2(0.8, 0.6, -0.6, 0.8), q) * 2.03 + float2(1.7, 9.2) - flow * 0.7;
+				h += GradientNoise(q + float2(t * 0.11, 0)) * 0.27;
+				q = mul(float2x2(0.8, -0.6, 0.6, 0.8), q) * 2.11 + float2(8.3, 2.8);
+				h += GradientNoise(q - float2(0, t * 0.17)) * 0.13;
+				return h * _FlowWaveAmount + ripples;
+			}
+
+			// Light focused by the ripples: bright under crests (converging) and dim under troughs, from the curvature of the
+			// surface where sunlight entered above this floor point. Focusing builds with depth up to _CausticFocusDepth.
+			float RippleCaustic(float2 surfaceP, float depth, float spread)
+			{
+				float e = 0.04 + spread;
+				float centre = Ripples(surfaceP);
+				float curvature = (Ripples(surfaceP + float2(e, 0)) + Ripples(surfaceP - float2(e, 0))
+					+ Ripples(surfaceP + float2(0, e)) + Ripples(surfaceP - float2(0, e)) - 4 * centre) / (e * e);
+				return -curvature * 0.02 * saturate(depth / _CausticFocusDepth);
+			}
+
+			float3 SceneColour(float2 uv)
+			{
+				return SAMPLE_TEXTURE2D_X_LOD(_CameraOpaqueTexture, sampler_CameraOpaqueTexture, UnityStereoTransformScreenSpaceTex(uv), 0).rgb;
+			}
+
+			float SceneEyeDepth(float2 uv)
+			{
+				float raw = SAMPLE_TEXTURE2D_X_LOD(_CameraDepthTexture, sampler_CameraDepthTexture, UnityStereoTransformScreenSpaceTex(uv), 0).r;
+				if (unity_OrthoParams.w > 0.5)
+				{
+					#if UNITY_REVERSED_Z
+					raw = 1 - raw;
 					#endif
-				#endif
-				float time19 = 0.0;
-				float2 appendResult22 = (float2(WorldPosition.x , WorldPosition.z));
-				float2 coords19 = ( appendResult22 + ( _Speed * _TimeParameters.x ) ) * _VoronoiScale;
-				float2 id19 = 0;
-				float2 uv19 = 0;
-				float voroi19 = voronoi19( coords19, time19, id19, uv19, 0 );
-				float4 lerpResult24 = lerp( _Color1 , _Color0 , voroi19);
-				float time20 = 0.0;
-				float2 coords20 = ( appendResult22 + ( _Speed1 * _TimeParameters.x ) ) * _VoronoiScale;
-				float2 id20 = 0;
-				float2 uv20 = 0;
-				float voroi20 = voronoi20( coords20, time20, id20, uv20, 0 );
-				float4 lerpResult28 = lerp( lerpResult24 , _Color2 , voroi20);
-				
-				float3 BakedAlbedo = 0;
-				float3 BakedEmission = 0;
-				float3 Color = lerpResult28.rgb;
-				float Alpha = 1;
-				float AlphaClipThreshold = 0.5;
-				float AlphaClipThresholdShadow = 0.5;
-
-				#ifdef _ALPHATEST_ON
-					clip( Alpha - AlphaClipThreshold );
-				#endif
-
-				#ifdef LOD_FADE_CROSSFADE
-					LODDitheringTransition( IN.clipPos.xyz, unity_LODFade.x );
-				#endif
-
-				#ifdef ASE_FOG
-					Color = MixFog( Color, IN.fogFactor );
-				#endif
-
-				return half4( Color, Alpha );
+					return lerp(_ProjectionParams.y, _ProjectionParams.z, raw);
+				}
+				return LinearEyeDepth(raw, _ZBufferParams);
 			}
 
-			ENDHLSL
-		}
-
-		
-		Pass
-		{
-			
-			Name "DepthOnly"
-			Tags { "LightMode"="DepthOnly" }
-
-			ZWrite On
-			ColorMask 0
-			AlphaToMask Off
-
-			HLSLPROGRAM
-			#define _RECEIVE_SHADOWS_OFF 1
-			#pragma multi_compile_instancing
-			#define ASE_SRP_VERSION 999999
-
-			#pragma prefer_hlslcc gles
-			#pragma exclude_renderers d3d11_9x
-
-			#pragma vertex vert
-			#pragma fragment frag
-
-			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
-			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderGraphFunctions.hlsl"
-			#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
-
-			
-
-			struct VertexInput
+			float EyeDepth(float3 positionWS)
 			{
-				float4 vertex : POSITION;
-				float3 ase_normal : NORMAL;
-				
-				UNITY_VERTEX_INPUT_INSTANCE_ID
-			};
-
-			struct VertexOutput
-			{
-				float4 clipPos : SV_POSITION;
-				#if defined(ASE_NEEDS_FRAG_WORLD_POSITION)
-				float3 worldPos : TEXCOORD0;
-				#endif
-				#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR) && defined(ASE_NEEDS_FRAG_SHADOWCOORDS)
-				float4 shadowCoord : TEXCOORD1;
-				#endif
-				
-				UNITY_VERTEX_INPUT_INSTANCE_ID
-				UNITY_VERTEX_OUTPUT_STEREO
-			};
-
-			CBUFFER_START(UnityPerMaterial)
-			float4 _Color1;
-			float4 _Color0;
-			float4 _Color2;
-			float2 _Speed;
-			float2 _Speed1;
-			float _VoronoiScale;
-			float _WaveHeight;
-			#ifdef TESSELLATION_ON
-				float _TessPhongStrength;
-				float _TessValue;
-				float _TessMin;
-				float _TessMax;
-				float _TessEdgeLength;
-				float _TessMaxDisp;
-			#endif
-			CBUFFER_END
-			
-
-					float2 voronoihash19( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
-			
-					float voronoi19( float2 v, float time, inout float2 id, inout float2 mr, float smoothness )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0;
-						for ( int j = -1; j <= 1; j++ )
-						{
-							for ( int i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash19( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						 		}
-						 	}
-						}
-						return F1;
-					}
-			
-					float2 voronoihash20( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
-			
-					float voronoi20( float2 v, float time, inout float2 id, inout float2 mr, float smoothness )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0;
-						for ( int j = -1; j <= 1; j++ )
-						{
-							for ( int i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash20( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						 		}
-						 	}
-						}
-						return F1;
-					}
-			
-
-			VertexOutput VertexFunction( VertexInput v  )
-			{
-				VertexOutput o = (VertexOutput)0;
-				UNITY_SETUP_INSTANCE_ID(v);
-				UNITY_TRANSFER_INSTANCE_ID(v, o);
-				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
-
-				float time19 = 0.0;
-				float3 ase_worldPos = mul(GetObjectToWorldMatrix(), v.vertex).xyz;
-				float2 appendResult22 = (float2(ase_worldPos.x , ase_worldPos.z));
-				float2 coords19 = ( appendResult22 + ( _Speed * _TimeParameters.x ) ) * _VoronoiScale;
-				float2 id19 = 0;
-				float2 uv19 = 0;
-				float voroi19 = voronoi19( coords19, time19, id19, uv19, 0 );
-				float time20 = 0.0;
-				float2 coords20 = ( appendResult22 + ( _Speed1 * _TimeParameters.x ) ) * _VoronoiScale;
-				float2 id20 = 0;
-				float2 uv20 = 0;
-				float voroi20 = voronoi20( coords20, time20, id20, uv20, 0 );
-				
-				#ifdef ASE_ABSOLUTE_VERTEX_POS
-					float3 defaultVertexValue = v.vertex.xyz;
-				#else
-					float3 defaultVertexValue = float3(0, 0, 0);
-				#endif
-				float3 vertexValue = ( ( voroi19 + voroi20 ) * float3(0,1,0) * _WaveHeight );
-				#ifdef ASE_ABSOLUTE_VERTEX_POS
-					v.vertex.xyz = vertexValue;
-				#else
-					v.vertex.xyz += vertexValue;
-				#endif
-
-				v.ase_normal = v.ase_normal;
-
-				float3 positionWS = TransformObjectToWorld( v.vertex.xyz );
-
-				#if defined(ASE_NEEDS_FRAG_WORLD_POSITION)
-				o.worldPos = positionWS;
-				#endif
-
-				o.clipPos = TransformWorldToHClip( positionWS );
-				#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR) && defined(ASE_NEEDS_FRAG_SHADOWCOORDS)
-					VertexPositionInputs vertexInput = (VertexPositionInputs)0;
-					vertexInput.positionWS = positionWS;
-					vertexInput.positionCS = clipPos;
-					o.shadowCoord = GetShadowCoord( vertexInput );
-				#endif
-				return o;
+				return -TransformWorldToView(positionWS).z;
 			}
 
-			#if defined(TESSELLATION_ON)
-			struct VertexControl
+			float2 WorldToScreenUV(float3 positionWS)
 			{
-				float4 vertex : INTERNALTESSPOS;
-				float3 ase_normal : NORMAL;
-				
-				UNITY_VERTEX_INPUT_INSTANCE_ID
-			};
-
-			struct TessellationFactors
-			{
-				float edge[3] : SV_TessFactor;
-				float inside : SV_InsideTessFactor;
-			};
-
-			VertexControl vert ( VertexInput v )
-			{
-				VertexControl o;
-				UNITY_SETUP_INSTANCE_ID(v);
-				UNITY_TRANSFER_INSTANCE_ID(v, o);
-				o.vertex = v.vertex;
-				o.ase_normal = v.ase_normal;
-				
-				return o;
+				float4 cs = TransformWorldToHClip(positionWS);
+				float4 ndc = cs * 0.5;
+				float2 uv = (float2(ndc.x, ndc.y * _ProjectionParams.x) + ndc.w) / cs.w;
+				return uv;
 			}
 
-			TessellationFactors TessellationFunction (InputPatch<VertexControl,3> v)
+			// Whether sunlight reaching an underwater point is blocked by something solid above it (a lily pad, a rock
+			// overhang, a fish), found by marching towards the light through the depth buffer. Only on-screen things block.
+			float UnderwaterShadow(float3 p, float3 lightDir, float depth)
 			{
-				TessellationFactors o;
-				float4 tf = 1;
-				float tessValue = _TessValue; float tessMin = _TessMin; float tessMax = _TessMax;
-				float edgeLength = _TessEdgeLength; float tessMaxDisp = _TessMaxDisp;
-				#if defined(ASE_FIXED_TESSELLATION)
-				tf = FixedTess( tessValue );
-				#elif defined(ASE_DISTANCE_TESSELLATION)
-				tf = DistanceBasedTess(v[0].vertex, v[1].vertex, v[2].vertex, tessValue, tessMin, tessMax, GetObjectToWorldMatrix(), _WorldSpaceCameraPos );
-				#elif defined(ASE_LENGTH_TESSELLATION)
-				tf = EdgeLengthBasedTess(v[0].vertex, v[1].vertex, v[2].vertex, edgeLength, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams );
-				#elif defined(ASE_LENGTH_CULL_TESSELLATION)
-				tf = EdgeLengthBasedTessCull(v[0].vertex, v[1].vertex, v[2].vertex, edgeLength, tessMaxDisp, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams, unity_CameraWorldClipPlanes );
-				#endif
-				o.edge[0] = tf.x; o.edge[1] = tf.y; o.edge[2] = tf.z; o.inside = tf.w;
-				return o;
-			}
-
-			[domain("tri")]
-			[partitioning("fractional_odd")]
-			[outputtopology("triangle_cw")]
-			[patchconstantfunc("TessellationFunction")]
-			[outputcontrolpoints(3)]
-			VertexControl HullFunction(InputPatch<VertexControl, 3> patch, uint id : SV_OutputControlPointID)
-			{
-			   return patch[id];
-			}
-
-			[domain("tri")]
-			VertexOutput DomainFunction(TessellationFactors factors, OutputPatch<VertexControl, 3> patch, float3 bary : SV_DomainLocation)
-			{
-				VertexInput o = (VertexInput) 0;
-				o.vertex = patch[0].vertex * bary.x + patch[1].vertex * bary.y + patch[2].vertex * bary.z;
-				o.ase_normal = patch[0].ase_normal * bary.x + patch[1].ase_normal * bary.y + patch[2].ase_normal * bary.z;
-				
-				#if defined(ASE_PHONG_TESSELLATION)
-				float3 pp[3];
-				for (int i = 0; i < 3; ++i)
-					pp[i] = o.vertex.xyz - patch[i].ase_normal * (dot(o.vertex.xyz, patch[i].ase_normal) - dot(patch[i].vertex.xyz, patch[i].ase_normal));
-				float phongStrength = _TessPhongStrength;
-				o.vertex.xyz = phongStrength * (pp[0]*bary.x + pp[1]*bary.y + pp[2]*bary.z) + (1.0f-phongStrength) * o.vertex.xyz;
-				#endif
-				UNITY_TRANSFER_INSTANCE_ID(patch[0], o);
-				return VertexFunction(o);
-			}
-			#else
-			VertexOutput vert ( VertexInput v )
-			{
-				return VertexFunction( v );
-			}
-			#endif
-
-			half4 frag(VertexOutput IN  ) : SV_TARGET
-			{
-				UNITY_SETUP_INSTANCE_ID(IN);
-				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX( IN );
-
-				#if defined(ASE_NEEDS_FRAG_WORLD_POSITION)
-				float3 WorldPosition = IN.worldPos;
-				#endif
-				float4 ShadowCoords = float4( 0, 0, 0, 0 );
-
-				#if defined(ASE_NEEDS_FRAG_SHADOWCOORDS)
-					#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
-						ShadowCoords = IN.shadowCoord;
-					#elif defined(MAIN_LIGHT_CALCULATE_SHADOWS)
-						ShadowCoords = TransformWorldToShadowCoord( WorldPosition );
-					#endif
-				#endif
-
-				
-				float Alpha = 1;
-				float AlphaClipThreshold = 0.5;
-
-				#ifdef _ALPHATEST_ON
-					clip(Alpha - AlphaClipThreshold);
-				#endif
-
-				#ifdef LOD_FADE_CROSSFADE
-					LODDitheringTransition( IN.clipPos.xyz, unity_LODFade.x );
-				#endif
+				float maxDistance = (depth + 0.2) / max(lightDir.y, 0.2);
+				[loop]
+				for (int i = 0; i < 12; i++)
+				{
+					float d = 0.03 + maxDistance * (i + 1) / 12.0;
+					float3 q = p + lightDir * d;
+					float2 uv = WorldToScreenUV(q);
+					if (any(uv < 0) || any(uv > 1))
+						break;
+					float diff = EyeDepth(q) - SceneEyeDepth(uv);
+					if (diff > 0.03 && diff < 0.6)
+						return 1;
+				}
 				return 0;
 			}
+
+			Varyings Vert(Attributes input)
+			{
+				Varyings output = (Varyings)0;
+				UNITY_SETUP_INSTANCE_ID(input);
+				UNITY_TRANSFER_INSTANCE_ID(input, output);
+				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
+
+				VertexPositionInputs positions = GetVertexPositionInputs(input.positionOS.xyz);
+				output.positionCS = positions.positionCS;
+				output.positionWS = positions.positionWS;
+				return output;
+			}
+
+			half4 Frag(Varyings input) : SV_Target
+			{
+				UNITY_SETUP_INSTANCE_ID(input);
+				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
+
+				float t = _Time.y * _AnimationSpeed;
+				float3 positionWS = input.positionWS;
+				float2 p = positionWS.xz;
+
+				const float e = 0.03;
+				float h = WaterHeight(p, t);
+				float hx = WaterHeight(p + float2(e, 0), t);
+				float hz = WaterHeight(p + float2(0, e), t);
+				float3 normalWS = normalize(float3(-(hx - h) / e * _WaveStrength * 0.25, 1, -(hz - h) / e * _WaveStrength * 0.25));
+
+				float3 toCamera = GetWorldSpaceNormalizeViewDir(positionWS);
+				float3 rayDir = -toCamera;
+				float surfaceDepth = EyeDepth(positionWS);
+				float2 screenUV = GetNormalizedScreenSpaceUV(input.positionCS);
+
+				// Thickness of water behind the surface along the view ray, before and after refraction.
+				// Refraction shifts the point seen through the water sideways in world space, further for deeper things.
+				float3 cameraForward = -UNITY_MATRIX_V[2].xyz;
+				float rayToEye = 1 / max(0.001, dot(rayDir, cameraForward));
+				float rawThickness = max(0, SceneEyeDepth(screenUV) - surfaceDepth);
+				float3 rawFloorWS = positionWS + rayDir * min(rawThickness, 4) * rayToEye;
+				float3 shift = float3(normalWS.x, 0, normalWS.z) * _RefractionStrength * min(positionWS.y - rawFloorWS.y, 2);
+				float2 refractedUV = WorldToScreenUV(rawFloorWS + shift);
+				float refractedSceneDepth = SceneEyeDepth(refractedUV);
+				if (refractedSceneDepth < surfaceDepth)
+				{
+					refractedUV = screenUV;
+					refractedSceneDepth = SceneEyeDepth(screenUV);
+				}
+				float thickness = max(0, refractedSceneDepth - surfaceDepth);
+
+				float3 floorWS = positionWS + rayDir * thickness * rayToEye;
+				float verticalDepth = max(0, positionWS.y - floorWS.y);
+
+				float3 refracted;
+				refracted.r = SceneColour(screenUV + (refractedUV - screenUV) * (1 + _ChromaticAberration)).r;
+				refracted.g = SceneColour(refractedUV).g;
+				refracted.b = SceneColour(screenUV + (refractedUV - screenUV) * (1 - _ChromaticAberration)).b;
+
+				// Depth blur: a disc of taps around the refracted point whose world-space radius grows with depth.
+				// Taps that land on things in front of the water (lily pads, the bank) are skipped so they don't smear in.
+				float blurWorld = min(verticalDepth * _DepthBlur, _DepthBlurMax);
+				float uvPerWorld = abs(UNITY_MATRIX_P[1][1]) * 0.5 / (unity_OrthoParams.w > 0.5 ? 1 : max(refractedSceneDepth, 0.01));
+				float2 blurRadius = blurWorld * uvPerWorld * float2(_ScaledScreenParams.y / _ScaledScreenParams.x, 1);
+				float blurPixels = blurRadius.y * _ScaledScreenParams.y;
+				[branch]
+				if (blurPixels > 0.75)
+				{
+					float3 blurred = 0;
+					float weight = 0;
+					float rotation = InterleavedGradientNoise(input.positionCS.xy, 0) * 6.2831;
+					[unroll]
+					for (int i = 0; i < 16; i++)
+					{
+						float r = sqrt((i + 0.5) / 16);
+						float a = i * 2.39996 + rotation;
+						float2 uv = refractedUV + float2(cos(a), sin(a)) * r * blurRadius;
+						float w = SceneEyeDepth(uv) > surfaceDepth ? 1 : 0;
+						blurred += SceneColour(uv) * w;
+						weight += w;
+					}
+					if (weight > 0)
+						refracted = lerp(refracted, blurred / weight, saturate(blurPixels - 0.75));
+				}
+
+				Light mainLight = GetMainLight();
+				// Surfaces facing away from the sun, and anything in shadow, get no caustics.
+				float3 floorNormal = normalize(cross(ddy(floorWS), ddx(floorWS)));
+				floorNormal = dot(floorNormal, toCamera) < 0 ? -floorNormal : floorNormal;
+				float facing = saturate(dot(floorNormal, mainLight.direction));
+				float shadow = verticalDepth > 0.01 ? UnderwaterShadow(floorWS, mainLight.direction, verticalDepth) : 0;
+				refracted *= 1 - shadow * _UnderwaterShadow;
+
+				float caustic = RippleCaustic(floorWS.xz + mainLight.direction.xz * verticalDepth * 0.5, verticalDepth, blurWorld)
+					* facing * (1 - shadow);
+				caustic = clamp(caustic * exp(-verticalDepth * _CausticDepthFade) * _CausticIntensity, -0.5, 3);
+				float3 caustics = Quantise(max(caustic, 0).xxx) - max(-caustic, 0);
+				refracted += refracted * caustics * _CausticColour.rgb * mainLight.color;
+
+				float pathLength = (verticalDepth + thickness) * 0.5;
+				float3 transmittance = exp(-_Absorption.rgb * _AbsorptionScale * pathLength);
+				float inscatter = (1 - exp(-pathLength * _HazeDensity)) * _InscatterAmount;
+				float3 underwater = refracted * transmittance * _ShallowTint.rgb;
+				underwater = lerp(underwater, _DeepColour.rgb, inscatter);
+
+				float3 reflectDir = reflect(rayDir, normalWS);
+				reflectDir = normalize(float3(reflectDir.x, max(reflectDir.y, 0.08), reflectDir.z));
+				float3 sky = lerp(_SkyHorizon.rgb, _SkyZenith.rgb, saturate(reflectDir.y));
+				float nDotV = saturate(dot(normalWS, toCamera));
+				float fresnel = saturate(saturate(_FresnelBias + (1 - _FresnelBias) * pow(1 - nDotV, _FresnelPower)) * _ReflectionStrength);
+				float3 colour = lerp(underwater, sky, fresnel);
+
+				// Mirrored scene from PlanarWaterReflection, rippled by the surface normal. Objects reflect more strongly
+				// than physically plausible so they read clearly from the steep game camera.
+				[branch]
+				if (_PlanarReflectionEnabled > 0.5)
+				{
+					float uvPerWorld = abs(UNITY_MATRIX_P[1][1]) * 0.5 / (unity_OrthoParams.w > 0.5 ? 1 : surfaceDepth);
+					float2 reflectUV = screenUV + normalWS.xz * _ReflectionDistortion * uvPerWorld * float2(_ScaledScreenParams.y / _ScaledScreenParams.x, 1);
+					// Mip-blurred, with four offset taps to smooth out the blockiness of the lower mips.
+					float2 texel = exp2(_ReflectionBlur) / _ScaledScreenParams.xy;
+					float4 planar = SAMPLE_TEXTURE2D_LOD(_PlanarReflectionTexture, sampler_LinearClamp, reflectUV + texel * float2(0.5, 1), _ReflectionBlur)
+						+ SAMPLE_TEXTURE2D_LOD(_PlanarReflectionTexture, sampler_LinearClamp, reflectUV + texel * float2(-1, 0.5), _ReflectionBlur)
+						+ SAMPLE_TEXTURE2D_LOD(_PlanarReflectionTexture, sampler_LinearClamp, reflectUV + texel * float2(-0.5, -1), _ReflectionBlur)
+						+ SAMPLE_TEXTURE2D_LOD(_PlanarReflectionTexture, sampler_LinearClamp, reflectUV + texel * float2(1, -0.5), _ReflectionBlur);
+					planar *= 0.25;
+					colour = lerp(colour, planar.rgb, saturate(planar.a) * saturate(fresnel + _ObjectReflectionStrength));
+				}
+
+				float3 halfDir = normalize(mainLight.direction + toCamera);
+				float specular = pow(saturate(dot(normalWS, halfDir)), _SpecularPower) * _SpecularPower * 0.02;
+				colour += Quantise(saturate(specular)) * _SpecularColour.rgb * mainLight.color;
+
+				float2 cell = floor(p * _SparkleDensity);
+				float2 cellUV = frac(p * _SparkleDensity) - 0.5;
+				float sparkleSeed = Hash21(cell);
+				float twinkle = saturate(sin(t * (2 + sparkleSeed * 3) + sparkleSeed * 40) * 2 - 1);
+				cellUV += (Hash22(cell + 17) - 0.5) * 0.5;
+				float2 a = abs(cellUV);
+				float star = saturate(1 - length(cellUV) * 7) + saturate(1 - a.x * 30) * saturate(1 - a.y * 4) + saturate(1 - a.y * 30) * saturate(1 - a.x * 4);
+				float crest = saturate(h * 4 - 0.3);
+				float sparkle = step(1 - _SparkleAmount, sparkleSeed) * twinkle * star * crest;
+				colour += sparkle * _SparkleIntensity * _SpecularColour.rgb;
+
+				colour += _GlowColour.rgb * (_GlowAmount + saturate(h + 0.1) * _CrestGlow * 0.3);
+
+				// Shallow-water glow: the band's reach wobbles with layered noise and lacy gaps open up inside it, with a
+				// thin solid line kept right where the water touches things. The noise is 3D and only moves along Y, so the
+				// pattern reshapes in place instead of visibly sliding across the surface.
+				float3 edgeP = float3(p.x * _EdgeNoiseScale, t * _EdgeNoiseSpeed, p.y * _EdgeNoiseScale);
+				float reach = GradientNoise3D(edgeP) * 0.55
+					+ GradientNoise3D(edgeP * float3(2.3, 1.3, 2.3) + float3(0, 0, 3.7)) * 0.3
+					+ GradientNoise3D(edgeP * float3(5.3, 1.7, 5.3) + float3(8.1, 0, 0)) * 0.15;
+				float lace = GradientNoise3D(edgeP * float3(3.1, 1.5, 3.1) + float3(reach * 2, 0, 0)) * 0.5
+					+ GradientNoise3D(edgeP * float3(7.7, 2, 7.7) + float3(1.3, 0, 5.1)) * 0.25;
+				// Ripple crests deepen the water at the edge and troughs make it shallower, so the band breathes with them.
+				// Clamped so deep troughs out in open water (e.g. a splash) can't make it look shallow.
+				float shore = (rawThickness + clamp(Ripples(p) * _EdgeRippleInfluence, -_EdgeWidth, _EdgeWidth)) / _EdgeWidth;
+				float band = saturate(1 - shore + reach * _EdgeNoiseStrength);
+				float foam = band * band * lerp(1, smoothstep(-0.05, 0.2, lace + band * 0.3 - 0.15), _EdgeBreakup);
+				float contact = saturate(1 - rawThickness / (_EdgeWidth * 0.15));
+				colour += Quantise(saturate(foam + contact * contact * 0.6)) * _EdgeColour.rgb * _EdgeIntensity;
+
+				return half4(colour, 1);
+			}
 			ENDHLSL
 		}
-
-	
 	}
-	CustomEditor "UnityEditor.ShaderGraph.PBRMasterGUI"
-	Fallback "Hidden/InternalErrorShader"
-	
 }
-/*ASEBEGIN
-Version=18500
-0;0;1920;1029;1370.16;296.6563;1;True;True
-Node;AmplifyShaderEditor.WorldPosInputsNode;21;-1041.214,12.11282;Inherit;False;0;4;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3
-Node;AmplifyShaderEditor.SimpleTimeNode;30;-930.1861,286.0487;Inherit;False;1;0;FLOAT;1;False;1;FLOAT;0
-Node;AmplifyShaderEditor.Vector2Node;32;-920.8106,163.6157;Inherit;False;Property;_Speed;Speed;3;0;Create;True;0;0;False;0;False;0,0;0.1,0;0;3;FLOAT2;0;FLOAT;1;FLOAT;2
-Node;AmplifyShaderEditor.Vector2Node;39;-785.2408,366.7279;Inherit;False;Property;_Speed1;Speed;4;0;Create;True;0;0;False;0;False;0,0;-0.2,0;0;3;FLOAT2;0;FLOAT;1;FLOAT;2
-Node;AmplifyShaderEditor.SimpleTimeNode;41;-794.6163,489.1609;Inherit;False;1;0;FLOAT;1;False;1;FLOAT;0
-Node;AmplifyShaderEditor.SimpleMultiplyOpNode;31;-728.1935,226.0301;Inherit;False;2;2;0;FLOAT2;0,0;False;1;FLOAT;0;False;1;FLOAT2;0
-Node;AmplifyShaderEditor.DynamicAppendNode;22;-784.2148,51.11282;Inherit;False;FLOAT2;4;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;0;False;3;FLOAT;0;False;1;FLOAT2;0
-Node;AmplifyShaderEditor.SimpleMultiplyOpNode;40;-592.6237,429.1423;Inherit;False;2;2;0;FLOAT2;0,0;False;1;FLOAT;0;False;1;FLOAT2;0
-Node;AmplifyShaderEditor.SimpleAddOpNode;29;-506.8268,41.78677;Inherit;False;2;2;0;FLOAT2;0,0;False;1;FLOAT2;0,0;False;1;FLOAT2;0
-Node;AmplifyShaderEditor.RangedFloatNode;38;-468.5421,306.8401;Inherit;False;Property;_VoronoiScale;VoronoiScale;6;0;Create;True;0;0;False;0;False;1;2.2;0;0;0;1;FLOAT;0
-Node;AmplifyShaderEditor.SimpleAddOpNode;23;-335.2673,129.2791;Inherit;False;2;2;0;FLOAT2;0,0;False;1;FLOAT2;10,10;False;1;FLOAT2;0
-Node;AmplifyShaderEditor.VoronoiNode;19;-193.6346,-133.7651;Inherit;True;0;0;1;0;1;False;1;False;False;4;0;FLOAT2;0,0;False;1;FLOAT;0;False;2;FLOAT;1;False;3;FLOAT;0;False;3;FLOAT;0;FLOAT2;1;FLOAT2;2
-Node;AmplifyShaderEditor.VoronoiNode;20;-191.2673,146.2791;Inherit;True;0;0;1;0;1;False;1;False;False;4;0;FLOAT2;0,0;False;1;FLOAT;0;False;2;FLOAT;1;False;3;FLOAT;0;False;3;FLOAT;0;FLOAT2;1;FLOAT2;2
-Node;AmplifyShaderEditor.RangedFloatNode;37;239.1195,549.7075;Inherit;False;Property;_WaveHeight;WaveHeight;5;0;Create;True;0;0;False;0;False;0;0.2;0;0;0;1;FLOAT;0
-Node;AmplifyShaderEditor.Vector3Node;34;251.683,391.9838;Inherit;False;Constant;_Vector0;Vector 0;4;0;Create;True;0;0;False;0;False;0,1,0;0,0,0;0;4;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3
-Node;AmplifyShaderEditor.SimpleAddOpNode;33;187.4769,172.8459;Inherit;True;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
-Node;AmplifyShaderEditor.ColorNode;27;168.6166,-65.83707;Inherit;False;Property;_Color2;Color 2;2;1;[HDR];Create;True;0;0;False;0;False;1,1,1,0;1.414214,1.414214,1.414214,0;True;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.SimpleMultiplyOpNode;35;484.7786,297.0706;Inherit;False;3;3;0;FLOAT;0;False;1;FLOAT3;0,0,0;False;2;FLOAT;0;False;1;FLOAT3;0
-Node;AmplifyShaderEditor.LerpOp;24;219.6431,-201.8662;Inherit;False;3;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;2;FLOAT;0;False;1;COLOR;0
-Node;AmplifyShaderEditor.LerpOp;28;502.9702,-4.701761;Inherit;False;3;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;2;FLOAT;0;False;1;COLOR;0
-Node;AmplifyShaderEditor.ColorNode;26;-198.8628,-539.7438;Inherit;False;Property;_Color1;Color 1;1;0;Create;True;0;0;False;0;False;0.2416842,0.4888612,0.574,0;0.367632,0.6530834,0.851,0;True;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.ColorNode;25;-190.2797,-364.6534;Inherit;False;Property;_Color0;Color 0;0;0;Create;True;0;0;False;0;False;0.345098,0.6980392,0.8196079,0;0.3171948,0.6994256,0.8301887,0;True;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;1;754.7642,74.22257;Half;False;True;-1;2;UnityEditor.ShaderGraph.PBRMasterGUI;0;3;Water;2992e84f91cbeb14eab234972e07ea9d;True;Forward;0;1;Forward;8;False;False;False;False;False;False;False;False;True;0;False;-1;True;0;False;-1;False;False;False;False;False;False;False;False;True;3;RenderPipeline=UniversalPipeline;RenderType=Transparent=RenderType;Queue=Transparent=Queue=0;True;0;0;True;1;5;False;-1;10;False;-1;1;1;False;-1;10;False;-1;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;-1;False;False;False;True;False;255;False;-1;255;False;-1;255;False;-1;7;False;-1;1;False;-1;1;False;-1;1;False;-1;7;False;-1;1;False;-1;1;False;-1;1;False;-1;True;2;False;-1;True;3;False;-1;True;True;0;False;-1;0;False;-1;True;1;LightMode=UniversalForward;False;0;Hidden/InternalErrorShader;0;0;Standard;22;Surface;1;  Blend;0;Two Sided;1;Cast Shadows;0;  Use Shadow Threshold;0;Receive Shadows;0;GPU Instancing;1;LOD CrossFade;0;Built-in Fog;0;DOTS Instancing;0;Meta Pass;0;Extra Pre Pass;0;Tessellation;0;  Phong;0;  Strength;0.5,False,-1;  Type;0;  Tess;16,False,-1;  Min;10,False,-1;  Max;25,False,-1;  Edge Length;16,False,-1;  Max Displacement;25,False,-1;Vertex Position,InvertActionOnDeselection;1;0;5;False;True;False;True;False;False;;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;3;0,0;Float;False;False;-1;2;UnityEditor.ShaderGraph.PBRMasterGUI;0;1;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;DepthOnly;0;3;DepthOnly;0;False;False;False;False;False;False;False;False;True;0;False;-1;True;0;False;-1;False;False;False;False;False;False;False;False;True;3;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;0;0;False;False;False;False;False;False;False;False;True;0;False;-1;False;True;False;False;False;False;0;False;-1;False;False;False;False;True;1;False;-1;False;False;True;1;LightMode=DepthOnly;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;4;0,0;Float;False;False;-1;2;UnityEditor.ShaderGraph.PBRMasterGUI;0;1;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;Meta;0;4;Meta;0;False;False;False;False;False;False;False;False;True;0;False;-1;True;0;False;-1;False;False;False;False;False;False;False;False;True;3;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;0;0;False;False;False;False;False;False;False;False;False;True;2;False;-1;False;False;False;False;False;False;False;False;True;1;LightMode=Meta;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;2;0,0;Float;False;False;-1;2;UnityEditor.ShaderGraph.PBRMasterGUI;0;1;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;ShadowCaster;0;2;ShadowCaster;0;False;False;False;False;False;False;False;False;True;0;False;-1;True;0;False;-1;False;False;False;False;False;False;False;False;True;3;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;0;0;False;False;False;False;False;False;False;False;True;0;False;-1;False;False;False;False;False;False;True;1;False;-1;True;3;False;-1;False;True;1;LightMode=ShadowCaster;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;0;71.52734,-91.96374;Float;False;False;-1;2;UnityEditor.ShaderGraph.PBRMasterGUI;0;1;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;ExtraPrePass;0;0;ExtraPrePass;5;False;False;False;False;False;False;False;False;True;0;False;-1;True;0;False;-1;False;False;False;False;False;False;False;False;True;3;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;0;0;True;1;1;False;-1;0;False;-1;0;1;False;-1;0;False;-1;False;False;False;False;False;False;False;False;True;0;False;-1;True;True;True;True;True;0;False;-1;False;False;False;True;False;255;False;-1;255;False;-1;255;False;-1;7;False;-1;1;False;-1;1;False;-1;1;False;-1;7;False;-1;1;False;-1;1;False;-1;1;False;-1;True;1;False;-1;True;3;False;-1;True;True;0;False;-1;0;False;-1;True;0;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
-WireConnection;31;0;32;0
-WireConnection;31;1;30;0
-WireConnection;22;0;21;1
-WireConnection;22;1;21;3
-WireConnection;40;0;39;0
-WireConnection;40;1;41;0
-WireConnection;29;0;22;0
-WireConnection;29;1;31;0
-WireConnection;23;0;22;0
-WireConnection;23;1;40;0
-WireConnection;19;0;29;0
-WireConnection;19;2;38;0
-WireConnection;20;0;23;0
-WireConnection;20;2;38;0
-WireConnection;33;0;19;0
-WireConnection;33;1;20;0
-WireConnection;35;0;33;0
-WireConnection;35;1;34;0
-WireConnection;35;2;37;0
-WireConnection;24;0;26;0
-WireConnection;24;1;25;0
-WireConnection;24;2;19;0
-WireConnection;28;0;24;0
-WireConnection;28;1;27;0
-WireConnection;28;2;20;0
-WireConnection;1;2;28;0
-WireConnection;1;5;35;0
-ASEEND*/
-//CHKSM=457C37A3C0EC6E64FAC884EAAEA41BEDDE7E0D43
