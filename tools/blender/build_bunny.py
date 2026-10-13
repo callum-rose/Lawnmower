@@ -1,6 +1,6 @@
 """Builds the Regular Bunny mower in the VoxelStyle.md style and renders preview views.
 
-blender --background --factory-startup --python build_bunny.py -- [variant=classic|toy|lop|sitting] [out=<prefix>]
+blender --background --factory-startup --python build_bunny.py -- [variant=classic|toy|lop|sitting|loplong] [out=<prefix>]
 
 (or, with Blender's `bpy` module installed from pip: python build_bunny.py -- variant=... out=...)
 
@@ -12,6 +12,8 @@ tall ears with butter insides, a white tail and four dark feet.
 - toy:     a box with short bevels only (the Taxi's lesson, R7a), chunky upright ears.
 - lop:     the classic body with ears that flop down its sides.
 - sitting: a separate head on a low body, so the head can nod and turn; ears swept back.
+- loplong: between lop and sitting: a long body and a separate, slightly taller head at its front,
+           with lop ears.
 
 The script follows the bake_shade.py contract: parts are authored in voxels under an empty called
 `root`, the root part is `Body`, there is a shadow-catching `ground`, and it ends in the standard
@@ -29,7 +31,7 @@ argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
 kv = dict(a.split("=", 1) for a in argv if "=" in a)
 VARIANT = kv.get("variant", "classic")
 OUT = kv.get("out", "/tmp/bunny_" + VARIANT)
-assert VARIANT in ("classic", "toy", "lop", "sitting"), VARIANT
+assert VARIANT in ("classic", "toy", "lop", "sitting", "loplong"), VARIANT
 
 # The reference's coral, gold, white and dark red. The face is not voxels: it is the reference's own
 # face texture, a decal on a second UV channel (see FACE_TEX below).
@@ -321,6 +323,29 @@ elif VARIANT == "toy":
     tail(8, -7, size=4, proud=2.5)
     feet((-3.5, 3.5), (-4, 4), 3, 5, 3, 1, 2)
     HEIGHT = 22
+
+elif VARIANT == "loplong":
+    # The lop's long body cut in two: a 10-tall body and a 12-tall head overlapping its front, so the
+    # head stands proud of the back and can nod and turn. The head is 11 wide to the body's 12 (R8).
+    box = (-6, 6, 2, 12, -7, 5)
+    body = Part("Body")
+    body.box(*box, COAT)
+    round_box(body, box, top=2, side=2, bottom=1)
+    body.build()
+    hbox = (-5.5, 5.5, 4, 16, -0.5, 8.5)
+    head = Part("Head")
+    head.box(*hbox, COAT)
+    round_box(head, hbox, top=2, side=2, bottom=1)
+    head.paint(lambda x, y, z: z == 7.5 and -3.5 <= x < 3.5 and 5 <= y < 14, FACE)
+    head_ob = head.build(pivot=(0, 10, 2))                                       # neck, inside the body
+    face_uvs(head_ob, 8.5, 10.5, 10)
+    for sx in (1, -1):                                                           # lop ears, riding on the head
+        e = ear("Ear" + ("R" if sx > 0 else "L"), sx, sx * 3.5, 15, 2.5, 3, 2, 10, 2, pitch=5, splay=135)
+        e.parent = head_ob
+        e.location = Vector(e.location) - Vector(head_ob.location)
+    tail(7, -7)
+    feet((-3, 3), (-4.5, 2.5), 3, 4, 3, 1, 2)
+    HEIGHT = 18
 
 else:  # sitting
     # A low body and a separate head that can nod: the classic proportions split at the neck.
