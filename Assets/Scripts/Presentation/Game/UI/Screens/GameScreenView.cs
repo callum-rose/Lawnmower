@@ -61,6 +61,10 @@ namespace Game.UI.Screens
 			pauseCard.SettingsButton.Clicked += () => SettingsRequested?.Invoke();
 			pauseCard.LevelsButton.Clicked += () => LevelSelectRequested?.Invoke();
 			pauseCard.MenuButton.Clicked += () => MainMenuRequested?.Invoke();
+			if (pauseCard.OutsideButton != null)
+			{
+				pauseCard.OutsideButton.onClick.AddListener(() => ResumeRequested?.Invoke());
+			}
 
 			completeCard.NextButton.Clicked += () => NextLevelRequested?.Invoke();
 			completeCard.ReplayButton.Clicked += () => RestartRequested?.Invoke();
@@ -80,7 +84,10 @@ namespace Game.UI.Screens
 
 		#region IGameScreenView
 
-		public void ShowProgress(int moves, int par) => hud.ShowProgress(moves, par);
+		/// <summary>The HUD doesn't show a move counter.</summary>
+		public void ShowProgress(int moves, int par)
+		{
+		}
 
 		public void ShowCompleted(LevelCompletedInfo info)
 		{
@@ -110,11 +117,7 @@ namespace Game.UI.Screens
 
 		#region IGameHudView
 
-		public void ShowLevel(int number)
-		{
-			_levelNumber = number;
-			hud.ShowLevel(number);
-		}
+		public void ShowLevel(int number) => _levelNumber = number;
 
 		public void ShowHistory(bool canUndo, bool canRedo) => hud.ShowHistory(canUndo, canRedo);
 
@@ -132,7 +135,7 @@ namespace Game.UI.Screens
 		public void SetFailAnchor(Func<Vector3> worldPosition, Camera camera) => failedSheet.SetAnchor(worldPosition, camera);
 
 		/// <summary>
-		/// The screen rectangle (pixels) the board should fit in: below the top bar and above whatever is at the bottom
+		/// The screen rectangle (pixels) the board should fit in: below the pause button and above whatever is at the bottom
 		/// (the Level Failed sheet, else the arrows, else the Restart/Undo/Redo row).
 		/// </summary>
 		public Rect GetBoardScreenRect()

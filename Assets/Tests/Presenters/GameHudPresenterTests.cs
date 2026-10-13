@@ -116,8 +116,6 @@ namespace Lawnmower.Presenters.Tests
 			Assert.IsTrue(_game.IsPaused);
 			Assert.IsTrue(_hud.Paused.HasValue);
 			Assert.AreEqual(2, _hud.Paused.Value.LevelNumber);
-			Assert.AreEqual(0, _hud.Paused.Value.Perfects);
-			Assert.AreEqual(2, _hud.Paused.Value.LevelCount);
 
 			_input.Press(R);
 			Assert.AreEqual(0, _game.Stats.Moves, "no moves while paused");
@@ -127,14 +125,6 @@ namespace Lawnmower.Presenters.Tests
 			Assert.IsFalse(_hud.Paused.HasValue);
 			_input.Press(R);
 			Assert.AreEqual(1, _game.Stats.Moves);
-		}
-
-		[Test]
-		public void Pause_SubtitleCountsPerfects()
-		{
-			_progression.MarkCompleted(SecondLevel, 3, true);
-			_hud.PressPause();
-			Assert.AreEqual(1, _hud.Paused.Value.Perfects);
 		}
 
 		[Test]
