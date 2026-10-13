@@ -1,6 +1,7 @@
 """Builds the Regular Bunny mower in the VoxelStyle.md style and renders preview views.
 
-blender --background --factory-startup --python build_bunny.py -- [variant=classic|toy|lop|sitting|cube] [out=<prefix>]
+blender --background --factory-startup --python build_bunny.py -- [variant=classic|toy|lop|sitting|cube]
+    [colours=original|snow|midnight|forest|grape] [out=<prefix>]
 
 (or, with Blender's `bpy` module installed from pip: python build_bunny.py -- variant=... out=...)
 
@@ -35,8 +36,19 @@ assert VARIANT in ("classic", "toy", "lop", "sitting", "cube"), VARIANT
 
 # The reference's coral, gold, white and dark red. The face is not voxels: it is the reference's own
 # face texture, a decal on a second UV channel (see FACE_TEX below).
-COAT, FACE, WHITE, DARK = "P44", "P41", "P00", "P51"
-PALETTE = {"P00": "f6f6f2", "P41": "ffd070", "P44": "f08236", "P51": "b4521e"}
+# colours=<name> swaps the four roles (coat, face panel and inner ears, tail, feet) for a colourway.
+COLOURWAYS = {
+    "original": ("P44", "P41", "P00", "P51"),   # Orange, Butter, White, Rust
+    "snow":     ("P00", "P53", "P46", "P03"),   # White, Blush, Pink, Grey
+    "midnight": ("P40", "P37", "P00", "P56"),   # Deep blue, Sky, White, Navy
+    "forest":   ("P21", "P59", "P09", "P23"),   # Grass, Mint, Cream, Pine
+    "grape":    ("P47", "P55", "P41", "P48"),   # Purple, Lavender, Butter, Plum
+}
+COLOURS = kv.get("colours", "original")
+COAT, FACE, WHITE, DARK = COLOURWAYS[COLOURS]
+PALETTE = {"P00": "f6f6f2", "P03": "8a8b90", "P09": "ece0c0", "P21": "5a9440", "P23": "23452a", "P37": "8ab4d8",
+           "P40": "3a4d8c", "P41": "ffd070", "P44": "f08236", "P46": "e8899a", "P47": "b868c0", "P48": "7a3e86",
+           "P51": "b4521e", "P53": "f6c4cc", "P55": "d4b0e0", "P56": "23305a", "P59": "b8e6b0"}
 
 # ---- the face decal ----------------------------------------------------------------------------------
 # The game's bunny material ("Toon Test With UV2 Decal") draws _MainTex on UV0 and alpha-blends
