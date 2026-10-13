@@ -506,11 +506,11 @@ elif VARIANT == "cube":
 
 elif VARIANT == "egg":
     # An upright egg with a smooth surface (not voxels): a dense sphere reshaped to the profile
-    # r(t) = 5.5 sqrt(1 - t^2) (1 - 0.25 t), widest below the middle, cut flat at y = 2 to sit on.
+    # r(t) = 6.3 (1 - |t|^2.4)^(1/2.4) (1 - 0.12 t): fat, widest a little below the middle, a blunt top, cut flat at y = 2 to sit on.
     # 12.8 tall above the seat. The face colour is a smooth oval on the front; the face decal is pressed onto
     # it, eye line at 1/phi of the body's height. Big hind feet, small front paws, upright ears in the
     # crown, a tail.
-    EGG_YC, EGG_A, EGG_B, EGG_K, SEAT = 7.6, 7.2, 5.5, 0.25, 2
+    EGG_YC, EGG_A, EGG_B, EGG_K, EGG_P, SEAT = 7.6, 7.2, 6.3, 0.12, 2.4, 2
     bm = bmesh.new()
     bmesh.ops.create_uvsphere(bm, u_segments=96, v_segments=64, radius=1)
     # The sphere's pole points forward (tilted 10 deg up), so its rings circle the face: the face patch is
@@ -520,7 +520,8 @@ elif VARIANT == "egg":
     on_face = {f.index for f in bm.faces if all(v.co.dot(pole) > math.cos(math.radians(45)) - 1e-6 for v in f.verts)}
     for v in bm.verts:                                       # Blender z is up: t from the sphere's z
         t = v.co.z
-        k = EGG_B * (1 - EGG_K * t)
+        h = (v.co.x ** 2 + v.co.y ** 2) ** 0.5                                  # the sphere's own radius here
+        k = EGG_B * (1 - EGG_K * t) * ((1 - abs(t) ** EGG_P) ** (1 / EGG_P) / h if h > 1e-9 else 0)
         x, y, z = v.co.x * k, max(SEAT, EGG_YC + EGG_A * t), -v.co.y * k      # Unity voxel coords
         v.co = B((x, y, z))
     bm.faces.ensure_lookup_table()
@@ -542,7 +543,7 @@ elif VARIANT == "egg":
     for sx in (1, -1):
         ear("Ear" + ("R" if sx > 0 else "L"), sx, sx * 3, 13.2, -1.5, 5, 3, 11, 3, pitch=10, splay=15,
             plate_inner=True)
-    tail(5.5, -5.4, size=3, proud=2)
+    tail(5.5, -6.1, size=3, proud=2)
     feet((-3, 3), (-2,), 3, 5, 3, 1, 2)                                          # big hind feet, 3 x 5
     feet((-2.5, 2.5), (3.5,), 2, 3, 3, 1, 2)                                     # small front paws, 2 x 3
     HEIGHT = 24
