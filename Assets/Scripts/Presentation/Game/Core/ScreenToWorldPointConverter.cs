@@ -1,6 +1,6 @@
 ﻿using System;
 using UnityEngine;
-using UnityInput = UnityEngine.Input;
+using UnityEngine.InputSystem;
 
 namespace Game.Core
 {
@@ -17,15 +17,7 @@ namespace Game.Core
 
         [SerializeField] private float gizmoPlaneSize = 10;
 
-        private string ScreenPos => $"x: {UnityInput.mousePosition.x}, y: {UnityInput.mousePosition.y}";
-        private string WorldPos
-        {
-            get
-            {
-                Vector3 worldPos = GetWorldPoint(UnityInput.mousePosition);
-                return $"x: {worldPos.x}, y: {worldPos.y}, z: {worldPos.z}";
-            }
-        }
+        private static Vector2 MousePosition => Mouse.current?.position.ReadValue() ?? Vector2.zero;
 
         private Plane _plane;
 
@@ -65,7 +57,7 @@ namespace Game.Core
             Gizmos.DrawLine(corner0, corner2);
             Gizmos.DrawLine(corner1, corner3);
 
-            Gizmos.DrawSphere(GetWorldPoint(UnityInput.mousePosition), 0.1f);
+            Gizmos.DrawSphere(GetWorldPoint(MousePosition), 0.1f);
         }
 
         #endregion

@@ -70,7 +70,8 @@ namespace UI.Buttons
 
         public void OnPointerEnter(PointerEventData eventData)
         {
-            if (UnityEngine.Input.touchCount > 0)
+            // Touches "enter" as they press; only a hovering mouse gets the tint.
+            if (UnityEngine.InputSystem.Touchscreen.current?.primaryTouch.press.isPressed == true)
             {
                 OnPointerExit(eventData);
                 return;

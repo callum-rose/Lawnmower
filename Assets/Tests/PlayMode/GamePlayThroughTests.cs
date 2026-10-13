@@ -7,22 +7,25 @@ using Core;
 using Game.Core;
 using Game.Levels;
 using Game.Mowers;
-using Game.Mowers.Input;
+using Game.Input;
 using Lawnmower.Model;
 using Lawnmower.Presenters;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Controls;
 using UnityEngine.TestTools;
 using Object = UnityEngine.Object;
 
 namespace Tests.PlayMode
 {
 	/// <summary>
-	/// Plays levels in the real Game scene: input goes through the mower input channel into the
-	/// presenter, exactly as the keyboard/swipe/arrow controls send it. Any logged error or exception fails the test.
+	/// Plays levels in the real Game scene: moves are key presses on a test keyboard (New Input System), which go
+	/// through the scene's <see cref="MoveInputController"/> into the presenter. Swipes use a test touchscreen.
+	/// Any logged error or exception fails the test.
 	/// </summary>
-	public class GamePlayThroughTests
+	public class GamePlayThroughTests : InputTestFixture
 	{
 		private sealed class NoProgress : ILevelProgress
 		{
@@ -33,7 +36,8 @@ namespace Tests.PlayMode
 		private const float Timeout = 20;
 
 		private NoProgress _progress;
-		private MowerInputEventChannel _input;
+		private Keyboard _keyboard;
+		private MovementScheme _schemeBefore;
 		private MowerData _mower;
 		private readonly List<Object> _created = new List<Object>();
 		private readonly List<string> _errors = new List<string>();
@@ -43,21 +47,25 @@ namespace Tests.PlayMode
 			message.Contains("Fake or uninitialized surface") || message.Contains("Renderpass")
 			|| stackTrace.Contains("ScriptableRenderContext") || stackTrace.Contains("UnityEngine.Rendering.");
 
-		[SetUp]
-		public void SetUp()
+		public override void Setup()
 		{
+			base.Setup();
+			_keyboard = InputSystem.AddDevice<Keyboard>();
+			_schemeBefore = MovementSchemeSetting.Current;
+			MovementSchemeSetting.Current = MovementScheme.Swipe;
+
 			_errors.Clear();
 			Application.logMessageReceived += OnLog;
 
 			_progress = new NoProgress();
 			GameManager.ProgressOverrideForTests = _progress;
-			_input = Load<MowerInputEventChannel>("t:MowerInputEventChannel");
 			_mower = Load<MowerData>("RegularBunny t:MowerData");
 		}
 
-		[TearDown]
-		public void TearDown()
+		public override void TearDown()
 		{
+			MovementSchemeSetting.Current = _schemeBefore;
+
 			// ignoreFailingMessages belongs to this test's log scope; resetting it here would re-check the render noise.
 			Application.logMessageReceived -= OnLog;
 
@@ -69,6 +77,7 @@ namespace Tests.PlayMode
 			}
 
 			_created.Clear();
+			base.TearDown();
 		}
 
 		[UnityTest]
@@ -186,6 +195,58 @@ namespace Tests.PlayMode
 			AssertNoErrors();
 		}
 
+		[UnityTest]
+		public IEnumerator Swipe_OnTheBoard_RequestsOneMove()
+		{
+			Touchscreen touchscreen = InputSystem.AddDevice<Touchscreen>();
+			LevelData level = Copy(Load<LevelDataManager>("t:LevelDataManager").GetLevel(0).LevelData);
+			GameManager game = null;
+			yield return StartLevel(level, g => game = g);
+
+			List<GridVector> requested = new List<GridVector>();
+			game.MoveInput.MoveRequested += requested.Add;
+			yield return SwipeUp(touchscreen);
+			game.MoveInput.MoveRequested -= requested.Add;
+
+			Assert.AreEqual(1, requested.Count, "one swipe, one move");
+			Assert.IsTrue(requested[0].IsCardinalUnit);
+			yield return new WaitForSeconds(0.6f);
+			AssertNoErrors();
+		}
+
+		[UnityTest]
+		public IEnumerator ArrowsScheme_IgnoresSwipes_ShowsTheArrows_AndKeepsTheKeyboard()
+		{
+			Touchscreen touchscreen = InputSystem.AddDevice<Touchscreen>();
+			LevelData level = Copy(Load<LevelDataManager>("t:LevelDataManager").GetLevel(0).LevelData);
+			GameManager game = null;
+			yield return StartLevel(level, g => game = g);
+
+			global::Game.UI.UiArrowsGraphicInputHandler arrows = Object.FindAnyObjectByType<global::Game.UI.UiArrowsGraphicInputHandler>(FindObjectsInactive.Include);
+			Assert.IsNotNull(arrows, "the Game scene has on-screen arrows");
+			Assert.IsFalse(arrows.gameObject.activeInHierarchy, "arrows are hidden in the Swipe scheme");
+
+			MovementSchemeSetting.Current = MovementScheme.Arrows;
+			yield return null;
+			Assert.AreEqual(MovementScheme.Arrows, game.MoveInput.Scheme);
+			Assert.IsTrue(arrows.gameObject.activeInHierarchy, "arrows are shown in the Arrows scheme");
+
+			List<GridVector> requested = new List<GridVector>();
+			game.MoveInput.MoveRequested += requested.Add;
+			yield return SwipeUp(touchscreen);
+			Assert.IsEmpty(requested, "swipes are ignored in the Arrows scheme");
+
+			IReadOnlyList<GridVector> solution = MoveNotation.Parse(level.Solution);
+			yield return Play(game, new[] { solution[0] });
+			game.MoveInput.MoveRequested -= requested.Add;
+			CollectionAssert.AreEqual(new[] { solution[0] }, requested, "the keyboard works in every scheme");
+			Assert.AreEqual(1, game.Presenter.Stats.Moves);
+
+			MovementSchemeSetting.Current = MovementScheme.Swipe;
+			yield return null;
+			Assert.IsFalse(arrows.gameObject.activeInHierarchy);
+		}
+
 		#region Helpers
 
 		private void OnLog(string message, string stackTrace, LogType type)
@@ -250,13 +311,44 @@ namespace Tests.PlayMode
 		{
 			foreach (GridVector move in moves)
 			{
-				_input.Raise(move);
+				ButtonControl key = KeyFor(move);
+				Press(key, queueEventOnly: true);
+				yield return null;
+				Release(key, queueEventOnly: true);
 				yield return null;
 			}
 
 			// Let the mower animations finish so the views are exercised too.
 			yield return new WaitForSeconds(0.6f);
 			AssertNoErrors();
+		}
+
+		private ButtonControl KeyFor(GridVector move)
+		{
+			if (move == GridVector.Right) return _keyboard.rightArrowKey;
+			if (move == GridVector.Left) return _keyboard.leftArrowKey;
+			if (move == GridVector.Up) return _keyboard.upArrowKey;
+			if (move == GridVector.Down) return _keyboard.downArrowKey;
+			throw new ArgumentOutOfRangeException(nameof(move), move, "not a cardinal unit move");
+		}
+
+		/// <summary>A straight drag up the screen from its centre, in small steps.</summary>
+		private IEnumerator SwipeUp(Touchscreen touchscreen)
+		{
+			Vector2 start = new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
+			float length = Mathf.Min(Screen.height * 0.3f, 400);
+			BeginTouch(1, start, queueEventOnly: true, screen: touchscreen);
+			yield return null;
+
+			for (int i = 1; i <= 8; i++)
+			{
+				MoveTouch(1, start + new Vector2(0, length * i / 8), queueEventOnly: true, screen: touchscreen);
+				yield return null;
+			}
+
+			EndTouch(1, start + new Vector2(0, length), queueEventOnly: true, screen: touchscreen);
+			yield return null;
+			yield return null;
 		}
 
 		/// <summary>A runtime copy, so the scene change can't unload it and nothing writes to the asset.</summary>

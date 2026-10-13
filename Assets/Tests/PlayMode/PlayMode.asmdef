@@ -7,7 +7,9 @@
         "Lawnmower.Presentation",
         "Lawnmower.Model",
         "Lawnmower.Infrastructure",
-        "Lawnmower.Presenters"
+        "Lawnmower.Presenters",
+        "Unity.InputSystem",
+        "Unity.InputSystem.TestFramework"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -3,7 +3,6 @@ using BalsamicBits.Extensions;
 using Core.EventChannels;
 using Game.Core;
 using Game.Levels;
-using Game.Mowers.Input;
 using UnityEngine;
 
 namespace Game.Cameras
@@ -19,11 +18,8 @@ namespace Game.Cameras
 		[SerializeField, Min(0)] private float snapAnimDuration = 0.5f;
 
 		[Header("Event Channels")]
-		[SerializeField] private IMowerInputEventChannelListenerContainer mowerInputEventChannel;
-
 		[SerializeField] private IBoolEventChannelListenerContainer canPanCameraEventChannel;
 
-		private IMowerInputEventChannelListener MowerInputEventChannel => mowerInputEventChannel.Result;
 		private IBoolEventChannelListener CanPanCameraEventChannel => canPanCameraEventChannel.Result;
 
 		private bool _isDragging;
@@ -34,7 +30,6 @@ namespace Game.Cameras
 
 		private void OnEnable()
 		{
-			MowerInputEventChannel.EventRaised += MowerInputEventChannelOnEventRaised;
 			CanPanCameraEventChannel.EventRaised += OnCanPanCameraSet;
 		}
 
@@ -45,7 +40,6 @@ namespace Game.Cameras
 
 		private void OnDisable()
 		{
-			MowerInputEventChannel.EventRaised -= MowerInputEventChannelOnEventRaised;
 			CanPanCameraEventChannel.EventRaised -= OnCanPanCameraSet;
 		}
 
@@ -76,11 +70,6 @@ namespace Game.Cameras
 			}
 
 			panTarget.position = Vector3.Lerp(panTarget.position, mowerTarget.position, _snappedAmount);
-		}
-
-		private void MowerInputEventChannelOnEventRaised(GridVector _)
-		{
-			SetSnapped(true);
 		}
 
 		private void OnCanPanCameraSet(bool canPan)
