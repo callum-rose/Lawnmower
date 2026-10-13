@@ -225,7 +225,6 @@ Shader "Ocean"
 				float _TessMaxDisp;
 			#endif
 			CBUFFER_END
-			uniform float4 _CameraDepthTexture_TexelSize;
 			sampler2D BakedNoiseTex;
 
 
