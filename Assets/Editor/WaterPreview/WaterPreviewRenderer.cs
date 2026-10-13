@@ -1,13 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Game.Terrain;
+using Unity.Collections;
+using Unity.Mathematics;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
 
-// Renders the Water shader in a test pond (real grass tiles around primitive rocks, fish, plants and lily pads) from the
+// Renders the Water shader in a test pond (the level's SDF terrain and grass tiles around primitive rocks, fish, plants,
+// a sand floor and lily pads) from the
 // game camera, for judging the look outside play mode. Run in batch mode:
 //   Unity -batchmode -quit -projectPath . -executeMethod WaterPreviewRenderer.Render -logFile <log>
 // Environment variables: WATER_OUT (output folder), WATER_VIDEO=1 (raw RGB24 clip of the close shot instead of stills,
@@ -31,14 +35,12 @@ public static class WaterPreviewRenderer
 		foreach (var go in UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects())
 			go.SetActive(go.name == "Directional Light");
 
-		var basePrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Game/Tiles/Base.prefab");
-		var probe = (GameObject)PrefabUtility.InstantiatePrefab(basePrefab);
-		float top = probe.GetComponentInChildren<Renderer>().bounds.max.y;
-		Object.DestroyImmediate(probe);
-
+		var terrainSettings = AssetDatabase.LoadAssetAtPath<TerrainSettings>("Assets/ScriptableObjects/Game/Terrain/TerrainSettings.asset");
+		float top = terrainSettings.TopHeight;
 		float surface = top - 0.08f;
 		float floor = top - 0.95f;
-		BuildBank(top);
+		BuildBank();
+		BuildTerrain(terrainSettings);
 		BuildPond(surface, floor, top);
 
 		var rippleType = Type.GetType("Game.Tiles.WaterRippleSource, Lawnmower.Presentation");
@@ -62,7 +64,8 @@ public static class WaterPreviewRenderer
 		var water = GameObject.CreatePrimitive(PrimitiveType.Quad);
 		Object.DestroyImmediate(water.GetComponent<Collider>());
 		water.transform.SetPositionAndRotation(new Vector3(0, surface, 0.5f), Quaternion.Euler(90, 0, 0));
-		water.transform.localScale = new Vector3(5, 4, 1);
+		// Half a tile bigger than the pond on every side so it tucks under the terrain's inset bank.
+		water.transform.localScale = new Vector3(6, 5, 1);
 		water.layer = 4;
 		water.GetComponent<Renderer>().sharedMaterial = waterMaterial;
 
@@ -204,16 +207,55 @@ public static class WaterPreviewRenderer
 		File.WriteAllBytes(Path.Combine(outDir, $"sim_{tag}.png"), read.EncodeToPNG());
 	}
 
+	const int MinX = -5, MaxX = 5, MinZ = -4, MaxZ = 6;
+
 	static bool InPond(int x, int z) => x >= -2 && x <= 2 && z >= -1 && z <= 2;
 
-	static void BuildBank(float top)
+	// The level's SDF terrain, as TerrainManager builds it, with the pond tiles left out like water tiles are.
+	static void BuildTerrain(TerrainSettings settings)
+	{
+		int width = MaxX - MinX + 1, depth = MaxZ - MinZ + 1;
+		var solid = new bool[width, depth];
+		var cells = new Texture2D(width, depth, TextureFormat.RGBA32, false, false) { filterMode = FilterMode.Bilinear, wrapMode = TextureWrapMode.Clamp };
+		for (int x = 0; x < width; x++)
+		for (int z = 0; z < depth; z++)
+		{
+			solid[x, z] = !InPond(x + MinX, z + MinZ);
+			cells.SetPixel(x, z, new Color(0.16f, 0.22f, 0.06f));
+		}
+		cells.Apply();
+
+		var mesh = new Mesh { name = "Terrain" };
+		var footprint = TerrainFootprint.Create(solid, settings.ConvexCornerRadius, settings.ConcaveCornerRadius, Allocator.TempJob);
+		try
+		{
+			float margin = settings.Margin;
+			TerrainMesher.Build(mesh, footprint, settings.Shape, new float3(-margin, settings.BottomHeight, -margin),
+				new float3(width + margin, settings.TopHeight + settings.VoxelSize * 2, depth + margin), settings.VoxelSize);
+		}
+		finally
+		{
+			footprint.Dispose();
+		}
+
+		var terrain = new GameObject("Terrain");
+		terrain.transform.position = new Vector3(MinX - 0.5f, 0, MinZ - 0.5f);
+		terrain.AddComponent<MeshFilter>().sharedMesh = mesh;
+		var renderer = terrain.AddComponent<MeshRenderer>();
+		renderer.sharedMaterial = AssetDatabase.LoadAssetAtPath<Material>("Assets/Materials/Tiles/Terrain.mat");
+		var block = new MaterialPropertyBlock();
+		block.SetTexture("_TerrainCells", cells);
+		renderer.SetPropertyBlock(block);
+	}
+
+	static void BuildBank()
 	{
 		var grass = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Game/Tiles/Grass/Grass.prefab");
 		var stone = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Game/Tiles/Stone/Stone.prefab");
 		var setterType = Type.GetType("Game.Tiles.AppearanceSetter, Lawnmower.Presentation");
 		Random.InitState(7);
-		for (int x = -5; x <= 5; x++)
-		for (int z = -4; z <= 6; z++)
+		for (int x = MinX; x <= MaxX; x++)
+		for (int z = MinZ; z <= MaxZ; z++)
 		{
 			if (InPond(x, z))
 				continue;
@@ -256,12 +298,7 @@ public static class WaterPreviewRenderer
 		Random.InitState(42);
 		float depth = top - floor;
 		var sand = new Color(0.95f, 0.88f, 0.7f);
-		var wall = new Color(0.62f, 0.66f, 0.55f);
-		Prim(PrimitiveType.Cube, new Vector3(0, floor - 0.05f, 0.5f), new Vector3(5, 0.1f, 4), Quaternion.identity, sand);
-		Prim(PrimitiveType.Cube, new Vector3(0, floor + depth / 2, -1.55f), new Vector3(5.2f, depth, 0.1f), Quaternion.identity, wall);
-		Prim(PrimitiveType.Cube, new Vector3(0, floor + depth / 2, 2.55f), new Vector3(5.2f, depth, 0.1f), Quaternion.identity, wall);
-		Prim(PrimitiveType.Cube, new Vector3(-2.55f, floor + depth / 2, 0.5f), new Vector3(0.1f, depth, 4.2f), Quaternion.identity, wall);
-		Prim(PrimitiveType.Cube, new Vector3(2.55f, floor + depth / 2, 0.5f), new Vector3(0.1f, depth, 4.2f), Quaternion.identity, wall);
+		Prim(PrimitiveType.Cube, new Vector3(0, floor - 0.05f, 0.5f), new Vector3(6, 0.1f, 5), Quaternion.identity, sand);
 
 		Color[] pebbleColours = { new(0.98f, 0.97f, 0.95f), new(0.85f, 0.8f, 0.78f), new(0.95f, 0.75f, 0.75f), new(0.7f, 0.78f, 0.85f) };
 		for (int i = 0; i < 60; i++)

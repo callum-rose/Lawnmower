@@ -4,9 +4,9 @@ The pond water: a clear, glowing, heavily refractive surface whose motion comes 
 walls and obstacles. This doc explains how it works, how to use it, and how we got here, including the options we tried
 and dropped.
 
-![Final look](../../Recordings/Water/09_final.jpg)
+![Final look](../../docs/images/water/09_final.jpg)
 
-Videos: [final look with splashes](../../Recordings/Water/final.mp4), [the four first variants](../../Recordings/Water/variants.mp4).
+Videos: [final look with splashes](../../docs/images/water/final.mp4), [the four first variants](../../docs/images/water/variants.mp4).
 
 ## How it works
 
@@ -40,7 +40,7 @@ For every water pixel the shader:
    the water is thin (walls, rocks, lily pads). The edge band's reach and lacy breakup come from 3D noise that only
    moves along Y, so it reshapes in place, and it swells and retreats with passing ripples.
 
-![Ripple height field](../../Recordings/Water/06_ripple_field.jpg)
+![Ripple height field](../../docs/images/water/06_ripple_field.jpg)
 
 *The ripple simulation's height field from above: rings from the rock and lily pads bouncing off the pond walls and
 interfering.*
@@ -62,10 +62,27 @@ interfering.*
 - **Splashes:** call `waterRippleSimulation.Splash(position, radius, strength)` when something lands in the water, e.g.
   a frog with `radius: 0.08f, strength: 1.5f`. Up to 8 per simulation step.
 
+### With the SDF terrain
+
+The level terrain (`TerrainManager`) only treats grass, stone and spring tiles as solid, so water tiles are holes in it
+with rounded corners and banks that slope outwards below the surface. That suits the water: the banks are opaque, so
+they're refracted, hazed and blurred, catch caustics on their slopes, and give the shallow-edge glow a natural rounded
+shoreline. Two things to know:
+
+- **Make the water mesh bigger than the hole.** Above the terrain's pivot height its sides are inset from the tile grid,
+  so water exactly the size of the water tiles leaves a gap at the bank. The preview extends it half a tile on every
+  side, where the terrain top hides it.
+- **The terrain has no pond floor.** Its bottom is open over the ocean, and the ocean is transparent, so it isn't in the
+  opaque texture the water refracts. A pond needs its own floor (the preview uses a sand slab at −0.95), or the terrain
+  could close its bottom under water tiles.
+
+![Pond in the SDF terrain](../../docs/images/water/10_terrain.jpg)
+
 ### Previewing outside Play mode
 
-`Assets/Editor/WaterPreview/WaterPreviewRenderer.cs` builds a test pond from real grass and stone tiles plus primitive
-rocks, fish, plants, a sloped sandbank and lily pads, and renders it from the game camera:
+`Assets/Editor/WaterPreview/WaterPreviewRenderer.cs` builds a test pond in the level's SDF terrain with real grass and
+stone tiles, plus a sand floor and primitive rocks, fish, plants, a sloped sandbank and lily pads, and renders it from
+the game camera:
 
 ```bash
 Unity -batchmode -quit -projectPath . -executeMethod WaterPreviewRenderer.Render -logFile water.log
@@ -90,8 +107,8 @@ properties so the effect reads, and ready for rocks, fish, plants and lily pads 
 
 One rewritten shader, four material presets, rendered with primitives standing in for the future models.
 
-![The four variants, wide](../../Recordings/Water/01_variants_wide.jpg)
-![The four variants, close](../../Recordings/Water/02_variants_close.jpg)
+![The four variants, wide](../../docs/images/water/01_variants_wide.jpg)
+![The four variants, close](../../docs/images/water/02_variants_close.jpg)
 
 | Variant | Idea | Outcome |
 |---|---|---|
@@ -120,7 +137,7 @@ Problems fixed along the way:
 - **Noisier shallow edges.** The edge band was smooth with one gentle wobble. It became layered noise with lacy gaps
   and a solid contact line.
 
-  ![Edge glow before and after](../../Recordings/Water/03_edge_noise.jpg)
+  ![Edge glow before and after](../../docs/images/water/03_edge_noise.jpg)
 
 - **The edge noise slid across the surface.** It was scrolled in X and Z and also rode the flowing waves. It now uses
   3D noise moved only along Y, so it changes in place, and no longer uses wave height.
@@ -129,7 +146,7 @@ Problems fixed along the way:
 - **Real depth blur.** Added the 16-tap blur that grows with depth. The first version did nothing: the projection
   matrix's vertical term is negative when rendering to a texture, so the radius came out negative. Fixed with `abs`.
 
-  ![Depth blur before and after](../../Recordings/Water/04_depth_blur.jpg)
+  ![Depth blur before and after](../../docs/images/water/04_depth_blur.jpg)
 
 - **Animation at half speed** via a single `Animation Speed` multiplier.
 
@@ -144,7 +161,7 @@ nearly invisible, and screen-space reflections can't see the grass because it re
   `SubmitRenderRequest`, since `RenderSingleCamera` is obsolete.
 - **Blurred reflections** using mipmaps plus four offset taps, and **edge glow intensity** cut from 1 to 0.45.
 
-  ![Planar reflections](../../Recordings/Water/05_planar_reflections.jpg)
+  ![Planar reflections](../../docs/images/water/05_planar_reflections.jpg)
 
 ### Round 4: ripples
 
@@ -171,7 +188,7 @@ From a reference photo of rings spreading round a stone:
    as shallow and flashed a white blob.
 6. **Dynamic splashes** (`Splash`) for things landing in the water.
 
-   ![Splashes](../../Recordings/Water/07_splashes.jpg)
+   ![Splashes](../../docs/images/water/07_splashes.jpg)
 
 7. **Speed doubled back** to 0.25 units/s, and **caustics toned down** (the old ones animated independently of the now
    still surface).
@@ -188,7 +205,7 @@ From a reference photo of rings spreading round a stone:
     map was the alternative, but it would change lighting and cost across the whole game, so the shadows are kept
     inside the water shader.
 
-  ![Caustics and shadows](../../Recordings/Water/08_caustics_and_shadows.jpg)
+  ![Caustics and shadows](../../docs/images/water/08_caustics_and_shadows.jpg)
 
 ## Options tried and not used
 
@@ -205,9 +222,10 @@ From a reference photo of rings spreading round a stone:
 ## Known limitations and follow-ups
 
 - **Water isn't in the game yet.** There is no water tile prefab; when there is, it needs the Water layer, plus one
-  `PlanarWaterReflection` and one `WaterRippleSimulation` per pond (or per level).
+  `PlanarWaterReflection` and one `WaterRippleSimulation` per pond (or per level), a pond floor, and a surface that
+  overlaps the terrain's banks (see "With the SDF terrain").
 - **The simulation is one rectangle.** Only its edges act as walls. Non-rectangular ponds made of tiles need a mask
-  built from the level grid so other tiles reflect too.
+  built from the level grid (or from the terrain's footprint) so other tiles reflect too.
 - **iPhone performance hasn't been measured.** Per water pixel: up to 32 texture reads for the depth blur, 12 depth reads
   for the shadow march, 6 ripple reads for caustics and edges, plus a half-resolution scene render per frame for
   reflections and a 200×160 simulation step twice per frame. Expect to trim taps and steps.
@@ -216,5 +234,5 @@ From a reference photo of rings spreading round a stone:
 - **Screen-space shadows only come from on-screen things,** and very thin objects give slightly stepped edges.
 - **The underwater sun direction is approximate** (a fixed slope rather than refracted at the surface).
 - **Ripple sources emit steady rings.** A moving source makes rings, not a V-shaped wake.
-- **Turning on the depth texture also changes the Ocean shader,** whose shoreline effect reads it and never worked
-  before.
+- **The depth texture is now on for everything.** The Ocean's shoreline foam reads it too; together with the renderer's
+  Copy Depth Mode set to After Opaques on master, both the ocean and the water get the opaque scene's depth.
