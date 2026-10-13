@@ -68,7 +68,7 @@ namespace Lawnmower.Presenters
 		{
 			if (paused)
 			{
-				_view.ShowPaused(new PauseInfo(LevelNumber, _progression.PerfectCount, _progression.LevelCount));
+				_view.ShowPaused(new PauseInfo(LevelNumber));
 			}
 			else
 			{

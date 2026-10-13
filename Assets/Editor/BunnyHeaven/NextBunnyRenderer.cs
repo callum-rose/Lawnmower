@@ -6,14 +6,14 @@ using UnityEngine;
 namespace Lawnmower.Editor.BunnyHeaven
 {
 	/// <summary>
-	/// Renders the RegularBunny (Idle pose, 3/4 view) as a transparent sprite with an ink outline: the bunny standing
+	/// Renders the EggBunny (Idle pose, 3/4 view) as a transparent sprite with an ink outline: the bunny standing
 	/// on Level Select's "NEXT!" node.
 	/// </summary>
 	public static class NextBunnyRenderer
 	{
 		public const string OutputPath = "Assets/Art/LevelSelect/NextBunny.png";
 
-		private const string BunnyPrefabPath = "Assets/Prefabs/Game/Mowers/Complete/RegularBunny.prefab";
+		private const string BunnyPrefabPath = "Assets/Prefabs/Game/Mowers/Complete/EggBunny.prefab";
 		private const int Size = 256;
 		private const float Fill = 0.86f;
 		private const float OutlineWidth = 5f;
@@ -29,7 +29,7 @@ namespace Lawnmower.Editor.BunnyHeaven
 			GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(BunnyPrefabPath);
 			if (prefab == null)
 			{
-				throw new FileNotFoundException("RegularBunny prefab not found", BunnyPrefabPath);
+				throw new FileNotFoundException("EggBunny prefab not found", BunnyPrefabPath);
 			}
 
 			Color[] pixels;
@@ -62,7 +62,7 @@ namespace Lawnmower.Editor.BunnyHeaven
 					RectInt opaque = OffscreenRenderer.OpaqueBounds(pixels, Size, Size);
 					if (opaque.width == 0)
 					{
-						throw new System.InvalidOperationException("RegularBunny rendered nothing");
+						throw new System.InvalidOperationException("EggBunny rendered nothing");
 					}
 
 					float worldPerPixel = camera.orthographicSize * 2f / Size;

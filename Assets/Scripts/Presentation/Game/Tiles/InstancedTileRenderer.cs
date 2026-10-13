@@ -9,6 +9,8 @@ namespace Game.Tiles
 	/// Draws the tiles' meshes with GPU instancing: one instanced draw per mesh/material pair rather than one draw per
 	/// renderer. Registered MeshRenderers are switched off and their meshes are drawn from their current transforms
 	/// every frame, so tile animations, grass height changes (containers toggled active) and dirt rotations still show.
+	/// A registered renderer that is switched back on draws itself until it is switched off again (e.g. grass recoloured
+	/// with a property block while it changes height).
 	/// Renderers that can't be instanced (no instancing on the material, a property block, ...) are left drawing as normal.
 	/// </summary>
 	internal class InstancedTileRenderer
@@ -256,7 +258,7 @@ namespace Game.Tiles
 				foreach (Instance instance in _instances)
 				{
 					// The tile may have been destroyed without being unregistered (e.g. on scene unload)
-					if (instance.GameObject == null || !instance.GameObject.activeInHierarchy)
+					if (instance.GameObject == null || !instance.GameObject.activeInHierarchy || instance.Renderer.enabled)
 					{
 						continue;
 					}

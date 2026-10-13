@@ -2,22 +2,19 @@ using System;
 
 namespace Lawnmower.Presenters
 {
-	/// <summary>What the Pause card shows under its title: "Level {n} · {perfects} of {total} perfect".</summary>
+	/// <summary>What the Pause card shows: the current level.</summary>
 	public readonly struct PauseInfo
 	{
+		/// <summary>1-based; 0 when the level isn't in the level list.</summary>
 		public int LevelNumber { get; }
-		public int Perfects { get; }
-		public int LevelCount { get; }
 
-		public PauseInfo(int levelNumber, int perfects, int levelCount)
+		public PauseInfo(int levelNumber)
 		{
 			LevelNumber = levelNumber;
-			Perfects = perfects;
-			LevelCount = levelCount;
 		}
 	}
 
-	/// <summary>The in-game HUD around the board (level pill, undo/redo) and the Pause card.</summary>
+	/// <summary>The in-game HUD around the board (undo/redo) and the Pause card.</summary>
 	public interface IGameHudView
 	{
 		/// <summary>1-based; 0 when the level isn't in the level list.</summary>

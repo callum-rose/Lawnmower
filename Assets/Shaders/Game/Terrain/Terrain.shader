@@ -1,0 +1,238 @@
+// The level's SDF terrain. Tops take each tile's colour from _TerrainCells (one texel per tile, in object space where
+// tile (x, z) covers [x, x + 1] x [z, z + 1]), blended softly across tile edges. Sides and the rounded edge fall back
+// to a dirt gradient by height, sampled from one column of _SideTex like the old block bases.
+Shader "Game/Terrain"
+{
+	Properties
+	{
+		[NoScaleOffset] _SideTex("Side Gradient", 2D) = "white" {}
+		_SideColumn("Side Gradient Column", Range(0, 1)) = 0.375
+		_SideTop("Side Gradient Top Height", Float) = 0
+		_SideBottom("Side Gradient Bottom Height", Float) = -1.2
+		_TopStart("Top Starts At Normal Y", Range(0, 1)) = 0.8
+		_TopEnd("Top Complete At Normal Y", Range(0, 1)) = 0.95
+		_CellBlend("Tile Colour Blend Width", Range(0.001, 1)) = 0.15
+		_DiffuseAmount("Diffuse Amount", Range(0, 1)) = 0.25
+		_ShadowCutoff("Shadow Cutoff", Range(0, 1)) = 0.3
+		_ShadowSmoothness("Shadow Smoothness", Range(0.001, 1)) = 0.1
+		_ShadowColour("Shadow Colour", Color) = (0.55, 0.6, 0.75, 1)
+		[HideInInspector] _TerrainCells("Tile Colours", 2D) = "white" {}
+	}
+
+	SubShader
+	{
+		Tags { "RenderPipeline"="UniversalPipeline" "RenderType"="Opaque" "Queue"="Geometry" }
+
+		HLSLINCLUDE
+		#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+
+		CBUFFER_START(UnityPerMaterial)
+			float _SideColumn;
+			float _SideTop;
+			float _SideBottom;
+			float _TopStart;
+			float _TopEnd;
+			float _CellBlend;
+			float _DiffuseAmount;
+			float _ShadowCutoff;
+			float _ShadowSmoothness;
+			half4 _ShadowColour;
+			float4 _TerrainCells_TexelSize;
+		CBUFFER_END
+		ENDHLSL
+
+		Pass
+		{
+			Name "ForwardLit"
+			Tags { "LightMode"="UniversalForward" }
+
+			HLSLPROGRAM
+			#pragma vertex Vert
+			#pragma fragment Frag
+			#pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
+			#pragma multi_compile_fragment _ _SHADOWS_SOFT _SHADOWS_SOFT_LOW _SHADOWS_SOFT_MEDIUM _SHADOWS_SOFT_HIGH
+			#pragma multi_compile_fog
+
+			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+
+			TEXTURE2D(_SideTex);
+			SAMPLER(sampler_SideTex);
+			TEXTURE2D(_TerrainCells);
+			SAMPLER(sampler_TerrainCells);
+
+			struct Attributes
+			{
+				float4 positionOS : POSITION;
+				float3 normalOS : NORMAL;
+			};
+
+			struct Varyings
+			{
+				float4 positionCS : SV_POSITION;
+				float3 positionOS : TEXCOORD0;
+				float3 positionWS : TEXCOORD1;
+				float3 normalWS : TEXCOORD2;
+				float fogFactor : TEXCOORD3;
+			};
+
+			Varyings Vert(Attributes input)
+			{
+				Varyings output;
+				VertexPositionInputs positions = GetVertexPositionInputs(input.positionOS.xyz);
+				output.positionCS = positions.positionCS;
+				output.positionWS = positions.positionWS;
+				output.positionOS = input.positionOS.xyz;
+				output.normalWS = TransformObjectToWorldNormal(input.normalOS);
+				output.fogFactor = ComputeFogFactor(positions.positionCS.z);
+				return output;
+			}
+
+			// Flat within each tile, blending to its neighbours only within _CellBlend of the edge
+			half3 TileColour(float2 tile)
+			{
+				float2 p = tile - 0.5;
+				float2 cell = floor(p);
+				float2 f = saturate((frac(p) - 0.5) / _CellBlend + 0.5);
+				float2 uv = (cell + f + 0.5) * _TerrainCells_TexelSize.xy;
+				return SAMPLE_TEXTURE2D(_TerrainCells, sampler_TerrainCells, uv).rgb;
+			}
+
+			half3 SideColour(float height)
+			{
+				float v = saturate((height - _SideBottom) / (_SideTop - _SideBottom));
+				return SAMPLE_TEXTURE2D(_SideTex, sampler_SideTex, float2(_SideColumn, v)).rgb;
+			}
+
+			half4 Frag(Varyings input) : SV_Target
+			{
+				float3 normal = normalize(input.normalWS);
+				float topness = smoothstep(_TopStart, _TopEnd, normal.y);
+				half3 albedo = lerp(SideColour(input.positionOS.y), TileColour(input.positionOS.xz), topness);
+
+				Light light = GetMainLight(TransformWorldToShadowCoord(input.positionWS));
+				float lit = saturate(dot(normal, light.direction)) * light.shadowAttenuation;
+				float band = smoothstep(_ShadowCutoff - _ShadowSmoothness, _ShadowCutoff + _ShadowSmoothness, lit);
+				half3 shade = lerp(lerp(1, _ShadowColour.rgb, _DiffuseAmount), 1, band);
+
+				half3 colour = albedo * shade * light.color;
+				colour = MixFog(colour, input.fogFactor);
+				return half4(colour, 1);
+			}
+			ENDHLSL
+		}
+
+		Pass
+		{
+			Name "ShadowCaster"
+			Tags { "LightMode"="ShadowCaster" }
+
+			ZWrite On
+			ZTest LEqual
+			ColorMask 0
+
+			HLSLPROGRAM
+			#pragma vertex Vert
+			#pragma fragment Frag
+			#pragma multi_compile_vertex _ _CASTING_PUNCTUAL_LIGHT_SHADOW
+
+			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+
+			float3 _LightDirection;
+			float3 _LightPosition;
+
+			struct Attributes
+			{
+				float4 positionOS : POSITION;
+				float3 normalOS : NORMAL;
+			};
+
+			float4 Vert(Attributes input) : SV_POSITION
+			{
+				float3 positionWS = TransformObjectToWorld(input.positionOS.xyz);
+				float3 normalWS = TransformObjectToWorldNormal(input.normalOS);
+
+			#if _CASTING_PUNCTUAL_LIGHT_SHADOW
+				float3 lightDirection = normalize(_LightPosition - positionWS);
+			#else
+				float3 lightDirection = _LightDirection;
+			#endif
+
+				float4 positionCS = TransformWorldToHClip(ApplyShadowBias(positionWS, normalWS, lightDirection));
+			#if UNITY_REVERSED_Z
+				positionCS.z = min(positionCS.z, UNITY_NEAR_CLIP_VALUE);
+			#else
+				positionCS.z = max(positionCS.z, UNITY_NEAR_CLIP_VALUE);
+			#endif
+				return positionCS;
+			}
+
+			half4 Frag() : SV_Target
+			{
+				return 0;
+			}
+			ENDHLSL
+		}
+
+		Pass
+		{
+			Name "DepthOnly"
+			Tags { "LightMode"="DepthOnly" }
+
+			ZWrite On
+			ColorMask R
+
+			HLSLPROGRAM
+			#pragma vertex Vert
+			#pragma fragment Frag
+
+			float4 Vert(float4 positionOS : POSITION) : SV_POSITION
+			{
+				return TransformObjectToHClip(positionOS.xyz);
+			}
+
+			half Frag() : SV_Target
+			{
+				return 0;
+			}
+			ENDHLSL
+		}
+
+		Pass
+		{
+			Name "DepthNormals"
+			Tags { "LightMode"="DepthNormals" }
+
+			ZWrite On
+
+			HLSLPROGRAM
+			#pragma vertex Vert
+			#pragma fragment Frag
+
+			struct Attributes
+			{
+				float4 positionOS : POSITION;
+				float3 normalOS : NORMAL;
+			};
+
+			struct Varyings
+			{
+				float4 positionCS : SV_POSITION;
+				float3 normalWS : TEXCOORD0;
+			};
+
+			Varyings Vert(Attributes input)
+			{
+				Varyings output;
+				output.positionCS = TransformObjectToHClip(input.positionOS.xyz);
+				output.normalWS = TransformObjectToWorldNormal(input.normalOS);
+				return output;
+			}
+
+			half4 Frag(Varyings input) : SV_Target
+			{
+				return half4(NormalizeNormalPerPixel(input.normalWS), 0);
+			}
+			ENDHLSL
+		}
+	}
+}

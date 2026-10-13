@@ -8,12 +8,12 @@ using UnityEngine;
 namespace Lawnmower.Editor.BunnyHeaven
 {
 	/// <summary>
-	/// Renders the RegularBunny mower onto the Bunny Heaven yellow with an ink outline, writes every
+	/// Renders the EggBunny mower onto the Bunny Heaven yellow with an ink outline, writes every
 	/// iOS icon size to <see cref="OutputDir"/> and assigns them in Player Settings. Also sets the splash.
 	/// </summary>
 	public static class AppIconRenderer
 	{
-		public const string BunnyPrefabPath = "Assets/Prefabs/Game/Mowers/Complete/RegularBunny.prefab";
+		public const string BunnyPrefabPath = "Assets/Prefabs/Game/Mowers/Complete/EggBunny.prefab";
 		public const string OutputDir = "Assets/Art/Icon";
 		public const int MasterSize = 1024;
 		public const string LaunchImagePath = OutputDir + "/LaunchScreen_Yellow.png";
@@ -142,7 +142,7 @@ namespace Lawnmower.Editor.BunnyHeaven
 			GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(BunnyPrefabPath);
 			if (prefab == null)
 			{
-				throw new FileNotFoundException("RegularBunny prefab not found", BunnyPrefabPath);
+				throw new FileNotFoundException("EggBunny prefab not found", BunnyPrefabPath);
 			}
 
 			using OffscreenRenderer renderer = new OffscreenRenderer();
@@ -167,7 +167,7 @@ namespace Lawnmower.Editor.BunnyHeaven
 				RectInt opaque = OffscreenRenderer.OpaqueBounds(pixels, MasterSize, MasterSize);
 				if (opaque.width == 0)
 				{
-					throw new System.InvalidOperationException("RegularBunny rendered nothing; check its renderers and the URP asset.");
+					throw new System.InvalidOperationException("EggBunny rendered nothing; check its renderers and the URP asset.");
 				}
 
 				float worldPerPixel = camera.orthographicSize * 2f / MasterSize;

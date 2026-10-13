@@ -77,7 +77,7 @@ namespace Game.Tiles
 				}
 			}
 			
-			SetAppearance(grassHeight);
+			GetAppearanceSetter().TransitionAppearance(prevGrassHeight, grassHeight);
 		}
 
 		private void OnTraversedOnto(GridVector fromDirection, Xor isInverted)
@@ -112,12 +112,17 @@ namespace Game.Tiles
 
 		private void SetAppearance(int grassHeight)
 		{
+			GetAppearanceSetter().SetAppearance(grassHeight);
+		}
+
+		private IAppearanceSetter GetAppearanceSetter()
+		{
 			if (_appearanceSetter == null)
 			{
 				_appearanceSetter = GetComponent<IAppearanceSetter>();
 			}
 
-			_appearanceSetter.SetAppearance(grassHeight);
+			return _appearanceSetter;
 		}
 		
 

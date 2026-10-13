@@ -9,7 +9,7 @@ using UnityEngine;
 namespace Lawnmower.Editor.BunnyHeaven
 {
 	/// <summary>
-	/// Renders a level's board (plus the RegularBunny on its start tile) isometrically, on a transparent
+	/// Renders a level's board (plus the EggBunny on its start tile) isometrically, on a transparent
 	/// background, to a PNG imported as a Sprite. Used for the Main Menu board preview.
 	/// </summary>
 	public static class LevelPreviewRenderer
