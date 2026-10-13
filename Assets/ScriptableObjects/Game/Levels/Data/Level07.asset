@@ -1,0 +1,173 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7126b9c1309bd8a418748c882885cd26, type: 3}
+  m_Name: Level07
+  m_EditorClassIdentifier: Scripts::Game.Levels.LevelData
+  guid: 960d8c9e73d642699c260f17035210c4
+  startPosition:
+    x: 2
+    y: 1
+  width: 5
+  depth: 5
+  tiles:
+  - kind: 1
+    grassHeight: 2
+    stoneDirection: 0
+    springOffset:
+      x: 0
+      y: 0
+  - kind: 1
+    grassHeight: 2
+    stoneDirection: 0
+    springOffset:
+      x: 0
+      y: 0
+  - kind: 1
+    grassHeight: 2
+    stoneDirection: 0
+    springOffset:
+      x: 0
+      y: 0
+  - kind: 1
+    grassHeight: 2
+    stoneDirection: 0
+    springOffset:
+      x: 0
+      y: 0
+  - kind: 1
+    grassHeight: 2
+    stoneDirection: 0
+    springOffset:
+      x: 0
+      y: 0
+  - kind: 1
+    grassHeight: 2
+    stoneDirection: 0
+    springOffset:
+      x: 0
+      y: 0
+  - kind: 1
+    grassHeight: 2
+    stoneDirection: 0
+    springOffset:
+      x: 0
+      y: 0
+  - kind: 1
+    grassHeight: 1
+    stoneDirection: 0
+    springOffset:
+      x: 0
+      y: 0
+  - kind: 1
+    grassHeight: 2
+    stoneDirection: 0
+    springOffset:
+      x: 0
+      y: 0
+  - kind: 1
+    grassHeight: 2
+    stoneDirection: 0
+    springOffset:
+      x: 0
+      y: 0
+  - kind: 1
+    grassHeight: 2
+    stoneDirection: 0
+    springOffset:
+      x: 0
+      y: 0
+  - kind: 1
+    grassHeight: 2
+    stoneDirection: 0
+    springOffset:
+      x: 0
+      y: 0
+  - kind: 1
+    grassHeight: 2
+    stoneDirection: 0
+    springOffset:
+      x: 0
+      y: 0
+  - kind: 2
+    grassHeight: 0
+    stoneDirection: 2
+    springOffset:
+      x: 0
+      y: 0
+  - kind: 1
+    grassHeight: 2
+    stoneDirection: 0
+    springOffset:
+      x: 0
+      y: 0
+  - kind: 1
+    grassHeight: 2
+    stoneDirection: 0
+    springOffset:
+      x: 0
+      y: 0
+  - kind: 2
+    grassHeight: 0
+    stoneDirection: 1
+    springOffset:
+      x: 0
+      y: 0
+  - kind: 1
+    grassHeight: 2
+    stoneDirection: 0
+    springOffset:
+      x: 0
+      y: 0
+  - kind: 5
+    grassHeight: 0
+    stoneDirection: 0
+    springOffset:
+      x: 0
+      y: -2
+  - kind: 1
+    grassHeight: 2
+    stoneDirection: 0
+    springOffset:
+      x: 0
+      y: 0
+  - kind: 1
+    grassHeight: 2
+    stoneDirection: 0
+    springOffset:
+      x: 0
+      y: 0
+  - kind: 1
+    grassHeight: 2
+    stoneDirection: 0
+    springOffset:
+      x: 0
+      y: 0
+  - kind: 1
+    grassHeight: 2
+    stoneDirection: 0
+    springOffset:
+      x: 0
+      y: 0
+  - kind: 1
+    grassHeight: 2
+    stoneDirection: 0
+    springOffset:
+      x: 0
+      y: 0
+  - kind: 1
+    grassHeight: 2
+    stoneDirection: 0
+    springOffset:
+      x: 0
+      y: 0
+  solution: UUULLDDRDLDRRRRUUUULD
+  par: 21

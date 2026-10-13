@@ -20,52 +20,87 @@ namespace Tests.EditMode
 		private const string LevelDir = "Assets/ScriptableObjects/Game/Levels/Data/";
 		private const string MowerDir = "Assets/ScriptableObjects/Game/Mower/Data/";
 
-		// name, id ("N" format; null = any non-empty id), size, start, rows (y = 0 first, "/"-separated)
+		// name (path under LevelDir), id ("N" format; null = any non-empty id), size, start, rows (y = 0 first, "/"-separated)
 		private static readonly object[][] Levels =
 		{
 			new object[]
 			{
-				"Level Spring Test", null, "3x3", "0,0",
+				"Level01", "78f25b51482c40ca888d9fa822cd2f16", "3x3", "0,0",
+				"grass:1 grass:2 grass:2 / grass:2 empty grass:2 / grass:2 grass:2 grass:2"
+			},
+			new object[]
+			{
+				"Level02", "ea0d7938b56a4911a432a2cd89c5e57f", "3x4", "0,1",
+				"grass:2 grass:2 empty / grass:1 grass:2 grass:2 / grass:2 grass:2 grass:2 / grass:2 grass:2 grass:2"
+			},
+			new object[]
+			{
+				"Level04", "14afdf4921cf43b8a7514fef8ebc9eef", "4x5", "2,3",
+				"grass:2 grass:2 grass:2 grass:2 / grass:2 stone:1 grass:2 grass:2 / grass:2 stone:2 grass:2 grass:2 / grass:2 grass:2 grass:1 grass:2 / grass:2 grass:2 grass:2 grass:2"
+			},
+			new object[]
+			{
+				"Level07", "960d8c9e73d642699c260f17035210c4", "5x5", "2,1",
+				"grass:2 grass:2 grass:2 grass:2 grass:2 / grass:2 grass:2 grass:1 grass:2 grass:2 / grass:2 grass:2 grass:2 stone:2 grass:2 / grass:2 stone:1 grass:2 spring:0,-2 grass:2 / grass:2 grass:2 grass:2 grass:2 grass:2"
+			},
+			new object[]
+			{
+				"Level08", "c620857b56494ab186fc315b118fbe97", "5x6", "3,4",
+				"grass:2 grass:2 grass:2 grass:2 grass:2 / grass:2 grass:2 grass:2 grass:2 grass:3 / grass:2 grass:2 grass:2 grass:2 grass:2 / water water water water water / spring:0,-2 grass:2 grass:2 grass:1 grass:2 / grass:2 grass:2 grass:2 grass:2 grass:2"
+			},
+			new object[]
+			{
+				"Level09", "62002a94fe2b4567a708e7f5274332d1", "5x6", "3,0",
+				"grass:2 grass:2 grass:2 grass:1 grass:2 / spring:0,2 grass:2 grass:2 grass:2 grass:2 / water water water wood water / grass:2 grass:2 grass:2 grass:3 grass:2 / grass:2 grass:2 grass:2 grass:2 grass:2 / grass:2 grass:2 grass:2 grass:3 grass:2"
+			},
+			new object[]
+			{
+				"Level10", "dff15cf21bc04c40a84f269cdc3ac5d4", "6x6", "2,0",
+				"grass:2 grass:2 grass:1 grass:2 grass:2 grass:2 / grass:2 grass:3 grass:3 spring:0,2 grass:2 grass:2 / water water water water water water / grass:2 grass:2 spring:0,-2 grass:2 grass:2 grass:2 / grass:2 grass:2 grass:2 grass:2 grass:2 grass:2 / grass:2 grass:3 grass:2 grass:2 grass:3 grass:2"
+			},
+			new object[]
+			{
+				"Archive/Level Spring Test", null, "3x3", "0,0",
 				"grass:2 grass:2 grass:2 / grass:2 grass:2 empty / empty grass:2 spring:0,-2"
 			},
 			new object[]
 			{
-				"Level1", "3dbc7be08e344caa8b96bfda39edd55d", "4x4", "0,0",
+				"Level03", "3dbc7be08e344caa8b96bfda39edd55d", "4x4", "0,0",
 				"grass:1 grass:2 grass:2 grass:2 / grass:2 grass:2 grass:2 grass:2 / grass:2 grass:2 grass:2 grass:2 / grass:2 grass:2 grass:2 grass:2"
 			},
 			new object[]
 			{
-				"Level3", "2b462ecb888545e588f62ebb524dd6e2", "7x7", "0,5",
+				"Archive/Level3", "2b462ecb888545e588f62ebb524dd6e2", "7x7", "0,5",
 				"grass:2 grass:2 grass:2 empty grass:2 grass:2 grass:2 / grass:2 stone:0 grass:2 empty grass:2 stone:1 grass:2 / grass:2 grass:2 grass:2 grass:2 grass:2 grass:2 grass:2 / grass:2 grass:2 grass:2 grass:2 grass:2 grass:2 grass:2 / grass:2 stone:2 grass:2 stone:0 grass:2 stone:3 grass:2 / grass:1 grass:2 grass:2 grass:2 grass:2 grass:2 grass:2 / empty grass:2 grass:2 grass:2 empty empty empty"
 			},
 			new object[]
 			{
-				"Level4", "8256fdfc0ed34892a0b20730d35495f6", "4x4", "0,2",
+				"Level05", "8256fdfc0ed34892a0b20730d35495f6", "4x4", "0,2",
 				"grass:2 grass:2 grass:2 grass:2 / grass:2 grass:3 grass:3 grass:2 / grass:2 grass:3 grass:3 grass:2 / grass:2 grass:2 grass:2 grass:2"
 			},
 			new object[]
 			{
-				"Level5", "9e55bac18995413da92713000191a911", "7x3", "1,1",
+				"Archive/Level5", "9e55bac18995413da92713000191a911", "7x3", "1,1",
 				"empty empty grass:2 grass:2 grass:2 empty empty / grass:2 grass:2 grass:3 grass:2 grass:3 grass:2 grass:2 / grass:2 grass:2 grass:2 grass:1 grass:2 grass:2 grass:2"
 			},
 			new object[]
 			{
-				"Level6", "fb8d9ee4e5cf468fbe22978efe5cd85e", "13x9", "0,7",
+				"Archive/Level6", "fb8d9ee4e5cf468fbe22978efe5cd85e", "13x9", "0,7",
 				"empty empty empty empty grass:2 grass:2 grass:2 grass:2 grass:2 empty empty empty empty / empty empty empty empty grass:2 empty empty empty grass:2 empty grass:2 grass:2 grass:2 / empty empty empty empty grass:3 grass:2 grass:2 empty grass:2 grass:2 grass:2 grass:2 grass:2 / empty empty grass:2 grass:2 grass:3 empty grass:2 empty grass:2 grass:2 grass:2 grass:3 grass:2 / empty empty grass:2 empty grass:2 empty grass:2 empty grass:2 grass:2 grass:2 grass:2 empty / empty empty grass:2 empty grass:2 grass:2 grass:2 empty empty empty empty empty empty / empty empty grass:2 grass:2 grass:3 grass:3 grass:2 grass:2 empty empty empty empty empty / grass:1 grass:2 grass:2 empty grass:2 grass:2 empty grass:2 empty empty empty empty empty / empty empty grass:2 grass:2 grass:2 grass:2 grass:2 grass:2 empty empty empty empty empty"
 			},
 			new object[]
 			{
-				"Level7", "8cef796429854b8fbac31b969e1b4243", "9x6", "2,3",
+				"Archive/Level7", "8cef796429854b8fbac31b969e1b4243", "9x6", "2,3",
 				"grass:2 grass:3 grass:2 empty empty empty empty empty empty / grass:2 grass:3 grass:2 wood grass:2 grass:2 grass:2 empty empty / empty grass:2 empty empty empty empty grass:2 grass:2 grass:2 / grass:2 grass:3 grass:2 wood grass:2 grass:2 grass:2 grass:3 grass:2 / grass:2 grass:2 grass:2 empty empty grass:2 grass:2 grass:2 empty / grass:2 grass:2 grass:2 empty empty empty empty empty empty"
 			},
 			new object[]
 			{
-				"Level8", "f9298d8f0f944a23ac58a24bf8c3c380", "14x9", "2,1",
+				"Archive/Level8", "f9298d8f0f944a23ac58a24bf8c3c380", "14x9", "2,1",
 				"grass:2 grass:2 grass:2 grass:2 grass:2 grass:2 grass:2 wood wood wood grass:2 grass:2 empty empty / grass:2 grass:2 grass:1 water water water water water water water water grass:2 empty empty / grass:2 grass:2 water water grass:3 grass:3 wood wood water grass:2 grass:2 grass:2 empty empty / grass:2 grass:2 grass:2 grass:2 grass:3 grass:2 empty wood wood grass:3 empty empty empty empty / grass:2 empty empty grass:2 grass:2 grass:2 empty empty empty grass:2 empty grass:2 grass:2 grass:2 / grass:2 grass:2 grass:2 grass:2 grass:2 grass:3 wood wood empty grass:2 grass:2 grass:2 empty grass:2 / empty empty empty empty empty empty empty wood wood grass:3 grass:2 empty grass:2 grass:2 / empty empty empty empty empty empty empty empty empty grass:2 grass:2 grass:2 grass:2 empty / empty empty empty empty empty empty empty empty empty grass:2 empty empty empty empty"
 			},
 			new object[]
 			{
-				"Level9", "0fbbe24b992942c187861eb16870e6a1", "5x5", "4,2",
+				"Level06", "0fbbe24b992942c187861eb16870e6a1", "5x5", "4,2",
 				"empty grass:2 grass:2 grass:2 grass:2 / empty grass:2 grass:3 grass:2 grass:2 / grass:2 grass:3 wood grass:3 grass:1 / grass:2 grass:2 wood wood empty / grass:2 grass:2 grass:2 grass:2 empty"
 			},
 		};
@@ -74,7 +109,7 @@ namespace Tests.EditMode
 		{
 			foreach (object[] level in Levels)
 			{
-				yield return new TestCaseData(level).SetName($"Level_{((string)level[0]).Replace(' ', '_')}");
+				yield return new TestCaseData(level).SetName($"Level_{((string)level[0]).Replace(' ', '_').Replace('/', '_')}");
 			}
 		}
 
