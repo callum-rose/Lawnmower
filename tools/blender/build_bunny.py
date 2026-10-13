@@ -2,7 +2,7 @@
 
 blender --background --factory-startup --python build_bunny.py -- [variant=classic|toy|lop|sitting|cube]
     [colours=original|snow|midnight|forest|grape] [pattern=dutch|spots|stripes|harlequin]
-    [soften=1..4] [rounded=1] [out=<prefix>]
+    [soften=1..4] [rounded=1] [golden=1] [out=<prefix>]
 
 (or, with Blender's `bpy` module installed from pip: python build_bunny.py -- variant=... out=...)
 
@@ -55,7 +55,9 @@ PATTERNS = {   # coat, face, tail, feet, mark
 }
 PATTERN = kv.get("pattern", "plain")
 SOFT = int(kv.get("soften", "0"))
-ROUNDED = kv.get("rounded", "0") == "1"   # cube: fillet every edge; colour patches as round-cornered plates
+GOLDEN = kv.get("golden", "0") == "1"    # cube, rounded: proportions in golden ratio (Fibonacci 2-3-5-8-13)
+ROUNDED = kv.get("rounded", "0") == "1" or GOLDEN   # cube: fillet every edge; colour patches as round-cornered plates
+PHI = (1 + 5 ** 0.5) / 2
 FILLET = 0.35                             # voxels: the fillet's width
 PLATE_PROUD = 0.05                        # voxels: how far a colour plate stands off its face
 COLOURS = kv.get("colours", "original")
@@ -423,7 +425,12 @@ elif VARIANT == "cube":
     # voxels. Upright ears, 4 x 3 thick.
     # soften=1..4 trials, each building on the last: 1 bigger bevels and cut corners; 2 every small edge
     # as two facets on a curve; 3 the back as a three-facet curve too; 4 that, smooth-shaded.
-    box = (-6, 6, 2, 15, -7, 8)
+    # golden=1: a 13 cube; the back slopes 8 and leaves a 5 flat top (13 : 8 : 5); an 8 x 8 face plate,
+    # its margins split 1 : phi top to bottom, its eye line at 1/phi of its height; ears 8 visible x 5 x 3;
+    # feet 3 x 5 x 2 visible; a 3 tail; edge bevels and the plate's side gap in phi : 1.
+    box = (-6.5, 6.5, 2, 15, -6, 7) if GOLDEN else (-6, 6, 2, 15, -7, 8)
+    slope = 8 if GOLDEN else 7
+    front = box[5]
     body = Part("Body")
     body.box(*box, COAT)
     X, Y, Z = 0, 1, 2
@@ -433,12 +440,14 @@ elif VARIANT == "cube":
     r, facets = {0: (2, 1), 1: (3, 1)}.get(SOFT, (3, 2))
     if ROUNDED and SOFT == 0:
         r = 4 / 3                     # a third smaller, for a bigger face (off the whole-voxel lattice)
+    if GOLDEN:
+        r = 2.5 * PHI / (1 + PHI)     # the 2.5 side margin split bevel : gap = phi : 1
     for axes, signs in small:
         round_edge(body, box, axes, signs, r, facets)
     if SOFT >= 3:
         round_edge(body, box, (Y, Z), (1, -1), 9, 3)                             # the back as a curve
     else:
-        bevel_edge(body, box, (0, 1, -1), 7)                                     # the sloping back
+        bevel_edge(body, box, (0, 1, -1), slope)                                 # the sloping back
     if SOFT == 1:                                                                # cut the eight corners
         for sx in (1, -1):
             for sy in (1, -1):
@@ -463,17 +472,26 @@ elif VARIANT == "cube":
         ear_cols = {1: dict(col=MARK), -1: {}}
     face_size = min(11, (12 - 2 * flat) / 0.66)                                  # the texture's face spans 0.66
     body_ob = body.build()
-    face_uvs(body_ob, 8, 10.5 if flat <= 2 else 10, face_size)
-    if ROUNDED:                       # the panel as a plate, inset to clear the fillet, the face decal on it
+    face_uvs(body_ob, front, 10.5 if flat <= 2 else 10, face_size)
+    if GOLDEN:
+        py0 = 2 + 5 * PHI / (1 + PHI)                                            # margins 3.09 below, 1.91 above
+        face_uvs(plate("PlateFace", body_ob, (0, 0, 0), -4, 4, py0, py0 + 8, front, 8 / PHI ** 4, FACE),
+                 front + PLATE_PROUD, py0 + 8 / PHI, 0.95 * 8 / 0.66)
+    elif ROUNDED:                       # the panel as a plate, inset to clear the fillet, the face decal on it
         inset = flat + 0.4
         face_size = 0.95 * (12 - 2 * inset) / 0.66                              # fill the plate, with a margin
         face_uvs(plate("PlateFace", body_ob, (0, 0, 0), -6 + inset, 6 - inset, 2 + inset, 15 - inset, 8, 1.5, FACE),
                  8 + PLATE_PROUD, 9.7, face_size)                                # lower: centred, room for the open mouth
     for sx in (1, -1):
-        ear("Ear" + ("R" if sx > 0 else "L"), sx, sx * 2.5, 15, 2, 4, 3, 11, 2, pitch=10, splay=15,
+        ex, ez0, ew, ed, eh = (3, 2.5, 5, 3, 10) if GOLDEN else (2.5, 2, 4, 3, 11)
+        ear("Ear" + ("R" if sx > 0 else "L"), sx, sx * ex, 15, ez0, ew, ed, eh, 2, pitch=10, splay=15,
             tip=0 if SOFT >= 2 else 1, tip_round=(2, 2) if SOFT >= 2 else None, plate_inner=ROUNDED, **ear_cols[sx])
-    tail(5, -7)
-    feet((-3, 3), (-4, 4), 3, 4, 3, 1, 2)
+    if GOLDEN:
+        tail(5, box[4], size=3, proud=2)
+        feet((-3.5, 3.5), (-3, 3), 3, 5, 3, 1, 2)
+    else:
+        tail(5, -7)
+        feet((-3, 3), (-4, 4), 3, 4, 3, 1, 2)
     HEIGHT = 26
 
 else:  # sitting
