@@ -4,6 +4,8 @@ using Exceptions;
 using Game.Levels;
 using Game.Mowers;
 using Game.Input;
+using Game.UI.Screens;
+using Lawnmower.Screens;
 using Game.UndoSystem;
 using Core.EventChannels;
 using Lawnmower.Model;
@@ -15,8 +17,8 @@ using UnityEngine.Serialization;
 namespace Game.Core
 {
 	/// <summary>
-	/// Composition root for the Game scene: wires a <see cref="GamePresenter"/> to this scene's views
-	/// for each level, and opens its input once the level intro has played.
+	/// Composition root for the Game scene: wires a <see cref="GamePresenter"/>, the HUD and the tutorial to this
+	/// scene's views for each level, and opens input once the level intro has played.
 	/// </summary>
 	internal class GameManager : BaseSceneManager
 	{
@@ -28,20 +30,21 @@ namespace Game.Core
 		[SerializeField] private UndoController undoController;
 		[SerializeField] private GamePlayData gamePlayData;
 		[SerializeField] private MoveInputController moveInput;
+		[SerializeField] private GameScreenView screen;
+		[SerializeField] private Camera gameCamera;
 
 		[Header("Event Channels")]
-		[SerializeField] private OpenDialogEventChannel openDialogEventChannel;
-		[SerializeField] private CloseDialogEventChannel closeDialogEventChannel;
 		[SerializeField] private IVoidEventChannelTransmitterContainer startPlayingEventChannel;
 		[SerializeField] private IVoidEventChannelTransmitterContainer stopPlayingEventChannel;
-		[SerializeField] private UndoableEventChannel levelFailedChannel;
 
 		private IVoidEventChannelTransmitter StartPlayingEventChannel => startPlayingEventChannel.Result;
 		private IVoidEventChannelTransmitter StopPlayingEventChannel => stopPlayingEventChannel.Result;
 
 		private GamePresenter _presenter;
+		private GameHudPresenter _hud;
 		private GameFeedbackPresenter _feedback;
-		private DialogGameScreenView _screen;
+		private TutorialPresenter _tutorial;
+		private bool _showTutorial;
 		private Coroutine _startPlayingTimer;
 
 		/// <summary>The current session's presenter, or null between levels.</summary>
@@ -50,9 +53,17 @@ namespace Game.Core
 		/// <summary>The running simulation, or null between levels.</summary>
 		public LevelSimulation Simulation => _presenter?.Simulation;
 
-		internal DialogGameScreenView Screen => _screen;
+		internal GameScreenView Screen => screen;
+
+		internal GameHudPresenter Hud => _hud;
+
+		/// <summary>The tutorial, while it runs.</summary>
+		internal TutorialPresenter Tutorial => _tutorial;
 
 		internal MoveInputController MoveInput => moveInput;
+
+		/// <summary>The mower this level was started with.</summary>
+		internal MowerData Mower { get; private set; }
 
 		#region Unity
 
@@ -76,21 +87,38 @@ namespace Game.Core
 			}
 
 			LevelData level = input.Level;
+			Mower = input.Mower;
 			mowerManager.SetMower(input.Mower);
 
-			_screen = new DialogGameScreenView(openDialogEventChannel, closeDialogEventChannel, levelFailedChannel, undoController);
+			GameNavigator navigator = new GameNavigator(levelDataManager, input);
 			_presenter = new GamePresenter(
 				new GameSessionSetup(level.ToDefinition(), level.Par),
 				levelManager,
 				mowerManager,
-				_screen,
-				new GameNavigator(levelDataManager, input),
+				screen,
+				navigator,
 				GameServices.Progression,
 				new UnityClock());
 
+			_hud = new GameHudPresenter(_presenter, screen, GameServices.Progression, navigator);
+			_hud.SettingsRequested += OpenSettings;
+			undoController.UndoRequested += _presenter.Undo;
+			undoController.RedoRequested += _presenter.Redo;
+			screen.SetFailAnchor(mowerManager.GetMowerWorldPosition, gameCamera);
+
 			_presenter.AttachInput(moveInput.Input);
 			_presenter.Start();
+			_hud.Start();
 			_feedback = GameServices.CreateFeedback(_presenter.Simulation);
+
+			if (input.IsTutorial)
+			{
+				TutorialLauncher.Request();
+			}
+
+			_showTutorial = TutorialLauncher.ShouldShow(
+				GameServices.Progression.IndexOf(level.Id) == 0,
+				PersistantData.LevelModule.TutorialCompleted.Load());
 
 			_startPlayingTimer = StartCoroutine(IntroRoutine());
 		}
@@ -105,23 +133,31 @@ namespace Game.Core
 				_startPlayingTimer = null;
 			}
 
+			_tutorial?.Dispose();
+			_tutorial = null;
 			_feedback?.Dispose();
 			_feedback = null;
-			_presenter?.DetachInput(moveInput.Input);
-			_presenter?.Dispose();
-			_presenter = null;
+
+			if (_hud != null)
+			{
+				_hud.SettingsRequested -= OpenSettings;
+				_hud.Dispose();
+				_hud = null;
+			}
+
+			if (_presenter != null)
+			{
+				undoController.UndoRequested -= _presenter.Undo;
+				undoController.RedoRequested -= _presenter.Redo;
+				_presenter.DetachInput(moveInput.Input);
+				_presenter.Dispose();
+				_presenter = null;
+			}
 
 			if (clearViews)
 			{
 				levelManager.Clear();
 				mowerManager.Hide();
-			}
-
-			_screen?.Dispose();
-			_screen = null;
-
-			if (clearViews)
-			{
 				StopPlayingEventChannel?.Raise();
 			}
 		}
@@ -145,6 +181,20 @@ namespace Game.Core
 			_startPlayingTimer = null;
 			_presenter.BeginPlay();
 			StartPlayingEventChannel.Raise();
+
+			if (_showTutorial)
+			{
+				_tutorial = new TutorialPresenter(screen.Tutorial, moveInput.Input,
+					() => PersistantData.LevelModule.TutorialCompleted.Save(true));
+				_tutorial.Finished += () => _tutorial = null;
+				_tutorial.Start();
+			}
+		}
+
+		/// <summary>Pause → SETTINGS: G4's overlay opens over the Pause card, which is still there when it closes.</summary>
+		private void OpenSettings()
+		{
+			SettingsOverlay.Show();
 		}
 
 		#endregion

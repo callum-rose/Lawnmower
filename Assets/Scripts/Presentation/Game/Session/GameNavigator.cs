@@ -4,7 +4,7 @@ using Lawnmower.Presenters;
 
 namespace Game.Core
 {
-	internal sealed class GameNavigator : IGameNavigator
+	internal sealed class GameNavigator : IGameNavigator, IGameMenuNavigator
 	{
 		private readonly LevelDataManager _levels;
 		private readonly GameSetupPassThroughData _current;
@@ -37,6 +37,11 @@ namespace Game.Core
 		public void LoadLevelSelect()
 		{
 			ViewManager.Instance.Load(UnityScene.LevelSelect);
+		}
+
+		public void LoadMainMenu()
+		{
+			ViewManager.Instance.Load(UnityScene.MainMenu);
 		}
 	}
 }

@@ -32,6 +32,9 @@ namespace Lawnmower.Presenters
 		private bool _isRunningCommand;
 		private bool _isDisposed;
 		private bool _hasBegun;
+		private bool _isRedoing;
+		private int _undoDepth;
+		private int _redoDepth;
 		private (LevelStatus from, LevelStatus to, Xor inverted)? _pendingStatusChange;
 
 		/// <summary>Null until <see cref="Start"/>.</summary>
@@ -44,6 +47,12 @@ namespace Lawnmower.Presenters
 		public bool IsPaused => _attempt.IsPaused;
 
 		public int Par => _setup.Par;
+
+		/// <summary>There is a move to undo (bumps aren't undo steps).</summary>
+		public bool CanUndo => _undoDepth > 0;
+
+		/// <summary>There is an undone move to redo; a new move clears it.</summary>
+		public bool CanRedo => _redoDepth > 0;
 
 		public Guid LevelId => _setup.Definition.Id;
 
@@ -200,7 +209,19 @@ namespace Lawnmower.Presenters
 				return;
 			}
 
-			Run(() => _undoSystem.Redo());
+			Run(() =>
+			{
+				_isRedoing = true;
+
+				try
+				{
+					_undoSystem.Redo();
+				}
+				finally
+				{
+					_isRedoing = false;
+				}
+			});
 		}
 
 		/// <summary>
@@ -257,11 +278,15 @@ namespace Lawnmower.Presenters
 			if (inverted)
 			{
 				_attempt.CountMoveUndone();
+				_undoDepth--;
+				_redoDepth++;
 				_mower.RewindMove(move);
 			}
 			else
 			{
 				_attempt.CountMove();
+				_undoDepth++;
+				_redoDepth = _isRedoing ? _redoDepth - 1 : 0;
 				_mower.PlayMove(move);
 			}
 

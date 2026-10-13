@@ -1,6 +1,6 @@
 using System;
 using Game.Core;
-using Game.UI;
+using Game.UI.Screens;
 using Lawnmower.Presenters;
 using UnityEngine;
 
@@ -15,10 +15,8 @@ namespace Game.Input
 	internal class MoveInputController : MonoBehaviour
 	{
 		[SerializeField] private ScreenToWorldPointConverter screenToBoard;
-		[SerializeField] private UiArrowsManager arrows;
-
-		[Tooltip("Shown only while the Arrows scheme is active.")]
-		[SerializeField] private GameObject[] arrowsObjects = Array.Empty<GameObject>();
+		[Tooltip("The on-screen arrows; shown only while the Arrows scheme is active.")]
+		[SerializeField] private ArrowPadView arrows;
 
 		[Header("Swipe")]
 		[SerializeField, Min(0.01f)] private float swipeMinDistanceInches = 0.2f;
@@ -40,6 +38,8 @@ namespace Game.Input
 				return _input;
 			}
 		}
+
+		public ArrowPadView Arrows => arrows;
 
 		public MovementScheme Scheme
 		{
@@ -96,7 +96,7 @@ namespace Game.Input
 
 			_keyboard = new KeyboardMoveInput();
 			_swipe = new SwipeMoveInput(screenToBoard, swipeMinDistanceInches, swipeMinStraightness);
-			_arrows = new ArrowsMoveInput(arrows);
+			_arrows = new ArrowsMoveInput(arrows, screenToBoard);
 			_input = new SwitchableMoveInput(_swipe, _arrows, MovementSchemeSetting.Current, _keyboard);
 			_input.MoveRequested += OnMoveRequested;
 		}
@@ -107,12 +107,9 @@ namespace Game.Input
 			_input.Scheme = scheme;
 			_swipe.Reset();
 
-			foreach (GameObject arrowsObject in arrowsObjects)
+			if (arrows != null)
 			{
-				if (arrowsObject != null)
-				{
-					arrowsObject.SetActive(scheme == MovementScheme.Arrows);
-				}
+				arrows.gameObject.SetActive(scheme == MovementScheme.Arrows);
 			}
 		}
 
