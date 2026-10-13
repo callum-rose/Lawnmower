@@ -505,44 +505,47 @@ elif VARIANT == "cube":
     HEIGHT = 26
 
 elif VARIANT == "egg":
-    # An upright egg, faceted like the rest of the style: the voxels are cut by the egg's tangent planes
-    # at 45 deg steps around and 22.5 deg steps up, so it reads as a cut gem rather than a staircase.
-    # The egg is 18 tall over a flat seat at y = 2, 11 across at its widest, which sits below the middle;
-    # its profile is r(t) = 5.5 sqrt(1 - t^2) (1 - 0.25 t). The face colour covers every face turned
-    # well towards the front (not the crown) and the face decal is pressed onto them, eye line at 1/phi of the body's height.
-    # Big hind feet, small front paws, upright ears in the crown, a tail.
-    EGG_YC, EGG_A, EGG_B, EGG_K = 9, 9, 5.5, 0.25
-    egg_pts = []
-    for i in range(61):
-        t = -1 + 2 * i / 60
-        r = EGG_B * max(0, 1 - t * t) ** 0.5 * (1 - EGG_K * t)
-        for j in range(48):
-            a_ = 2 * math.pi * j / 48
-            egg_pts.append((r * math.cos(a_), EGG_YC + EGG_A * t, r * math.sin(a_)))
-    box = (-6, 6, 2, 18, -6, 6)
-    body = Part("Body")
-    body.box(*box, COAT)
-    for i in range(8):
-        az = math.radians(45 * i)
-        for j in range(-3, 5):                                                   # -67.5 .. +90 deg
-            el = math.radians(22.5 * j)
-            n = (math.cos(el) * math.sin(az), math.sin(el), math.cos(el) * math.cos(az))
-            if j == 4 and i:
-                continue                                                         # one cap, not eight
-            body.bevel(n, max(n[0] * x + n[1] * y + n[2] * z for x, y, z in egg_pts))
-    face_idx = mat(FACE)
-    body_ob = body.build()
-    for f in body_ob.data.polygons:                                              # forward, not the crown
-        if f.normal.y < -0.6 and f.normal.z < 0.5:
-            f.material_index = face_idx
-    face_uvs(body_ob, None, 2 + 16 / PHI, 11, facing=0.6)
+    # An upright egg with a smooth surface (not voxels): a dense sphere reshaped to the profile
+    # r(t) = 5.5 sqrt(1 - t^2) (1 - 0.25 t), widest below the middle, cut flat at y = 2 to sit on.
+    # 12.8 tall above the seat. The face colour is a smooth oval on the front; the face decal is pressed onto
+    # it, eye line at 1/phi of the body's height. Big hind feet, small front paws, upright ears in the
+    # crown, a tail.
+    EGG_YC, EGG_A, EGG_B, EGG_K, SEAT = 7.6, 7.2, 5.5, 0.25, 2
+    bm = bmesh.new()
+    bmesh.ops.create_uvsphere(bm, u_segments=96, v_segments=64, radius=1)
+    # The sphere's pole points forward (tilted 10 deg up), so its rings circle the face: the face patch is
+    # every face within 45 deg of the pole, and its edge runs along one smooth ring.
+    pole = Vector((0, -math.cos(math.radians(10)), math.sin(math.radians(10))))   # Blender: -y forward
+    bmesh.ops.rotate(bm, verts=bm.verts, matrix=Vector((0, 0, 1)).rotation_difference(pole).to_matrix())
+    on_face = {f.index for f in bm.faces if all(v.co.dot(pole) > math.cos(math.radians(45)) - 1e-6 for v in f.verts)}
+    for v in bm.verts:                                       # Blender z is up: t from the sphere's z
+        t = v.co.z
+        k = EGG_B * (1 - EGG_K * t)
+        x, y, z = v.co.x * k, max(SEAT, EGG_YC + EGG_A * t), -v.co.y * k      # Unity voxel coords
+        v.co = B((x, y, z))
+    bm.faces.ensure_lookup_table()
+    for f in bm.faces:
+        f.material_index = 1 if f.index in on_face else 0    # remapped to real slots below
+    me = bpy.data.meshes.new("Body")
+    bm.to_mesh(me)
+    coat_idx, face_idx = mat(COAT), mat(FACE)               # register both before taking the slots
+    for m in MATS.values():
+        me.materials.append(m)
+    me.shade_smooth()
+    body_ob = bpy.data.objects.new("Body", me)
+    sc.collection.objects.link(body_ob)
+    body_ob.parent = root
+    eye_y = SEAT + 12.8 / PHI
+    for f in me.polygons:
+        f.material_index = face_idx if f.material_index == 1 else coat_idx
+    face_uvs(body_ob, None, eye_y, 10.5, facing=0.5)
     for sx in (1, -1):
-        ear("Ear" + ("R" if sx > 0 else "L"), sx, sx * 3, 16.5, -1.5, 5, 3, 11, 3, pitch=10, splay=15,
+        ear("Ear" + ("R" if sx > 0 else "L"), sx, sx * 3, 13.2, -1.5, 5, 3, 11, 3, pitch=10, splay=15,
             plate_inner=True)
-    tail(6.5, -5.6, size=3, proud=2)
+    tail(5.5, -5.4, size=3, proud=2)
     feet((-3, 3), (-2,), 3, 5, 3, 1, 2)                                          # big hind feet, 3 x 5
     feet((-2.5, 2.5), (3.5,), 2, 3, 3, 1, 2)                                     # small front paws, 2 x 3
-    HEIGHT = 27
+    HEIGHT = 24
 
 else:  # sitting
     # A low body and a separate head that can nod: the classic proportions split at the neck.
