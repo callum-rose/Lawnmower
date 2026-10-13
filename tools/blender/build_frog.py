@@ -49,7 +49,7 @@ body.paint(lambda x, y, z: y == 2, BELLY)
 spots = [(-3, -1), (1, 0), (-1, 2)]                                       # min corners (x, z) of 2 x 2 spots on the back
 body.paint(lambda x, y, z: y == 6 and any(sx <= x < sx + 2 and sz <= z < sz + 2 for sx, sz in spots), SPOT)
 body.paint(lambda x, y, z: y == 8 and z == 7 and x in (2, -3), INK)       # eyes, 1 x 1 (head under 8 tall, R13)
-body.build()
+body.build(pivot=(0, 0, -Z0))                                             # origin lands between the feet once shifted
 
 # ---- Jaw: hinged at the mouth corners, resting one 5 deg step open (R14, R19); 2 buried in the trunk ----
 jaw = Part("Jaw")
@@ -59,7 +59,9 @@ for sx in (1, -1):
     jaw.bevel((sx, 0, 1), 3.5 + 9 - 1)                                    # chin corners, under the snout's
 jaw.paint(lambda x, y, z: y == 3 and z < 8 and -2.5 <= x < 2.5, BELLY)    # throat, inside the chin and sides
 jaw.paint(lambda x, y, z: y == 4 and z >= 3 and (x in (-3.5, 2.5) or z == 8), MOUTH)   # the smile
-jaw.build(pivot=(0, 5, 3), rot=(5, 0, 0))
+jaw.build(pivot=(0, 5, 3), rot=(5, 0, 0), parent=body.ob)
+
+fronts, hinds = [], []
 
 # ---- Front legs: short and straight, 1 buried in the trunk ---------------------------------------------
 for sx in (1, -1):
@@ -67,7 +69,8 @@ for sx in (1, -1):
     x0 = 2.5 if sx > 0 else -5.5
     leg.box(x0, x0 + 3, 0, 3, 0.5, 2.5, SKIN)                             # half a voxel behind the trunk's front face (R8)
     leg.box(x0, x0 + 3, 0, 1, 2.5, 4.5, SKIN)                             # foot, toes forward
-    leg.build(pivot=(sx * 4, 2.5, 1.5))
+    leg.build(pivot=(sx * 4, 2.5, 1.5), parent=body.ob)
+    fronts.append((leg.ob, sx))
 
 # ---- Hind legs: folded thigh at the side of the rump, long foot forward along the ground ----------------
 for sx in (1, -1):
@@ -82,10 +85,58 @@ for sx in (1, -1):
     leg.bevel((0, 1, 1), 5 + 1 - 3, thigh)                                # knee slope, 3 x 3
     leg.bevel((sx, 1, 0), xo + 5 - 1, thigh)                              # outer top edge
     leg.paint(lambda x, y, z: y >= 1 and z in (-4, -1), SPOT)             # thigh bands
-    leg.build(pivot=(sx * 5, 3, -2))
+    leg.build(pivot=(sx * 5, 3, -2), parent=body.ob)
+    hinds.append((leg.ob, sx))
 
-for o in root.children:                                                    # the whole model moves; pivots move with it
-    o.location = Vector(o.location) + Vector(B((0, 0, Z0)))
+body.ob.location = Vector(body.ob.location) + Vector(B((0, 0, Z0)))     # the whole model moves; pivots move with it
+
+# ---- Jump: an in-place hop. 24 frames: a 0.1 m frog's own cycle would be 8, far too quick to read, so the
+# hop is slowed (character override). Keys per channel (frame, value), eased between; frame 24 equals 0.
+FRAMES = 24
+KEYS = {   # body pitch (+ is nose down), hind and front leg swing (+ swings the foot back), jaw, height
+    "pitch": [(0, 0), (4, 6), (7, -25), (12, -5), (16, 10), (19, 3), (24, 0)],
+    "hind":  [(0, 0), (4, 0), (7, 70), (12, 55), (16, 15), (19, 0), (24, 0)],
+    "front": [(0, 0), (4, 5), (7, 20), (12, -35), (16, -20), (19, 0), (24, 0)],
+    "jaw":   [(0, 5), (6, 5), (10, 20), (14, 5), (24, 5)],
+}
+AIR = (6, 11, 16, 5.0)     # take-off frame, peak frame, landing frame, peak height in voxels
+
+
+def channel(name, f):
+    ks = KEYS[name]
+    for (f0, v0), (f1, v1) in zip(ks, ks[1:]):
+        if f0 <= f <= f1:
+            u = (f - f0) / (f1 - f0)
+            return v0 + (v1 - v0) * u * u * (3 - 2 * u)                  # smoothstep between keys
+    return ks[-1][1]
+
+
+def air(f):
+    t0, tp, t1, h = AIR
+    if not t0 <= f <= t1:
+        return 0.0
+    u = (f - tp) / ((tp - t0) if f < tp else (t1 - tp))
+    return h * (1 - u * u)                                                # a parabola, ground to peak to ground
+
+
+def lowest():
+    bpy.context.view_layer.update()
+    return min((o.matrix_world @ v.co).z for o in root.children_recursive if o.type == 'MESH' for v in o.data.vertices)
+
+
+begin_animation(FRAMES)
+parts = [body.ob, jaw.ob] + [o for o, _ in fronts + hinds]
+for f in range(FRAMES + 1):
+    pose(jaw.ob, rot=(channel("jaw", f), 0, 0))
+    for ob, _ in hinds:
+        pose(ob, rot=(channel("hind", f), 0, 0))
+    for ob, _ in fronts:
+        pose(ob, rot=(channel("front", f), 0, 0))
+    pose(body.ob, rot=(channel("pitch", f), 0, 0), offset=(0, 0, 0))
+    pose(body.ob, offset=(0, air(f) - lowest(), 0))                       # the lowest point stays on the ground (or `air` above it)
+    for ob in parts:
+        key(ob, f)
+flatten()
 
 # ---- preview ---------------------------------------------------------------------------------------------
 ground, cam = make_preview(ground_y=0)

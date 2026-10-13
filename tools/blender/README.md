@@ -27,4 +27,18 @@ The `bpy` wheel from PyPI (`pip install bpy`, Python 3.13) works in place of `bl
 
 Each FBX is one object per part under `root`, palette colours as materials (named by hex), and a `Shade`
 vertex colour: R is the baked AO (multiply it into the base colour), G is height over the body.
-Both models are static rest poses, but split into parts at their real joints so they can be animated later.
+Both FBXs carry one looping animation (frames 0..N, the last frame equal to the first, 24 fps):
+
+| Model | Animation | Frames |
+|---|---|---|
+| Carp | Gentle swim: the body sways and bobs, a lagged wave runs through stalk and tail, the pectorals paddle | 32 |
+| Frog | In-place hop: lean, launch with the hind legs kicked back, jaw opens at the top, land nose-first, settle | 24 |
+
+Parts are posed through a parent chain while building, then flattened (`voxel_common.flatten`) so every
+part is a direct child of `root` with its full motion baked per frame: nested parts come back misplaced
+through the FBX export (VoxelStyle.md R18). The frog's body height is solved per frame so the lowest point
+stays on the ground except while airborne.
+
+For an animated model `bake_shade.py` averages the AO over 8 poses spread across the loop with every part
+present (a simplification of R24: it does not bake each part with only its parent and children, or leave the
+frog's legs out of the body's bake per R25). Tone is still measured at rest.

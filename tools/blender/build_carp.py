@@ -50,7 +50,7 @@ body.build()
 stalk = Part("Stalk")
 stalk.box(-1.5, 1.5, -2.5, 0.5, -7.5, -4.5, FLANK)
 stalk.paint(lambda x, y, z: y >= -0.5, BACK)
-stalk.build(pivot=(0, -1, -5))
+stalk.build(pivot=(0, -1, -5), parent=body.ob)
 
 # ---- Tail: 1 wide, 7 tall, leading edges rising at 45 deg from the stalk, forked 2 deep ---------------
 tail = Part("Tail")
@@ -59,21 +59,39 @@ tail.bevel((0, 1, 1), -6)                                                 # uppe
 tail.bevel((0, -1, 1), -4)                                                # lower leading edge
 tail.bevel((0, -1, -1), 9.5, lambda x, y, z: y >= -1)                     # fork, upper lobe
 tail.bevel((0, 1, -1), 7.5, lambda x, y, z: y < -1)                       # fork, lower lobe
-tail.build(pivot=(0, -1, -7))
+tail.build(pivot=(0, -1, -7), parent=stalk.ob)
 
 # ---- Dorsal fin: tall at the front, falling to the rear; 1 buried in the back --------------------------
 dorsal = Part("Dorsal")
 dorsal.box(-0.5, 0.5, 2.5, 6.5, -3.5, 2.5, FIN)
 dorsal.bevel((0, 1, 1), 6.5 + 2.5 - 1)                                    # rounded leading tip
 dorsal.bevel((0, 1, -1), 6.5)                                             # long fall, half a voxel proud of the back's bevel (R8)
-dorsal.build(pivot=(0, 3, 0))
+dorsal.build(pivot=(0, 3, 0), parent=body.ob)
 
 # ---- Pectoral fins: thin plates low behind the head, swept back and drooped on their own grids (R6, R7) -
+pecs = []
 for sx in (1, -1):
     pec = Part("Pectoral" + ("R" if sx > 0 else "L"))
     x0 = 1.5 if sx > 0 else -4.5                                          # 1 buried in the body
     pec.box(x0, x0 + 3, -3, -2, 1, 3, FIN)
-    pec.build(pivot=(sx * 2, -2.5, 2.5), rot=(0, sx * 45, -sx * 35))
+    pec.build(pivot=(sx * 2, -2.5, 2.5), rot=(0, sx * 45, -sx * 35), parent=body.ob)
+    pecs.append((pec.ob, sx))
+
+# ---- Swim: a gentle wave from head to tail through the seam pivots ---------------------------------------
+# A real carp is 0.6 m, so its loop would be round(24 x sqrt(0.6)) = 19 frames; this one cruises, so it is
+# slowed to 32 (character override). Every channel is a whole number of cycles, so frame 32 equals frame 0.
+FRAMES = 32
+begin_animation(FRAMES)
+for f in range(FRAMES + 1):
+    w = 2 * math.pi * f / FRAMES
+    pose(body.ob, rot=(0, 3 * math.sin(w), 1.5 * math.sin(w + 0.5)), offset=(0, 0.3 * math.sin(2 * w), 0))
+    pose(stalk.ob, rot=(0, -9 * math.sin(w - 0.9), 0))                      # the stalk follows, later
+    pose(tail.ob, rot=(0, -16 * math.sin(w - 1.8), 0))                      # and the tail, later still
+    for ob, sx in pecs:                                                     # the pectorals paddle
+        pose(ob, rot=(0, sx * (45 + 6 * math.sin(w)), -sx * (35 + 8 * math.sin(2 * w))))
+    for ob in (body.ob, stalk.ob, tail.ob) + tuple(ob for ob, _ in pecs):
+        key(ob, f)
+flatten()
 
 # ---- preview ---------------------------------------------------------------------------------------------
 ground, cam = make_preview(ground_y=-5.5)

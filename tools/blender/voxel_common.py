@@ -57,12 +57,13 @@ def B(p):
 _M = Matrix(((1, 0, 0), (0, 0, -1), (0, 1, 0)))     # Unity axes -> Blender axes
 
 
-def unity_rotation(rx=0, ry=0, rz=0):
-    """A rest rotation given in Unity degrees (applied Z, then X, then Y, as Unity does), as a Blender
-    euler. Every rest angle should be a multiple of 5 (R6)."""
+def unity_rotation(rx=0, ry=0, rz=0, compat=None):
+    """A rotation given in Unity degrees (applied Z, then X, then Y, as Unity does), as a Blender euler,
+    kept continuous with `compat` when animating. Every rest angle should be a multiple of 5 (R6)."""
     r = lambda ax, a: Matrix.Rotation(math.radians(a), 3, ax)
     ru = r("Y", ry) @ r("X", rx) @ r("Z", rz)
-    return (_M @ ru @ _M.transposed()).to_euler()
+    m = _M @ ru @ _M.transposed()
+    return m.to_euler("XYZ", compat) if compat is not None else m.to_euler()
 
 
 # ---- parts: voxels on the half-voxel lattice, cut by 45 deg bevel planes ------------------------------
@@ -192,9 +193,10 @@ class Part:
         if parent is None:
             ob.location = B(pivot)
             ob.parent = root
-        else:   # pivot is in model coordinates; place relative to the parent's origin
+        else:   # pivot is in model coordinates; place relative to the parent's (unrotated) origin
+            bpy.context.view_layer.update()
             ob.parent = parent
-            ob.location = Vector(B(pivot)) - parent.location
+            ob.location = Vector(B(pivot)) - parent.matrix_world.translation
         ob.rotation_euler = unity_rotation(*rot)
         s.ob = ob
         return ob
@@ -202,6 +204,70 @@ class Part:
 
 root = bpy.data.objects.new("root", None)
 sc.collection.objects.link(root)
+
+
+# ---- animation: parts only rotate about their pivots; only the root part also moves (R7, R16) ----------
+REST = {}       # rest transforms by object name; bake_shade.py bakes and measures at rest
+
+
+def begin_animation(frames, fps=24):
+    """Snapshot the rest pose and set a seamless loop over frames 0..frames (the last key equals the first)."""
+    for o in bpy.data.objects:
+        REST[o.name] = (o.location.copy(), o.rotation_euler.copy())
+    sc.frame_start, sc.frame_end = 0, frames
+    sc.render.fps = fps
+    bpy.context.preferences.edit.keyframe_new_interpolation_type = "LINEAR"
+
+
+def pose(ob, rot=None, offset=None):
+    """Set a part's rotation (Unity degrees, rest angle included) and, for the root part only, an offset
+    from its rest position (Unity voxels)."""
+    if rot is not None:
+        ob.rotation_euler = unity_rotation(*rot, compat=ob.rotation_euler)
+    if offset is not None:
+        ob.location = REST[ob.name][0] + Vector(B(offset))
+
+
+def key(ob, frame):
+    ob.keyframe_insert("rotation_euler", frame=frame)
+    ob.keyframe_insert("location", frame=frame)
+
+
+def flatten():
+    """Bake chained motion into flat parts: every part a direct child of `root`, keyed every frame with its
+    full transform (R18 - nested parts come back misplaced through the FBX export)."""
+    obs = [o for o in bpy.data.objects if o.type == 'MESH' and o.parent is not None]
+    frames = range(sc.frame_start, sc.frame_end + 1)
+    mats = {o.name: [] for o in obs}
+    for f in frames:
+        sc.frame_set(f)
+        for o in obs:
+            mats[o.name].append(root.matrix_world.inverted() @ o.matrix_world)
+    for o in obs:
+        if o.animation_data:
+            o.animation_data.action = None
+    rest_pose()
+    bpy.context.view_layer.update()
+    rest = {o.name: root.matrix_world.inverted() @ o.matrix_world for o in obs}
+    for o in obs:
+        o.parent = root
+        o.matrix_parent_inverse.identity()
+        o.matrix_basis = rest[o.name]
+        REST[o.name] = (o.location.copy(), o.rotation_euler.copy())
+    for o in obs:
+        for i, f in enumerate(frames):
+            loc, q, _ = mats[o.name][i].decompose()
+            o.location = loc
+            o.rotation_euler = q.to_euler("XYZ", o.rotation_euler)
+            key(o, f)
+    rest_pose()
+    sc.frame_set(sc.frame_start)
+
+
+def rest_pose():
+    for name, (loc, rot) in REST.items():
+        o = bpy.data.objects[name]
+        o.location, o.rotation_euler = loc, rot
 
 
 # ---- preview: ground, light, orthographic camera ------------------------------------------------------
