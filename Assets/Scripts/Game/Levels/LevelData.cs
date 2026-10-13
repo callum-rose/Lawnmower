@@ -25,6 +25,9 @@ namespace Game.Levels
 
 		[SerializeField] private TileRecord[] tiles = { new TileRecord() };
 
+		[SerializeField, Tooltip("U/D/L/R moves, verified by LevelAssetSimulationTests")]
+		private string solution;
+
 		[NonSerialized] private LevelDefinition _definition;
 
 		public Guid Id => Guid.TryParse(guid, out Guid g) ? g : Guid.Empty;
@@ -32,6 +35,9 @@ namespace Game.Levels
 		public int Width => width;
 		public int Depth => depth;
 		public GridVector StartPosition => startPosition;
+
+		/// <summary>A known solution in <see cref="MoveNotation"/> (U/D/L/R); empty if none is recorded.</summary>
+		public string Solution => solution;
 
 		#region Unity
 

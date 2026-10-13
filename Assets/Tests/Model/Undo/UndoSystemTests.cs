@@ -1,8 +1,9 @@
+using System.Collections.Generic;
 using Game.UndoSystem;
 using Moq;
 using NUnit.Framework;
 
-namespace Tests.EditMode
+namespace Lawnmower.Model.Tests
 {
 	public class UndoSystemTests
 	{
@@ -208,5 +209,55 @@ namespace Tests.EditMode
 
 			Assert.AreEqual(redoneEventCount, numUndosToAdd);
 		}
+
+		[Test]
+		public void UndoAndRedo_OnEmptyHistory_ReturnFalse()
+		{
+			UndoSystem undoSystem = new UndoSystem();
+
+			Assert.IsFalse(undoSystem.Undo());
+			Assert.IsFalse(undoSystem.Redo());
+		}
+
+		[Test]
+		public void NewDoAfterUndo_DiscardsRedoEntries()
+		{
+			List<string> log = new List<string>();
+			UndoSystem undoSystem = new UndoSystem();
+			undoSystem.Do(Logged(log, "a"));
+			undoSystem.Do(Logged(log, "b"));
+
+			Assert.IsTrue(undoSystem.Undo());
+			undoSystem.Do(Logged(log, "c"));
+
+			Assert.IsFalse(undoSystem.Redo(), "b's redo entry was discarded");
+			Assert.AreEqual(2, undoSystem.Count);
+			Assert.IsTrue(undoSystem.Undo());
+			Assert.IsTrue(undoSystem.Undo());
+			Assert.IsFalse(undoSystem.Undo());
+			CollectionAssert.AreEqual(new[] { "do a", "do b", "undo b", "do c", "undo c", "undo a" }, log);
+		}
+
+		[Test]
+		public void Limit_DropsTheOldestSteps()
+		{
+			List<string> log = new List<string>();
+			UndoSystem undoSystem = new UndoSystem(2);
+			undoSystem.Do(Logged(log, "a"));
+			undoSystem.Do(Logged(log, "b"));
+			undoSystem.Do(Logged(log, "c"));
+
+			Assert.IsTrue(undoSystem.Undo());
+			Assert.IsTrue(undoSystem.Undo());
+			Assert.IsFalse(undoSystem.Undo(), "only the newest 2 steps are kept");
+			CollectionAssert.AreEqual(new[] { "do a", "do b", "do c", "undo c", "undo b" }, log);
+
+			Assert.IsTrue(undoSystem.Redo());
+			Assert.IsTrue(undoSystem.Redo());
+			Assert.IsFalse(undoSystem.Redo());
+		}
+
+		private static IUndoable Logged(List<string> log, string name) =>
+			new Undoable(() => log.Add("do " + name), () => log.Add("undo " + name));
 	}
 }
