@@ -1,8 +1,10 @@
 # Voxel Style
 
-The house art style for anything Assembler builds out of parts: creatures, vehicles, props and
+The art style for Bunny Heaven's 3D models: creatures, mowers and other vehicles, props and
 buildings. It is voxels — but each **part** sits on its **own grid**, rotated to suit the part, so a
 fin, a limb or a roof is a clean angled slab instead of a staircase.
+Ported from the Assembler project, where the style was developed; the worked examples below are
+Assembler models.
 
 The rules are numbered and normative; each carries a one-line **Why** so an edge case can be decided
 by intent rather than by guesswork. Rules marked **[checkable]** can be verified by a program; until
@@ -11,11 +13,10 @@ file format a model is stored in is deliberately out of scope.
 
 | Doc | Owns |
 |---|---|
-| [`Models.md`](Models.md) | Composing visuals from the engine's primitive meshes with the `model` behaviour |
 | **`VoxelStyle.md`** (this file) | The voxel art style: grids, parts, palette, faces, articulation, buildings, shading |
 | [`VoxelExport.md`](VoxelExport.md) | Exporting a model from Blender and importing it into Unity |
 
-![The worked example, three-quarter view](../../../docs/images/voxel-style/shark-three-quarter.png)
+![The worked example, three-quarter view](../../docs/images/voxel-style/shark-three-quarter.png)
 
 ---
 
@@ -47,7 +48,7 @@ stands on nothing (a swimming shark, a bird in flight) it is the centre of the r
 during the animation.
 When authoring in Blender, up is +Z and the front faces −Y; the FBX export (forward −Z, up Y)
 converts to Unity's axes.
-*Why:* matches [`Models.md`](Models.md) and Unity, and puts the origin where gameplay code will
+*Why:* matches Unity, and puts the origin where gameplay code will
 rotate and place the model.
 
 **R3. Real-world size sets the scale; the reference sets the proportions.** If the model's spec gives
@@ -339,7 +340,7 @@ Flat palette colour (R12) plus ambient occlusion baked once, offline, into the m
 from a path tracer, free at runtime. The bake has to stay believable while parts move, which is what
 these rules are for.
 
-![The shark pulled apart, showing each part's baked AO](../../../docs/images/voxel-style/shark-exploded-ao.png)
+![The shark pulled apart, showing each part's baked AO](../../docs/images/voxel-style/shark-exploded-ao.png)
 
 **R23. Bake AO offline into a dedicated vertex channel, per face corner; palette colours stay
 untouched.** Use Blender Cycles' AO bake into a colour attribute named `AO` in the face-corner
@@ -482,13 +483,13 @@ on its parent's seam.
 
 | Side | Top |
 |---|---|
-| ![Side](../../../docs/images/voxel-style/shark-side.png) | ![Top](../../../docs/images/voxel-style/shark-top.png) |
+| ![Side](../../docs/images/voxel-style/shark-side.png) | ![Top](../../docs/images/voxel-style/shark-top.png) |
 
 **Swim cycle.** A wave runs head to tail through a chain of seam pivots: the body sways 4° and bobs;
 the head counter-sways 3°; the stalk follows at 13°, the tail at 20°, each a little later than the
 one in front; the pectorals flap; the jaw opens once per cycle.
 
-![Swim cycle — three-quarter and top views](../../../docs/images/voxel-style/shark-swim.gif)
+![Swim cycle — three-quarter and top views](../../docs/images/voxel-style/shark-swim.gif)
 
 **Taste.** The snout and jaw tilt toward each other so the nose reads as a wedge without a single
 bevel. The fins are straight angled strips — clean leading edges, tapering only on the trailing
@@ -503,7 +504,7 @@ legs, a stepped rim — and replaces only the staircase at the top of the shell 
 a level crest ringed by four 45° wedges, mitred where they meet (R7b). That is the mix the style is
 after: slopes where the reference staircases, steps where it is deliberately tiered.
 
-![Reference (left) and model (right)](../../../docs/images/voxel-style/turtle-vs-reference.png)
+![Reference (left) and model (right)](../../docs/images/voxel-style/turtle-vs-reference.png)
 
 12 × 19 × 10 voxels — a 0.3 m animal scaled up past the 12-voxel floor, and to 19 long because its
 head and shell need it (R3). Four colours: Lime P17, Forest P22, Pine P23 (the rim, a neighbouring
@@ -522,7 +523,7 @@ The shell bobs so the lowest sole always touches the ground; the feet slide — 
 **AO:** the legs are big movers (R25) and leave the shell out of their shadow; head and tail sway, so
 their contact is averaged into the shell (R24).
 
-![Walk cycle](../../../docs/images/voxel-style/turtle-walk.gif)
+![Walk cycle](../../docs/images/voxel-style/turtle-walk.gif)
 
 ### Taxi — a boxy subject, bevels and wheels
 
@@ -531,7 +532,7 @@ slopes everywhere read as a different, angrier vehicle. This one takes its propo
 reference (R3) and uses slopes only as four short bevels (R7a), so the silhouette stays a cute boxy
 toy.
 
-![Reference (left) and model (right)](../../../docs/images/voxel-style/taxi-vs-reference.png)
+![Reference (left) and model (right)](../../docs/images/voxel-style/taxi-vs-reference.png)
 
 ~3 m long: 30-voxel body, 32 with bumpers, 18 wide at the wheels. Nine parts, six colours — Yellow
 P42, Ink P08, White P00, Graphite P06, Blue P39, Amber P43 — the cap exactly (R11). The checker band
@@ -550,7 +551,7 @@ pitches ±1° and bobs to keep the lower axle on the ground (Vehicles note). **A
 never move relative to each other and bake as one group (R24); a spinning octagon's contact is the
 same at every angle, so the wheels are not big movers.
 
-![Drive cycle](../../../docs/images/voxel-style/taxi-drive.gif)
+![Drive cycle](../../docs/images/voxel-style/taxi-drive.gif)
 
 ### Lunar lander — no reference, a design note instead
 
@@ -561,7 +562,7 @@ The thumbnail test (R7c) then stripped the engine bell to a block, the docking t
 the footpads from octagons to squares (see Taste calls). The two dishes keep their octagons: they face
 the camera and read as round.
 
-![Three-quarter, front and top](../../../docs/images/voxel-style/lander-views.png)
+![Three-quarter, front and top](../../docs/images/voxel-style/lander-views.png)
 
 Thirteen parts, six colours — Amber P43 (descent stage), Butter P41 (legs), Light grey P02 (ascent
 stage), Slate P04, Graphite P06 (windows), White P00 (dishes). The descent stage is an octagon of 45°
@@ -571,7 +572,7 @@ wedges (R7b); the legs are rotated-grid struts; the faceted ascent stage mixes w
 — the centre of its four footpads (R2) — while the S-band dish pans ±30° and the radar nods, each on
 its mount (R16). Nothing on it is a big mover (R25).
 
-![Hover idle](../../../docs/images/voxel-style/lander-hover.gif)
+![Hover idle](../../docs/images/voxel-style/lander-hover.gif)
 
 ### Cottage — a building
 
@@ -580,7 +581,7 @@ proportion and crookedness: a roof bigger than the walls (35 : 26), pitched 60°
 the eaves, a chimney leaning 10°, one shutter hanging askew by 10°. Openings are plain rectangles
 (see Taste calls).
 
-![Three-quarter, front, top and cutaway](../../../docs/images/voxel-style/cottage-views.png)
+![Three-quarter, front, top and cutaway](../../docs/images/voxel-style/cottage-views.png)
 
 5.2 × 4.4 × 7 m, six colours — Cream P09, Tan P12 (thatch), Walnut P26, Stone P29, Red P45 (door),
 Grass P21 (shutters). The roof follows R21: a ridge cap because the pitch is above 45°, gable steps
@@ -591,7 +592,7 @@ kink. Inside: an internal wall, a loft floor and a ladder (R22).
 hinged on its edge, swinging to 85° and back (R22). It is a big mover, so the house bakes its AO
 without it (R25).
 
-![Door swing — three-quarter and cutaway](../../../docs/images/voxel-style/cottage-door.gif)
+![Door swing — three-quarter and cutaway](../../docs/images/voxel-style/cottage-door.gif)
 
 ### Giraffe — a tall subject at real size
 
@@ -599,7 +600,7 @@ Built at real size: 55 voxels (5.5 m) tall, so each voxel is under 2 pixels in t
 detail budget is tight. Thirteen parts, four colours — Butter P41 (coat), Chestnut P13 (patches),
 Brown P14 (muzzle, hooves, ossicone tips), Ink P08 (eyes).
 
-![Reference (left) and model (right)](../../../docs/images/voxel-style/giraffe-vs-reference.png)
+![Reference (left) and model (right)](../../docs/images/voxel-style/giraffe-vs-reference.png)
 
 | Part | Grid | Size (W × L × H voxels) | Pivot |
 |---|---|---|---|
@@ -614,7 +615,7 @@ Brown P14 (muzzle, hooves, ossicone tips), Ink P08 (eyes).
 neck nods with each step and sways once a stride, and the head counter-nods to stay level. The legs
 are big movers (R25); the neck's contact is averaged into the body.
 
-![Pacing walk](../../../docs/images/voxel-style/giraffe-walk.gif)
+![Pacing walk](../../docs/images/voxel-style/giraffe-walk.gif)
 
 **Taste.**
 - **The rump is a tier and a wedge, not a raised back.** The 10° back sits on top and the wedge only
@@ -637,7 +638,7 @@ are big movers (R25); the neck's contact is averaged into the body.
 ~3 m long, eight parts, five colours — Chestnut P13 (coat), Brown P14 (nose), Dark brown P15
 (hooves), Sand P10 (antlers, chest patch, belly), Ink P08 (eyes).
 
-![Reference (left) and model (right)](../../../docs/images/voxel-style/moose-vs-reference.png)
+![Reference (left) and model (right)](../../docs/images/voxel-style/moose-vs-reference.png)
 
 | Part | Grid | Size (W × L × H voxels) | Pivot |
 |---|---|---|---|
@@ -649,7 +650,7 @@ are big movers (R25); the neck's contact is averaged into the body.
 **Walk.** 42 frames, diagonal leg pairs ±20°, the body bobbing so the lowest sole always touches the
 ground, the head nodding ±6° with the antlers riding on it.
 
-![Walk](../../../docs/images/voxel-style/moose-walk.gif)
+![Walk](../../docs/images/voxel-style/moose-walk.gif)
 
 **Taste.**
 - **Rump 9 wide under 11-wide shoulders**: the reference's rear legs stand near the body's sides; a
@@ -669,7 +670,7 @@ ground, the head nodding ±6° with the antlers riding on it.
 A 0.8 m bird scaled up to 2 m to clear its reference's proportions (R3). Seven parts, four colours —
 White P00, Pale grey P01 (wings), Orange P44 (beak, feet), Ink P08 (eyes).
 
-![Reference (left) and model (right)](../../../docs/images/voxel-style/goose-vs-reference.png)
+![Reference (left) and model (right)](../../docs/images/voxel-style/goose-vs-reference.png)
 
 | Part | Grid | Size (W × L × H voxels) | Pivot |
 |---|---|---|---|
@@ -682,7 +683,7 @@ White P00, Pale grey P01 (wings), Orange P44 (beak, feet), Ink P08 (eyes).
 **Waddle.** 21 frames — fast, because it is a small bird (cycle speed). Legs alternate ±20°, the
 body rolls ±6° onto the standing leg, the neck pumps twice a step, and each wing flicks once.
 
-![Waddle](../../../docs/images/voxel-style/goose-waddle.gif)
+![Waddle](../../docs/images/voxel-style/goose-waddle.gif)
 
 **Taste.**
 - **A plain body, no lip**: the reference's inset isn't part of what makes it a goose (Taste calls).
@@ -703,7 +704,7 @@ The reference sprawls its tentacles across the ground; the spec stands it up on 
 tentacles so it can walk (R3). 25 parts, three colours — Purple P47 (mantle), Plum P48 (tentacles),
 Ink P08 (eyes).
 
-![Reference (left) and model (right)](../../../docs/images/voxel-style/octopus-vs-reference.png)
+![Reference (left) and model (right)](../../docs/images/voxel-style/octopus-vs-reference.png)
 
 | Part | Grid | Size (W × L × H voxels) | Pivot |
 |---|---|---|---|
@@ -716,7 +717,7 @@ Ink P08 (eyes).
 outward to lift the tip and plant it; at each changeover the knees splay and the mantle sinks, and it
 sways ±2.5°. Every tentacle is a big mover, so the mantle bakes alone (R24, R25).
 
-![Crawl](../../../docs/images/voxel-style/octopus-crawl.gif)
+![Crawl](../../docs/images/voxel-style/octopus-crawl.gif)
 
 **Taste.**
 - **Straight tentacles, not the sprawl**: the sprawl couldn't walk; standing it up keeps the

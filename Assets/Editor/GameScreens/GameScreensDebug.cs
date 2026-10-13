@@ -23,7 +23,7 @@ namespace Lawnmower.Editor.GameScreens
 			}
 
 			LevelDataManager levels = Find<LevelDataManager>("t:LevelDataManager");
-			MowerData mower = Find<MowerData>("RegularBunny t:MowerData");
+			MowerData mower = Find<MowerData>("EggBunny t:MowerData");
 			ViewManager.Instance.Load(UnityScene.Game, new GameSetupPassThroughData(mower, levels.GetLevel(index).LevelData));
 			return $"loading {levels.GetLevel(index).LevelData.name}";
 		}
