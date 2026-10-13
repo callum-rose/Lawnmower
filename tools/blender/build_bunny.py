@@ -1,6 +1,6 @@
 """Builds the Regular Bunny mower in the VoxelStyle.md style and renders preview views.
 
-blender --background --factory-startup --python build_bunny.py -- [variant=classic|toy|lop|sitting|cube]
+blender --background --factory-startup --python build_bunny.py -- [variant=classic|toy|lop|sitting|cube|egg]
     [colours=original|snow|midnight|forest|grape] [pattern=dutch|spots|stripes|harlequin]
     [soften=1..4] [rounded=1] [golden=1] [out=<prefix>]
 
@@ -33,7 +33,7 @@ argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
 kv = dict(a.split("=", 1) for a in argv if "=" in a)
 VARIANT = kv.get("variant", "classic")
 OUT = kv.get("out", "/tmp/bunny_" + VARIANT)
-assert VARIANT in ("classic", "toy", "lop", "sitting", "cube"), VARIANT
+assert VARIANT in ("classic", "toy", "lop", "sitting", "cube", "egg"), VARIANT
 
 # The reference's coral, gold, white and dark red. The face is not voxels: it is the reference's own
 # face texture, a decal on a second UV channel (see FACE_TEX below).
@@ -56,7 +56,7 @@ PATTERNS = {   # coat, face, tail, feet, mark
 PATTERN = kv.get("pattern", "plain")
 SOFT = int(kv.get("soften", "0"))
 GOLDEN = kv.get("golden", "0") == "1"    # cube, rounded: proportions in golden ratio (Fibonacci 2-3-5-8-13)
-ROUNDED = kv.get("rounded", "0") == "1" or GOLDEN   # cube: fillet every edge; colour patches as round-cornered plates
+ROUNDED = kv.get("rounded", "0") == "1" or GOLDEN or VARIANT == "egg"   # cube: fillet every edge; colour patches as round-cornered plates
 PHI = (1 + 5 ** 0.5) / 2
 FILLET = 0.35                             # voxels: the fillet's width
 PLATE_PROUD = 0.05                        # voxels: how far a colour plate stands off its face
@@ -287,9 +287,11 @@ def inside(box):
     x0, x1, y0, y1, z0, z1 = box
     return lambda x, y, z: x0 <= x < x1 and y0 <= y < y1 and z0 <= z < z1
 
-def face_uvs(ob, front_z, eye_y, size):
+def face_uvs(ob, front_z, eye_y, size, facing=None):
     """UV0 into bunny_tex's colour strips; UV1 projects the face texture onto the plane z = front_z, a
-    size x size square centred on x = 0 with the texture's eyes at height eye_y (after the decal offset)."""
+    size x size square centred on x = 0 with the texture's eyes at height eye_y (after the decal offset).
+    With `facing`, it lands on every face turned towards the front by more than that (normal . forward),
+    whatever its depth: a decal pressed onto a curved front."""
     me = ob.data
     cols = list(MATS)
     uv0, uv1 = me.uv_layers.new(name="UVMap"), me.uv_layers.new(name="FaceMap")
@@ -297,7 +299,7 @@ def face_uvs(ob, front_z, eye_y, size):
     px, py, pz = ob.location.x, ob.location.z, -ob.location.y      # the part's pivot, back in voxels
     for f in me.polygons:
         n = f.normal
-        on_front = front_z is not None and n.y < -0.99 and all(abs(-me.vertices[me.loops[l].vertex_index].co.y + pz - front_z) < 1e-4
+        on_front = (n.y < -facing) if facing is not None else front_z is not None and n.y < -0.99 and all(abs(-me.vertices[me.loops[l].vertex_index].co.y + pz - front_z) < 1e-4
                                        for l in f.loop_indices)
         for l in f.loop_indices:
             uv0.data[l].uv = (STRIP_U.get(cols[f.material_index], 0.125), 0.5)   # markings: no strip
@@ -501,6 +503,46 @@ elif VARIANT == "cube":
         tail(5, -7)
         feet((-3, 3), (-4, 4), 3, 4, 3, 1, 2)
     HEIGHT = 26
+
+elif VARIANT == "egg":
+    # An upright egg, faceted like the rest of the style: the voxels are cut by the egg's tangent planes
+    # at 45 deg steps around and 22.5 deg steps up, so it reads as a cut gem rather than a staircase.
+    # The egg is 18 tall over a flat seat at y = 2, 11 across at its widest, which sits below the middle;
+    # its profile is r(t) = 5.5 sqrt(1 - t^2) (1 - 0.25 t). The face colour covers every face turned
+    # well towards the front (not the crown) and the face decal is pressed onto them, eye line at 1/phi of the body's height.
+    # Big hind feet, small front paws, upright ears in the crown, a tail.
+    EGG_YC, EGG_A, EGG_B, EGG_K = 9, 9, 5.5, 0.25
+    egg_pts = []
+    for i in range(61):
+        t = -1 + 2 * i / 60
+        r = EGG_B * max(0, 1 - t * t) ** 0.5 * (1 - EGG_K * t)
+        for j in range(48):
+            a_ = 2 * math.pi * j / 48
+            egg_pts.append((r * math.cos(a_), EGG_YC + EGG_A * t, r * math.sin(a_)))
+    box = (-6, 6, 2, 18, -6, 6)
+    body = Part("Body")
+    body.box(*box, COAT)
+    for i in range(8):
+        az = math.radians(45 * i)
+        for j in range(-3, 5):                                                   # -67.5 .. +90 deg
+            el = math.radians(22.5 * j)
+            n = (math.cos(el) * math.sin(az), math.sin(el), math.cos(el) * math.cos(az))
+            if j == 4 and i:
+                continue                                                         # one cap, not eight
+            body.bevel(n, max(n[0] * x + n[1] * y + n[2] * z for x, y, z in egg_pts))
+    face_idx = mat(FACE)
+    body_ob = body.build()
+    for f in body_ob.data.polygons:                                              # forward, not the crown
+        if f.normal.y < -0.6 and f.normal.z < 0.5:
+            f.material_index = face_idx
+    face_uvs(body_ob, None, 2 + 16 / PHI, 11, facing=0.6)
+    for sx in (1, -1):
+        ear("Ear" + ("R" if sx > 0 else "L"), sx, sx * 3, 16.5, -1.5, 5, 3, 11, 3, pitch=10, splay=15,
+            plate_inner=True)
+    tail(6.5, -5.6, size=3, proud=2)
+    feet((-3, 3), (-2,), 3, 5, 3, 1, 2)                                          # big hind feet, 3 x 5
+    feet((-2.5, 2.5), (3.5,), 2, 3, 3, 1, 2)                                     # small front paws, 2 x 3
+    HEIGHT = 27
 
 else:  # sitting
     # A low body and a separate head that can nod: the classic proportions split at the neck.
