@@ -5,7 +5,7 @@ blender --background --factory-startup --python build_bunny.py -- [variant=class
 (or, with Blender's `bpy` module installed from pip: python build_bunny.py -- variant=... out=...)
 
 Four takes on the same character, all from Assets/Models/Mower/Blender/regular_bunny.blend as the
-reference: an orange egg of a body with a butter face panel, square eyes, a nose and buck teeth, two
+reference: an orange egg of a body with a butter face panel carrying the game's own face texture, two
 tall ears with butter insides, a white tail and four dark feet.
 
 - classic: the reference's egg, heavily bevelled, ears upright and splayed.
@@ -31,9 +31,25 @@ VARIANT = kv.get("variant", "classic")
 OUT = kv.get("out", "/tmp/bunny_" + VARIANT)
 assert VARIANT in ("classic", "toy", "lop", "sitting"), VARIANT
 
-# Six colours, the R11 cap: the reference's coral, gold, white and dark red, plus eyes and mouth.
-COAT, FACE, WHITE, DARK, INK, MOUTH = "P44", "P41", "P00", "P51", "P08", "P07"
-PALETTE = {"P00": "f6f6f2", "P07": "3a2630", "P08": "141414", "P41": "ffd070", "P44": "f08236", "P51": "b4521e"}
+# The reference's coral, gold, white and dark red. The face is not voxels: it is the reference's own
+# face texture, a decal on a second UV channel (see FACE_TEX below).
+COAT, FACE, WHITE, DARK = "P44", "P41", "P00", "P51"
+PALETTE = {"P00": "f6f6f2", "P41": "ffd070", "P44": "f08236", "P51": "b4521e"}
+
+# ---- the face decal ----------------------------------------------------------------------------------
+# The game's bunny material ("Toon Test With UV2 Decal") draws _MainTex on UV0 and alpha-blends
+# _DecalTex over it on UV1, and FaceAnimationComponent swaps the decal between the bunny_face textures.
+# So the mesh carries the same two channels as regular_bunny.blend:
+# - UVMap (UV0): every face at the centre of its colour's strip in bunny_tex.png;
+# - FaceMap (UV1): a planar projection of a FACE_SIZE-voxel square onto the face's front plane, with
+#   every other face parked outside 0..1, where the clamped decal is transparent.
+# The material's decal offset (0, -0.05) is applied in the preview too, so it matches the game.
+import os
+HERE = os.path.dirname(os.path.abspath(__file__)) if "__file__" in globals() else os.getcwd()
+FACE_TEX = kv.get("face", os.path.join(HERE, "../../Assets/Textures/Game/Mowers/bunny_face.png"))
+DECAL_OFFSET = (0.0, -0.05)
+EYE_V = 0.426                                   # bunny_face.png: the eyes' centre, from the bottom
+STRIP_U = {COAT: 0.125, FACE: 0.375, WHITE: 0.625, DARK: 0.875}
 
 # ---- scene and materials -----------------------------------------------------------------------------
 for o in list(bpy.data.objects):
@@ -54,6 +70,17 @@ def mat(key):
         b = m.node_tree.nodes["Principled BSDF"]
         b.inputs["Base Color"].default_value = lin(PALETTE[key])
         b.inputs["Roughness"].default_value = 0.9
+        nt = m.node_tree
+        uv = nt.nodes.new("ShaderNodeUVMap"); uv.uv_map = "FaceMap"
+        off = nt.nodes.new("ShaderNodeVectorMath"); off.operation = "ADD"
+        off.inputs[1].default_value = (DECAL_OFFSET[0], DECAL_OFFSET[1], 0)
+        tex = nt.nodes.new("ShaderNodeTexImage"); tex.extension = "CLIP"
+        tex.image = bpy.data.images.load(os.path.abspath(FACE_TEX), check_existing=True)
+        mix = nt.nodes.new("ShaderNodeMix"); mix.data_type = "RGBA"
+        mix.inputs["A"].default_value = lin(PALETTE[key])
+        nt.links.new(uv.outputs["UV"], off.inputs[0]); nt.links.new(off.outputs["Vector"], tex.inputs["Vector"])
+        nt.links.new(tex.outputs["Alpha"], mix.inputs["Factor"]); nt.links.new(tex.outputs["Color"], mix.inputs["B"])
+        nt.links.new(mix.outputs["Result"], b.inputs["Base Color"])
         MATS[key] = m
     return list(MATS).index(key)
 
@@ -210,14 +237,24 @@ def inside(box):
     x0, x1, y0, y1, z0, z1 = box
     return lambda x, y, z: x0 <= x < x1 and y0 <= y < y1 and z0 <= z < z1
 
-def face(part, front, cy):
-    """Paint the face on the layer whose min corner is z=front: eyes 2 x 2 (the head is 8+ tall, R13)
-    with their bottom row at cy+2, the nose at cy+1, buck teeth in a dark mouth at cy and cy-1."""
-    f = lambda pred, col: part.paint(lambda x, y, z: z == front and pred(x, y), col)
-    f(lambda x, y: y in (cy + 2, cy + 3) and x in (-3, -2, 1, 2), INK)
-    f(lambda x, y: y == cy + 1 and x in (-1, 0), DARK)
-    f(lambda x, y: (y == cy and x in (-2, 1)) or (y == cy - 1 and -2 <= x < 2), MOUTH)
-    f(lambda x, y: y == cy and x in (-1, 0), WHITE)
+def face_uvs(ob, front_z, eye_y, size):
+    """UV0 into bunny_tex's colour strips; UV1 projects the face texture onto the plane z = front_z, a
+    size x size square centred on x = 0 with the texture's eyes at height eye_y (after the decal offset)."""
+    me = ob.data
+    cols = list(MATS)
+    uv0, uv1 = me.uv_layers.new(name="UVMap"), me.uv_layers.new(name="FaceMap")
+    y0 = eye_y - (EYE_V - DECAL_OFFSET[1]) * size
+    px, py, pz = ob.location.x, ob.location.z, -ob.location.y      # the part's pivot, back in voxels
+    for f in me.polygons:
+        n = f.normal
+        on_front = front_z is not None and n.y < -0.99 and all(abs(-me.vertices[me.loops[l].vertex_index].co.y + pz - front_z) < 1e-4
+                                       for l in f.loop_indices)
+        for l in f.loop_indices:
+            uv0.data[l].uv = (STRIP_U[cols[f.material_index]], 0.5)
+            co = me.vertices[me.loops[l].vertex_index].co
+            x, y = co.x + px, co.z + py
+            uv1.data[l].uv = ((x + size / 2) / size, (y - y0) / size) if on_front else (-1.0, -1.0)
+    me.uv_layers.active = uv0
 
 def rot(ob, pitch=0, splay=0, yaw=0):
     """Rest rotation in degrees, 5 deg steps (R6). pitch > 0 leans the top back, splay > 0 leans it
@@ -260,8 +297,7 @@ if VARIANT in ("classic", "lop"):
     body.box(*box, COAT)
     round_box(body, box, top=3, side=2, bottom=2)
     body.paint(lambda x, y, z: z == 6 and -4 <= x < 4 and 4 <= y < 12, FACE)    # the flat front, bevels stay coat
-    face(body, 6, 6)
-    body.build()
+    face_uvs(body.build(), 7, 9.5, 11)
     if VARIANT == "classic":
         for sx in (1, -1):
             ear("Ear" + ("R" if sx > 0 else "L"), sx, sx * 2.5, 15, -2, 3, 2, 11, 2, pitch=10, splay=15)
@@ -279,8 +315,7 @@ elif VARIANT == "toy":
     body.box(*box, COAT)
     round_box(body, box, top=2, side=1, front_back=True)
     body.paint(lambda x, y, z: z == 6 and -4 <= x < 4 and 3 <= y < 12, FACE)    # an inset panel with a coat rim
-    face(body, 6, 6)
-    body.build()
+    face_uvs(body.build(), 7, 9, 11)
     for sx in (1, -1):
         ear("Ear" + ("R" if sx > 0 else "L"), sx, sx * 3, 14, -3, 4, 2, 10, 2, pitch=0, splay=0, tip=0)
     tail(8, -7, size=4, proud=2.5)
@@ -295,13 +330,13 @@ else:  # sitting
     round_box(body, box, top=2, side=2, bottom=1)
     body.paint(lambda x, y, z: y < 6 and z >= 4 and -3 <= x < 3, FACE)          # a butter chest bib
     body.build()
-    hbox = (-5, 5, 9, 19, -1.5, 8.5)
+    hbox = (-5.5, 5.5, 9, 19, -1.5, 8.5)
     head = Part("Head")
     head.box(*hbox, COAT)
     round_box(head, hbox, top=2, side=2, bottom=1)
-    head.paint(lambda x, y, z: z == 7.5 and -3 <= x < 3 and 10 <= y < 17, FACE)
-    face(head, 7.5, 12)
+    head.paint(lambda x, y, z: z == 7.5 and -3.5 <= x < 3.5 and 10 <= y < 17, FACE)
     head_ob = head.build(pivot=(0, 11, 3))                                       # neck, on the body's top
+    face_uvs(head_ob, 8.5, 14.5, 10)
     for sx in (1, -1):                                                           # the ears ride on the head
         e = ear("Ear" + ("R" if sx > 0 else "L"), sx, sx * 2.5, 19, 0.5, 3, 2, 11, 2, pitch=25, splay=10)
         e.parent = head_ob
@@ -309,6 +344,10 @@ else:  # sitting
     tail(6, -7)
     feet((-3, 3), (-4, 4), 3, 4, 3, 1, 2)
     HEIGHT = 29
+
+for o in list(bpy.data.objects):                     # every other part: colour strips, no face
+    if o.type == "MESH" and not o.data.uv_layers:
+        face_uvs(o, None, 0, 1)
 
 # ---- preview: ground, light, orthographic camera ------------------------------------------------------
 root.scale = (0.1, 0.1, 0.1)                                                      # R1: authored in voxels
