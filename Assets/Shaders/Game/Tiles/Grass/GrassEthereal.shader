@@ -2,6 +2,7 @@
 // Vertex wind/bend/mower motion and toon lighting match Grass.shader, so materials can switch between the two.
 // Flower stems are marked by uv0.x = 2 + flowerIndex, bulbs by 10 + flowerIndex and halo quads by 20 + flowerIndex.
 // Halo quad vertices all sit at the bulb centre; their normal's sign gives the corner to expand to in view space.
+// uv2.x runs -1 -> 1 across each blade, so the blade's side edges can be rim lit.
 Shader "Grass Ethereal"
 {
 	Properties
@@ -55,6 +56,12 @@ Shader "Grass Ethereal"
 		_FlowerHaloSize("Flower Halo Size", Float) = 0.3
 		_FlowerHaloIntensity("Flower Halo Intensity", Range(0, 2)) = 0.9
 
+		[Header(Rim Light)]
+		_RimColour("Rim Colour", Color) = (0.85,1,0.5,1)
+		_RimIntensity("Rim Intensity", Range(0, 2)) = 0.2
+		_RimWidth("Rim Width", Range(0.01, 1)) = 0.5
+		_RimPower("Rim Tip Power", Range(0, 4)) = 0.5
+
 		[Header(Shimmer)]
 		_ShimmerAmount("Shimmer Amount", Range(0, 1)) = 0.35
 		_ShimmerSpeed("Shimmer Speed", Float) = 1.5
@@ -80,6 +87,7 @@ Shader "Grass Ethereal"
 			float3 normalOS : NORMAL;
 			float2 uv0 : TEXCOORD0;
 			float2 uv1 : TEXCOORD1;
+			float2 uv2 : TEXCOORD2;
 			UNITY_VERTEX_INPUT_INSTANCE_ID
 		};
 
@@ -89,6 +97,7 @@ Shader "Grass Ethereal"
 			float4 uv : TEXCOORD0;
 			float3 normalWS : TEXCOORD1;
 			float3 positionWS : TEXCOORD2;
+			float bladeSide : TEXCOORD3;
 			UNITY_VERTEX_INPUT_INSTANCE_ID
 			UNITY_VERTEX_OUTPUT_STEREO
 		};
@@ -131,6 +140,10 @@ Shader "Grass Ethereal"
 		float _FlowerPulseSpeed;
 		float _FlowerHaloSize;
 		float _FlowerHaloIntensity;
+		float4 _RimColour;
+		float _RimIntensity;
+		float _RimWidth;
+		float _RimPower;
 		float _ShimmerAmount;
 		float _ShimmerSpeed;
 		float _ZWrite;
@@ -224,6 +237,7 @@ Shader "Grass Ethereal"
 				output.uv = float4(input.uv0, input.uv1);
 				output.positionCS = TransformObjectToHClip(input.positionOS.xyz);
 				output.normalWS = TransformObjectToWorldNormal(input.normalOS);
+				output.bladeSide = input.uv2.x;
 
 				if (haloPass && !flowerHidden)
 				{
@@ -328,6 +342,10 @@ Shader "Grass Ethereal"
 			{
 				return half4(colour, 1) * _Fade;
 			}
+
+			// Rim light along the blade's side edges, fading towards the base
+			float rim = smoothstep(1 - _RimWidth, 1, abs(input.bladeSide));
+			glow += _RimColour.rgb * rim * pow(height, _RimPower) * _RimIntensity;
 
 			// Premultiplied: the body fades out towards the tip while the glow stays additive
 			return half4(colour * alpha + glow, alpha) * _Fade;

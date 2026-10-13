@@ -6,6 +6,7 @@
 #   uv0.x  texture colour column, constant per blade
 #   uv0.y  0 at the blade base -> 1 at the tip (drives colour gradient, wind falloff, alpha and glow)
 #   uv1    blade base position in tile space, constant per blade (bend noise, AO, per-blade seed)
+#   uv2.x  -1 on a blade's left edge -> 1 on its right edge, following the rounded tip (rim light); 0 on flowers
 #   Flowers reuse uv0.x as a marker: 2 + index on the stem, 10 + index on the bulb, 20 + index on the halo quad
 #   (the shader shows each flower per tile at random and expands the halo quad to face the camera, using its normals as corners)
 
@@ -52,7 +53,7 @@ HALO_CORNER_SPREAD = 0.002
 
 def build_tile(name, tile_height, offset, seed, blades_per_side, width_scale):
 	rng = random.Random(seed)
-	verts, faces, uv0s, uv1s, normals = [], [], [], [], []
+	verts, faces, uv0s, uv1s, uv2s, normals = [], [], [], [], [], []
 	cell = (1 - 2 * EDGE_MARGIN) / blades_per_side
 
 	for ix in range(blades_per_side):
@@ -82,6 +83,7 @@ def build_tile(name, tile_height, offset, seed, blades_per_side, width_scale):
 				half = side * width * 0.5 * (1 + (TIP_WIDTH_RATIO - 1) * s / SEGMENTS)
 				verts += [centre - half, centre + half]
 				uv0s += [(u, t), (u, t)]
+				uv2s += [(-1, 0), (1, 0)]
 
 			shoulder = base + Vector((0, 0, height * shoulder_t)) + lean * shoulder_t * shoulder_t
 			tangent = (Vector((0, 0, height)) + lean * 2 * shoulder_t).normalized()
@@ -89,6 +91,8 @@ def build_tile(name, tile_height, offset, seed, blades_per_side, width_scale):
 				angle = math.pi * i / (CAP_POINTS + 1)
 				verts.append(shoulder + side * cap_radius * math.cos(angle) + tangent * cap_radius * math.sin(angle))
 				uv0s.append((u, shoulder_t + cap_radius * math.sin(angle) / height))
+				# The cap's outline is still the blade's edge, so it stays at the rim value
+				uv2s.append((-1, 0) if math.cos(angle) < 0 else (1, 0))
 
 			count = (SEGMENTS + 1) * 2 + CAP_POINTS
 			uv1s += [(bx, by)] * count
@@ -100,7 +104,9 @@ def build_tile(name, tile_height, offset, seed, blades_per_side, width_scale):
 			left = start + SEGMENTS * 2
 			faces.append((left, left + 1, *range(left + 2, left + 2 + CAP_POINTS)))
 
+	flowers_start = len(verts)
 	add_flowers(random.Random(FLOWER_SEED), offset, verts, faces, uv0s, uv1s, normals)
+	uv2s += [(0, 0)] * (len(verts) - flowers_start)
 
 	mesh = bpy.data.meshes.new(name)
 	mesh.from_pydata([tuple(v) for v in verts], [], faces)
@@ -108,9 +114,11 @@ def build_tile(name, tile_height, offset, seed, blades_per_side, width_scale):
 
 	uv0_layer = mesh.uv_layers.new(name="UVMap")
 	uv1_layer = mesh.uv_layers.new(name="BladeUV")
+	uv2_layer = mesh.uv_layers.new(name="BladeSide")
 	for loop in mesh.loops:
 		uv0_layer.data[loop.index].uv = uv0s[loop.vertex_index]
 		uv1_layer.data[loop.index].uv = uv1s[loop.vertex_index]
+		uv2_layer.data[loop.index].uv = uv2s[loop.vertex_index]
 
 	mesh.normals_split_custom_set_from_vertices([tuple(n) for n in normals])
 
