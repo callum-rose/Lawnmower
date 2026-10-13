@@ -19,5 +19,6 @@ namespace Game.Core
 		
 		public MowerData Mower => mower;
 		public LevelData Level => level;
+		public bool IsTutorial => isTutorial;
 	}
 }

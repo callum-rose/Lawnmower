@@ -8,6 +8,7 @@ using Game.Core;
 using Game.Levels;
 using Game.Mowers;
 using Game.Input;
+using Game.UI.Screens;
 using Lawnmower.Model;
 using Lawnmower.Presenters;
 using Lawnmower.Services;
@@ -35,6 +36,7 @@ namespace Tests.PlayMode
 		private InMemoryProgressStore _progress;
 		private Keyboard _keyboard;
 		private MovementScheme _schemeBefore;
+		private bool _tutorialSeenBefore;
 		private MowerData _mower;
 		private readonly List<Object> _created = new List<Object>();
 		private readonly List<string> _errors = new List<string>();
@@ -61,6 +63,11 @@ namespace Tests.PlayMode
 			_schemeBefore = MovementSchemeSetting.Current;
 			MovementSchemeSetting.Current = MovementScheme.Swipe;
 
+			// Level 1 shows the tutorial until it's been seen; most tests play without it.
+			_tutorialSeenBefore = PersistantData.LevelModule.TutorialCompleted.Load();
+			PersistantData.LevelModule.TutorialCompleted.Save(true);
+			TutorialLauncher.CancelRequest();
+
 			_errors.Clear();
 			Application.logMessageReceived += OnLog;
 
@@ -72,6 +79,8 @@ namespace Tests.PlayMode
 		public override void TearDown()
 		{
 			MovementSchemeSetting.Current = _schemeBefore;
+			PersistantData.LevelModule.TutorialCompleted.Save(_tutorialSeenBefore);
+			TutorialLauncher.CancelRequest();
 
 			// ignoreFailingMessages belongs to this test's log scope; resetting it here would re-check the render noise.
 			Application.logMessageReceived -= OnLog;
@@ -252,7 +261,7 @@ namespace Tests.PlayMode
 			GameManager game = null;
 			yield return StartLevel(level, g => game = g);
 
-			global::Game.UI.UiArrowsGraphicInputHandler arrows = Object.FindAnyObjectByType<global::Game.UI.UiArrowsGraphicInputHandler>(FindObjectsInactive.Include);
+			ArrowPadView arrows = game.Screen.ArrowPad;
 			Assert.IsNotNull(arrows, "the Game scene has on-screen arrows");
 			Assert.IsFalse(arrows.gameObject.activeInHierarchy, "arrows are hidden in the Swipe scheme");
 
@@ -268,13 +277,158 @@ namespace Tests.PlayMode
 
 			IReadOnlyList<GridVector> solution = MoveNotation.Parse(level.Solution);
 			yield return Play(game, new[] { solution[0] });
-			game.MoveInput.MoveRequested -= requested.Add;
 			CollectionAssert.AreEqual(new[] { solution[0] }, requested, "the keyboard works in every scheme");
 			Assert.AreEqual(1, game.Presenter.Stats.Moves);
+
+			// Each arrow maps onto one board direction; together they cover all four.
+			HashSet<GridVector> directions = new HashSet<GridVector>();
+			foreach (Vector2 screenDirection in new[] { Vector2.up, Vector2.down, Vector2.left, Vector2.right })
+			{
+				requested.Clear();
+				arrows.Press(screenDirection);
+				Assert.AreEqual(1, requested.Count);
+				directions.Add(requested[0]);
+			}
+
+			game.MoveInput.MoveRequested -= requested.Add;
+			Assert.AreEqual(4, directions.Count);
+			yield return new WaitForSeconds(0.6f);
 
 			MovementSchemeSetting.Current = MovementScheme.Swipe;
 			yield return null;
 			Assert.IsFalse(arrows.gameObject.activeInHierarchy);
+		}
+
+		[UnityTest]
+		public IEnumerator FirstLevel_SolvedAtPar_ShowsLawnPerfect_AndUnlocksLevel2()
+		{
+			LevelData level = Copy(Load<LevelDataManager>("t:LevelDataManager").GetLevel(0).LevelData);
+			GameManager game = null;
+			yield return StartLevel(level, g => game = g);
+			GameScreenView screen = game.Screen;
+			Assert.AreEqual("LEVEL 1", screen.Hud.LevelText);
+			Assert.AreEqual($"0/{level.Par}", screen.Hud.ProgressText);
+			Assert.IsFalse(GameServices.Progression.IsUnlocked(GameServices.Progression.Levels[1]));
+
+			IReadOnlyList<GridVector> solution = MoveNotation.Parse(level.Solution);
+			yield return Play(game, solution);
+
+			Assert.AreEqual($"{solution.Count}/{level.Par}", screen.Hud.ProgressText);
+			Assert.IsTrue(screen.IsCompletedShown, "Level Complete shows");
+			Assert.IsTrue(screen.CompleteCard.IsPerfectShown, "at par: the perfect variant with the tick badge");
+			Assert.AreEqual("PERFECT!", screen.CompleteCard.Headline);
+			Assert.IsTrue(screen.CompleteCard.NextButton.gameObject.activeSelf);
+			Assert.IsFalse(screen.Hud.PauseButton.Interactable, "the HUD is covered");
+			Assert.IsTrue(GameServices.Progression.IsUnlocked(GameServices.Progression.Levels[1]), "Level 2 unlocks");
+			Assert.IsTrue(GameServices.Progression.IsPerfect(level.Id));
+		}
+
+		[UnityTest]
+		public IEnumerator Failing_ShowsScalped_UndoLastMoveButton_ResumesPlay()
+		{
+			LevelData level = Copy(Load<LevelDataManager>("t:LevelDataManager").GetLevel(0).LevelData);
+			IReadOnlyList<GridVector> solution = MoveNotation.Parse(level.Solution);
+			GameManager game = null;
+			yield return StartLevel(level, g => game = g);
+
+			int played = 0;
+			GridVector? ruining = null;
+			while (played < solution.Count - 1 && !(ruining = FindRuiningMove(game.Simulation)).HasValue)
+			{
+				yield return Play(game, new[] { solution[played++] });
+			}
+
+			Assert.IsTrue(ruining.HasValue, "no move along the solution ruins the level");
+			yield return Play(game, new[] { ruining.Value });
+			Assert.IsTrue(game.Screen.IsFailedShown, "the SCALPED! sheet shows");
+
+			game.Screen.FailedSheet.UndoButton.Button.onClick.Invoke();
+			yield return new WaitForSeconds(0.5f);
+			Assert.AreEqual(LevelStatus.Playing, game.Simulation.Status);
+			Assert.IsFalse(game.Screen.IsFailedShown, "the sheet closes");
+			Assert.IsFalse(game.Screen.FailedSheet.gameObject.activeSelf);
+
+			yield return Play(game, new[] { solution[played] });
+			Assert.AreEqual(played + 1, game.Presenter.Stats.Moves, "play resumes");
+			AssertNoErrors();
+		}
+
+		[UnityTest]
+		public IEnumerator Pause_BlocksMoves_ResumeContinues()
+		{
+			LevelData level = Copy(Load<LevelDataManager>("t:LevelDataManager").GetLevel(0).LevelData);
+			IReadOnlyList<GridVector> solution = MoveNotation.Parse(level.Solution);
+			GameManager game = null;
+			yield return StartLevel(level, g => game = g);
+
+			game.Screen.Hud.PauseButton.Button.onClick.Invoke();
+			yield return null;
+			Assert.IsTrue(game.Presenter.IsPaused);
+			Assert.IsTrue(game.Screen.IsPausedShown);
+			StringAssert.StartsWith("Level 1 · ", game.Screen.PauseCard.Subtitle);
+
+			yield return Play(game, new[] { solution[0] });
+			Assert.AreEqual(0, game.Presenter.Stats.Moves, "paused: moves are ignored");
+
+			game.Screen.PauseCard.ResumeButton.Button.onClick.Invoke();
+			yield return new WaitForSeconds(0.3f);
+			Assert.IsFalse(game.Presenter.IsPaused);
+			Assert.IsFalse(game.Screen.IsPausedShown);
+
+			yield return Play(game, new[] { solution[0] });
+			Assert.AreEqual(1, game.Presenter.Stats.Moves);
+		}
+
+		[UnityTest]
+		public IEnumerator Tutorial_ShowsTheFirstTimeOnLevel1_AndIsRemembered()
+		{
+			PersistantData.LevelModule.TutorialCompleted.Save(false);
+			LevelData level = Copy(Load<LevelDataManager>("t:LevelDataManager").GetLevel(0).LevelData);
+			IReadOnlyList<GridVector> solution = MoveNotation.Parse(level.Solution);
+			GameManager game = null;
+			yield return StartLevel(level, g => game = g);
+			yield return null;
+
+			TutorialOverlayView tutorial = game.Screen.Tutorial;
+			Assert.IsNotNull(game.Tutorial, "the tutorial runs the first time Level 1 is played");
+			Assert.AreEqual(TutorialStep.Swipe, tutorial.Step, "the default scheme is Swipe");
+			Assert.IsTrue(tutorial.gameObject.activeInHierarchy);
+
+			yield return Play(game, new[] { solution[0] });
+			Assert.AreEqual(TutorialStep.MowTheRest, tutorial.Step);
+
+			tutorial.Dismiss();
+			yield return new WaitForSeconds(0.3f);
+			Assert.IsNull(game.Tutorial);
+			Assert.IsTrue(PersistantData.LevelModule.TutorialCompleted.Load(), "seen is saved");
+
+			// Seen: Level 1 no longer shows it, unless requested (How to play / Replay tutorial).
+			yield return StartLevel(level, g => game = g);
+			yield return null;
+			Assert.IsNull(game.Tutorial);
+
+			TutorialLauncher.Request();
+			yield return StartLevel(level, g => game = g);
+			yield return null;
+			Assert.IsNotNull(game.Tutorial);
+		}
+
+		[UnityTest]
+		public IEnumerator LevelComplete_OverPar_ShowsLawnDoneWithoutTheBadge()
+		{
+			LevelData level = Copy(Load<LevelDataManager>("t:LevelDataManager").GetLevel(0).LevelData);
+			GameManager game = null;
+			yield return StartLevel(level, g => game = g);
+
+			LevelCompleteCardView card = game.Screen.CompleteCard;
+			card.Show(new LevelCompletedInfo(new AttemptStats(level.Par + 3, 2, 75), level.Par, true,
+				new CompletionResult(level.Par + 3, level.Par + 5, level.Par + 3, false, false, null)), 1);
+			yield return new WaitForSeconds(0.3f);
+
+			Assert.AreEqual("DONE!", card.Headline);
+			Assert.IsFalse(card.IsPerfectShown);
+			Assert.AreEqual($"New best: {level.Par + 3} moves!", card.BestLine);
+			Assert.AreEqual("1:15", LevelCompleteCardView.FormatTime(75));
 		}
 
 		#region Helpers

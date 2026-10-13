@@ -31,6 +31,9 @@ namespace Game.Mowers
 		/// <summary>True once the mower has been dropped in and is visible (it starts hidden during the level intro).</summary>
 		public bool IsMowerVisible => _mowerObject != null && _mowerObject.gameObject.activeInHierarchy;
 
+		/// <summary>The mower's world position (the level origin before one is shown).</summary>
+		public Vector3 GetMowerWorldPosition() => _mowerObject != null ? _mowerObject.transform.position : transform.position;
+
 		/// <summary>The mower prefab <see cref="Show"/> spawns.</summary>
 		public void SetMower(MowerData mower)
 		{
