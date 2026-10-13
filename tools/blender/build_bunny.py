@@ -425,9 +425,9 @@ elif VARIANT == "cube":
     # voxels. Upright ears, 4 x 3 thick.
     # soften=1..4 trials, each building on the last: 1 bigger bevels and cut corners; 2 every small edge
     # as two facets on a curve; 3 the back as a three-facet curve too; 4 that, smooth-shaded.
-    # golden=1: a 13 cube; the back slopes 8 and leaves a 5 flat top (13 : 8 : 5); an 8 x 8 face plate,
-    # its margins split 1 : phi top to bottom, its eye line at 1/phi of its height; ears 8 visible x 5 x 3;
-    # feet 3 x 5 x 2 visible; a 3 tail; edge bevels and the plate's side gap in phi : 1.
+    # golden=1: a 13 cube; the back slopes 8 and leaves a 5 flat top (13 : 8 : 5); the face colour over the
+    # whole front and its bevels, the eye line where an 8-tall panel with margins split 1 : phi would put
+    # it; ears 8 visible x 5 x 3; hind feet 3 x 5, front paws 2 x 3, 2 visible; a 3 tail.
     box = (-6.5, 6.5, 2, 15, -6, 7) if GOLDEN else (-6, 6, 2, 15, -7, 8)
     slope = 8 if GOLDEN else 7
     front = box[5]
@@ -471,13 +471,20 @@ elif VARIANT == "cube":
         mark(lambda x, y, z: x < 0)
         ear_cols = {1: dict(col=MARK), -1: {}}
     face_size = min(11, (12 - 2 * flat) / 0.66)                                  # the texture's face spans 0.66
+    face_idx = mat(FACE)                                                         # make sure the body carries it
     body_ob = body.build()
-    face_uvs(body_ob, front, 10.5 if flat <= 2 else 10, face_size)
     if GOLDEN:
-        py0 = 2 + 5 * PHI / (1 + PHI)                                            # margins 3.09 below, 1.91 above
-        face_uvs(plate("PlateFace", body_ob, (0, 0, 0), -4, 4, py0, py0 + 8, front, 8 / PHI ** 4, FACE),
-                 front + PLATE_PROUD, py0 + 8 / PHI, 0.95 * 8 / 0.66)
-    elif ROUNDED:                       # the panel as a plate, inset to clear the fillet, the face decal on it
+        # The face colour covers the whole front and wraps onto the bevels around it, stopping where each
+        # bevel meets a side, the top or the bottom: every face turned more than 60 deg towards the front.
+        # The edge follows the geometry, so the fillet rounds it.
+        for f in body_ob.data.polygons:
+            if f.normal.y < -0.5:
+                f.material_index = face_idx
+        py0 = 2 + 5 * PHI / (1 + PHI)                                            # the old 8 x 8 panel's place
+        face_uvs(body_ob, front, py0 + 8 / PHI, 0.95 * 8 / 0.66)
+    else:
+        face_uvs(body_ob, front, 10.5 if flat <= 2 else 10, face_size)
+    if ROUNDED and not GOLDEN:                       # the panel as a plate, inset to clear the fillet, the face decal on it
         inset = flat + 0.4
         face_size = 0.95 * (12 - 2 * inset) / 0.66                              # fill the plate, with a margin
         face_uvs(plate("PlateFace", body_ob, (0, 0, 0), -6 + inset, 6 - inset, 2 + inset, 15 - inset, 8, 1.5, FACE),
@@ -488,7 +495,8 @@ elif VARIANT == "cube":
             tip=0 if SOFT >= 2 else 1, tip_round=(2, 2) if SOFT >= 2 else None, plate_inner=ROUNDED, **ear_cols[sx])
     if GOLDEN:
         tail(5, box[4], size=3, proud=2)
-        feet((-3.5, 3.5), (-3, 3), 3, 5, 3, 1, 2)
+        feet((-3.5, 3.5), (-3,), 3, 5, 3, 1, 2)                                  # big hind feet, 3 x 5
+        feet((-3, 3), (3,), 2, 3, 3, 1, 2)                                       # small front paws, 2 x 3
     else:
         tail(5, -7)
         feet((-3, 3), (-4, 4), 3, 4, 3, 1, 2)
