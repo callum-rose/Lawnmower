@@ -153,6 +153,7 @@ namespace Tests.EditMode
 			}
 		}
 
+		[TestCase("EggBunny", "344dbd1651b546189959dd71f623276d")]
 		[TestCase("RegularBunny", "57944479062546d9bab013ca63cb41f6")]
 		[TestCase("RoboBunny", "f7536016d50d4cbd8d3016edd0422253")]
 		[TestCase("RoboSnail", "42f1c3d3cf164371ac4ec62a81a89296")]
