@@ -6,7 +6,8 @@
         "UnityEditor.TestRunner",
         "Scripts",
         "Lawnmower.Model",
-        "Lawnmower.Model.Tests"
+        "Lawnmower.Model.Tests",
+        "Lawnmower.Solver"
     ],
     "includePlatforms": [
         "Editor"

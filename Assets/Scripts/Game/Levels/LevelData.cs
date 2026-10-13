@@ -28,6 +28,9 @@ namespace Game.Levels
 		[SerializeField, Tooltip("U/D/L/R moves, verified by LevelAssetSimulationTests")]
 		private string solution;
 
+		[SerializeField, Min(0), Tooltip("Shortest solution length, written by Bunny Heaven/Recompute Par; 0 = unknown")]
+		private int par;
+
 		[NonSerialized] private LevelDefinition _definition;
 
 		public Guid Id => Guid.TryParse(guid, out Guid g) ? g : Guid.Empty;
@@ -38,6 +41,9 @@ namespace Game.Levels
 
 		/// <summary>A known solution in <see cref="MoveNotation"/> (U/D/L/R); empty if none is recorded.</summary>
 		public string Solution => solution;
+
+		/// <summary>The solver's shortest solution length; 0 if unknown (not yet computed, or too big to solve).</summary>
+		public int Par => par;
 
 		#region Unity
 

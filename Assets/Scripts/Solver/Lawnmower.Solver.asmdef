@@ -1,0 +1,16 @@
+{
+    "name": "Lawnmower.Solver",
+    "rootNamespace": "Lawnmower.Solver",
+    "references": [
+        "Lawnmower.Model"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": true
+}
