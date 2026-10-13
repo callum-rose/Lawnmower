@@ -1,7 +1,8 @@
 """Builds the Regular Bunny mower in the VoxelStyle.md style and renders preview views.
 
 blender --background --factory-startup --python build_bunny.py -- [variant=classic|toy|lop|sitting|cube]
-    [colours=original|snow|midnight|forest|grape] [pattern=dutch|spots|stripes|harlequin] [out=<prefix>]
+    [colours=original|snow|midnight|forest|grape] [pattern=dutch|spots|stripes|harlequin]
+    [soften=1..4] [rounded=1] [out=<prefix>]
 
 (or, with Blender's `bpy` module installed from pip: python build_bunny.py -- variant=... out=...)
 
@@ -54,6 +55,9 @@ PATTERNS = {   # coat, face, tail, feet, mark
 }
 PATTERN = kv.get("pattern", "plain")
 SOFT = int(kv.get("soften", "0"))
+ROUNDED = kv.get("rounded", "0") == "1"   # cube: fillet every edge; colour patches as round-cornered plates
+FILLET = 0.35                             # voxels: the fillet's width
+PLATE_PROUD = 0.05                        # voxels: how far a colour plate stands off its face
 COLOURS = kv.get("colours", "original")
 COAT, FACE, WHITE, DARK = COLOURWAYS[COLOURS]
 MARK = None
@@ -307,14 +311,52 @@ def rot(ob, pitch=0, splay=0, yaw=0):
         assert a % 5 == 0, a
     ob.rotation_euler = (math.radians(-pitch), math.radians(splay), math.radians(yaw))
 
+def plate(name, parent, pivot, x0, x1, y0, y1, z, radius, col, segments=4):
+    """A flat round-cornered rectangle of colour on the plane z (a front face), a hair proud of it, in the
+    parent's own space. Painted voxels can only make square patches; this rounds their corners."""
+    px, py, pz = pivot
+    pts = []
+    for cx, cy, a0 in ((x1 - radius, y0 + radius, -90), (x1 - radius, y1 - radius, 0),
+                       (x0 + radius, y1 - radius, 90), (x0 + radius, y0 + radius, 180)):
+        for i in range(segments + 1):
+            a = math.radians(a0 + 90 * i / segments)
+            pts.append((cx + radius * math.cos(a), cy + radius * math.sin(a)))
+    me = bpy.data.meshes.new(name)
+    me.from_pydata([B((x - px, y - py, z + PLATE_PROUD - pz)) for x, y in pts], [], [list(range(len(pts)))])
+    idx = mat(col)
+    for m in MATS.values():
+        me.materials.append(m)
+    me.polygons[0].material_index = idx
+    if me.polygons[0].normal.y > 0:                                              # face the front (-Y in Blender)
+        me.flip_normals()
+    ob = bpy.data.objects.new(name, me)
+    sc.collection.objects.link(ob)
+    ob.parent = parent
+    return ob
+
+def fillet_all(width=FILLET):
+    """Round every edge of every part (not the plates) with a three-segment bevel, smooth-shaded across
+    the bevel, with hardened normals so the flat faces stay flat."""
+    dg = bpy.context.evaluated_depsgraph_get()
+    for o in [o for o in bpy.data.objects if o.type == "MESH" and not o.name.startswith("Plate")]:
+        o.data.shade_smooth()
+        m = o.modifiers.new("fillet", "BEVEL")
+        m.width, m.segments, m.limit_method, m.angle_limit = width, 3, "ANGLE", math.radians(20)
+        m.harden_normals = True                       # flat faces keep their own normal; only the fillet curves
+        dg.update()
+        me = bpy.data.meshes.new_from_object(o.evaluated_get(dg))
+        o.modifiers.clear()
+        o.data = me
+
 def ear(name, sx, x_c, base_y, z0, w, d, h, bury, pitch, splay, pivot_y=None, tip=1, col=None, tip_col=None, tip_rows=0,
-        tip_round=None):
+        tip_round=None, plate_inner=False):
     """An ear: w x d x h with `bury` rows inside its parent, butter on the inner (front) face."""
     e = Part(name)
     x0, x1 = x_c - w / 2, x_c + w / 2
     y0, y1 = base_y - bury, base_y + h - bury
     e.box(x0, x1, y0, y1, z0, z0 + d, col or COAT)
-    e.paint(lambda x, y, z: z == z0 + d - 1 and base_y + 1 <= y < y1 - 2 and x0 + 1 <= x < x1 - 1, FACE)
+    if not plate_inner:
+        e.paint(lambda x, y, z: z == z0 + d - 1 and base_y + 1 <= y < y1 - 2 and x0 + 1 <= x < x1 - 1, FACE)
     if tip_col:
         e.paint(lambda x, y, z: y >= y1 - tip_rows, tip_col)
     if tip_round:                                                                # (radius, facets)
@@ -323,7 +365,10 @@ def ear(name, sx, x_c, base_y, z0, w, d, h, bury, pitch, splay, pivot_y=None, ti
     if tip:
         for s in (1, -1):
             bevel_edge(e, (x0, x1, y0, y1, z0, z0 + d), (s, 1, 0), tip)
-    ob = e.build(pivot=(x_c, base_y if pivot_y is None else pivot_y, z0 + d / 2))
+    pivot = (x_c, base_y if pivot_y is None else pivot_y, z0 + d / 2)
+    ob = e.build(pivot=pivot)
+    if plate_inner:
+        plate("Plate" + name, ob, pivot, x0 + 1, x1 - 1, base_y + 1, y1 - 2, z0 + d, 0.7, FACE)
     rot(ob, pitch=pitch, splay=sx * splay)
     return ob
 
@@ -398,7 +443,8 @@ elif VARIANT == "cube":
                 for sz in (1, -1):
                     bevel_edge(body, box, (sx, sy, sz), 5)
     flat = r                                                                     # the front's flat margin
-    body.paint(lambda x, y, z: z == 7 and -6 + flat <= x < 6 - flat and 2 + flat <= y < 15 - flat, FACE)
+    if not ROUNDED:
+        body.paint(lambda x, y, z: z == 7 and -6 + flat <= x < 6 - flat and 2 + flat <= y < 15 - flat, FACE)
     mark = lambda pred: body.paint(lambda x, y, z: body.vox[(x, y, z)] == COAT and pred(x, y, z), MARK)
     ear_cols = {1: {}, -1: {}}
     if PATTERN == "dutch":            # the rear half dark, a clean line across the middle
@@ -414,10 +460,15 @@ elif VARIANT == "cube":
         mark(lambda x, y, z: x < 0)
         ear_cols = {1: dict(col=MARK), -1: {}}
     face_size = min(11, (12 - 2 * flat) / 0.66)                                  # the texture's face spans 0.66
-    face_uvs(body.build(), 8, 10.5 if flat <= 2 else 10, face_size)
+    body_ob = body.build()
+    face_uvs(body_ob, 8, 10.5 if flat <= 2 else 10, face_size)
+    if ROUNDED:                       # the panel as a plate, inset to clear the fillet, the face decal on it
+        inset = flat + 0.4
+        face_uvs(plate("PlateFace", body_ob, (0, 0, 0), -6 + inset, 6 - inset, 2 + inset, 15 - inset, 8, 1.5, FACE),
+                 8 + PLATE_PROUD, 10.5, face_size)
     for sx in (1, -1):
         ear("Ear" + ("R" if sx > 0 else "L"), sx, sx * 2.5, 15, 2, 4, 3, 11, 2, pitch=10, splay=15,
-            tip=0 if SOFT >= 2 else 1, tip_round=(2, 2) if SOFT >= 2 else None, **ear_cols[sx])
+            tip=0 if SOFT >= 2 else 1, tip_round=(2, 2) if SOFT >= 2 else None, plate_inner=ROUNDED, **ear_cols[sx])
     tail(5, -7)
     feet((-3, 3), (-4, 4), 3, 4, 3, 1, 2)
     HEIGHT = 26
@@ -444,6 +495,9 @@ else:  # sitting
     tail(6, -7)
     feet((-3, 3), (-4, 4), 3, 4, 3, 1, 2)
     HEIGHT = 29
+
+if ROUNDED:
+    fillet_all()
 
 if SOFT >= 4:                                         # smooth shading across the facets, hard at 90 deg
     for o in bpy.data.objects:
