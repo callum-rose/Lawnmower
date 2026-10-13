@@ -15,3 +15,7 @@ Scripts for models in the [voxel style](../../Assets/Docs/VoxelStyle.md). They r
   UV sets after the bunny's, so for the bunny's decal UVs export without it instead. Ported from Assembler;
   its Tone and edge-distance channels feed Assembler's Voxel Shade shader, which this project doesn't
   have yet — the AO channel is usable on its own as vertex colour R.
+- **`original_shapes.py`** — shape variations on the in-game, smooth `regular_bunny.blend`
+  (`chubby|tall|lop|swept`, or `base` for the model as it is), rendered from four sides. It changes
+  only object transforms in memory; the .blend is not saved. Previews are in
+  [`docs/images/bunny-original`](../../docs/images/bunny-original).
