@@ -12,7 +12,8 @@ tall ears with butter insides, a white tail and four dark feet.
 - toy:     a box with short bevels only (the Taxi's lesson, R7a), chunky upright ears.
 - lop:     the classic body with ears that flop down its sides.
 - sitting: a separate head on a low body, so the head can nod and turn; ears swept back.
-- cube:    the reference's profile on a cube: one body part with a big bevel down the back, upright ears.
+- cube:    the reference's profile on a cube: one body part with a big bevel down the back and
+           2-voxel bevels elsewhere, thick upright ears.
 
 The script follows the bake_shade.py contract: parts are authored in voxels under an empty called
 `root`, the root part is `Body`, there is a shadow-catching `ground`, and it ends in the standard
@@ -325,19 +326,19 @@ elif VARIANT == "toy":
 
 elif VARIANT == "cube":
     # The reference's profile on a cube, in one part: a tall front and a back sloping away through one
-    # big 45 deg bevel (a 7 x 7 wedge, R7b) along the top rear edge; every other edge bevelled by one
-    # voxel. Upright ears.
+    # big 45 deg bevel (a 7 x 7 wedge, R7b) along the top rear edge; every other edge bevelled by two
+    # voxels. Upright ears, 4 x 3 thick.
     box = (-6, 6, 2, 15, -7, 8)
     body = Part("Body")
     body.box(*box, COAT)
-    round_box(body, box, top=1, side=1, bottom=1, front_back=False)
+    round_box(body, box, top=2, side=2, bottom=2, front_back=False)
     bevel_edge(body, box, (0, 1, -1), 7)                                         # the sloping back
-    bevel_edge(body, box, (0, 1, 1), 1)
-    bevel_edge(body, box, (0, -1, -1), 1); bevel_edge(body, box, (0, -1, 1), 1)
-    body.paint(lambda x, y, z: z == 7 and -5 <= x < 5 and 3 <= y < 14, FACE)    # the flat front, bevels stay coat
+    bevel_edge(body, box, (0, 1, 1), 2)
+    bevel_edge(body, box, (0, -1, -1), 2); bevel_edge(body, box, (0, -1, 1), 2)
+    body.paint(lambda x, y, z: z == 7 and -4 <= x < 4 and 4 <= y < 13, FACE)    # the flat front, bevels stay coat
     face_uvs(body.build(), 8, 10.5, 11)
     for sx in (1, -1):
-        ear("Ear" + ("R" if sx > 0 else "L"), sx, sx * 2.5, 15, 2, 3, 2, 11, 2, pitch=10, splay=15)
+        ear("Ear" + ("R" if sx > 0 else "L"), sx, sx * 2.5, 15, 2, 4, 3, 11, 2, pitch=10, splay=15)
     tail(5, -7)
     feet((-3, 3), (-4, 4), 3, 4, 3, 1, 2)
     HEIGHT = 26
