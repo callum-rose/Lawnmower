@@ -53,6 +53,7 @@ PATTERNS = {   # coat, face, tail, feet, mark
     "harlequin": ("P43", "P09", "P00", "P05", "P05"),   # Amber and Charcoal halves, swapped on the ears
 }
 PATTERN = kv.get("pattern", "plain")
+SOFT = int(kv.get("soften", "0"))
 COLOURS = kv.get("colours", "original")
 COAT, FACE, WHITE, DARK = COLOURWAYS[COLOURS]
 MARK = None
@@ -245,6 +246,22 @@ def bevel_edge(part, box, n, k, where=None):
     far = [(x1 if n[0] > 0 else x0), (y1 if n[1] > 0 else y0), (z1 if n[2] > 0 else z0)]
     part.bevel(n, sum(n[i] * far[i] for i in range(3)) - k, where)
 
+def round_edge(part, box, axes, signs, r, facets, where=None):
+    """Soften the box edge between faces axes[0] (outward sign signs[0]) and axes[1] by `facets` flat
+    planes through points on a quarter circle of radius r tangent to both faces. facets=1 is the R7b
+    45 deg bevel of depth r; more facets go beyond the style's 45 deg wedges to read as a rounded edge."""
+    far = [(box[2 * a + 1] if sg > 0 else box[2 * a]) for a, sg in zip(axes, signs)]
+    pts = [(-r + r * math.sin(t), -r + r * math.cos(t)) for t in
+           (math.pi / 2 * i / facets for i in range(facets + 1))]           # (0,-r) ... (-r,0) in (a, b)
+    for (pa, pb), (qa, qb) in zip(pts, pts[1:]):
+        na, nb = (qb - pb), -(qa - pa)                                       # outward normal of the chord
+        if na * 1 + nb * 1 < 0:
+            na, nb = -na, -nb
+        n = [0, 0, 0]
+        n[axes[0]], n[axes[1]] = na * signs[0], nb * signs[1]
+        d = na * pa + nb * pb + n[axes[0]] * far[0] + n[axes[1]] * far[1]
+        part.bevel(tuple(n), d, where)
+
 def round_box(part, box, top=0, side=0, bottom=0, front_back=True, where=None):
     """Bevel a box's top edges by `top`, its vertical edges by `side`, its bottom edges by `bottom`."""
     for s in (1, -1):
@@ -290,7 +307,8 @@ def rot(ob, pitch=0, splay=0, yaw=0):
         assert a % 5 == 0, a
     ob.rotation_euler = (math.radians(-pitch), math.radians(splay), math.radians(yaw))
 
-def ear(name, sx, x_c, base_y, z0, w, d, h, bury, pitch, splay, pivot_y=None, tip=1, col=None, tip_col=None, tip_rows=0):
+def ear(name, sx, x_c, base_y, z0, w, d, h, bury, pitch, splay, pivot_y=None, tip=1, col=None, tip_col=None, tip_rows=0,
+        tip_round=None):
     """An ear: w x d x h with `bury` rows inside its parent, butter on the inner (front) face."""
     e = Part(name)
     x0, x1 = x_c - w / 2, x_c + w / 2
@@ -299,6 +317,9 @@ def ear(name, sx, x_c, base_y, z0, w, d, h, bury, pitch, splay, pivot_y=None, ti
     e.paint(lambda x, y, z: z == z0 + d - 1 and base_y + 1 <= y < y1 - 2 and x0 + 1 <= x < x1 - 1, FACE)
     if tip_col:
         e.paint(lambda x, y, z: y >= y1 - tip_rows, tip_col)
+    if tip_round:                                                                # (radius, facets)
+        for s in (1, -1):
+            round_edge(e, (x0, x1, y0, y1, z0, z0 + d), (0, 1), (s, 1), *tip_round)
     if tip:
         for s in (1, -1):
             bevel_edge(e, (x0, x1, y0, y1, z0, z0 + d), (s, 1, 0), tip)
@@ -355,14 +376,29 @@ elif VARIANT == "cube":
     # The reference's profile on a cube, in one part: a tall front and a back sloping away through one
     # big 45 deg bevel (a 7 x 7 wedge, R7b) along the top rear edge; every other edge bevelled by two
     # voxels. Upright ears, 4 x 3 thick.
+    # soften=1..4 trials, each building on the last: 1 bigger bevels and cut corners; 2 every small edge
+    # as two facets on a curve; 3 the back as a three-facet curve too; 4 that, smooth-shaded.
     box = (-6, 6, 2, 15, -7, 8)
     body = Part("Body")
     body.box(*box, COAT)
-    round_box(body, box, top=2, side=2, bottom=2, front_back=False)
-    bevel_edge(body, box, (0, 1, -1), 7)                                         # the sloping back
-    bevel_edge(body, box, (0, 1, 1), 2)
-    bevel_edge(body, box, (0, -1, -1), 2); bevel_edge(body, box, (0, -1, 1), 2)
-    body.paint(lambda x, y, z: z == 7 and -4 <= x < 4 and 4 <= y < 13, FACE)    # the flat front, bevels stay coat
+    X, Y, Z = 0, 1, 2
+    small = [((X, Y), (s1, s2)) for s1 in (1, -1) for s2 in (1, -1)] + \
+            [((X, Z), (s1, s2)) for s1 in (1, -1) for s2 in (1, -1)] + \
+            [((Y, Z), (1, 1)), ((Y, Z), (-1, 1)), ((Y, Z), (-1, -1))]
+    r, facets = {0: (2, 1), 1: (3, 1)}.get(SOFT, (3, 2))
+    for axes, signs in small:
+        round_edge(body, box, axes, signs, r, facets)
+    if SOFT >= 3:
+        round_edge(body, box, (Y, Z), (1, -1), 9, 3)                             # the back as a curve
+    else:
+        bevel_edge(body, box, (0, 1, -1), 7)                                     # the sloping back
+    if SOFT == 1:                                                                # cut the eight corners
+        for sx in (1, -1):
+            for sy in (1, -1):
+                for sz in (1, -1):
+                    bevel_edge(body, box, (sx, sy, sz), 5)
+    flat = r                                                                     # the front's flat margin
+    body.paint(lambda x, y, z: z == 7 and -6 + flat <= x < 6 - flat and 2 + flat <= y < 15 - flat, FACE)
     mark = lambda pred: body.paint(lambda x, y, z: body.vox[(x, y, z)] == COAT and pred(x, y, z), MARK)
     ear_cols = {1: {}, -1: {}}
     if PATTERN == "dutch":            # the rear half dark, a clean line across the middle
@@ -377,9 +413,11 @@ elif VARIANT == "cube":
     elif PATTERN == "harlequin":      # split down the middle, the ears the other way round
         mark(lambda x, y, z: x < 0)
         ear_cols = {1: dict(col=MARK), -1: {}}
-    face_uvs(body.build(), 8, 10.5, 11)
+    face_size = min(11, (12 - 2 * flat) / 0.66)                                  # the texture's face spans 0.66
+    face_uvs(body.build(), 8, 10.5 if flat <= 2 else 10, face_size)
     for sx in (1, -1):
-        ear("Ear" + ("R" if sx > 0 else "L"), sx, sx * 2.5, 15, 2, 4, 3, 11, 2, pitch=10, splay=15, **ear_cols[sx])
+        ear("Ear" + ("R" if sx > 0 else "L"), sx, sx * 2.5, 15, 2, 4, 3, 11, 2, pitch=10, splay=15,
+            tip=0 if SOFT >= 2 else 1, tip_round=(2, 2) if SOFT >= 2 else None, **ear_cols[sx])
     tail(5, -7)
     feet((-3, 3), (-4, 4), 3, 4, 3, 1, 2)
     HEIGHT = 26
@@ -406,6 +444,12 @@ else:  # sitting
     tail(6, -7)
     feet((-3, 3), (-4, 4), 3, 4, 3, 1, 2)
     HEIGHT = 29
+
+if SOFT >= 4:                                         # smooth shading across the facets, hard at 90 deg
+    for o in bpy.data.objects:
+        if o.type == "MESH":
+            o.data.shade_smooth()
+            o.data.set_sharp_from_angle(angle=math.radians(50))
 
 for o in list(bpy.data.objects):                     # every other part: colour strips, no face
     if o.type == "MESH" and not o.data.uv_layers:
