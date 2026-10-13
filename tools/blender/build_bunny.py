@@ -353,7 +353,7 @@ def fillet_all(width=FILLET):
         o.data = me
 
 def ear(name, sx, x_c, base_y, z0, w, d, h, bury, pitch, splay, pivot_y=None, tip=1, col=None, tip_col=None, tip_rows=0,
-        tip_round=None, plate_inner=False):
+        tip_round=None, plate_inner=False, plate_radius=0.7):
     """An ear: w x d x h with `bury` rows inside its parent, butter on the inner (front) face."""
     e = Part(name)
     x0, x1 = x_c - w / 2, x_c + w / 2
@@ -372,7 +372,7 @@ def ear(name, sx, x_c, base_y, z0, w, d, h, bury, pitch, splay, pivot_y=None, ti
     pivot = (x_c, base_y if pivot_y is None else pivot_y, z0 + d / 2)
     ob = e.build(pivot=pivot)
     if plate_inner:
-        plate("Plate" + name, ob, pivot, x0 + 1, x1 - 1, base_y + 1, y1 - 2, z0 + d, 0.7, FACE)
+        plate("Plate" + name, ob, pivot, x0 + 1, x1 - 1, base_y + 1, y1 - 2, z0 + d, plate_radius, FACE)
     rot(ob, pitch=pitch, splay=sx * splay)
     return ob
 
@@ -385,8 +385,10 @@ def feet(xs, zs, w, l, h, bury, body_bottom):
     for i, x_c in enumerate(xs):
         for j, z_c in enumerate(zs):
             f = Part("Foot" + ("R" if x_c > 0 else "L") + ("F" if z_c > 0 else "B"))
-            f.box(x_c - w / 2, x_c + w / 2, 0, body_bottom + bury, z_c - l / 2, z_c + l / 2, DARK)
-            f.build(pivot=(x_c, body_bottom, z_c))
+            whole = math.ceil(l - 1e-9)                      # a length off the lattice: build whole, then scale
+            f.box(x_c - w / 2, x_c + w / 2, 0, body_bottom + bury, z_c - whole / 2, z_c + whole / 2, DARK)
+            ob = f.build(pivot=(x_c, body_bottom, z_c))
+            ob.scale[1] = l / whole                          # Blender y is the model's length
 
 # ---- the variants ------------------------------------------------------------------------------------
 if VARIANT in ("classic", "lop"):
@@ -508,8 +510,8 @@ elif VARIANT == "egg":
     # An upright egg with a smooth surface (not voxels): a dense sphere reshaped to the profile
     # r(t) = 6.3 (1 - |t|^2.4)^(1/2.4) (1 - 0.12 t): fat, widest a little below the middle, a blunt top, cut flat at y = 2 to sit on.
     # 12.8 tall above the seat. The face colour is a smooth oval on the front; the face decal is pressed onto
-    # it, eye line at 1/phi of the body's height. Big hind feet, small front paws, upright ears in the
-    # crown, a tail.
+    # it, eye line at 1/phi of the body's height. Hind feet phi times the front paws' length, in line with
+    # them seen from the front; upright ears with round tips in the crown; a tail.
     EGG_YC, EGG_A, EGG_B, EGG_K, EGG_P, SEAT = 7.6, 7.2, 6.3, 0.12, 2.4, 2
     bm = bmesh.new()
     bmesh.ops.create_uvsphere(bm, u_segments=96, v_segments=64, radius=1)
@@ -542,10 +544,10 @@ elif VARIANT == "egg":
     face_uvs(body_ob, None, eye_y, 10.5, facing=0.5)
     for sx in (1, -1):
         ear("Ear" + ("R" if sx > 0 else "L"), sx, sx * 3, 13.2, -1.5, 5, 3, 11, 3, pitch=10, splay=15,
-            plate_inner=True)
+            tip=0, tip_round=(2.5, 8), plate_inner=True, plate_radius=1.5)          # round tips, stadium patches
     tail(5.5, -6.1, size=3, proud=2)
-    feet((-3, 3), (-2,), 3, 5, 3, 1, 2)                                          # big hind feet, 3 x 5
-    feet((-2.5, 2.5), (3.5,), 2, 3, 3, 1, 2)                                     # small front paws, 2 x 3
+    feet((-3, 3), (-2,), 3, 3 * PHI, 3, 1, 2)                                    # hind feet 3 phi = 4.85 long
+    feet((-3, 3), (3.5,), 2, 3, 3, 1, 2)                                         # front paws 3 long, in line
     HEIGHT = 24
 
 else:  # sitting
