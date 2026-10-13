@@ -46,7 +46,19 @@ namespace Game.Mowers.Models
 			_texturePropertyId ??= Shader.PropertyToID(texturePropertyName);
 #endif
 			
-			material.SetTextureOffset(_texturePropertyId.Value, offset + baseOffset);
+			Vector2 totalOffset = offset + baseOffset;
+
+			if (material.HasTexture(_texturePropertyId.Value))
+			{
+				material.SetTextureOffset(_texturePropertyId.Value, totalOffset);
+				return;
+			}
+
+			// Procedural faces store tiling/offset in a vector (xy tiling, zw offset)
+			Vector4 tilingOffset = material.GetVector(_texturePropertyId.Value);
+			material.SetVector(
+				_texturePropertyId.Value,
+				new Vector4(tilingOffset.x, tilingOffset.y, totalOffset.x, totalOffset.y));
 		}
 	}
 }
