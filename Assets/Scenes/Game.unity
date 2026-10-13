@@ -4572,6 +4572,115 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac0b09e7857660247b1477e93731de29, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &1226782324
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1226782325}
+  - component: {fileID: 1226782326}
+  m_Layer: 0
+  m_Name: PondDecor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1226782325
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1226782324}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2014382488}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1226782326
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1226782324}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e135be8a86c654ea29d36e5bb8e34ad1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Lawnmower.Presentation::Game.Levels.PondDecorManager
+  positioner: {fileID: 2014382489}
+  oceanManager: {fileID: 762153560}
+  decorPerTile: 0.1875
+  boardMargin: 0.4
+  oceanEdgeMargin: 0.3
+  spacing: 0.1
+  attemptsPerDecor: 30
+  swimSpeed: 0.3
+  appearDuration: 0.25
+  decors:
+  - prefab: {fileID: 919132149155446097, guid: d57ab80a4cc0949a29e836f19b9680aa, type: 3}
+    maxCount: 1
+    weight: 0.5
+    scale: {x: 0.4, y: 0.45}
+    footprint: 1
+    heightAboveWater: -0.1
+    perchHeight: 0
+    perches: 0
+    swimRadius: 0
+  - prefab: {fileID: 919132149155446097, guid: c331f7bf786ed447889bb403b1aecc30, type: 3}
+    maxCount: 2
+    weight: 1
+    scale: {x: 0.45, y: 0.5}
+    footprint: 0.7
+    heightAboveWater: -0.15
+    perchHeight: 0
+    perches: 0
+    swimRadius: 0.4
+  - prefab: {fileID: 919132149155446097, guid: e5b1a60d79d4442098481fc4050450ae, type: 3}
+    maxCount: 2
+    weight: 1
+    scale: {x: 0.45, y: 0.55}
+    footprint: 0.6
+    heightAboveWater: -0.05
+    perchHeight: 0
+    perches: 0
+    swimRadius: 0
+  - prefab: {fileID: 919132149155446097, guid: a067a3a917ca143388a2805cb5ca30fc, type: 3}
+    maxCount: 1
+    weight: 0.5
+    scale: {x: 0.45, y: 0.55}
+    footprint: 0.6
+    heightAboveWater: -0.05
+    perchHeight: 0
+    perches: 0
+    swimRadius: 0
+  - prefab: {fileID: 919132149155446097, guid: 3b3dffc18102c4a1e8e35bdd5fa0baf8, type: 3}
+    maxCount: 4
+    weight: 1.5
+    scale: {x: 0.45, y: 0.6}
+    footprint: 0.6
+    heightAboveWater: -0.05
+    perchHeight: 0.1
+    perches: 0
+    swimRadius: 0
+  - prefab: {fileID: 919132149155446097, guid: d32e78dbc60a44a079d94474bc396e78, type: 3}
+    maxCount: 1
+    weight: 0.75
+    scale: {x: 0.22, y: 0.25}
+    footprint: 0.9
+    heightAboveWater: 0
+    perchHeight: 0
+    perches: 1
+    swimRadius: 0
+  levelDataEventChannel: {fileID: 11400000, guid: 6893d8a204369ee449b9d7778103aad6, type: 2}
 --- !u!1 &1332339434
 GameObject:
   m_ObjectHideFlags: 0
@@ -5236,6 +5345,9 @@ MonoBehaviour:
   boundsAbove: 0.9
   boundsPadding: 0.15
   smoothTime: 0.25
+  maxZoom: 4
+  rotationSnapSpeed: 360
+  mouseWheelZoomStep: 1.15
 --- !u!114 &1720806196
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5519,6 +5631,7 @@ Transform:
   - {fileID: 120270600}
   - {fileID: 457597534}
   - {fileID: 816126237}
+  - {fileID: 1226782325}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &2014382489
