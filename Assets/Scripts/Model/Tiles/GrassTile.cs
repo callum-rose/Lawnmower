@@ -21,6 +21,14 @@ namespace Game.Tiles
 
 		public GrassTile(int grassHeight)
 		{
+			// Out-of-range heights used to be clamped only on read, so a height-5 tile needed three
+			// mows to show a change and its first undo threw (B10).
+			if (grassHeight < 0 || grassHeight > MaxGrassHeight)
+			{
+				throw new ArgumentOutOfRangeException(nameof(grassHeight), grassHeight,
+					$"Grass height must be 0-{MaxGrassHeight}");
+			}
+
 			_internalGrassHeight = new EventProperty<int>(grassHeight, i => Math.Clamp(i, 0, MaxGrassHeight));
 		}
 
