@@ -6,11 +6,14 @@ Models built to the house voxel style in Assembler's `Assets/docs/VoxelStyle.md`
 |---|---|
 | `build_carp.py` | `Assets/Models/Creatures/carp.fbx` |
 | `build_frog.py` | `Assets/Models/Creatures/frog.fbx` |
+| `build_toad.py` | Preview renders and video frames only (no FBX exported yet) |
 
 `voxel_common.py` is the shared part builder (ported from Assembler's `Tools/blender/build_human.py`);
 `bake_shade.py` is copied from Assembler's `Tools/blender/` unchanged.
 
-Preview renders (Cycles, four views):
+Preview renders (Cycles, four views). If Blender can't find `voxel_common`, run from this folder with
+`--python-expr "import sys; sys.path.insert(0, '.'); exec(open('build_toad.py').read())"` in place of `--python`.
+The toad also takes `frames=0,14,44` (stills from the video camera) or `video=<frame prefix>` (every frame of the loop).
 
 ```bash
 blender --background --factory-startup --python build_carp.py -- out=/tmp/carp
@@ -33,6 +36,7 @@ Both FBXs carry one looping animation (frames 0..N, the last frame equal to the 
 |---|---|---|
 | Carp | Gentle swim: the body sways and bobs, a lagged wave runs through stalk and tail, the pectorals paddle | 32 |
 | Frog | In-place hop: lean, launch with the hind legs kicked back, jaw opens at the top, land nose-first, settle | 24 |
+| Toad | A heavy in-place hop (0..30), then it rears its head, gapes, and its tongue snaps out, wiggles and snaps back (30..64) | 64 |
 
 Parts are posed through a parent chain while building, then flattened (`voxel_common.flatten`) so every
 part is a direct child of `root` with its full motion baked per frame: nested parts come back misplaced
