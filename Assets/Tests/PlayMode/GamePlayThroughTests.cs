@@ -13,9 +13,11 @@ using Lawnmower.Presenters;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
 using UnityEngine.TestTools;
+using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
 namespace Tests.PlayMode
@@ -351,11 +353,11 @@ namespace Tests.PlayMode
 			throw new ArgumentOutOfRangeException(nameof(move), move, "not a cardinal unit move");
 		}
 
-		/// <summary>A straight drag up the screen from its centre, in small steps.</summary>
+		/// <summary>A straight drag up the screen, starting on the board (not on canvas UI), in small steps.</summary>
 		private IEnumerator SwipeUp(Touchscreen touchscreen)
 		{
-			Vector2 start = new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
-			float length = Mathf.Min(Screen.height * 0.3f, 400);
+			Vector2 start = FindPointOffUi();
+			float length = Mathf.Min(Screen.height * 0.25f, 400);
 			BeginTouch(1, start, queueEventOnly: true, screen: touchscreen);
 			yield return null;
 
@@ -368,6 +370,30 @@ namespace Tests.PlayMode
 			EndTouch(1, start + new Vector2(0, length), queueEventOnly: true, screen: touchscreen);
 			yield return null;
 			yield return null;
+		}
+
+		private static Vector2 FindPointOffUi()
+		{
+			EventSystem eventSystem = EventSystem.current;
+			List<RaycastResult> hits = new List<RaycastResult>();
+			IEnumerable<Vector2> candidates =
+				from y in Enumerable.Range(1, 13).Select(i => i / 20f)
+				from x in Enumerable.Range(2, 7).Select(i => i / 10f)
+				orderby Mathf.Abs(y - 0.5f) + Mathf.Abs(x - 0.5f)
+				select new Vector2(Screen.width * x, Screen.height * y);
+
+			foreach (Vector2 point in candidates)
+			{
+				hits.Clear();
+				eventSystem.RaycastAll(new PointerEventData(eventSystem) { position = point }, hits);
+				if (!hits.Any(h => h.module is GraphicRaycaster))
+				{
+					return point;
+				}
+			}
+
+			Assert.Fail("no point on the board that isn't covered by UI");
+			return default;
 		}
 
 		/// <summary>A runtime copy, so the scene change can't unload it and nothing writes to the asset.</summary>

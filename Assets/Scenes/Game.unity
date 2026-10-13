@@ -303,9 +303,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mowerObjectCreator: {fileID: 83278716}
-  mowerPositionRequirers:
-  - ObjectField: {fileID: 0}
-    ResultType: 
+  mowerPositionRequirers: []
   mowerCreatedEventChannelContainer:
     ObjectField: {fileID: 11400000, guid: 12a07be353cc1b842a6e74de6d86c941, type: 2}
     ResultType: 
