@@ -9,7 +9,7 @@ namespace Lawnmower.Model.Tests
 	public class ArchitectureTests
 	{
 		private static readonly string[] Forbidden =
-			{ "UnityEngine", "UnityEditor", "Newtonsoft", "DOTween", "Sirenix", "Scripts", "Assembly-CSharp" };
+			{ "UnityEngine", "UnityEditor", "Newtonsoft", "DOTween", "Sirenix", "Lawnmower.Presentation", "Lawnmower.Infrastructure", "Lawnmower.Presenters", "Assembly-CSharp" };
 
 		[Test]
 		public void ModelAssembly_ReferencesNoEngineOrGameAssemblies()

@@ -4,10 +4,12 @@
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "Scripts",
+        "Lawnmower.Presentation",
         "Lawnmower.Model",
         "Lawnmower.Model.Tests",
-        "Lawnmower.Solver"
+        "Lawnmower.Solver",
+        "Lawnmower.Infrastructure",
+        "Lawnmower.Presenters"
     ],
     "includePlatforms": [
         "Editor"
