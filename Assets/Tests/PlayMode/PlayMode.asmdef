@@ -8,6 +8,7 @@
         "Lawnmower.Model",
         "Lawnmower.Infrastructure",
         "Lawnmower.Presenters",
+        "Lawnmower.Solver",
         "Unity.InputSystem",
         "Unity.InputSystem.TestFramework",
         "UnityEngine.UI",

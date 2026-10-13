@@ -48,12 +48,10 @@ namespace Tests.PlayMode
 		}
 
 		/// <summary>
-		/// URP render-pass noise when the editor's Game view isn't drawing (unfocused editor), and the known
-		/// Ocean.shader compile error (STATUS.md), logged once by whichever test first draws the ocean; not game code.
+		/// URP render-pass noise when the editor's Game view isn't drawing (unfocused editor); not game code.
 		/// </summary>
 		private static bool IsRenderNoise(string message, string stackTrace) =>
 			message.Contains("Fake or uninitialized surface") || message.Contains("Renderpass")
-			|| message.StartsWith("Shader error in 'Ocean'")
 			|| stackTrace.Contains("ScriptableRenderContext") || stackTrace.Contains("UnityEngine.Rendering.");
 
 		public override void Setup()
