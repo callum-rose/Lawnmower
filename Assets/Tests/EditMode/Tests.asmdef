@@ -12,7 +12,9 @@
         "Lawnmower.Presenters",
         "Lawnmower.Haptics",
         "Unity.RenderPipelines.Universal.Runtime",
-        "Unity.RenderPipelines.Core.Runtime"
+        "Unity.RenderPipelines.Core.Runtime",
+        "Unity.Mathematics",
+        "Unity.Collections"
     ],
     "includePlatforms": [
         "Editor"
