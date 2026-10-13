@@ -18,6 +18,14 @@ namespace Lawnmower.Screens
 		private Vector2Int _appliedScreen;
 		private Canvas _canvas;
 
+		/// <summary>Sets the minimum insets (canvas units); 0 fits exactly to the safe area.</summary>
+		public void SetMinInsets(float top, float bottom)
+		{
+			minTop = Mathf.Max(0f, top);
+			minBottom = Mathf.Max(0f, bottom);
+			Apply();
+		}
+
 		private void OnEnable() => Apply();
 
 		private void Update()

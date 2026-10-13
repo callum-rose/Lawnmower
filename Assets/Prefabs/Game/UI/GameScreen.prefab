@@ -3878,7 +3878,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3467293789309752096}
-  - component: {fileID: 5435854486812816848}
+  - component: {fileID: 7408693271400827040}
   m_Layer: 5
   m_Name: SafeArea
   m_TagString: Untagged
@@ -3908,7 +3908,7 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &5435854486812816848
+--- !u!114 &7408693271400827040
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -3917,9 +3917,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 5699011694848968434}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3629818ecf9074757a612a1b5244c935, type: 3}
+  m_Script: {fileID: 11500000, guid: 83195ce8087b54b76af5a15983f25d96, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Lawnmower.Presentation::MainMenu.SafeAreaFitter
+  m_EditorClassIdentifier: Lawnmower.Presentation::Lawnmower.Screens.SafeAreaPanel
+  minTop: 0
+  minBottom: 0
 --- !u!1 &6036667947856212757
 GameObject:
   m_ObjectHideFlags: 0

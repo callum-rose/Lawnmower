@@ -124,7 +124,7 @@ namespace Lawnmower.MainMenuEditor
 
 			RectTransform safe = NewUI("SafeArea", rootRect);
 			Stretch(safe, 0, 0, 0, 0);
-			safe.gameObject.AddComponent<SafeAreaFitter>();
+			safe.gameObject.AddComponent<Lawnmower.Screens.SafeAreaPanel>().SetMinInsets(0f, 0f);
 
 			LongPressTrigger title = BuildTitle(safe);
 			BuildRibbon(safe);
