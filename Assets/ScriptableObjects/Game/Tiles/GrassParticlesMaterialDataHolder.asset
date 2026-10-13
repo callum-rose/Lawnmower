@@ -15,6 +15,6 @@ MonoBehaviour:
   grassMaterials:
     keys: 010000000200000003000000i
     values:
-    - {fileID: 2100000, guid: faafe16e55e22214d8eeb7f23c502d2d, type: 2}
-    - {fileID: 2100000, guid: bcc01392f1815794bb0612dfbf312a0a, type: 2}
-    - {fileID: 2100000, guid: ef869fce1975d1c43a281f55c2c02e6d, type: 2}
+    - {fileID: 2100000, guid: 30f1cfd116411ba48bc4c83fb63ab5b4, type: 2}
+    - {fileID: 2100000, guid: 1aacdddcd7b654a43842458afae7246b, type: 2}
+    - {fileID: 2100000, guid: f110a092dbe9ee641b51d53bc25ff9fe, type: 2}
