@@ -9,7 +9,8 @@
         "Lawnmower.Model",
         "Lawnmower.Solver",
         "Lawnmower.Infrastructure",
-        "Lawnmower.Presenters"
+        "Lawnmower.Presenters",
+        "Unity.Mathematics"
     ],
     "includePlatforms": [
         "Editor"
