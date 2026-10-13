@@ -12,7 +12,8 @@
         "Unity.InputSystem.TestFramework",
         "UnityEngine.UI",
         "BunnyHeaven.UI",
-        "Lawnmower.Haptics"
+        "Lawnmower.Haptics",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

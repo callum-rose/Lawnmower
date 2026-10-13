@@ -11,18 +11,20 @@ namespace LevelSelect
 	/// <summary>Composition root for the LevelSelect scene.</summary>
 	internal class SceneManager : MonoBehaviour
 	{
-		[SerializeField] private LevelTileManager levelTileManager;
+		[SerializeField] private LevelSelectScreenView screen;
 		[SerializeField] private CurrentMowerManager currentMowerManager;
 		[SerializeField] private LevelDataManager levelDataManager;
 
 		private LevelSelectPresenter _presenter;
+
+		public LevelSelectScreenView Screen => screen;
 
 		#region Unity
 
 		private void Start()
 		{
 			_presenter = new LevelSelectPresenter(
-				levelTileManager,
+				screen,
 				new ProgressionLevelCatalog(GameServices.Progression),
 				new LevelSelectNavigator(levelDataManager, currentMowerManager));
 			_presenter.Start();
@@ -51,6 +53,8 @@ namespace LevelSelect
 				LevelData level = _levels.GetLevel(index).LevelData;
 				ViewManager.Instance.Load(UnityScene.Game, new GameSetupPassThroughData(_mowers.GetCurrent(), level));
 			}
+
+			public void GoToMainMenu() => ViewManager.Instance.Load(UnityScene.MainMenu);
 		}
 	}
 }

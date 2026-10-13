@@ -196,29 +196,19 @@ namespace Tests.PlayMode
 
 			ViewManager.Instance.Load(UnityScene.LevelSelect);
 			float end = Time.realtimeSinceStartup + Timeout;
-			UI.Buttons.Button play = null;
-			while (Time.realtimeSinceStartup < end && play == null)
+			while (Time.realtimeSinceStartup < end && Object.FindObjectsByType<LevelSelect.LevelNodeView>(FindObjectsSortMode.None).Length < levels.LevelCount)
 			{
-				play = Object.FindObjectsByType<UI.Buttons.Button>(FindObjectsSortMode.None).FirstOrDefault(b => b.gameObject.scene.name == "LevelSelect");
 				yield return null;
 			}
 
-			Assert.IsNotNull(play, "LevelSelect's Play button never appeared");
+			LevelSelect.LevelNodeView[] nodes = Object.FindObjectsByType<LevelSelect.LevelNodeView>(FindObjectsSortMode.None);
+			Assert.AreEqual(levels.LevelCount, nodes.Length);
 			yield return null;
-			play.OnPointerClick(null);
-
-			while (Time.realtimeSinceStartup < end && Object.FindObjectsByType<LevelSelect.LevelTile>(FindObjectsSortMode.None).Length < levels.LevelCount)
-			{
-				yield return null;
-			}
-
-			LevelSelect.LevelTile[] tiles = Object.FindObjectsByType<LevelSelect.LevelTile>(FindObjectsSortMode.None);
-			Assert.AreEqual(levels.LevelCount, tiles.Length);
 			AssertNoErrors();
 
-			// Tiles are added to their container in level order.
-			LevelSelect.LevelTile first = tiles.OrderBy(t => t.transform.GetSiblingIndex()).First();
-			first.OnPointerClick(null);
+			LevelSelect.LevelNodeView first = nodes.Single(n => n.Number == 1);
+			Assert.AreEqual(LevelNodeState.Next, first.State);
+			first.Button.onClick.Invoke();
 
 			GameManager game = null;
 			end = Time.realtimeSinceStartup + Timeout;

@@ -7,19 +7,6 @@ namespace Lawnmower.Presenters.Tests
 {
 	public class ProgressionLevelCatalogTests
 	{
-		private sealed class View : ILevelSelectView
-		{
-			public event Action<int> LevelChosen;
-			public void ShowLevels(IReadOnlyList<LevelSummary> levels) { }
-			public void Tap(int index) => LevelChosen?.Invoke(index);
-		}
-
-		private sealed class Navigator : ILevelSelectNavigator
-		{
-			public readonly List<int> Played = new List<int>();
-			public void PlayLevel(int index) => Played.Add(index);
-		}
-
 		private static readonly Guid[] Levels = Enumerable.Range(1, 3).Select(i => new Guid(i, 0, 0, new byte[8])).ToArray();
 
 		[Test]
@@ -53,8 +40,8 @@ namespace Lawnmower.Presenters.Tests
 		public void LockedLevels_CannotBePlayed_UntilTheOneBeforeIsCompleted()
 		{
 			Progression progression = new Progression(Levels, new InMemoryProgressStore());
-			View view = new View();
-			Navigator navigator = new Navigator();
+			FakeLevelSelectView view = new FakeLevelSelectView();
+			FakeLevelSelectNavigator navigator = new FakeLevelSelectNavigator();
 
 			LevelSelectPresenter presenter = new LevelSelectPresenter(view, new ProgressionLevelCatalog(progression), navigator);
 			presenter.Start();
