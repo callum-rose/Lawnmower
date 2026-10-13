@@ -7650,7 +7650,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9200237905882389980, guid: 92f3ec301908e9840ae4d2c881aba10a, type: 3}
       propertyPath: unityEvent.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9200237905882389980, guid: 92f3ec301908e9840ae4d2c881aba10a, type: 3}
       propertyPath: unityEvent.m_PersistentCalls.m_Calls.Array.data[0].m_Target
@@ -7662,11 +7662,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9200237905882389980, guid: 92f3ec301908e9840ae4d2c881aba10a, type: 3}
       propertyPath: unityEvent.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: UndoAll
+      value: Restart
       objectReference: {fileID: 0}
     - target: {fileID: 9200237905882389980, guid: 92f3ec301908e9840ae4d2c881aba10a, type: 3}
       propertyPath: unityEvent.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: Game.UndoSystem.UndoController, Assembly-CSharp
+      value: Game.UndoSystem.UndoController, Lawnmower.Presentation
       objectReference: {fileID: 0}
     - target: {fileID: 9200237905882389980, guid: 92f3ec301908e9840ae4d2c881aba10a, type: 3}
       propertyPath: unityEvent.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName

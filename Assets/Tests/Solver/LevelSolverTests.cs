@@ -241,7 +241,7 @@ namespace Lawnmower.Solver.Tests
 			string[] references = typeof(LevelSolver).Assembly.GetReferencedAssemblies().Select(a => a.Name).ToArray();
 
 			CollectionAssert.Contains(references, "Lawnmower.Model");
-			Assert.That(references.Where(r => r.StartsWith("Unity") || r == "Scripts" || r.StartsWith("Assembly-CSharp")),
+			Assert.That(references.Where(r => r.StartsWith("Unity") || r.StartsWith("Lawnmower.Presentation") || r.StartsWith("Lawnmower.Infrastructure") || r.StartsWith("Lawnmower.Presenters") || r.StartsWith("Assembly-CSharp")),
 				Is.Empty, string.Join(", ", references));
 		}
 	}
