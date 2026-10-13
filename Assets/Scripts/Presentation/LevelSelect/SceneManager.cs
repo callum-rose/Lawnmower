@@ -3,6 +3,7 @@ using Game.Core;
 using Game.Levels;
 using Game.Mowers;
 using Lawnmower.Presenters;
+using Lawnmower.Services;
 using UnityEngine;
 
 namespace LevelSelect
@@ -22,7 +23,7 @@ namespace LevelSelect
 		{
 			_presenter = new LevelSelectPresenter(
 				levelTileManager,
-				new LevelDataManagerCatalog(levelDataManager),
+				new ProgressionLevelCatalog(GameServices.Progression),
 				new LevelSelectNavigator(levelDataManager, currentMowerManager));
 			_presenter.Start();
 		}

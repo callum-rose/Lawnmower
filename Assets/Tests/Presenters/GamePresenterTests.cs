@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Game.Core;
 using Lawnmower.Model;
@@ -10,12 +11,15 @@ namespace Lawnmower.Presenters.Tests
 {
 	public class GamePresenterTests
 	{
+		private static readonly Guid NextLevelId = new Guid("11111111111111111111111111111111");
+
 		private ViewLog _log;
 		private FakeBoard _board;
 		private FakeMower _mower;
 		private FakeScreen _screen;
 		private FakeNavigator _navigator;
-		private FakeProgress _progress;
+		private Progression _progress;
+		private InMemoryProgressStore _store;
 		private FakeClock _clock;
 		private FakeInput _input;
 
@@ -27,7 +31,8 @@ namespace Lawnmower.Presenters.Tests
 			_mower = new FakeMower(_log);
 			_screen = new FakeScreen(_log);
 			_navigator = new FakeNavigator(_log);
-			_progress = new FakeProgress();
+			_store = new InMemoryProgressStore();
+			_progress = new Progression(new[] { LevelText.DefaultId, NextLevelId }, _store);
 			_clock = new FakeClock();
 			_input = new FakeInput();
 		}
@@ -249,10 +254,11 @@ namespace Lawnmower.Presenters.Tests
 			_input.Press(R);
 			_input.Press(R);
 
-			Assert.AreEqual(1, _progress.Records.Count);
-			Assert.AreEqual(LevelText.DefaultId, _progress.Records[0].id);
-			Assert.AreEqual(2, _progress.Records[0].stats.Moves);
-			Assert.AreEqual(2, _progress.Records[0].par);
+			Assert.AreEqual(1, _store.SaveCount);
+			Assert.IsTrue(_progress.IsCompleted(LevelText.DefaultId));
+			Assert.AreEqual(2, _progress.Best(LevelText.DefaultId));
+			Assert.IsTrue(_progress.IsPerfect(LevelText.DefaultId));
+			Assert.IsTrue(_progress.IsUnlocked(NextLevelId));
 			Assert.IsTrue(_screen.Completed.HasValue);
 			Assert.AreEqual(2, _screen.Completed.Value.Moves);
 			Assert.IsTrue(_screen.Completed.Value.IsPerfect);
@@ -394,6 +400,148 @@ namespace Lawnmower.Presenters.Tests
 			Assert.IsFalse(presenter.IsAcceptingInput);
 			CollectionAssert.IsEmpty(_log.Lines);
 			Assert.Throws<ObjectDisposedException>(presenter.BeginPlay);
+		}
+
+		#endregion
+
+		#region G1: pause, stats and progression
+
+		[Test]
+		public void Pause_IgnoresMovesUndoAndRedo_UntilResume()
+		{
+			GamePresenter presenter = Create("grass:1 grass:3 grass:3");
+			_input.Press(R);
+			List<bool> paused = new List<bool>();
+			presenter.PausedChanged += paused.Add;
+
+			presenter.Pause();
+			_input.Press(R);
+			_screen.PressUndo();
+			_screen.PressRedo();
+
+			Assert.IsTrue(presenter.IsPaused);
+			Assert.IsFalse(presenter.IsAcceptingInput);
+			Assert.AreEqual(1, presenter.Stats.Moves);
+			Assert.AreEqual(0, presenter.Stats.Undos);
+
+			presenter.Resume();
+			_input.Press(R);
+
+			Assert.AreEqual(2, presenter.Stats.Moves);
+			CollectionAssert.AreEqual(new[] { true, false }, paused);
+		}
+
+		[Test]
+		public void Pause_StopsTheAttemptClock()
+		{
+			GamePresenter presenter = Create("grass:1 grass:3 grass:3", begin: false);
+			_clock.Now = 10;
+			presenter.BeginPlay();
+			_clock.Now = 14;
+			presenter.Pause();
+			_clock.Now = 100;
+			presenter.Resume();
+			_clock.Now = 103;
+
+			Assert.AreEqual(7, presenter.Stats.Duration, 1e-9);
+		}
+
+		[Test]
+		public void PauseAndResume_AreIdempotent()
+		{
+			GamePresenter presenter = Create("grass:1 grass:3 grass:3");
+			int raised = 0;
+			presenter.PausedChanged += _ => raised++;
+
+			presenter.Resume();
+			presenter.Pause();
+			presenter.Pause();
+			presenter.Resume();
+			presenter.Resume();
+
+			Assert.AreEqual(2, raised);
+		}
+
+		[Test]
+		public void Completing_FreezesTheClock()
+		{
+			GamePresenter presenter = Create("grass:1 grass:2 grass:2", begin: false);
+			_clock.Now = 0;
+			presenter.BeginPlay();
+			_clock.Now = 5;
+			_input.Press(R);
+			_input.Press(R);
+			_clock.Now = 60;
+
+			Assert.AreEqual(5, presenter.Stats.Duration, 1e-9);
+			Assert.AreEqual(5, _screen.Completed.Value.Duration, 1e-9);
+		}
+
+		[Test]
+		public void StatsChanged_IsRaisedForMovesAndUndos_NotBumps()
+		{
+			GamePresenter presenter = Create("grass:1 grass:3 stone:0");
+			List<int> moves = new List<int>();
+			presenter.StatsChanged += s => moves.Add(s.Moves);
+
+			_input.Press(R);
+			_input.Press(R);
+			_screen.PressUndo();
+
+			CollectionAssert.AreEqual(new[] { 1, 0 }, moves);
+		}
+
+		[Test]
+		public void CompletedInfo_CarriesUndosBestAndNewBest()
+		{
+			_progress.MarkCompleted(LevelText.DefaultId, 5, false);
+			GamePresenter presenter = Create("grass:1 grass:2 grass:2", par: 2);
+			LevelCompletedInfo? raised = null;
+			presenter.Completed += info => raised = info;
+
+			_input.Press(R);
+			_screen.PressUndo();
+			_input.Press(R);
+			_input.Press(R);
+
+			LevelCompletedInfo shown = _screen.Completed.Value;
+			Assert.AreEqual(shown.Moves, raised.Value.Moves);
+			Assert.AreEqual(2, shown.Moves);
+			Assert.AreEqual(1, shown.Undos);
+			Assert.AreEqual(2, shown.Best);
+			Assert.IsTrue(shown.IsNewBest);
+			Assert.IsFalse(shown.IsFirstCompletion);
+			Assert.IsTrue(shown.IsPerfect);
+		}
+
+		[Test]
+		public void FirstCompletion_IsNotANewBest()
+		{
+			Create("grass:1 grass:2 grass:2", par: 2);
+
+			_input.Press(R);
+			_input.Press(R);
+
+			Assert.IsTrue(_screen.Completed.Value.IsFirstCompletion);
+			Assert.IsFalse(_screen.Completed.Value.IsNewBest);
+		}
+
+		[Test]
+		public void CompletingOverPar_SavesNotPerfect()
+		{
+			Create("grass:1 grass:2 grass:2", par: 1);
+
+			_input.Press(R);
+			_input.Press(R);
+
+			Assert.IsTrue(_progress.IsCompleted(LevelText.DefaultId));
+			Assert.IsFalse(_progress.IsPerfect(LevelText.DefaultId));
+		}
+
+		[Test]
+		public void LevelId_IsTheDefinitionsId()
+		{
+			Assert.AreEqual(LevelText.DefaultId, Create("grass:1 grass:2").LevelId);
 		}
 
 		#endregion

@@ -1,9 +1,9 @@
 using Core;
-using Settings.EventChannels;
 using UnityEngine;
 
 namespace Settings
 {
+	/// <summary>Sets the global Low/High shader keywords (the grass and water shaders' quality) from <see cref="GraphicsSettingState"/>.</summary>
 	[UnreferencedScriptableObject]
 	[CreateAssetMenu(fileName = nameof(ShaderQualityManager),
 		menuName = SoNames.SettingsDir + nameof(ShaderQualityManager))]
@@ -11,22 +11,16 @@ namespace Settings
 	{
 		[SerializeField] private string graphicsSettingsLowShaderKeyword = "_GRAPHICSSETTINGS_LOW";
 		[SerializeField] private string graphicSettingsHighShaderKeyword = "_GRAPHICSSETTINGS_HIGH";
-		[SerializeField] private GraphicsSetting defaultQualitySetting;
-
-		[Header("Event Channels")]
-		[SerializeField] private IGraphicsSettingEventChannelListenerContainer graphicsSettingEventChannel;
-
-		private IGraphicsSettingEventChannelListener GraphicsSettingEventChannel => graphicsSettingEventChannel.Result;
 
 		private void OnEnable()
 		{
-			OnGraphicsSettingsChanged(defaultQualitySetting);
-			GraphicsSettingEventChannel.EventRaised += OnGraphicsSettingsChanged;
+			OnGraphicsSettingsChanged(GraphicsSettingState.Current);
+			GraphicsSettingState.Changed += OnGraphicsSettingsChanged;
 		}
 
 		private void OnDisable()
 		{
-			GraphicsSettingEventChannel.EventRaised -= OnGraphicsSettingsChanged;
+			GraphicsSettingState.Changed -= OnGraphicsSettingsChanged;
 		}
 
 		[ContextMenu("Set Low")]
@@ -43,35 +37,15 @@ namespace Settings
 			Shader.EnableKeyword(graphicSettingsHighShaderKeyword);
 		}
 
-		[ContextMenu("Toggle")]
-		public void Toggle()
+		private void OnGraphicsSettingsChanged(GraphicsSetting setting)
 		{
-			bool isLow = Shader.IsKeywordEnabled(graphicsSettingsLowShaderKeyword);
-			if (isLow)
-			{
-				SetHigh();
-			}
-			else
+			if (setting == GraphicsSetting.Low)
 			{
 				SetLow();
 			}
-		}
-
-		private void OnGraphicsSettingsChanged(GraphicsSetting setting)
-		{
-			switch (setting)
+			else
 			{
-				case GraphicsSetting.Low:
-					SetLow();
-					break;
-				
-				case GraphicsSetting.High:
-					SetHigh();
-					break;
-				
-				default:
-					Debug.LogError($"GraphicsSetting wrong somehow: {setting}");
-					goto case GraphicsSetting.Low;
+				SetHigh();
 			}
 		}
 	}

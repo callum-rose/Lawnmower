@@ -10,7 +10,9 @@
         "Lawnmower.Presenters",
         "Unity.InputSystem",
         "Unity.InputSystem.TestFramework",
-        "UnityEngine.UI"
+        "UnityEngine.UI",
+        "BunnyHeaven.UI",
+        "Lawnmower.Haptics"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
