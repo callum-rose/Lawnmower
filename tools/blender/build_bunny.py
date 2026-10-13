@@ -1,7 +1,7 @@
 """Builds the Regular Bunny mower in the VoxelStyle.md style and renders preview views.
 
 blender --background --factory-startup --python build_bunny.py -- [variant=classic|toy|lop|sitting|cube]
-    [colours=original|snow|midnight|forest|grape] [out=<prefix>]
+    [colours=original|snow|midnight|forest|grape] [pattern=dutch|spots|stripes|harlequin] [out=<prefix>]
 
 (or, with Blender's `bpy` module installed from pip: python build_bunny.py -- variant=... out=...)
 
@@ -44,11 +44,24 @@ COLOURWAYS = {
     "forest":   ("P21", "P59", "P09", "P23"),   # Grass, Mint, Cream, Pine
     "grape":    ("P47", "P55", "P41", "P48"),   # Purple, Lavender, Butter, Plum
 }
+# pattern=<name> (cube only) adds markings (R12) in a MARK colour, with its own colourway.
+PATTERNS = {   # coat, face, tail, feet, mark
+    "plain":     None,
+    "dutch":     ("P00", "P01", "P00", "P05", "P05"),   # White front, Charcoal rear and ears
+    "spots":     ("P09", "P10", "P00", "P14", "P14"),   # Cream with Brown patches
+    "stripes":   ("P44", "P09", "P00", "P06", "P06"),   # Orange tiger, Graphite stripes, Cream face
+    "harlequin": ("P43", "P09", "P00", "P05", "P05"),   # Amber and Charcoal halves, swapped on the ears
+}
+PATTERN = kv.get("pattern", "plain")
 COLOURS = kv.get("colours", "original")
 COAT, FACE, WHITE, DARK = COLOURWAYS[COLOURS]
+MARK = None
+if PATTERNS[PATTERN]:
+    COAT, FACE, WHITE, DARK, MARK = PATTERNS[PATTERN]
 PALETTE = {"P00": "f6f6f2", "P03": "8a8b90", "P09": "ece0c0", "P21": "5a9440", "P23": "23452a", "P37": "8ab4d8",
            "P40": "3a4d8c", "P41": "ffd070", "P44": "f08236", "P46": "e8899a", "P47": "b868c0", "P48": "7a3e86",
-           "P51": "b4521e", "P53": "f6c4cc", "P55": "d4b0e0", "P56": "23305a", "P59": "b8e6b0"}
+           "P51": "b4521e", "P53": "f6c4cc", "P55": "d4b0e0", "P56": "23305a", "P59": "b8e6b0",
+           "P01": "dcdcd8", "P05": "4a4a50", "P06": "2b2b30", "P10": "dcc08e", "P14": "6e3d22", "P43": "eea62a"}
 
 # ---- the face decal ----------------------------------------------------------------------------------
 # The game's bunny material ("Toon Test With UV2 Decal") draws _MainTex on UV0 and alpha-blends
@@ -264,7 +277,7 @@ def face_uvs(ob, front_z, eye_y, size):
         on_front = front_z is not None and n.y < -0.99 and all(abs(-me.vertices[me.loops[l].vertex_index].co.y + pz - front_z) < 1e-4
                                        for l in f.loop_indices)
         for l in f.loop_indices:
-            uv0.data[l].uv = (STRIP_U[cols[f.material_index]], 0.5)
+            uv0.data[l].uv = (STRIP_U.get(cols[f.material_index], 0.125), 0.5)   # markings: no strip
             co = me.vertices[me.loops[l].vertex_index].co
             x, y = co.x + px, co.z + py
             uv1.data[l].uv = ((x + size / 2) / size, (y - y0) / size) if on_front else (-1.0, -1.0)
@@ -277,13 +290,15 @@ def rot(ob, pitch=0, splay=0, yaw=0):
         assert a % 5 == 0, a
     ob.rotation_euler = (math.radians(-pitch), math.radians(splay), math.radians(yaw))
 
-def ear(name, sx, x_c, base_y, z0, w, d, h, bury, pitch, splay, pivot_y=None, tip=1):
+def ear(name, sx, x_c, base_y, z0, w, d, h, bury, pitch, splay, pivot_y=None, tip=1, col=None, tip_col=None, tip_rows=0):
     """An ear: w x d x h with `bury` rows inside its parent, butter on the inner (front) face."""
     e = Part(name)
     x0, x1 = x_c - w / 2, x_c + w / 2
     y0, y1 = base_y - bury, base_y + h - bury
-    e.box(x0, x1, y0, y1, z0, z0 + d, COAT)
+    e.box(x0, x1, y0, y1, z0, z0 + d, col or COAT)
     e.paint(lambda x, y, z: z == z0 + d - 1 and base_y + 1 <= y < y1 - 2 and x0 + 1 <= x < x1 - 1, FACE)
+    if tip_col:
+        e.paint(lambda x, y, z: y >= y1 - tip_rows, tip_col)
     if tip:
         for s in (1, -1):
             bevel_edge(e, (x0, x1, y0, y1, z0, z0 + d), (s, 1, 0), tip)
@@ -348,9 +363,23 @@ elif VARIANT == "cube":
     bevel_edge(body, box, (0, 1, 1), 2)
     bevel_edge(body, box, (0, -1, -1), 2); bevel_edge(body, box, (0, -1, 1), 2)
     body.paint(lambda x, y, z: z == 7 and -4 <= x < 4 and 4 <= y < 13, FACE)    # the flat front, bevels stay coat
+    mark = lambda pred: body.paint(lambda x, y, z: body.vox[(x, y, z)] == COAT and pred(x, y, z), MARK)
+    ear_cols = {1: {}, -1: {}}
+    if PATTERN == "dutch":            # the rear half dark, a clean line across the middle
+        mark(lambda x, y, z: z < 0)
+        ear_cols = {1: dict(col=MARK), -1: dict(col=MARK)}
+    elif PATTERN == "spots":          # 3 x 3 patches, one voxel in from every edge (the giraffe's taste call)
+        spots = [(-6, 9, -3), (-6, 5, 3), (5, 10, 2), (5, 5, -4), (-3, 13, 1), (2, 13, -1), (-1, 6, -6), (3, 9, -5)]
+        mark(lambda x, y, z: any(abs(x - a) <= 1 and abs(y - b) <= 1 and abs(z - c) <= 1 for a, b, c in spots))
+    elif PATTERN == "stripes":        # 2-voxel bands around the body, dark ear tips
+        mark(lambda x, y, z: (z + 7) % 4 in (1, 2) and z < 6)
+        ear_cols = {1: dict(tip_col=MARK, tip_rows=3), -1: dict(tip_col=MARK, tip_rows=3)}
+    elif PATTERN == "harlequin":      # split down the middle, the ears the other way round
+        mark(lambda x, y, z: x < 0)
+        ear_cols = {1: dict(col=MARK), -1: {}}
     face_uvs(body.build(), 8, 10.5, 11)
     for sx in (1, -1):
-        ear("Ear" + ("R" if sx > 0 else "L"), sx, sx * 2.5, 15, 2, 4, 3, 11, 2, pitch=10, splay=15)
+        ear("Ear" + ("R" if sx > 0 else "L"), sx, sx * 2.5, 15, 2, 4, 3, 11, 2, pitch=10, splay=15, **ear_cols[sx])
     tail(5, -7)
     feet((-3, 3), (-4, 4), 3, 4, 3, 1, 2)
     HEIGHT = 26

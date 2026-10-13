@@ -4,7 +4,7 @@ Scripts for models in the [voxel style](../../Assets/Docs/VoxelStyle.md). They r
 (`blender --background --factory-startup --python <script> -- ...`) or with Blender's Python module
 (`pip install bpy` into a Python 3.13 venv, then `python <script> -- ...`).
 
-- **`build_bunny.py`** — the Regular Bunny in five takes (`variant=classic|toy|lop|sitting|cube`, recoloured with `colours=original|snow|midnight|forest|grape`); renders
+- **`build_bunny.py`** — the Regular Bunny in five takes (`variant=classic|toy|lop|sitting|cube`, recoloured with `colours=original|snow|midnight|forest|grape`; the cube also takes `pattern=dutch|spots|stripes|harlequin`); renders
   three-quarter, front, side and back previews to `out=<prefix>`. Previews are in
   [`docs/images/bunny-voxel`](../../docs/images/bunny-voxel). The face is the game's own
   `bunny_face.png`, not voxels: the mesh carries the old model's two UV channels — `UVMap` into
