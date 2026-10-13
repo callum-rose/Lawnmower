@@ -1,0 +1,24 @@
+{
+    "name": "Lawnmower.Screens.Editor",
+    "rootNamespace": "Lawnmower.Screens.Editor",
+    "references": [
+        "Lawnmower.Presentation",
+        "Lawnmower.Presenters",
+        "BunnyHeaven.UI",
+        "BunnyHeaven.UI.Editor",
+        "Unity.TextMeshPro",
+        "UnityEngine.UI",
+        "Unity.InputSystem"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

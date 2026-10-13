@@ -13,6 +13,12 @@ namespace Lawnmower.Presenters
 			_progression = progression ?? throw new ArgumentNullException(nameof(progression));
 		}
 
+		public event Action Changed
+		{
+			add => _progression.Changed += value;
+			remove => _progression.Changed -= value;
+		}
+
 		public IReadOnlyList<LevelSummary> GetLevels()
 		{
 			IReadOnlyList<Guid> levels = _progression.Levels;
