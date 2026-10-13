@@ -6,7 +6,8 @@
         "GUID:90868c18e31ad1846b3d38a2d0d12b7e",
         "GUID:3a94c0cb4efe84c4dada831cf7ac1c48",
         "GUID:3aa9d4cbe4acac0459209e4656723ee8",
-        "Lawnmower.Model"
+        "Lawnmower.Model",
+        "Lawnmower.Solver"
     ],
     "includePlatforms": [
         "Editor"
