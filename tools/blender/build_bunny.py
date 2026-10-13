@@ -549,11 +549,11 @@ elif VARIANT == "cube":
 
 elif VARIANT == "egg":
     # An upright egg with a smooth surface (not voxels): a dense sphere reshaped to the profile
-    # r(t) = 6.3 (1 - |t|^2.4)^(1/2.4) (1 - 0.03 t): widest just below the middle (y 7.1), a blunt top, cut flat at y = 2 to sit on.
+    # r(t) = 6.3 (1 - |t|^2.4)^(1/2.4) (1 - 0.075 t): widest a little below the middle (y 6.5), a blunt top, cut flat at y = 2 to sit on.
     # 12.8 tall above the seat. The face colour is a smooth oval on the front; the face decal is pressed onto
     # it, eye line at 1/phi of the body's height. Hind feet phi times the front paws' length, in line with
     # them seen from the front, tops hidden in the body; upright ears with round tips in the crown; a tail.
-    EGG_YC, EGG_A, EGG_B, EGG_K, EGG_P, SEAT = 7.6, 7.2, 6.3, 0.03, 2.4, 2
+    EGG_YC, EGG_A, EGG_B, EGG_K, EGG_P, SEAT = 7.6, 7.2, 6.3, 0.075, 2.4, 2
     bm = bmesh.new()
     bmesh.ops.create_uvsphere(bm, u_segments=96, v_segments=64, radius=1)
     # The sphere's pole points forward (tilted 10 deg up), so its rings circle the face: the face patch is
