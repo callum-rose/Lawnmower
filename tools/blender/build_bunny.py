@@ -431,6 +431,8 @@ elif VARIANT == "cube":
             [((X, Z), (s1, s2)) for s1 in (1, -1) for s2 in (1, -1)] + \
             [((Y, Z), (1, 1)), ((Y, Z), (-1, 1)), ((Y, Z), (-1, -1))]
     r, facets = {0: (2, 1), 1: (3, 1)}.get(SOFT, (3, 2))
+    if ROUNDED and SOFT == 0:
+        r = 4 / 3                     # a third smaller, for a bigger face (off the whole-voxel lattice)
     for axes, signs in small:
         round_edge(body, box, axes, signs, r, facets)
     if SOFT >= 3:
@@ -464,8 +466,9 @@ elif VARIANT == "cube":
     face_uvs(body_ob, 8, 10.5 if flat <= 2 else 10, face_size)
     if ROUNDED:                       # the panel as a plate, inset to clear the fillet, the face decal on it
         inset = flat + 0.4
+        face_size = 0.95 * (12 - 2 * inset) / 0.66                              # fill the plate, with a margin
         face_uvs(plate("PlateFace", body_ob, (0, 0, 0), -6 + inset, 6 - inset, 2 + inset, 15 - inset, 8, 1.5, FACE),
-                 8 + PLATE_PROUD, 10.5, face_size)
+                 8 + PLATE_PROUD, 9.7, face_size)                                # lower: centred, room for the open mouth
     for sx in (1, -1):
         ear("Ear" + ("R" if sx > 0 else "L"), sx, sx * 2.5, 15, 2, 4, 3, 11, 2, pitch=10, splay=15,
             tip=0 if SOFT >= 2 else 1, tip_round=(2, 2) if SOFT >= 2 else None, plate_inner=ROUNDED, **ear_cols[sx])
