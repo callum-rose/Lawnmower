@@ -1,18 +1,16 @@
 using System;
-using System.Collections.Generic;
 using Game.Core;
 using Lawnmower.Presenters;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
-using UnityEngine.UI;
 
 namespace Game.Input
 {
 	/// <summary>
 	/// Swipes on the board: the primary touch on a device, the mouse in the editor. A swipe is mapped onto the board
 	/// by projecting its start and end onto the board plane and taking the dominant world axis, so "up the screen"
-	/// follows the camera. Touches that start on UI are ignored. Polled by <see cref="MoveInputController"/>.
+	/// follows the camera. Touches that start on UI are ignored, as is everything from the moment a second finger lands
+	/// until every finger has lifted (that's a pinch / twist for the camera). Polled by <see cref="MoveInputController"/>.
 	/// </summary>
 	internal sealed class SwipeMoveInput : IMoveInput
 	{
@@ -23,9 +21,9 @@ namespace Game.Input
 
 		private readonly ScreenToWorldPointConverter _screenToBoard;
 		private readonly SwipeRecognizer _recognizer;
-		private readonly List<RaycastResult> _raycastResults = new List<RaycastResult>();
 
 		private bool _wasPressed;
+		private bool _isMultiTouch;
 
 		public SwipeMoveInput(ScreenToWorldPointConverter screenToBoard, float minDistanceInches, float minStraightness)
 		{
@@ -38,12 +36,30 @@ namespace Game.Input
 		{
 			_recognizer.End();
 			_wasPressed = false;
+			_isMultiTouch = false;
 		}
 
 		public void Tick()
 		{
 			Pointer pointer = Pointer.current;
 			bool isPressed = pointer != null && pointer.press.isPressed;
+
+			int touchCount = ScreenTouches.CountPressed();
+			if (touchCount >= 2)
+			{
+				_isMultiTouch = true;
+			}
+			else if (touchCount == 0 && !isPressed)
+			{
+				_isMultiTouch = false;
+			}
+
+			if (_isMultiTouch)
+			{
+				_recognizer.End();
+				_wasPressed = isPressed;
+				return;
+			}
 
 			if (!isPressed)
 			{
@@ -62,7 +78,7 @@ namespace Game.Input
 			{
 				_wasPressed = true;
 
-				if (!IsOverUi(position))
+				if (!ScreenTouches.IsOverCanvas(position))
 				{
 					_recognizer.Begin(position.x, position.y);
 				}
@@ -86,29 +102,6 @@ namespace Game.Input
 			Vector3 end = _screenToBoard.GetWorldPoint(new Vector2(swipe.EndX, swipe.EndY));
 			Vector3 delta = end - start;
 			return SwipeRecognizer.ToCardinal(delta.x, delta.z);
-		}
-
-		/// <summary>Only canvas UI counts: the board itself is hit by the camera's physics raycaster.</summary>
-		private bool IsOverUi(Vector2 screenPosition)
-		{
-			EventSystem eventSystem = EventSystem.current;
-			if (eventSystem == null)
-			{
-				return false;
-			}
-
-			_raycastResults.Clear();
-			eventSystem.RaycastAll(new PointerEventData(eventSystem) { position = screenPosition }, _raycastResults);
-
-			foreach (RaycastResult result in _raycastResults)
-			{
-				if (result.module is GraphicRaycaster)
-				{
-					return true;
-				}
-			}
-
-			return false;
 		}
 	}
 }

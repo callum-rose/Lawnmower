@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: GrassParticlesMaterialDataHolder
   m_EditorClassIdentifier: 
   grassMaterials:
-    keys: 010000000200000003000000i
+    keys: 010000000200000003000000
     values:
-    - {fileID: 2100000, guid: faafe16e55e22214d8eeb7f23c502d2d, type: 2}
-    - {fileID: 2100000, guid: bcc01392f1815794bb0612dfbf312a0a, type: 2}
-    - {fileID: 2100000, guid: ef869fce1975d1c43a281f55c2c02e6d, type: 2}
+    - {fileID: 2100000, guid: 6e693e03d38f0432c8f35e23c87652da, type: 2}
+    - {fileID: 2100000, guid: 2cc1cdd101fb943b5b1b8f9b13607af2, type: 2}
+    - {fileID: 2100000, guid: 8c416cd5e7f504ca091985e6947600db, type: 2}

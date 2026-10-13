@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Core;
+using Game.Cameras;
 using Game.Core;
 using Game.Levels;
 using Game.Mowers;
@@ -242,6 +243,51 @@ namespace Tests.PlayMode
 		}
 
 		[UnityTest]
+		public IEnumerator TwoFingerPinchAndTwist_ZoomsAndTurnsTheBoard_WithoutMoving()
+		{
+			Touchscreen touchscreen = InputSystem.AddDevice<Touchscreen>();
+			LevelData level = Copy(Load<LevelDataManager>("t:LevelDataManager").GetLevel(0).LevelData);
+			GameManager game = null;
+			yield return StartLevel(level, g => game = g);
+
+			BoardCameraFramer framer = Object.FindAnyObjectByType<BoardCameraFramer>();
+			Assert.IsNotNull(framer, "the Game scene has a board camera");
+			Assert.AreEqual(1, framer.Zoom, 1e-3f);
+
+			List<GridVector> requested = new List<GridVector>();
+			game.MoveInput.MoveRequested += requested.Add;
+
+			Vector2 centre = FindPointOffUi();
+			BeginTouch(1, centre - Vector2.right * 30, queueEventOnly: true, screen: touchscreen);
+			BeginTouch(2, centre + Vector2.right * 30, queueEventOnly: true, screen: touchscreen);
+			yield return null;
+
+			Vector2 arm = Vector2.right * 30;
+			for (int i = 1; i <= 8; i++)
+			{
+				float t = i / 8f;
+				arm = Quaternion.Euler(0, 0, 60 * t) * (Vector2.right * Mathf.Lerp(30, 90, t));
+				MoveTouch(1, centre - arm, queueEventOnly: true, screen: touchscreen);
+				MoveTouch(2, centre + arm, queueEventOnly: true, screen: touchscreen);
+				yield return null;
+			}
+
+			yield return null;
+			Assert.AreEqual(3, framer.Zoom, 0.05f, "spreading the fingers 3x zooms in 3x");
+			Assert.AreEqual(60, framer.YawOffset, 1, "twisting the fingers turns the board");
+
+			EndTouch(1, centre - arm, queueEventOnly: true, screen: touchscreen);
+			EndTouch(2, centre + arm, queueEventOnly: true, screen: touchscreen);
+			yield return new WaitForSeconds(0.5f);
+			game.MoveInput.MoveRequested -= requested.Add;
+
+			Assert.AreEqual(90, framer.YawOffset, 1e-3f, "the turn settles on the nearest quarter turn");
+			Assert.AreEqual(3, framer.Zoom, 0.05f);
+			Assert.IsEmpty(requested, "a two-finger gesture isn't a swipe");
+			AssertNoErrors();
+		}
+
+		[UnityTest]
 		public IEnumerator ArrowsScheme_IgnoresSwipes_ShowsTheArrows_AndKeepsTheKeyboard()
 		{
 			Touchscreen touchscreen = InputSystem.AddDevice<Touchscreen>();
@@ -294,14 +340,11 @@ namespace Tests.PlayMode
 			GameManager game = null;
 			yield return StartLevel(level, g => game = g);
 			GameScreenView screen = game.Screen;
-			Assert.AreEqual("LEVEL 1", screen.Hud.LevelText);
-			Assert.AreEqual($"0/{level.Par}", screen.Hud.ProgressText);
 			Assert.IsFalse(GameServices.Progression.IsUnlocked(GameServices.Progression.Levels[1]));
 
 			IReadOnlyList<GridVector> solution = MoveNotation.Parse(level.Solution);
 			yield return Play(game, solution);
 
-			Assert.AreEqual($"{solution.Count}/{level.Par}", screen.Hud.ProgressText);
 			Assert.IsTrue(screen.IsCompletedShown, "Level Complete shows");
 			Assert.IsTrue(screen.CompleteCard.IsPerfectShown, "at par: the perfect variant with the tick badge");
 			Assert.AreEqual("PERFECT!", screen.CompleteCard.Headline);
@@ -353,7 +396,7 @@ namespace Tests.PlayMode
 			yield return null;
 			Assert.IsTrue(game.Presenter.IsPaused);
 			Assert.IsTrue(game.Screen.IsPausedShown);
-			StringAssert.StartsWith("Level 1 · ", game.Screen.PauseCard.Subtitle);
+			Assert.AreEqual("Level 1", game.Screen.PauseCard.Subtitle);
 
 			yield return Play(game, new[] { solution[0] });
 			Assert.AreEqual(0, game.Presenter.Stats.Moves, "paused: moves are ignored");
@@ -373,6 +416,45 @@ namespace Tests.PlayMode
 
 			yield return Play(game, new[] { solution[0] });
 			Assert.AreEqual(1, game.Presenter.Stats.Moves);
+		}
+
+		[UnityTest]
+		public IEnumerator Pause_TappingOutsideTheCard_Resumes()
+		{
+			LevelData level = Copy(Load<LevelDataManager>("t:LevelDataManager").GetLevel(0).LevelData);
+			GameManager game = null;
+			yield return StartLevel(level, g => game = g);
+
+			game.Screen.Hud.PauseButton.Button.onClick.Invoke();
+			yield return null;
+			Assert.IsTrue(game.Screen.IsPausedShown);
+
+			game.Screen.PauseCard.OutsideButton.onClick.Invoke();
+			yield return new WaitForSeconds(0.3f);
+			Assert.IsFalse(game.Presenter.IsPaused);
+			Assert.IsFalse(game.Screen.IsPausedShown);
+		}
+
+		[UnityTest]
+		public IEnumerator Redo_ShowsOnlyWhileThereIsSomethingToRedo()
+		{
+			LevelData level = Copy(Load<LevelDataManager>("t:LevelDataManager").GetLevel(0).LevelData);
+			IReadOnlyList<GridVector> solution = MoveNotation.Parse(level.Solution);
+			GameManager game = null;
+			yield return StartLevel(level, g => game = g);
+			GameHudView hud = game.Screen.Hud;
+			Assert.IsFalse(hud.IsRedoShown, "nothing to redo at the start");
+			Assert.IsFalse(hud.RedoButton.Interactable);
+
+			yield return Play(game, new[] { solution[0] });
+			hud.UndoButton.Button.onClick.Invoke();
+			yield return null;
+			Assert.IsTrue(hud.IsRedoShown, "an undo leaves something to redo");
+			Assert.IsTrue(hud.RedoButton.Interactable);
+
+			hud.RedoButton.Button.onClick.Invoke();
+			yield return null;
+			Assert.IsFalse(hud.IsRedoShown, "redone: Redo hides behind Undo again");
 		}
 
 		[UnityTest]

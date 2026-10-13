@@ -77,7 +77,28 @@ for o in parts:
     o.data.color_attributes.active_color = a
     o.select_set(True)
 bpy.context.view_layer.objects.active = parts[0]
-bpy.ops.object.bake(type='AO', target='VERTEX_COLORS')
+anims = {o: o.animation_data.action for o in bpy.data.objects if o.animation_data and o.animation_data.action}
+if anims:   # R24, simplified: every part present, averaged over poses spread across the loop
+    n = int(os.environ.get("AO_POSES", "8"))
+    span = sc.frame_end - sc.frame_start
+    acc = {o.name: [0.0] * len(o.data.loops) for o in parts}
+    for i in range(n):
+        sc.frame_set(sc.frame_start + round(i * span / n))
+        bpy.ops.object.bake(type='AO', target='VERTEX_COLORS')
+        for o in parts:
+            a = acc[o.name]
+            for li, c in enumerate(o.data.color_attributes["AO"].data):
+                a[li] += c.color[0] / n
+    for o in parts:
+        for li, c in enumerate(o.data.color_attributes["AO"].data):
+            v = acc[o.name][li]
+            c.color = (v, v, v, 1.0)
+    for o in anims:                        # measure Tone at rest (REST comes from voxel_common)
+        o.animation_data.action = None
+    rest_pose()
+    bpy.context.view_layer.update()
+else:
+    bpy.ops.object.bake(type='AO', target='VERTEX_COLORS')
 
 # ---- Tone: height at rest over the root part's height -----------------------------------------------
 ref = [o for o in parts if o.name == ROOT_PART]
@@ -105,6 +126,9 @@ for o in parts:
     me.color_attributes.active_color = me.color_attributes["Shade"]
     me.color_attributes.render_color_index = me.color_attributes.active_color_index
 
+for o, a in anims.items():
+    o.animation_data.action = a
+sc.frame_set(sc.frame_start)
 bpy.ops.object.select_all(action='DESELECT')
 for o in parts + [root]:
     o.select_set(True)
@@ -115,5 +139,7 @@ os.makedirs(os.path.dirname(os.path.abspath(FBX_OUT)), exist_ok=True)
 bpy.ops.export_scene.fbx(filepath=FBX_OUT, use_selection=True, object_types={'EMPTY', 'MESH'},
                          apply_scale_options='FBX_SCALE_ALL', axis_forward='-Z', axis_up='Y',
                          bake_space_transform=True, mesh_smooth_type='FACE', colors_type='LINEAR',
-                         prioritize_active_color=True, bake_anim=False, add_leaf_bones=False)
+                         prioritize_active_color=True, add_leaf_bones=False,
+                         bake_anim=bool(anims), bake_anim_use_all_actions=False, bake_anim_use_nla_strips=False,
+                         bake_anim_force_startend_keying=True, bake_anim_simplify_factor=0.0)
 print("SHADE_EXPORTED", FBX_OUT, {o.name: len(o.data.loops) for o in parts})

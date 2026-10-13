@@ -11,6 +11,11 @@ by intent rather than by guesswork. Rules marked **[checkable]** can be verified
 tooling exists, verify them by hand. Everything here is about how a model *looks and moves* — the
 file format a model is stored in is deliberately out of scope.
 
+| Doc | Owns |
+|---|---|
+| **`VoxelStyle.md`** (this file) | The voxel art style: grids, parts, palette, faces, articulation, buildings, shading |
+| [`VoxelExport.md`](VoxelExport.md) | Exporting a model from Blender and importing it into Unity |
+
 ![The worked example, three-quarter view](../../docs/images/voxel-style/shark-three-quarter.png)
 
 ---
