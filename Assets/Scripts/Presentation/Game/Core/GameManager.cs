@@ -5,6 +5,7 @@ using Game.Levels;
 using Game.Mowers;
 using Game.Input;
 using Game.UI.Screens;
+using Lawnmower.Screens;
 using Game.UndoSystem;
 using Core.EventChannels;
 using Lawnmower.Model;
@@ -61,6 +62,9 @@ namespace Game.Core
 
 		internal MoveInputController MoveInput => moveInput;
 
+		/// <summary>The mower this level was started with.</summary>
+		internal MowerData Mower { get; private set; }
+
 		#region Unity
 
 		private void OnDestroy()
@@ -83,6 +87,7 @@ namespace Game.Core
 			}
 
 			LevelData level = input.Level;
+			Mower = input.Mower;
 			mowerManager.SetMower(input.Mower);
 
 			GameNavigator navigator = new GameNavigator(levelDataManager, input);
@@ -186,17 +191,10 @@ namespace Game.Core
 			}
 		}
 
-		/// <summary>Pause → SETTINGS. A placeholder until Final integration sets <see cref="PauseSettingsHook.Open"/>.</summary>
+		/// <summary>Pause → SETTINGS: G4's overlay opens over the Pause card, which is still there when it closes.</summary>
 		private void OpenSettings()
 		{
-			if (PauseSettingsHook.Open != null)
-			{
-				PauseSettingsHook.Open(null);
-				return;
-			}
-
-			Debug.Log("[Game] Pause > Settings requested: not wired yet (Final integration sets PauseSettingsHook.Open to G4's Settings prefab).");
-			screen.ShowToast("Settings coming soon");
+			SettingsOverlay.Show();
 		}
 
 		#endregion

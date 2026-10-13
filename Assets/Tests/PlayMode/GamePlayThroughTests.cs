@@ -360,6 +360,14 @@ namespace Tests.PlayMode
 			yield return Play(game, new[] { solution[0] });
 			Assert.AreEqual(0, game.Presenter.Stats.Moves, "paused: moves are ignored");
 
+			game.Screen.PauseCard.SettingsButton.Button.onClick.Invoke();
+			yield return null;
+			Assert.IsTrue(Lawnmower.Screens.SettingsOverlay.IsOpen, "SETTINGS opens the Settings overlay");
+			Lawnmower.Screens.SettingsOverlay.Hide();
+			yield return new WaitForSeconds(0.5f);
+			Assert.IsFalse(Lawnmower.Screens.SettingsOverlay.IsOpen);
+			Assert.IsTrue(game.Screen.IsPausedShown, "closing Settings returns to the Pause card");
+
 			game.Screen.PauseCard.ResumeButton.Button.onClick.Invoke();
 			yield return new WaitForSeconds(0.3f);
 			Assert.IsFalse(game.Presenter.IsPaused);

@@ -479,7 +479,8 @@ namespace Lawnmower.Editor.GameScreens
 				("undoButton", undo),
 				("restartButton", restart),
 				("levelsButton", levels),
-				("annotation", annotation));
+				("annotation", annotation),
+				("annotationNote", note.rectTransform));
 			return view;
 		}
 

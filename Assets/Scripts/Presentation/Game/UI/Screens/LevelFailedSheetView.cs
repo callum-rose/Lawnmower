@@ -17,6 +17,8 @@ namespace Game.UI.Screens
 		[SerializeField] private ButtonView restartButton;
 		[SerializeField] private ButtonView levelsButton;
 		[SerializeField] private RectTransform annotation;
+		[Tooltip("The annotation's text; it sits on the side of the arrow with more room.")]
+		[SerializeField] private RectTransform annotationNote;
 		[SerializeField] private float slideTime = 0.3f;
 
 		private CanvasGroup _group;
@@ -102,6 +104,13 @@ namespace Game.UI.Screens
 			if (screen.z > 0 && RectTransformUtility.ScreenPointToLocalPointInRectangle(parent, screen, null, out Vector2 local))
 			{
 				annotation.anchoredPosition = local;
+
+				if (annotationNote != null)
+				{
+					Vector2 note = annotationNote.anchoredPosition;
+					note.x = Mathf.Abs(note.x) * (local.x > 0 ? -1 : 1);
+					annotationNote.anchoredPosition = note;
+				}
 			}
 		}
 
