@@ -10,21 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7126b9c1309bd8a418748c882885cd26, type: 3}
-  m_Name: Level9
-  m_EditorClassIdentifier: 
-  guid: 0fbbe24b992942c187861eb16870e6a1
+  m_Name: Level10
+  m_EditorClassIdentifier: Scripts::Game.Levels.LevelData
+  guid: dff15cf21bc04c40a84f269cdc3ac5d4
   startPosition:
-    x: 4
-    y: 2
-  width: 5
-  depth: 5
+    x: 2
+    y: 0
+  width: 6
+  depth: 6
   tiles:
-  - kind: 0
-    grassHeight: 0
-    stoneDirection: 0
-    springOffset:
-      x: 0
-      y: 0
   - kind: 1
     grassHeight: 2
     stoneDirection: 0
@@ -33,72 +27,6 @@ MonoBehaviour:
       y: 0
   - kind: 1
     grassHeight: 2
-    stoneDirection: 0
-    springOffset:
-      x: 0
-      y: 0
-  - kind: 1
-    grassHeight: 2
-    stoneDirection: 0
-    springOffset:
-      x: 0
-      y: 0
-  - kind: 1
-    grassHeight: 2
-    stoneDirection: 0
-    springOffset:
-      x: 0
-      y: 0
-  - kind: 0
-    grassHeight: 0
-    stoneDirection: 0
-    springOffset:
-      x: 0
-      y: 0
-  - kind: 1
-    grassHeight: 2
-    stoneDirection: 0
-    springOffset:
-      x: 0
-      y: 0
-  - kind: 1
-    grassHeight: 3
-    stoneDirection: 0
-    springOffset:
-      x: 0
-      y: 0
-  - kind: 1
-    grassHeight: 2
-    stoneDirection: 0
-    springOffset:
-      x: 0
-      y: 0
-  - kind: 1
-    grassHeight: 2
-    stoneDirection: 0
-    springOffset:
-      x: 0
-      y: 0
-  - kind: 1
-    grassHeight: 2
-    stoneDirection: 0
-    springOffset:
-      x: 0
-      y: 0
-  - kind: 1
-    grassHeight: 3
-    stoneDirection: 0
-    springOffset:
-      x: 0
-      y: 0
-  - kind: 4
-    grassHeight: 0
-    stoneDirection: 0
-    springOffset:
-      x: 0
-      y: 0
-  - kind: 1
-    grassHeight: 3
     stoneDirection: 0
     springOffset:
       x: 0
@@ -121,20 +49,122 @@ MonoBehaviour:
     springOffset:
       x: 0
       y: 0
-  - kind: 4
+  - kind: 1
+    grassHeight: 2
+    stoneDirection: 0
+    springOffset:
+      x: 0
+      y: 0
+  - kind: 1
+    grassHeight: 2
+    stoneDirection: 0
+    springOffset:
+      x: 0
+      y: 0
+  - kind: 1
+    grassHeight: 3
+    stoneDirection: 0
+    springOffset:
+      x: 0
+      y: 0
+  - kind: 1
+    grassHeight: 3
+    stoneDirection: 0
+    springOffset:
+      x: 0
+      y: 0
+  - kind: 5
+    grassHeight: 0
+    stoneDirection: 0
+    springOffset:
+      x: 0
+      y: 2
+  - kind: 1
+    grassHeight: 2
+    stoneDirection: 0
+    springOffset:
+      x: 0
+      y: 0
+  - kind: 1
+    grassHeight: 2
+    stoneDirection: 0
+    springOffset:
+      x: 0
+      y: 0
+  - kind: 3
     grassHeight: 0
     stoneDirection: 0
     springOffset:
       x: 0
       y: 0
-  - kind: 4
+  - kind: 3
     grassHeight: 0
     stoneDirection: 0
     springOffset:
       x: 0
       y: 0
-  - kind: 0
+  - kind: 3
     grassHeight: 0
+    stoneDirection: 0
+    springOffset:
+      x: 0
+      y: 0
+  - kind: 3
+    grassHeight: 0
+    stoneDirection: 0
+    springOffset:
+      x: 0
+      y: 0
+  - kind: 3
+    grassHeight: 0
+    stoneDirection: 0
+    springOffset:
+      x: 0
+      y: 0
+  - kind: 3
+    grassHeight: 0
+    stoneDirection: 0
+    springOffset:
+      x: 0
+      y: 0
+  - kind: 1
+    grassHeight: 2
+    stoneDirection: 0
+    springOffset:
+      x: 0
+      y: 0
+  - kind: 1
+    grassHeight: 2
+    stoneDirection: 0
+    springOffset:
+      x: 0
+      y: 0
+  - kind: 5
+    grassHeight: 0
+    stoneDirection: 0
+    springOffset:
+      x: 0
+      y: -2
+  - kind: 1
+    grassHeight: 2
+    stoneDirection: 0
+    springOffset:
+      x: 0
+      y: 0
+  - kind: 1
+    grassHeight: 2
+    stoneDirection: 0
+    springOffset:
+      x: 0
+      y: 0
+  - kind: 1
+    grassHeight: 2
+    stoneDirection: 0
+    springOffset:
+      x: 0
+      y: 0
+  - kind: 1
+    grassHeight: 2
     stoneDirection: 0
     springOffset:
       x: 0
@@ -163,11 +193,47 @@ MonoBehaviour:
     springOffset:
       x: 0
       y: 0
-  - kind: 0
-    grassHeight: 0
+  - kind: 1
+    grassHeight: 2
     stoneDirection: 0
     springOffset:
       x: 0
       y: 0
-  solution: DDLUUUULLLDRDLRRRLDDULD
-  par: 23
+  - kind: 1
+    grassHeight: 2
+    stoneDirection: 0
+    springOffset:
+      x: 0
+      y: 0
+  - kind: 1
+    grassHeight: 3
+    stoneDirection: 0
+    springOffset:
+      x: 0
+      y: 0
+  - kind: 1
+    grassHeight: 2
+    stoneDirection: 0
+    springOffset:
+      x: 0
+      y: 0
+  - kind: 1
+    grassHeight: 2
+    stoneDirection: 0
+    springOffset:
+      x: 0
+      y: 0
+  - kind: 1
+    grassHeight: 3
+    stoneDirection: 0
+    springOffset:
+      x: 0
+      y: 0
+  - kind: 1
+    grassHeight: 2
+    stoneDirection: 0
+    springOffset:
+      x: 0
+      y: 0
+  solution: RRRULLRRUULDULDLULDULDDRRLRLDLU
+  par: 31
