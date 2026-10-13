@@ -31,6 +31,9 @@ namespace Game.Levels
 
 		public IEnumerable<Transform> CameraTargets => cameraTargets;
 
+		/// <summary>How far from its centre the ocean is showing; the intro timeline animates it outwards.</summary>
+		public float ShowingRadius => amountShowingRadially * transform.localScale.x * planeDefaultSize / 2;
+
 		private static readonly int bandingId = Shader.PropertyToID("_Banding");
 		private static readonly int radialShowingId = Shader.PropertyToID("_AmountRadiallyShowing");
 		private static readonly int waveSpeedId = Shader.PropertyToID("_WaveSpeed");
@@ -68,14 +71,21 @@ namespace Game.Levels
 
 		private void LevelDataEventChannelOnEventRaised(Level level)
 		{
-			Vector3 worldCenter = positioner.GetLevelWorldCenter(level);
-			SetToCenter(worldCenter);
-
-			float maxDistanceFromCenter = positioner.GetMaxDistanceFromLevelCenter(level, worldCenter);
-			float planeRadius = CalculatePlaneRadius(maxDistanceFromCenter);
-			SetSize(planeRadius);
+			SetToCenter(positioner.GetLevelWorldCenter(level));
+			SetSize(GetRadius(level));
 
 			SetMaterialProperties();
+		}
+
+		#endregion
+
+		#region API
+
+		/// <summary>The radius of the ocean around <paramref name="level"/>, centred on the level's world centre.</summary>
+		public float GetRadius(Level level)
+		{
+			Vector3 worldCenter = positioner.GetLevelWorldCenter(level);
+			return CalculatePlaneRadius(positioner.GetMaxDistanceFromLevelCenter(level, worldCenter));
 		}
 
 		#endregion
