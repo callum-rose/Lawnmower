@@ -19,3 +19,10 @@ Scripts for models in the [voxel style](../../Assets/Docs/VoxelStyle.md). They r
   (`chubby|tall|lop|swept`, or `base` for the model as it is), rendered from four sides. It changes
   only object transforms in memory; the .blend is not saved. Previews are in
   [`docs/images/bunny-original`](../../docs/images/bunny-original).
+- **`build_egg_bunny_game.py`** — the in-game **Egg Bunny** (`build_bunny.py variant=egg`, re-framed for Unity):
+  `python build_egg_bunny_game.py -- Assets/Models/Mower/Blender/regular_bunny.blend Assets/Models/Mower Assets/Models/Mower/Blender/egg_bunny.blend Assets/Textures/Game/Mowers/egg_bunny_tex.png`.
+  It writes `egg_bunny.fbx`, `egg_bunny.blend` (with the Regular Bunny's actions, moved onto the egg's parts)
+  and `egg_bunny_tex.png`. The model keeps the Regular Bunny's part names, frame, rest rotations and foot
+  pivots, so `Assets/Animations/Game/Mower/EggBunny` holds the Regular Bunny's clips unchanged; the prefab
+  names the model instance `regular_bunny` because the clips address its parts by that path. Re-export with
+  the script, never by hand: the FBX settings (forward Y, up Z, meshes only) are what Unity's import expects.

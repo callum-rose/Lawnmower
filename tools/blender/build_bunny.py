@@ -615,7 +615,7 @@ else:  # sitting
     feet((-3, 3), (-4, 4), 3, 4, 3, 1, 2)
     HEIGHT = 29
 
-if ROUNDED:
+if ROUNDED and kv.get("fillet", "1") == "1":         # build_egg_bunny_game.py fillets after re-framing the parts
     fillet_all()
 
 if SOFT >= 4:                                         # smooth shading across the facets, hard at 90 deg

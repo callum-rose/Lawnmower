@@ -71,7 +71,7 @@ namespace Tests.PlayMode
 
 			_progress = new InMemoryProgressStore();
 			GameServices.InitialiseForTests(_progress);
-			_mower = Load<MowerData>("RegularBunny t:MowerData");
+			_mower = Load<MowerData>("EggBunny t:MowerData");
 		}
 
 		public override void TearDown()
