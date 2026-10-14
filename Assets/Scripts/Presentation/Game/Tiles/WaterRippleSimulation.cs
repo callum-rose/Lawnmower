@@ -4,6 +4,7 @@ namespace Game.Tiles
 {
 	// Simulates ripples over a rectangle of water centred on this transform, so waves from WaterRippleSource objects
 	// spread, bounce off the rectangle's edges and off other sources, and interfere. The Water shader reads the result.
+	// An optional mask holds parts of the rectangle still, so ponds that aren't rectangles have walls of their own.
 	public class WaterRippleSimulation : MonoBehaviour
 	{
 		private const float StepTime = 1 / 60f;
@@ -19,6 +20,7 @@ namespace Game.Tiles
 		private static readonly int ForceWidthId = Shader.PropertyToID("_ForceWidth");
 		private static readonly int SplashesId = Shader.PropertyToID("_Splashes");
 		private static readonly int SplashCountId = Shader.PropertyToID("_SplashCount");
+		private static readonly int MaskId = Shader.PropertyToID("_Mask");
 		private const int MaxSplashesPerStep = 8;
 
 		[SerializeField, Tooltip("World XZ size of the simulated area.")]
@@ -36,6 +38,7 @@ namespace Game.Tiles
 		[SerializeField, Tooltip("Fraction of wave height lost per second.")]
 		private float dampingPerSecond = 0.15f;
 
+		private Texture _mask;
 		private Material _material;
 		private RenderTexture _current;
 		private RenderTexture _next;
@@ -48,6 +51,20 @@ namespace Game.Tiles
 		{
 			get => size;
 			set => size = value;
+		}
+
+		/// <summary>The simulation's texture size; a <see cref="Mask"/> should match it.</summary>
+		public Vector2Int Resolution => new(Mathf.Max(2, Mathf.RoundToInt(size.x * texelsPerUnit)),
+			Mathf.Max(2, Mathf.RoundToInt(size.y * texelsPerUnit)));
+
+		/// <summary>
+		/// Where its red channel is below 0.5 the water is held still, so ripples bounce off it like off the rectangle's
+		/// edges. Covers the whole rectangle, point sampled. Null leaves the whole rectangle open.
+		/// </summary>
+		public Texture Mask
+		{
+			get => _mask;
+			set => _mask = value;
 		}
 
 		private void Update()
@@ -88,6 +105,14 @@ namespace Game.Tiles
 			}
 		}
 
+		// Flattens the water, e.g. when the pond is rebuilt for a new level.
+		public void Clear()
+		{
+			ClearTexture(_current);
+			ClearTexture(_next);
+			_splashCount = 0;
+		}
+
 		public void Step()
 		{
 			EnsureResources();
@@ -106,6 +131,7 @@ namespace Game.Tiles
 			_material.SetFloat(ForceWidthId, texel * 1.5f);
 			_material.SetVectorArray(SplashesId, _splashes);
 			_material.SetFloat(SplashCountId, _splashCount);
+			_material.SetTexture(MaskId, _mask != null ? _mask : Texture2D.whiteTexture);
 			_splashCount = 0;
 			Graphics.Blit(_current, _next, _material);
 			(_current, _next) = (_next, _current);
@@ -122,17 +148,16 @@ namespace Game.Tiles
 				_material = new Material(Shader.Find("Hidden/WaterRippleSimulation")) { hideFlags = HideFlags.DontSave };
 			}
 
-			int width = Mathf.Max(2, Mathf.RoundToInt(size.x * texelsPerUnit));
-			int height = Mathf.Max(2, Mathf.RoundToInt(size.y * texelsPerUnit));
-			if (_current != null && _current.width == width && _current.height == height)
+			Vector2Int resolution = Resolution;
+			if (_current != null && _current.width == resolution.x && _current.height == resolution.y)
 			{
 				return;
 			}
 
 			Release(ref _current);
 			Release(ref _next);
-			_current = Create(width, height);
-			_next = Create(width, height);
+			_current = Create(resolution.x, resolution.y);
+			_next = Create(resolution.x, resolution.y);
 		}
 
 		private static RenderTexture Create(int width, int height)
@@ -148,11 +173,21 @@ namespace Game.Tiles
 				hideFlags = HideFlags.DontSave,
 			};
 			texture.Create();
+			ClearTexture(texture);
+			return texture;
+		}
+
+		private static void ClearTexture(RenderTexture texture)
+		{
+			if (texture == null)
+			{
+				return;
+			}
+
 			RenderTexture active = RenderTexture.active;
 			RenderTexture.active = texture;
 			GL.Clear(false, true, Color.clear);
 			RenderTexture.active = active;
-			return texture;
 		}
 
 		private static void Release(ref RenderTexture texture)
