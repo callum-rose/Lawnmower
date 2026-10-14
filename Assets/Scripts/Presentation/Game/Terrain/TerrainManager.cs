@@ -22,6 +22,7 @@ namespace Game.Terrain
 	{
 		[SerializeField] private TerrainSettings settings;
 		[SerializeField] private GamePlayData gamePlayData;
+		[SerializeField] private TerrainEdging edging;
 
 		[Header("Top Colours")]
 		[Tooltip("Indexed by grass height: ruined (0) to tallest (3)")]
@@ -130,6 +131,7 @@ namespace Game.Terrain
 					level.Depth + margin);
 
 				TerrainMesher.Build(_mesh, footprint, settings.Shape, min, max, settings.VoxelSize);
+				edging.Build(footprint, settings.TopHeight);
 			}
 			finally
 			{
