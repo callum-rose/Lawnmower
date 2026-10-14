@@ -1,12 +1,12 @@
 // The level's SDF terrain. Tops take each tile's colour from _TerrainCells (one texel per tile, in object space where
 // tile (x, z) covers [x, x + 1] x [z, z + 1]), blended softly across tile edges. Sides and the rounded edge fall back
-// to a dirt gradient by height, sampled from one column of _SideTex like the old block bases.
+// to a gradient by height between two stone colours, under the cobbles that edge the shore.
 Shader "Game/Terrain"
 {
 	Properties
 	{
-		[NoScaleOffset] _SideTex("Side Gradient", 2D) = "white" {}
-		_SideColumn("Side Gradient Column", Range(0, 1)) = 0.375
+		_SideTopColour("Side Top Colour", Color) = (0.36, 0.34, 0.31, 1)
+		_SideBottomColour("Side Bottom Colour", Color) = (0.17, 0.17, 0.19, 1)
 		_SideTop("Side Gradient Top Height", Float) = 0
 		_SideBottom("Side Gradient Bottom Height", Float) = -1.2
 		_TopStart("Top Starts At Normal Y", Range(0, 1)) = 0.8
@@ -27,7 +27,8 @@ Shader "Game/Terrain"
 		#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
 		CBUFFER_START(UnityPerMaterial)
-			float _SideColumn;
+			half4 _SideTopColour;
+			half4 _SideBottomColour;
 			float _SideTop;
 			float _SideBottom;
 			float _TopStart;
@@ -55,8 +56,6 @@ Shader "Game/Terrain"
 
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 
-			TEXTURE2D(_SideTex);
-			SAMPLER(sampler_SideTex);
 			TEXTURE2D(_TerrainCells);
 			SAMPLER(sampler_TerrainCells);
 
@@ -100,7 +99,7 @@ Shader "Game/Terrain"
 			half3 SideColour(float height)
 			{
 				float v = saturate((height - _SideBottom) / (_SideTop - _SideBottom));
-				return SAMPLE_TEXTURE2D(_SideTex, sampler_SideTex, float2(_SideColumn, v)).rgb;
+				return lerp(_SideBottomColour.rgb, _SideTopColour.rgb, v);
 			}
 
 			half4 Frag(Varyings input) : SV_Target
