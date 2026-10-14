@@ -64,8 +64,10 @@ the `Terrain` object in `Game.unity`, fills every level's water tiles with one p
 - **Wood tiles next to water are bridges**, so the pond runs under them (Level 9).
 - Being under `Terrain`, the pond rises with it in the level intro.
 
-Water that reaches the edge of the level stops there, over the ocean (Levels 8 and 9). Nothing makes ripples in the
-game yet: with no `WaterRippleSource`s and no splashes the water is still.
+- **Bumping into a water tile splashes it,** a little way in from the side the mower came from.
+
+Water that reaches the edge of the level stops there, over the ocean (Levels 8 and 9). Otherwise nothing disturbs the
+water yet: there are no `WaterRippleSource`s in ponds, so between bumps it's still.
 
 ## Using it
 
@@ -243,8 +245,7 @@ From a reference photo of rings spreading round a stone:
 
 ## Known limitations and follow-ups
 
-- **Nothing disturbs the water in the game yet.** It needs ripple sources (rocks, lily pads) in ponds, or splashes,
-  e.g. when the mower bumps into a water tile.
+- **Only bumps disturb the water in the game.** Ponds have no ripple sources (rocks, lily pads) yet.
 - **One simulation per level.** Every pond in a level shares one rectangle; with separate ponds far apart most of it is
   masked out and wasted.
 - **iPhone performance hasn't been measured.** Per water pixel: up to 32 texture reads for the depth blur, 12 depth reads

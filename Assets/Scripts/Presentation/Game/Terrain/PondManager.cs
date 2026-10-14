@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Game.Core;
 using Game.Levels;
@@ -13,7 +14,7 @@ namespace Game.Terrain
 	/// Fills the holes the terrain leaves at a level's water tiles with one pond: a water surface, a floor under it and a
 	/// ripple simulation whose walls follow the terrain's shoreline. Wood tiles next to water are bridges, so the pond
 	/// runs under them. The surface and floor reach half a tile under the solid tiles around the pond, because the
-	/// terrain's banks are inset from the tile grid above its pivot height.
+	/// terrain's banks are inset from the tile grid above its pivot height. Bumping into a water tile splashes it.
 	/// Sits under the terrain in the same space (tile (x, z) covers [x, x + 1] x [z, z + 1]), so it rises with it.
 	/// </summary>
 	internal class PondManager : MonoBehaviour
@@ -29,8 +30,16 @@ namespace Game.Terrain
 		[Tooltip("How far the floor sits below the terrain top")]
 		[SerializeField] private float floorDepth = 0.95f;
 
+		[Header("Bump Splash")]
+		[Tooltip("How far into the water tile from the side the mower bumped, in tiles")]
+		[SerializeField] private float splashInset = 0.3f;
+		[SerializeField] private float splashRadius = 0.08f;
+		[SerializeField] private float splashStrength = 1.5f;
+
 		[Header("Event Channels")]
 		[SerializeField] private LevelDataEventChannel levelStartedEventChannel;
+
+		private readonly List<Action> _unsubscribes = new List<Action>();
 
 		private Level _level;
 		private Mesh _mesh;
@@ -57,6 +66,7 @@ namespace Game.Terrain
 #if UNITY_EDITOR
 			settings.Changed -= OnSettingsChanged;
 #endif
+			Unsubscribe();
 
 			Destroy(_mesh);
 			if (_mask)
@@ -73,6 +83,7 @@ namespace Game.Terrain
 		{
 			_level = level;
 			Build(level);
+			SubscribeToBumps(level);
 		}
 
 #if UNITY_EDITOR
@@ -119,6 +130,44 @@ namespace Game.Terrain
 			BuildMask(cells, solid, bounds, surfaceHeight);
 			rippleSimulation.Mask = _mask;
 			rippleSimulation.Clear();
+		}
+
+		private void SubscribeToBumps(Level level)
+		{
+			Unsubscribe();
+
+			foreach (GridVector position in level.Positions)
+			{
+				Tile tile = level.GetTile(position);
+				if (tile.Kind != TileKind.Water)
+				{
+					continue;
+				}
+
+				Vector3 centre = new Vector3(position.x + 0.5f, 0, position.y + 0.5f);
+				TraverseEvent onBumped = (direction, _) =>
+					Splash(centre - new Vector3(direction.x, 0, direction.y) * (0.5f - splashInset));
+				tile.BumpedInto += onBumped;
+				_unsubscribes.Add(() => tile.BumpedInto -= onBumped);
+			}
+		}
+
+		private void Splash(Vector3 localPosition)
+		{
+			if (rippleSimulation.isActiveAndEnabled)
+			{
+				rippleSimulation.Splash(transform.TransformPoint(localPosition), splashRadius, splashStrength);
+			}
+		}
+
+		private void Unsubscribe()
+		{
+			foreach (Action unsubscribe in _unsubscribes)
+			{
+				unsubscribe();
+			}
+
+			_unsubscribes.Clear();
 		}
 
 		private void SetShowing(bool showing)
@@ -237,7 +286,7 @@ namespace Game.Terrain
 			}
 
 			Vector3[] normals = new Vector3[vertices.Count];
-			System.Array.Fill(normals, Vector3.up);
+			Array.Fill(normals, Vector3.up);
 
 			_mesh.Clear();
 			_mesh.SetVertices(vertices);
