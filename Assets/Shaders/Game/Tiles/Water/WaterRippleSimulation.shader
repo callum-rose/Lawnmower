@@ -1,11 +1,13 @@
 // One step of the 2D wave equation for WaterRippleSimulation. R = current height, G = previous height.
-// The edges of the simulated area and the inside of every ripple source are held at zero, so waves reflect off them.
+// The edges of the simulated area, the masked-out parts of it and the inside of every ripple source are held at zero,
+// so waves reflect off them.
 // A thin ring around each source with strength > 0 is driven sinusoidally to emit waves.
 Shader "Hidden/WaterRippleSimulation"
 {
 	Properties
 	{
 		_MainTex("Previous State", 2D) = "black" {}
+		_Mask("Open Water (R)", 2D) = "white" {}
 	}
 
 	SubShader
@@ -22,6 +24,8 @@ Shader "Hidden/WaterRippleSimulation"
 
 			TEXTURE2D(_MainTex);
 			float4 _MainTex_TexelSize;
+			// Same size as the state; red below 0.5 is a wall, e.g. the bank of a pond that isn't a rectangle.
+			TEXTURE2D(_Mask);
 			float4 _SimRect;
 			float _Courant;
 			float _Damping;
@@ -55,9 +59,14 @@ Shader "Hidden/WaterRippleSimulation"
 				return output;
 			}
 
+			bool IsOpen(float2 uv)
+			{
+				return SAMPLE_TEXTURE2D_LOD(_Mask, sampler_PointClamp, uv, 0).r >= 0.5;
+			}
+
 			float Height(float2 uv)
 			{
-				if (any(uv < 0) || any(uv > 1))
+				if (any(uv < 0) || any(uv > 1) || !IsOpen(uv))
 					return 0;
 				return SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_PointClamp, uv, 0).r;
 			}
@@ -65,6 +74,8 @@ Shader "Hidden/WaterRippleSimulation"
 			float4 Frag(Varyings input) : SV_Target
 			{
 				float2 uv = input.uv;
+				if (!IsOpen(uv))
+					return 0;
 				float2 state = SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_PointClamp, uv, 0).rg;
 				float2 dx = float2(_MainTex_TexelSize.x, 0);
 				float2 dy = float2(0, _MainTex_TexelSize.y);

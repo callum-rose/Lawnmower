@@ -215,7 +215,7 @@ namespace Game.Terrain
 			return grassColours[Mathf.Clamp(height, 0, grassColours.Length - 1)];
 		}
 
-		private static bool IsSolid(TileKind kind)
+		internal static bool IsSolid(TileKind kind)
 		{
 			return kind is TileKind.Grass or TileKind.Stone or TileKind.Spring;
 		}
