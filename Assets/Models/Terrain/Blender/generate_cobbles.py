@@ -9,12 +9,13 @@
 # game can read each Mesh sub-asset directly and scatter it along the shoreline.
 #
 # Design note (R3a; reference: a Japanese-garden island ringed by rounded, mossy cobbles):
-#   A row of chunky cobbles, three or four to a tile edge, sitting half sunk along the top of the shoreline. They are
-#   edging, not props of their own, so they sit well under R3's 12-voxel floor: 4 to 6 voxels long and 3 tall,
-#   about the size of the reference's stones against a 10-voxel tile.
+#   A row of chunky cobbles, two or three to a tile edge, sunk into the top of the shoreline so they just touch. They
+#   are edging, not props of their own, so they sit well under R3's 12-voxel floor: 4 to 6 voxels long and 2 or 3
+#   tall against a 10-voxel tile. The reference's stones are smaller, but at 3 voxels a cobble loses its cut corners
+#   and bevel (R7c).
 #   Keep: the rounded silhouette, as cut corners and a 1 x 1 bevel round the top (as the pond's stepping stones,
-#     R7b), warm pale greys in two shades, and a moss cap on about half of them in two greens (the upper colour
-#     takes the bevel, R7b).
+#     R7b), warm greys in three shades, and an Olive moss cap on half of them (yellower than the lawn, so it doesn't
+#     read as grass; the upper colour takes the bevel, R7b).
 #   Drop: the lumpy, organic shapes and the speckled moss patches (R7c, R12).
 #   Variety comes from six sizes and colourings; the game turns each one along the shoreline in 5 deg steps (R6).
 
@@ -34,16 +35,15 @@ PALETTE = {
 	"Stone": "8a837a",  # P29
 	"DarkStone": "5c5650",  # P30
 	"Olive": "9ea26a",  # P20
-	"Grass": "5a9440",  # P21
 }
 GROUND = "5a9440"  # P21, preview only
 
 # (name, half length, half depth, height, stone colour, moss colour or None), in voxels
 COBBLES = [
-	("CobbleA", 2.5, 2, 3, "Limestone", "Grass"),
+	("CobbleA", 2.5, 2, 3, "Limestone", "Olive"),
 	("CobbleB", 2, 2, 3, "Stone", None),
-	("CobbleC", 3, 2, 2, "Limestone", "Olive"),
-	("CobbleD", 2, 2, 2, "Stone", "Grass"),
+	("CobbleC", 3, 2, 2, "Limestone", None),
+	("CobbleD", 2, 2, 2, "Stone", "Olive"),
 	("CobbleE", 3, 2, 3, "Limestone", None),
 	("CobbleF", 2, 2, 3, "DarkStone", "Olive"),
 ]

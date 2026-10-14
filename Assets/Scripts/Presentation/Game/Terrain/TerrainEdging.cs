@@ -6,17 +6,17 @@ using UnityEngine.Rendering;
 namespace Game.Terrain
 {
 	/// <summary>
-	/// Rings the terrain's shoreline with voxel cobbles, combined into one mesh. Cobbles are placed at even spacing along
-	/// each straight side and corner arc of the <see cref="TerrainFootprint"/>, inset from the outline and sunk into the
-	/// rounded top edge, each turned to follow the shore in 5° steps (VoxelStyle.md R6). Which cobble goes where is
-	/// hashed from its position, so a level always looks the same.
+	/// Rings the terrain's shoreline with voxel cobbles, combined into one mesh with a submesh per palette material.
+	/// Cobbles are placed at even spacing along each straight side and corner arc of the <see cref="TerrainFootprint"/>,
+	/// inset from the outline and sunk into the rounded top edge, each turned to follow the shore in 5° steps
+	/// (VoxelStyle.md R6). Which cobble goes where is hashed from its position, so a level always looks the same.
 	/// </summary>
 	[RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 	internal class TerrainEdging : MonoBehaviour
 	{
 		private const float RotationStep = 5;
 
-		[Tooltip("The cobbles model: one mesh per cobble, with Palette_<hex> materials and baked AO vertex colours")]
+		[Tooltip("The cobbles model (Assets/Models/Terrain/cobbles.fbx): one readable mesh per cobble")]
 		[SerializeField] private GameObject cobbles;
 
 		[Tooltip("Distance between cobble centres along the shoreline, in tiles")]
@@ -38,16 +38,19 @@ namespace Game.Terrain
 			public Vector3[] Positions;
 			public Vector3[] Normals;
 			public Color32[] Colours;
-			public int[] Triangles;
+			/// <summary>Triangles per submesh, as indices into <see cref="Materials"/>' combined submeshes.</summary>
+			public int[][] Triangles;
+			public int[] Materials;
 		}
 
 		private Cobble[] _cobbles;
+		private Material[] _materials;
 		private Mesh _mesh;
 
 		private readonly List<Vector3> _positions = new List<Vector3>();
 		private readonly List<Vector3> _normals = new List<Vector3>();
 		private readonly List<Color32> _colours = new List<Color32>();
-		private readonly List<int> _triangles = new List<int>();
+		private List<int>[] _triangles;
 
 		#region Unity
 
@@ -55,7 +58,8 @@ namespace Game.Terrain
 		{
 			_mesh = new Mesh { name = "TerrainEdging", indexFormat = IndexFormat.UInt32 };
 			GetComponent<MeshFilter>().sharedMesh = _mesh;
-			_cobbles = LoadCobbles(cobbles);
+			LoadCobbles();
+			GetComponent<MeshRenderer>().sharedMaterials = _materials;
 		}
 
 		private void OnDestroy()
@@ -72,7 +76,10 @@ namespace Game.Terrain
 			_positions.Clear();
 			_normals.Clear();
 			_colours.Clear();
-			_triangles.Clear();
+			foreach (List<int> triangles in _triangles)
+			{
+				triangles.Clear();
+			}
 
 			float y = topHeight - sink;
 
@@ -85,8 +92,7 @@ namespace Game.Terrain
 
 				for (int i = 0; i < count; i++)
 				{
-					float2 point = math.lerp(a, b, (i + 0.5f) / count);
-					AddCobble(footprint, point, tangent, y);
+					AddCobble(footprint, math.lerp(a, b, (i + 0.5f) / count), tangent, y);
 				}
 			}
 
@@ -98,8 +104,7 @@ namespace Game.Terrain
 				{
 					float angle = (i + 0.5f) / count * math.PI * 0.5f;
 					float2 direction = new float2(-arc.Facing.x * math.cos(angle), -arc.Facing.y * math.sin(angle));
-					float2 point = arc.Centre + direction * arc.Radius;
-					AddCobble(footprint, point, new float2(-direction.y, direction.x), y);
+					AddCobble(footprint, arc.Centre + direction * arc.Radius, new float2(-direction.y, direction.x), y);
 				}
 			}
 
@@ -107,7 +112,12 @@ namespace Game.Terrain
 			_mesh.SetVertices(_positions);
 			_mesh.SetNormals(_normals);
 			_mesh.SetColors(_colours);
-			_mesh.SetTriangles(_triangles, 0);
+			_mesh.subMeshCount = _triangles.Length;
+			for (int i = 0; i < _triangles.Length; i++)
+			{
+				_mesh.SetTriangles(_triangles[i], i);
+			}
+
 			_mesh.RecalculateBounds();
 		}
 
@@ -122,7 +132,7 @@ namespace Game.Terrain
 
 		private void AddCobble(TerrainFootprint footprint, float2 point, float2 tangent, float y)
 		{
-			// The outline's own winding isn't known here, so find which side of it is solid
+			// The outline's winding isn't known here, so find which side of it is solid
 			float2 normal = new float2(tangent.y, -tangent.x);
 			if (footprint.IsInside(point + normal * 0.02f))
 			{
@@ -135,6 +145,7 @@ namespace Game.Terrain
 			Unity.Mathematics.Random random = new Unity.Mathematics.Random(hash | 1);
 			Cobble cobble = _cobbles[random.NextInt(_cobbles.Length)];
 
+			// Each cobble's length runs along its X axis; lay that along the shore
 			float yaw = math.degrees(math.atan2(-tangent.y, tangent.x));
 			yaw = math.round(yaw / RotationStep) * RotationStep + random.NextInt(-turnSteps, turnSteps + 1) * RotationStep;
 
@@ -148,77 +159,69 @@ namespace Game.Terrain
 				_colours.Add(cobble.Colours[i]);
 			}
 
-			foreach (int index in cobble.Triangles)
+			for (int sub = 0; sub < cobble.Triangles.Length; sub++)
 			{
-				_triangles.Add(first + index);
+				List<int> triangles = _triangles[cobble.Materials[sub]];
+				foreach (int index in cobble.Triangles[sub])
+				{
+					triangles.Add(first + index);
+				}
 			}
 		}
 
-		/// <summary>
-		/// Flattens each cobble in the model into the root's space, packing its palette colour (from its material's
-		/// <c>Palette_&lt;hex&gt;</c> name) into the vertex RGB and its baked AO into A.
-		/// </summary>
-		private static Cobble[] LoadCobbles(GameObject model)
+		/// <summary>Flattens each cobble in the model into the model root's space, and gathers their palette materials.</summary>
+		private void LoadCobbles()
 		{
-			List<Cobble> result = new List<Cobble>();
-			Matrix4x4 toRoot = model.transform.worldToLocalMatrix;
+			List<Cobble> cobbleList = new List<Cobble>();
+			List<Material> materials = new List<Material>();
+			Matrix4x4 toRoot = cobbles.transform.worldToLocalMatrix;
 
-			foreach (MeshFilter filter in model.GetComponentsInChildren<MeshFilter>())
+			foreach (MeshFilter filter in cobbles.GetComponentsInChildren<MeshFilter>())
 			{
 				Mesh mesh = filter.sharedMesh;
-				Material[] materials = filter.GetComponent<MeshRenderer>().sharedMaterials;
+				Material[] meshMaterials = filter.GetComponent<MeshRenderer>().sharedMaterials;
 				Matrix4x4 matrix = toRoot * filter.transform.localToWorldMatrix;
 
 				Vector3[] positions = mesh.vertices;
 				Vector3[] normals = mesh.normals;
-				Color32[] ao = mesh.colors32;
-				Color32[] colours = new Color32[positions.Length];
-				List<int> triangles = new List<int>();
-
 				for (int i = 0; i < positions.Length; i++)
 				{
 					positions[i] = matrix.MultiplyPoint3x4(positions[i]);
 					normals[i] = matrix.MultiplyVector(normals[i]).normalized;
 				}
 
+				int[][] triangles = new int[mesh.subMeshCount][];
+				int[] materialIndices = new int[mesh.subMeshCount];
 				for (int sub = 0; sub < mesh.subMeshCount; sub++)
 				{
-					Color32 palette = PaletteColour(materials[Mathf.Min(sub, materials.Length - 1)]);
-					int[] subTriangles = mesh.GetTriangles(sub);
-					triangles.AddRange(subTriangles);
+					triangles[sub] = mesh.GetTriangles(sub);
 
-					foreach (int index in subTriangles)
+					Material material = meshMaterials[Mathf.Min(sub, meshMaterials.Length - 1)];
+					materialIndices[sub] = materials.IndexOf(material);
+					if (materialIndices[sub] < 0)
 					{
-						byte occlusion = ao.Length > 0 ? ao[index].r : byte.MaxValue;
-						colours[index] = new Color32(palette.r, palette.g, palette.b, occlusion);
+						materialIndices[sub] = materials.Count;
+						materials.Add(material);
 					}
 				}
 
-				result.Add(new Cobble
+				cobbleList.Add(new Cobble
 				{
 					Positions = positions,
 					Normals = normals,
-					Colours = colours,
-					Triangles = triangles.ToArray(),
+					Colours = mesh.colors32,
+					Triangles = triangles,
+					Materials = materialIndices,
 				});
 			}
 
-			return result.ToArray();
-		}
-
-		private static Color32 PaletteColour(Material material)
-		{
-			const string prefix = "Palette_";
-			string name = material.name;
-			int start = name.IndexOf(prefix, System.StringComparison.Ordinal);
-
-			if (start >= 0 && ColorUtility.TryParseHtmlString("#" + name.Substring(start + prefix.Length, 6), out Color colour))
+			_cobbles = cobbleList.ToArray();
+			_materials = materials.ToArray();
+			_triangles = new List<int>[_materials.Length];
+			for (int i = 0; i < _triangles.Length; i++)
 			{
-				return colour;
+				_triangles[i] = new List<int>();
 			}
-
-			Debug.LogError($"Cobble material {name} isn't named Palette_<hex>", material);
-			return Color.magenta;
 		}
 
 		#endregion
