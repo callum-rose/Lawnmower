@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Game.UI.Screens
 {
 	/// <summary>
-	/// The in-game HUD: Pause in the top-right corner; Undo bottom-right with Restart above it, and Redo bottom-left. Redo
+	/// The in-game HUD: Pause in the top-right corner; Undo bottom-right with Restart above it, and Redo just left of Undo. Redo
 	/// only shows while there's something to redo; otherwise it slides back to hide behind Undo. Passive.
 	/// </summary>
 	internal class GameHudView : MonoBehaviour
