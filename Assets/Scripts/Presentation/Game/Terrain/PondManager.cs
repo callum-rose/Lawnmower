@@ -18,8 +18,7 @@ namespace Game.Terrain
 	/// ripple simulation over the level whose walls follow the terrain's shoreline. Water tiles, empty tiles and the
 	/// space around the level are all the same sea. The seabed sits just under the terrain next to land and shelves off
 	/// into deep water away from it. Bumping into a water tile splashes it, and so does tapping open water.
-	/// Sits in the terrain's resting space (tile (x, z) covers [x, x + 1] x [z, z + 1]). The surface stays still while
-	/// the terrain rises through it in the level intro; the floor should be under the terrain so it rises with it.
+	/// Sits in the terrain's space (tile (x, z) covers [x, x + 1] x [z, z + 1]).
 	/// </summary>
 	internal class PondManager : MonoBehaviour
 	{
@@ -27,7 +26,7 @@ namespace Game.Terrain
 		[Tooltip("The water: on the Water layer, with the ripple simulation and planar reflection")]
 		[SerializeField] private MeshFilter surface;
 		[SerializeField] private WaterRippleSimulation rippleSimulation;
-		[Tooltip("The seabed; under the terrain so it rises with it")]
+		[Tooltip("The seabed")]
 		[SerializeField] private MeshFilter floor;
 
 		[Tooltip("How far the water surface sits below the terrain top")]
