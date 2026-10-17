@@ -6,6 +6,7 @@
         "Lawnmower.Presenters",
         "Lawnmower.Model",
         "Lawnmower.Infrastructure",
+        "Lawnmower.Screens.Editor",
         "BunnyHeaven.UI",
         "BunnyHeaven.UI.Editor",
         "Unity.TextMeshPro",
