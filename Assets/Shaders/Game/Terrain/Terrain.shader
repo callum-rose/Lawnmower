@@ -1,10 +1,12 @@
 // The level's SDF terrain. Tops take each tile's colour from _TerrainCells (one texel per tile, in object space where
-// tile (x, z) covers [x, x + 1] x [z, z + 1]), blended softly across tile edges. Sides and the rounded edge fall back
-// to a gradient by height between two stone colours, under the cobbles that edge the shore.
+// tile (x, z) covers [x, x + 1] x [z, z + 1], inside a one-texel border), blended softly across tile edges; where the
+// texel's alpha is zero (empty tiles, and the shore past the level's edge) the top is _ShoreColour. Sides and the
+// rounded edge fall back to a gradient by height between two stone colours, under the rocks that edge the shore.
 Shader "Game/Terrain"
 {
 	Properties
 	{
+		_ShoreColour("Shore Colour", Color) = (0.45, 0.34, 0.23, 1)
 		_SideTopColour("Side Top Colour", Color) = (0.36, 0.34, 0.31, 1)
 		_SideBottomColour("Side Bottom Colour", Color) = (0.17, 0.17, 0.19, 1)
 		_SideTop("Side Gradient Top Height", Float) = 0
@@ -27,6 +29,7 @@ Shader "Game/Terrain"
 		#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
 		CBUFFER_START(UnityPerMaterial)
+			half4 _ShoreColour;
 			half4 _SideTopColour;
 			half4 _SideBottomColour;
 			float _SideTop;
@@ -92,8 +95,9 @@ Shader "Game/Terrain"
 				float2 p = tile - 0.5;
 				float2 cell = floor(p);
 				float2 f = saturate((frac(p) - 0.5) / _CellBlend + 0.5);
-				float2 uv = (cell + f + 0.5) * _TerrainCells_TexelSize.xy;
-				return SAMPLE_TEXTURE2D(_TerrainCells, sampler_TerrainCells, uv).rgb;
+				float2 uv = (cell + f + 1.5) * _TerrainCells_TexelSize.xy;
+				half4 colour = SAMPLE_TEXTURE2D(_TerrainCells, sampler_TerrainCells, uv);
+				return lerp(_ShoreColour.rgb, colour.rgb, colour.a);
 			}
 
 			half3 SideColour(float height)
