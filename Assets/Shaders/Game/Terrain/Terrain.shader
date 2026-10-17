@@ -16,7 +16,22 @@ Shader "Game/Terrain"
 		_ShadowCutoff("Shadow Cutoff", Range(0, 1)) = 0.3
 		_ShadowSmoothness("Shadow Smoothness", Range(0.001, 1)) = 0.1
 		_ShadowColour("Shadow Colour", Color) = (0.55, 0.6, 0.75, 1)
+		[Header(Raked Dirt)]
+		_DirtColour("Dirt Colour", Color) = (0.7, 0.47, 0.35, 1)
+		_RakeLines("Grooves Per Tile", Float) = 6
+		_RakeGrooveWidth("Groove Width", Range(0.05, 0.5)) = 0.17
+		_RakeTurnSquareness("Turn Squareness", Range(2, 10)) = 4
+		_RakeEndMargin("Groove Ends From Tile Edge", Range(0, 0.5)) = 0.1
+		_RakeEndFade("Groove End Fade Length", Range(0.01, 1)) = 0.45
+		_RakeWobble("Wobble (Tiles)", Range(0, 0.2)) = 0.03
+		_RakeWobbleScale("Wobble Frequency", Range(0.1, 8)) = 1.3
+		_RakePressureVariation("Pressure Variation", Range(0, 1)) = 0.25
+		_RakeDepth("Groove Depth", Range(0, 1)) = 0.6
+		_RakeGrooveShade("Groove Shade", Range(0, 1)) = 0.08
+		_RakeLighting("Bump Diffuse Lighting", Range(0, 2)) = 0.35
+		_DirtGrain("Grain", Range(0, 1)) = 0.2
 		[HideInInspector] _TerrainCells("Tile Colours", 2D) = "white" {}
+		[HideInInspector] _TerrainRake("Rake Route", 2D) = "black" {}
 	}
 
 	SubShader
@@ -39,6 +54,20 @@ Shader "Game/Terrain"
 			float _ShadowSmoothness;
 			half4 _ShadowColour;
 			float4 _TerrainCells_TexelSize;
+			float4 _TerrainRake_TexelSize;
+			half4 _DirtColour;
+			float _RakeLines;
+			float _RakeGrooveWidth;
+			float _RakeTurnSquareness;
+			float _RakeEndMargin;
+			float _RakeEndFade;
+			float _RakeWobble;
+			float _RakeWobbleScale;
+			float _RakePressureVariation;
+			float _RakeDepth;
+			float _RakeGrooveShade;
+			float _RakeLighting;
+			float _DirtGrain;
 		CBUFFER_END
 		ENDHLSL
 
@@ -58,6 +87,8 @@ Shader "Game/Terrain"
 
 			TEXTURE2D(_TerrainCells);
 			SAMPLER(sampler_TerrainCells);
+
+			#include "RakedDirt.hlsl"
 
 			struct Attributes
 			{
@@ -86,14 +117,15 @@ Shader "Game/Terrain"
 				return output;
 			}
 
-			// Flat within each tile, blending to its neighbours only within _CellBlend of the edge
-			half3 TileColour(float2 tile)
+			// Flat within each tile, blending to its neighbours only within _CellBlend of the edge. Alpha is how much
+			// of it is dirt
+			half4 TileColour(float2 tile)
 			{
 				float2 p = tile - 0.5;
 				float2 cell = floor(p);
 				float2 f = saturate((frac(p) - 0.5) / _CellBlend + 0.5);
 				float2 uv = (cell + f + 0.5) * _TerrainCells_TexelSize.xy;
-				return SAMPLE_TEXTURE2D(_TerrainCells, sampler_TerrainCells, uv).rgb;
+				return SAMPLE_TEXTURE2D(_TerrainCells, sampler_TerrainCells, uv);
 			}
 
 			half3 SideColour(float height)
@@ -106,12 +138,24 @@ Shader "Game/Terrain"
 			{
 				float3 normal = normalize(input.normalWS);
 				float topness = smoothstep(_TopStart, _TopEnd, normal.y);
-				half3 albedo = lerp(SideColour(input.positionOS.y), TileColour(input.positionOS.xz), topness);
-
 				Light light = GetMainLight(TransformWorldToShadowCoord(input.positionWS));
-				float lit = saturate(dot(normal, light.direction)) * light.shadowAttenuation;
+
+				half4 top = TileColour(input.positionOS.xz);
+				DirtSurface dirt = RakedDirt(input.positionOS.xz, _DirtColour.rgb);
+				half3 topColour = lerp(top.rgb, dirt.albedo, top.a);
+				half3 albedo = lerp(SideColour(input.positionOS.y), topColour, topness);
+
+				// The grooves bend the normal, as a height map would, wherever the top is dirt
+				float3 bumpedOS = normalize(float3(dirt.tilt.x, 1, dirt.tilt.y));
+				float3 bumped = normalize(lerp(normal, TransformObjectToWorldNormal(bumpedOS), top.a * topness));
+
+				float lit = saturate(dot(bumped, light.direction)) * light.shadowAttenuation;
 				float band = smoothstep(_ShadowCutoff - _ShadowSmoothness, _ShadowCutoff + _ShadowSmoothness, lit);
 				half3 shade = lerp(lerp(1, _ShadowColour.rgb, _DiffuseAmount), 1, band);
+				// The toon band alone would flatten the grooves wherever the sun is well above them, so the bumped
+				// normal also shades them by how much more or less it faces the light than the flat surface does
+				float flatLit = saturate(dot(normal, light.direction));
+				shade *= 1 + (saturate(dot(bumped, light.direction)) - flatLit) * light.shadowAttenuation * _RakeLighting;
 
 				half3 colour = albedo * shade * light.color;
 				colour = MixFog(colour, input.fogFactor);

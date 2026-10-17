@@ -15,7 +15,8 @@ namespace Game.Terrain
 	/// <summary>
 	/// Builds one smooth terrain mesh under each level from an SDF of its solid tiles, in place of a block per tile.
 	/// The mesh sits in the level container's space, where tile (x, z) covers [x, x + 1] x [z, z + 1]. Each tile's top
-	/// colour (grass height, dirt, ...) goes in a one-texel-per-tile texture the terrain shader blends between.
+	/// colour (grass height, dirt, ...) goes in a one-texel-per-tile texture the terrain shader blends between, with how
+	/// much of it is dirt in alpha. The dirt is raked along a <see cref="RakePath"/> through the grass tiles.
 	/// </summary>
 	[RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 	internal class TerrainManager : MonoBehaviour
@@ -45,12 +46,14 @@ namespace Game.Terrain
 		[SerializeField] private LevelDataEventChannel levelStartedEventChannel;
 
 		private static readonly int CellsId = Shader.PropertyToID("_TerrainCells");
+		private static readonly int RakeId = Shader.PropertyToID("_TerrainRake");
 
 		private readonly List<Action> _unsubscribes = new List<Action>();
 
 		private Level _level;
 		private Mesh _mesh;
 		private Texture2D _cells;
+		private Texture2D _rake;
 		private MeshRenderer _renderer;
 		private MaterialPropertyBlock _propertyBlock;
 
@@ -82,6 +85,11 @@ namespace Game.Terrain
 			if (_cells)
 			{
 				Destroy(_cells);
+			}
+
+			if (_rake)
+			{
+				Destroy(_rake);
 			}
 		}
 
@@ -173,10 +181,49 @@ namespace Game.Terrain
 			}
 
 			_cells.Apply();
+			BuildRake(level);
 
 			_renderer.GetPropertyBlock(_propertyBlock);
 			_propertyBlock.SetTexture(CellsId, _cells);
+			_propertyBlock.SetTexture(RakeId, _rake);
 			_renderer.SetPropertyBlock(_propertyBlock);
+		}
+
+		private void BuildRake(Level level)
+		{
+			if (_rake == null || _rake.width != level.Width || _rake.height != level.Depth)
+			{
+				if (_rake)
+				{
+					Destroy(_rake);
+				}
+
+				_rake = new Texture2D(level.Width, level.Depth, TextureFormat.RGBA32, false, true)
+				{
+					name = "TerrainRake",
+					filterMode = FilterMode.Point,
+					wrapMode = TextureWrapMode.Clamp,
+				};
+			}
+
+			bool[,] rakeable = new bool[level.Width, level.Depth];
+			foreach (GridVector position in level.Positions)
+			{
+				rakeable[position.x, position.y] = level.GetTile(position).Kind == TileKind.Grass;
+			}
+
+			(byte a, byte b)[,] sides = RakePath.Build(rakeable);
+			Color32[] pixels = new Color32[level.Width * level.Depth];
+			for (int z = 0; z < level.Depth; z++)
+			{
+				for (int x = 0; x < level.Width; x++)
+				{
+					pixels[z * level.Width + x] = new Color32(sides[x, z].a, sides[x, z].b, 0, 0);
+				}
+			}
+
+			_rake.SetPixels32(pixels);
+			_rake.Apply();
 		}
 
 		private void SetCell(GridVector position, Color colour)
@@ -207,14 +254,22 @@ namespace Game.Terrain
 			return tile switch
 			{
 				IReadonlyGrassTile grass => GrassColour(grass.GrassHeight.Value),
-				_ when tile.Kind == TileKind.Spring => springColour,
-				_ => stoneColour,
+				_ when tile.Kind == TileKind.Spring => WithoutDirt(springColour),
+				_ => WithoutDirt(stoneColour),
 			};
 		}
 
 		private Color GrassColour(int height)
 		{
-			return grassColours[Mathf.Clamp(height, 0, grassColours.Length - 1)];
+			Color colour = grassColours[Mathf.Clamp(height, 0, grassColours.Length - 1)];
+			colour.a = height <= 0 ? 1 : 0;
+			return colour;
+		}
+
+		private static Color WithoutDirt(Color colour)
+		{
+			colour.a = 0;
+			return colour;
 		}
 
 		internal static bool IsSolid(TileKind kind)
