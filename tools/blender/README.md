@@ -65,7 +65,7 @@ in-game Egg Bunny. Run them the same way as the scripts above.
   only object transforms in memory; the .blend is not saved. Previews are in
   [`docs/images/bunny-original`](../../docs/images/bunny-original).
 - **`build_egg_bunny_game.py`** — the in-game **Egg Bunny** (`build_bunny.py variant=egg`, re-framed for Unity):
-  `python build_egg_bunny_game.py -- Assets/Models/Mower/Blender/regular_bunny.blend Assets/Models/Mower Assets/Models/Mower/Blender/egg_bunny.blend Assets/Textures/Game/Mowers/egg_bunny_tex.png`.
+  `python build_egg_bunny_game.py -- Assets/Archive/RegularBunny/regular_bunny.blend Assets/Models/Mower Assets/Models/Mower/Blender/egg_bunny.blend Assets/Textures/Game/Mowers/egg_bunny_tex.png`.
   It writes `egg_bunny.fbx`, `egg_bunny.blend` (with the Regular Bunny's actions, moved onto the egg's parts)
   and `egg_bunny_tex.png`. The model keeps the Regular Bunny's part names, frame, rest rotations and foot
   pivots, so `Assets/Animations/Game/Mower/EggBunny` holds the Regular Bunny's clips unchanged; the prefab
