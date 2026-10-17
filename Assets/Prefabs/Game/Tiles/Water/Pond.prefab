@@ -166,10 +166,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Lawnmower.Presentation::Game.Tiles.WaterRippleSimulation
   size: {x: 5, y: 4}
   texelsPerUnit: 40
-  waveSpeed: 0.25
+  waveSpeed: 0.5
   wavelength: 0.32
   dampingPerSecond: 0.15
-  edgeAbsorbWidth: 1
+  edgeAbsorbWidth: 1.5
 --- !u!114 &8304481171345610818
 MonoBehaviour:
   m_ObjectHideFlags: 0
