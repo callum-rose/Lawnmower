@@ -1,13 +1,14 @@
 using System;
 using BunnyHeaven.UI;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Game.UI.Screens
 {
 	/// <summary>
 	/// The Level Failed sheet (Figma 12:1106): a bottom sheet with the "SCALPED!" tag, the hint and UNDO LAST MOVE /
-	/// Restart / Levels, plus a "too short!" annotation over the failed tile. A full-screen blocker covers the board so
-	/// these are the only things the player can do. Passive.
+	/// Restart / Levels, plus a "too short!" annotation over the failed tile. A tap anywhere off the sheet dismisses it
+	/// so the player can keep mowing (free roam). Passive.
 	/// </summary>
 	[RequireComponent(typeof(CanvasGroup))]
 	internal class LevelFailedSheetView : MonoBehaviour
@@ -16,6 +17,8 @@ namespace Game.UI.Screens
 		[SerializeField] private ButtonView undoButton;
 		[SerializeField] private ButtonView restartButton;
 		[SerializeField] private ButtonView levelsButton;
+		[Tooltip("Full-screen button behind the sheet: a tap off the sheet dismisses it.")]
+		[SerializeField] private Button outsideButton;
 		[SerializeField] private RectTransform annotation;
 		[Tooltip("The annotation's text; it sits on the side of the arrow with more room.")]
 		[SerializeField] private RectTransform annotationNote;
@@ -29,6 +32,7 @@ namespace Game.UI.Screens
 		public ButtonView UndoButton => undoButton;
 		public ButtonView RestartButton => restartButton;
 		public ButtonView LevelsButton => levelsButton;
+		public Button OutsideButton => outsideButton;
 
 		public RectTransform Sheet => sheet;
 

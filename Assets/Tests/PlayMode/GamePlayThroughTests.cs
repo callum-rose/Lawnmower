@@ -190,8 +190,11 @@ namespace Tests.PlayMode
 			Assert.AreEqual(LevelStatus.Failed, game.Simulation.Status);
 			Assert.IsTrue(game.Screen.IsFailedShown);
 
-			yield return Play(game, new[] { solution[played] });
-			Assert.AreEqual(LevelStatus.Failed, game.Simulation.Status, "the Failed card blocks moves");
+			game.Screen.FailedSheet.OutsideButton.onClick.Invoke();
+			yield return null;
+			Assert.IsFalse(game.Screen.IsFailedShown, "a tap off the sheet dismisses it");
+			Assert.AreEqual(LevelStatus.Failed, game.Simulation.Status, "dismissing doesn't recover the level");
+			Assert.IsTrue(game.Screen.Hud.PauseButton.Interactable, "the HUD is usable again");
 
 			game.Screen.PressUndoLastMove();
 			yield return null;
