@@ -72,8 +72,12 @@ Water tiles don't get a tile object each (`TilePrefabsManager` still has no wate
   out of the sea.
 - **Pond decor** (lily pads, logs, fish) floats at the sea's surface (`PondManager.SurfaceHeight`).
 - **Bumping into a water tile splashes it,** a little way in from the side the mower came from.
+- **Tapping open water splashes it** where the finger lands (`Tap Splash` on `PondManager`). A tap is a short press
+  that barely moves (`TapInput`), so swipes don't splash. Taps on UI or terrain, during a pinch, or outside the ripple
+  simulation's mask do nothing.
 
-Otherwise nothing disturbs the water yet: there are no `WaterRippleSource`s on the decor, so between bumps it's still.
+Otherwise nothing disturbs the water yet: there are no `WaterRippleSource`s on the decor, so between bumps and taps
+it's still.
 
 ## Using it
 
@@ -274,7 +278,7 @@ The ripples alone left calm water looking static, so a gentle version of the rou
 
 ## Known limitations and follow-ups
 
-- **Only bumps disturb the water in the game.** The decor has no ripple sources yet.
+- **Only bumps and taps disturb the water in the game.** The decor has no ripple sources yet.
 - **iPhone performance hasn't been measured, and the water now covers most of the screen.** Per water pixel: up to 32
   texture reads for the depth blur, 12 depth reads for the shadow march, 6 ripple reads for caustics and edges, plus a
   half-resolution scene render per frame for reflections and a simulation step of up to 440×440 (Level 10) twice per
