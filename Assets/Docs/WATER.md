@@ -248,15 +248,27 @@ milky and hid the floor; it now uses slope boost 3 and intensity 0.35.
 
 ![Fresnel rim off and on](../../docs/images/water/11_fresnel_rim.jpg)
 
+### Round 7: web caustics
+
+The ripples alone left calm water looking static, so a gentle version of the round 3 shimmer came back alongside them:
+
+- **The animated Voronoi web caustics,** with their slight RGB split, on top of the ripple caustics (`Web Caustic
+  Amount` 0.6). They're added after the haze so they still shimmer through deep water, and are softened less by depth
+  blur than before (`Web Caustic Depth Softening`). Caustics from the flowing waves' own curvature were tried first,
+  but only gave soft blobs rather than the shimmering lines.
+- **Haze halved** (`Haze Amount` 0.7 → 0.35) so the floor reads more clearly.
+- **Flowing waves tried again** at 0.3, 0.15 and 0.08 alongside the ripples, then left off: the smooth surface with
+  the web caustics read better.
+
 ## Options tried and not used
 
 - **Variants A (Crystal Lagoon), C (Liquid Glass) and D (Toon Dream).** C's settings are worth revisiting for a magic
   pool; D's stepped look is still available through `Toon Steps`.
-- **Procedural flowing waves** (layered gradient noise with swirl). Still in the shader behind `Flow Waves Amount`.
 - **Calm-water variant** (wave strength 0.3, swirl 0.3), superseded by turning the flowing waves off.
 - **Screen-space reflections.** Replaced by the planar reflection.
 - **Analytic formula ripples.** Replaced by the simulation.
-- **Animated Voronoi caustics,** including a rainbow version. Replaced by ripple-driven caustics.
+- **Strong rainbow Voronoi caustics.** Brought back gently in round 7.
+- **Procedural flowing waves** (layered gradient noise with swirl). Still in the shader behind `Flow Waves Amount`.
 - **Shadow-map shadows for caustics.** Considered, not built; see above.
 - **Haze ×5 with a 0.5 cap.** Didn't read; retuned.
 
