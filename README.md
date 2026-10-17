@@ -23,16 +23,17 @@ The mower sits on a grid of tiles. Each move goes one tile up, down, left or rig
 | Grass  | Yes         | Cut down by 1 each time the mower drives onto it. Perfect at height 1, ruined at 0. |
 | Wood   | Yes         | A plain walkable path tile; always "complete".                                      |
 | Spring | Yes         | Launches the mower to a landing tile elsewhere on the grid.                         |
+| Rabbit hole | Yes    | Comes in colour-coded pairs. Drop in one and pop out of the other, landing one tile further on in the direction you were going. If that tile is blocked, off the grid or another hole, you bounce back to where you started. |
 | Stone  | No          | Solid obstacle: the mower bumps off it.                                             |
 | Water  | No          | Impassable.                                                                         |
 | Empty  | No          | A hole in the lawn.                                                                 |
 
 Moving into a non-traversable tile is a **bump**: the mower doesn't move, and a bump isn't a move (it doesn't count
-towards par and isn't an undo step). Moving off the edge of the grid is ignored.
+towards par and isn't an undo step). Bouncing back out of a blocked rabbit hole works the same way. Moving off the edge of the grid is ignored.
 
 ### Levels, par and progress
 
-There are 10 levels of increasing difficulty (`Assets/ScriptableObjects/Game/Levels/Data`), described in
+There are 11 levels of increasing difficulty (`Assets/ScriptableObjects/Game/Levels/Data`), described in
 [`Assets/Docs/LEVELS.md`](Assets/Docs/LEVELS.md). Every level is checked by the solver, and its **par** is the solver's
 shortest solution. Finishing at or under par is "LAWN PERFECT!". Levels unlock in order; holding the Main Menu title for
 about 2 seconds unlocks all of them.

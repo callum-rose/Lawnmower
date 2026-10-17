@@ -20,6 +20,7 @@ MonoBehaviour:
     - Game.Tiles.WaterTileObject
     - Game.Tiles.WoodTileObject
     - Game.Tiles.SpringTileObject
+    - Game.Tiles.RabbitHoleTileObject
     values:
     - {fileID: 0}
     - {fileID: 8723563144886214407, guid: 53ab8f14d0c34af46963e81b50305f7a, type: 3}
@@ -27,3 +28,4 @@ MonoBehaviour:
     - {fileID: 0}
     - {fileID: 7153295195802633809, guid: 2daa715174daab14d8eaed9812da04b5, type: 3}
     - {fileID: 7153295195802633809, guid: f3201c6b4da14da41a524fe5072a193e, type: 3}
+    - {fileID: 8301170894232928230, guid: b1d20027515574cd5ac6711f2da08461, type: 3}

@@ -252,10 +252,9 @@ namespace Game.Terrain
 					return;
 				}
 
-				// Face away from the inside end of the edge
-				float3 outward = (float3)AxisStep(axis) * (d0 < 0 ? 1 : -1);
-				float3 normal = math.cross(Vertices[c1] - Vertices[c0], Vertices[c2] - Vertices[c0]);
-				if (math.dot(normal, outward) < 0)
+				// Face away from the inside end of the edge. u x v is along the axis on the grid, so the winding follows from
+				// the sign alone; testing the vertices' positions instead flips quads the rough sides fold
+				if (d0 >= 0)
 				{
 					(c1, c3) = (c3, c1);
 				}

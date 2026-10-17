@@ -26,6 +26,7 @@ namespace Game.Tiles
 			{ typeof(GrassTile), typeof(GrassTileObject) },
 			{ typeof(EmptyTile), typeof(EmptyTileObject) },
 			{ typeof(SpringTile), typeof(SpringTileObject) },
+			{ typeof(RabbitHoleTile), typeof(RabbitHoleTileObject) },
 		};
 
 		#region Unity

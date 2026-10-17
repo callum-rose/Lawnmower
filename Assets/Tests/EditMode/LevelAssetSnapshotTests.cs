@@ -60,6 +60,16 @@ namespace Tests.EditMode
 			},
 			new object[]
 			{
+				"Level11", "d163392839bf4f77ac64410fd5dcc262", "5x5", "4,2",
+				"grass:2 grass:2 grass:2 grass:2 grass:2 / grass:2 grass:2 grass:2 grass:2 grass:2 / grass:2 grass:2 hole:0 grass:2 grass:1 / water grass:2 grass:2 grass:2 grass:2 / grass:2 hole:0 grass:2 grass:3 grass:2"
+			},
+			new object[]
+			{
+				"Archive/Level Rabbit Hole Test", "6c9d2b2250524120b249c871457f88e7", "4x3", "1,2",
+				"grass:2 grass:2 grass:2 grass:2 / grass:2 hole:0 grass:2 hole:0 / grass:2 grass:1 grass:2 grass:2"
+			},
+			new object[]
+			{
 				"Archive/Level Spring Test", null, "3x3", "0,0",
 				"grass:2 grass:2 grass:2 / grass:2 grass:2 empty / empty grass:2 spring:0,-2"
 			},

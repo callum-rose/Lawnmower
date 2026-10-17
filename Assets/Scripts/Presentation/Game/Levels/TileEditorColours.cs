@@ -1,4 +1,5 @@
 using System;
+using Game.Tiles;
 using Lawnmower.Model;
 using UnityEngine;
 
@@ -49,6 +50,10 @@ namespace Game.Levels
 
 				case TileKind.Spring:
 					colour = Color.yellow;
+					break;
+
+				case TileKind.RabbitHole:
+					colour = RabbitHolePairs.Colour(tile.HolePair);
 					break;
 
 				default:

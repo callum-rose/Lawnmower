@@ -31,7 +31,7 @@ namespace Lawnmower.Editor.Levels
 			public string Rows;
 		}
 
-		// Tokens: grass:N, stone:D, water, wood, empty, spring:dx,dy (relative landing offset).
+		// Tokens: grass:N, stone:D, water, wood, empty, spring:dx,dy (relative landing offset), hole:N (rabbit hole pair N).
 		private static readonly Authored[] AuthoredLevels =
 		{
 			// 1. Mow every tile once: a ring round a flower bed.
@@ -55,6 +55,9 @@ namespace Lawnmower.Editor.Levels
 			// 10. Two springs, one each way: cross the river and come back.
 			new Authored { Name = "Level10", Guid = "dff15cf21bc04c40a84f269cdc3ac5d4", Start = new GridVector(2, 0),
 				Rows = "grass:2 grass:2 grass:1 grass:2 grass:2 grass:2 / grass:2 grass:3 grass:3 spring:0,2 grass:2 grass:2 / water water water water water water / grass:2 grass:2 spring:0,-2 grass:2 grass:2 grass:2 / grass:2 grass:2 grass:2 grass:2 grass:2 grass:2 / grass:2 grass:3 grass:2 grass:2 grass:3 grass:2" },
+			// 11. A pair of rabbit holes: in one, out of the other, still heading the same way.
+			new Authored { Name = "Level11", Guid = "d163392839bf4f77ac64410fd5dcc262", Start = new GridVector(4, 2),
+				Rows = "grass:2 grass:2 grass:2 grass:2 grass:2 / grass:2 grass:2 grass:2 grass:2 grass:2 / grass:2 grass:2 hole:0 grass:2 grass:1 / water grass:2 grass:2 grass:2 grass:2 / grass:2 hole:0 grass:2 grass:3 grass:2" },
 		};
 
 		/// <summary>The level list, in play order. Names are asset file names under <see cref="DataDir"/>.</summary>
@@ -66,6 +69,7 @@ namespace Lawnmower.Editor.Levels
 			"Level05", // was Level4
 			"Level06", // was Level9
 			"Level07", "Level08", "Level09", "Level10",
+			"Level11",
 		};
 
 		[MenuItem("Bunny Heaven/Author Levels")]
@@ -166,6 +170,7 @@ namespace Lawnmower.Editor.Levels
 				case "wood": return TileSpec.Wood;
 				case "grass": return TileSpec.Grass(Int(parts[1]));
 				case "stone": return TileSpec.Stone(Int(parts[1]));
+				case "hole": return TileSpec.RabbitHole(Int(parts[1]));
 				case "spring":
 				{
 					string[] xy = parts[1].Split(',');

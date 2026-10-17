@@ -1,4 +1,6 @@
+using System;
 using System.Collections;
+using System.Collections.Generic;
 using BalsamicBits.Extensions;
 using Core.EventChannels;
 using UnityEngine;
@@ -6,6 +8,7 @@ using Game.Core;
 using Game.Mowers.Input;
 using Game.Mowers.Models;
 using Game.UndoSystem;
+using Lawnmower.Model;
 
 namespace Game.Mowers
 {
@@ -20,6 +23,18 @@ namespace Game.Mowers
 		[Tooltip("Arc height of a step that climbs onto or off a raised surface (the spring's mushroom cap).")]
 		[SerializeField, Min(0)] private float hopHeight = 1f;
 
+		[Header("Rabbit Holes")]
+		[SerializeField, Min(0)] private float burrowDepth = 0.8f;
+		[SerializeField, Range(0.1f, 1)] private float burrowScale = 0.5f;
+		[SerializeField, Min(0.05f)] private float burrowSinkDuration = 0.2f;
+		[SerializeField, Min(0.05f)] private float burrowRiseDuration = 0.3f;
+		[SerializeField, Min(0)] private float burrowRiseHeight = 0.6f;
+		[Tooltip("How far towards a blocked exit the mower gets, in tiles, before it bonks")]
+		[SerializeField, Range(0, 0.5f)] private float bonkDistance = 0.3f;
+		[SerializeField, Min(0.05f)] private float bonkDuration = 0.25f;
+		[SerializeField, Min(0)] private float dazedWobbleAngle = 25f;
+		[SerializeField, Min(0.05f)] private float dazedDuration = 0.6f;
+
 		[Header("Event Channels")]
 		[SerializeField] private IVector3EventChannelTransmitterContainer movedEventChannel;
 		[SerializeField] private IBoolEventChannelListenerContainer isMowerTransformControlledExternallyEventChannelContainer;
@@ -32,7 +47,8 @@ namespace Game.Mowers
 
 		private Coroutine _translationRoutine;
 		private Coroutine _rotationRoutine;
-		private Vector3? _pendingJumpTarget;
+		private Func<IEnumerator> _pendingRoutine;
+		private Vector3? _scaleBeforeBurrow;
 		
 		private bool _transformIsControlledExternally;
 
@@ -61,11 +77,13 @@ namespace Game.Mowers
 		{
 			_mowerPosition = mowerPosition;
 			_mowerPosition.CurrentPosition.ValueChangedFromTo += OnMowerMoved;
+			_mowerPosition.Bounced += OnMowerBounced;
 		}
 
 		void INeedMowerPosition.Clear()
 		{
 			_mowerPosition.CurrentPosition.ValueChangedFromTo -= OnMowerMoved;
+			_mowerPosition.Bounced -= OnMowerBounced;
 			_mowerPosition = null;
 		}
 
@@ -86,15 +104,23 @@ namespace Game.Mowers
 				return;
 			}
 
+			PathSegment? segment = _mowerPosition.CurrentSegment;
+
 			if (!isActiveAndEnabled)
 			{
 				// Hidden (before the drop-in): coroutines can't run, so just keep the position current.
-				_pendingJumpTarget = null;
+				_pendingRoutine = null;
 				SnapPosition(targetPosition);
+			}
+			else if (!inInverted && segment?.Kind == MovementKind.Burrow)
+			{
+				// Down the hole once the step onto it has finished, then up out of the other one.
+				PathSegment burrow = segment.Value;
+				QueueTranslation(() => BurrowRoutine(burrow));
 			}
 			else if ((targetPosition - prevPosition).IsCardinalUnit)
 			{
-				_pendingJumpTarget = null;
+				_pendingRoutine = null;
 				AnimateRotation(prevPosition, targetPosition, inInverted);
 				AnimationPosition(prevPosition, targetPosition, inInverted);
 			}
@@ -102,23 +128,25 @@ namespace Game.Mowers
 			{
 				// A spring jump (B3): arc to the landing tile once the step onto the spring has finished.
 				Vector3 landing = _positioner.GetStandWorldPosition(targetPosition);
-
-				if (_translationRoutine != null)
-				{
-					_pendingJumpTarget = landing;
-				}
-				else
-				{
-					_translationRoutine = JumpRoutine(landing).Start(this);
-				}
+				QueueTranslation(() => JumpRoutine(landing));
 			}
 			else
 			{
-				// Start placement (Zero -> start) and undoing a jump: snap. This also raises the
+				// Start placement (Zero -> start) and undoing a jump or burrow: snap. This also raises the
 				// mower-moved channel that MowerCreatedAnimator waits on before showing the mower.
-				_pendingJumpTarget = null;
+				_pendingRoutine = null;
 				SnapPosition(targetPosition);
 			}
+		}
+
+		private void OnMowerBounced(IReadOnlyList<PathSegment> attempted)
+		{
+			if (_transformIsControlledExternally || !isActiveAndEnabled || attempted.Count == 0)
+			{
+				return;
+			}
+
+			QueueTranslation(() => BounceRoutine(attempted));
 		}
 
 		private void AnimateRotation(GridVector prevPosition, GridVector targetPosition, Xor isInverted)
@@ -146,15 +174,14 @@ namespace Game.Mowers
 		{
 			Vector3 worldPosition = _positioner.GetStandWorldPosition(position);
 
-			_translationRoutine.Stop(this);
-			_translationRoutine = null;
+			StopTranslation();
 
 			if (!isInverted)
 			{
 				// Climbing onto or off a raised surface arcs over its edge rather than passing through it.
 				float prevY = _positioner.GetStandWorldPosition(prevPosition).y;
 				float arc = Mathf.Approximately(worldPosition.y, prevY) ? 0 : hopHeight;
-				_translationRoutine = TranslateRoutine(worldPosition, arc).Start(this);
+				_translationRoutine = ThenPending(TranslateRoutine(worldPosition, arc)).Start(this);
 			}
 			else
 			{
@@ -165,15 +192,27 @@ namespace Game.Mowers
 
 		private void SnapPosition(GridVector position)
 		{
-			_translationRoutine.Stop(this);
-			_translationRoutine = null;
+			StopTranslation();
 
 			Vector3 worldPosition = _positioner.GetStandWorldPosition(position);
 			transform.position = worldPosition;
 			MovedEventChannel.Raise(worldPosition);
 		}
 
-		private IEnumerator TranslateRoutine(Vector3 to, float arc)
+		/// <summary>Stops any translation, putting the mower back to full size if it was cut off down a hole.</summary>
+		private void StopTranslation()
+		{
+			_translationRoutine.Stop(this);
+			_translationRoutine = null;
+
+			if (_scaleBeforeBurrow.HasValue)
+			{
+				transform.localScale = _scaleBeforeBurrow.Value;
+				_scaleBeforeBurrow = null;
+			}
+		}
+
+		private IEnumerator TranslateRoutine(Vector3 to, float arc = 0)
 		{
 			void SetPosition(Vector3 pos)
 			{
@@ -197,25 +236,105 @@ namespace Game.Mowers
 			}
 
 			SetPosition(to);
-
-			_translationRoutine = null;
-
-			if (_pendingJumpTarget.HasValue)
-			{
-				Vector3 landing = _pendingJumpTarget.Value;
-				_pendingJumpTarget = null;
-				_translationRoutine = JumpRoutine(landing).Start(this);
-			}
 		}
 
 		private IEnumerator JumpRoutine(Vector3 to)
 		{
-			Vector3 from = transform.position;
+			yield return Slide(transform.position, to, jumpDuration, jumpHeight);
+		}
 
-			for (float time = Time.deltaTime; time < jumpDuration; time += Time.deltaTime)
+		/// <summary>Sinks into the burrow's hole and comes up out of the other, onto the landing tile.</summary>
+		private IEnumerator BurrowRoutine(PathSegment burrow)
+		{
+			Vector3 restScale = transform.localScale;
+			_scaleBeforeBurrow = restScale;
+			Vector3 down = Vector3.down * burrowDepth;
+			Vector3 entry = _positioner.GetStandWorldPosition(burrow.From);
+			Vector3 exit = _positioner.GetStandWorldPosition(burrow.ExitHole);
+			Vector3 landing = _positioner.GetStandWorldPosition(burrow.To);
+
+			yield return Slide(entry, entry + down, burrowSinkDuration, 0, restScale, restScale * burrowScale);
+			transform.rotation = LookAlong(burrow.Direction);
+			yield return Slide(exit + down, landing, burrowRiseDuration, burrowRiseHeight, restScale * burrowScale, restScale);
+			_scaleBeforeBurrow = null;
+		}
+
+		/// <summary>
+		/// Down the hole, up the other one into a blocked exit, bonk, back down and out of the first hole to where the
+		/// move started, dazed.
+		/// </summary>
+		private IEnumerator BounceRoutine(IReadOnlyList<PathSegment> attempted)
+		{
+			Vector3 restScale = transform.localScale;
+			_scaleBeforeBurrow = restScale;
+			Vector3 shrunk = restScale * burrowScale;
+			Vector3 down = Vector3.down * burrowDepth;
+			Vector3 start = _positioner.GetStandWorldPosition(attempted[0].From);
+
+			for (int i = 0; i < attempted.Count - 1; i++)
 			{
-				float t = time / jumpDuration;
-				Vector3 position = Vector3.Lerp(from, to, t) + Vector3.up * (jumpHeight * 4 * t * (1 - t));
+				PathSegment segment = attempted[i];
+				Vector3 to = _positioner.GetStandWorldPosition(segment.To);
+
+				if (segment.Kind == MovementKind.Step)
+				{
+					transform.rotation = LookAlong(segment.Direction);
+					yield return TranslateRoutine(to);
+				}
+				else
+				{
+					yield return JumpRoutine(to);
+				}
+			}
+
+			PathSegment burrow = attempted[attempted.Count - 1];
+			Vector3 entry = _positioner.GetStandWorldPosition(burrow.From);
+			Vector3 exit = _positioner.GetStandWorldPosition(burrow.ExitHole);
+			Vector3 bonk = exit + (_positioner.GetStandWorldPosition(burrow.To) - exit) * bonkDistance;
+
+			yield return Slide(entry, entry + down, burrowSinkDuration, 0, restScale, shrunk);
+			transform.rotation = LookAlong(burrow.Direction);
+			yield return Slide(exit + down, bonk, burrowRiseDuration, 0, shrunk, restScale);
+			yield return Slide(bonk, exit, bonkDuration, 0);
+			yield return Slide(exit, exit + down, burrowSinkDuration, 0, restScale, shrunk);
+
+			// The first leg is always the input step: head back the way it came.
+			transform.rotation = LookAlong(attempted[0].Direction * -1);
+			yield return Slide(entry + down, entry, burrowRiseDuration, 0, shrunk, restScale);
+			_scaleBeforeBurrow = null;
+			yield return TranslateRoutine(start);
+			yield return DazedRoutine();
+		}
+
+		private IEnumerator DazedRoutine()
+		{
+			Quaternion rest = transform.rotation;
+
+			for (float time = Time.deltaTime; time < dazedDuration; time += Time.deltaTime)
+			{
+				float t = time / dazedDuration;
+				float yaw = Mathf.Sin(t * Mathf.PI * 4) * dazedWobbleAngle * (1 - t);
+				transform.rotation = rest * Quaternion.AngleAxis(yaw, Vector3.up);
+
+				yield return null;
+			}
+
+			transform.rotation = rest;
+		}
+
+		/// <summary>Moves (and optionally scales) the mower in a straight line, lifted by an arc of <paramref name="arc"/>.</summary>
+		private IEnumerator Slide(Vector3 from, Vector3 to, float duration, float arc,
+			Vector3? fromScale = null, Vector3? toScale = null)
+		{
+			for (float time = Time.deltaTime; time < duration; time += Time.deltaTime)
+			{
+				float t = time / duration;
+				Vector3 position = Vector3.Lerp(from, to, t) + Vector3.up * (arc * 4 * t * (1 - t));
+
+				if (fromScale.HasValue && toScale.HasValue)
+				{
+					transform.localScale = Vector3.Lerp(fromScale.Value, toScale.Value, t);
+				}
 
 				transform.position = position;
 				MovedEventChannel.Raise(position);
@@ -223,10 +342,44 @@ namespace Game.Mowers
 				yield return null;
 			}
 
+			if (toScale.HasValue)
+			{
+				transform.localScale = toScale.Value;
+			}
+
 			transform.position = to;
 			MovedEventChannel.Raise(to);
+		}
+
+		/// <summary>Starts the routine now, or after the current translation if one is running.</summary>
+		private void QueueTranslation(Func<IEnumerator> routine)
+		{
+			if (_translationRoutine != null)
+			{
+				_pendingRoutine = routine;
+				return;
+			}
+
+			_translationRoutine = ThenPending(routine()).Start(this);
+		}
+
+		private IEnumerator ThenPending(IEnumerator routine)
+		{
+			yield return routine;
 
 			_translationRoutine = null;
+
+			if (_pendingRoutine != null)
+			{
+				Func<IEnumerator> next = _pendingRoutine;
+				_pendingRoutine = null;
+				_translationRoutine = ThenPending(next()).Start(this);
+			}
+		}
+
+		private static Quaternion LookAlong(GridVector direction)
+		{
+			return Quaternion.LookRotation(new Vector3(direction.x, 0, direction.y), Vector3.up);
 		}
 
 		private IEnumerator RotateRoutine(Quaternion to)

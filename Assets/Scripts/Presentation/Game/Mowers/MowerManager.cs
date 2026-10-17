@@ -67,7 +67,7 @@ namespace Game.Mowers
 		{
 			foreach (PathSegment segment in move.Segments)
 			{
-				_motion?.Publish(segment.From, segment.To, false);
+				_motion?.Publish(segment);
 			}
 		}
 
@@ -78,7 +78,11 @@ namespace Game.Mowers
 
 		public void PlayBump(MoveResult bump)
 		{
-			// The mower has no bump animation yet; G1 adds the bump haptic/SFX from the model event.
+			// A plain bump has no mower animation yet; G1 adds the bump haptic/SFX from the model event.
+			if (bump.Outcome == MoveOutcome.Bounced)
+			{
+				_motion?.PublishBounce(bump.AttemptedSegments);
+			}
 		}
 
 		public void Hide()
