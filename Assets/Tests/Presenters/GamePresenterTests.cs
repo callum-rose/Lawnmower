@@ -358,17 +358,39 @@ namespace Lawnmower.Presenters.Tests
 		}
 
 		[Test]
-		public void WhileFailed_MovesAndRedoAreIgnored()
+		public void WhileFailed_MovesKeepMowing_AndHideTheFailedCard()
 		{
 			GamePresenter presenter = Create("grass:1 grass:2 grass:2");
 			_input.Press(R);
 			_input.Press(L);
 
 			_input.Press(R);
-			presenter.Redo();
+			_input.Press(R);
 
-			Assert.AreEqual(V(0, 0), presenter.Simulation.MowerPosition.Value);
+			Assert.AreEqual(V(2, 0), presenter.Simulation.MowerPosition.Value);
+			Assert.AreEqual(LevelStatus.Failed, presenter.Simulation.Status, "a ruined lawn stays failed");
+			Assert.IsFalse(_screen.IsFailedShown);
+			Assert.AreEqual(4, presenter.Stats.Moves);
+		}
+
+		[Test]
+		public void WhileFailed_RedoWorks_AndUndoingPastTheFailResumesPlay()
+		{
+			GamePresenter presenter = Create("grass:1 grass:2 grass:2");
+			_input.Press(R);
+			_input.Press(L);
+			_input.Press(R);
+
+			presenter.Undo();
+			presenter.Redo();
+			Assert.AreEqual(V(1, 0), presenter.Simulation.MowerPosition.Value);
 			Assert.AreEqual(LevelStatus.Failed, presenter.Simulation.Status);
+
+			presenter.Undo();
+			presenter.Undo();
+			Assert.AreEqual(V(1, 0), presenter.Simulation.MowerPosition.Value);
+			Assert.AreEqual(LevelStatus.Playing, presenter.Simulation.Status);
+			Assert.IsFalse(_screen.IsFailedShown);
 		}
 
 		[Test]
