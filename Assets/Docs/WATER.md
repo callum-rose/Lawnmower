@@ -18,7 +18,7 @@ Five pieces:
 | `WaterRippleSimulation` | `Assets/Scripts/Presentation/Game/Tiles/` + `Hidden/WaterRippleSimulation` shader | Runs the 2D wave equation over a rectangle of water. The surface's shape comes from here. |
 | `WaterRippleSource` | `Assets/Scripts/Presentation/Game/Tiles/` | Anything touching the surface (rock, lily pad, fish). Blocks ripples and, with strength > 0, sends out rings. |
 | `PlanarWaterReflection` | `Assets/Scripts/Presentation/Game/Tiles/` | Renders the scene mirrored about the water plane at half resolution for reflections. |
-| `PondManager` + `Pond.prefab` | `Assets/Scripts/Presentation/Game/Terrain/`, `Assets/Prefabs/Game/Tiles/Water/` | Builds each level's pond from its water tiles: the surface, a floor, and the ripple simulation's size and mask. |
+| `PondManager` + `Pond.prefab` | `Assets/Scripts/Presentation/Game/Terrain/`, `Assets/Prefabs/Game/Tiles/Water/` | Builds the sea every level sits in: the surface, the seabed, and the ripple simulation's size and mask. |
 
 For every water pixel the shader:
 
@@ -34,7 +34,9 @@ For every water pixel the shader:
    the point faces the sun, and removed where a short ray march towards the sun through the depth buffer is blocked
    (lily pads, overhangs, fish). Blocked points are also darkened (`Underwater Shadow Darkening`).
 5. **Absorption and haze.** Light fades per channel with path length (`Absorption`), and the colour mixes towards
-   `Deep Colour` with depth (`Haze Density`, up to `Haze Amount`).
+   `Deep Colour` with depth (`Haze Density`, up to `Haze Amount`). Then the thinner the water over the floor, the
+   lighter it gets: it's screened towards `Shallow Light Colour` by `Shallow Light Amount`, fading out by `Shallow Light
+   Depth` (3, the deep sea floor) with `Shallow Light Falloff`, so water near land reads lighter than open sea.
 6. **Reflection.** A sky gradient weighted by fresnel, then the planar reflection texture (mip-blurred and rippled)
    blended in with an exaggerated `Object Reflection Strength` so it reads from the steep game camera.
 7. **Highlights and glow.** Sun specular, twinkling sparkles on crests, a constant glow, and a shallow-edge glow where
@@ -45,6 +47,10 @@ For every water pixel the shader:
    Slope Boost` also lights ripple faces tipped away from the camera compared with flat water, so rings and splashes
    pick up a pearly edge.
 
+![Shallow lightening](../../docs/images/water/12_shallow_lightening.jpg)
+
+*Shallow lightening over a floor ramping from 0.05 deep (right) to 2.5 deep (left).*
+
 ![Ripple height field](../../docs/images/water/06_ripple_field.jpg)
 
 *The ripple simulation's height field from above: rings from the rock and lily pads bouncing off the pond walls and
@@ -52,26 +58,32 @@ interfering.*
 
 ## In the game
 
+Every level sits in one sea of this water, filling everything that isn't terrain: water tiles, empty tiles and the space
+around the level, out past the edges of the screen. It replaced the old blue circular `Ocean` disc (its shader and
+materials are gone; `OceanManager` stays only for the intro camera's targets and the circle pond decor is scattered in).
 Water tiles don't get a tile object each (`TilePrefabsManager` still has no water prefab). Instead `Pond.prefab`, under
-the `Terrain` object in `Game.unity`, fills every level's water tiles with one pond when the level starts:
+`LevelContainer` in `Game.unity`, builds the sea when the level starts:
 
-- **One surface mesh** (`Water`, on the Water layer, with the level's `WaterRippleSimulation` and
-  `PlanarWaterReflection`) covering the water tiles plus each quarter of a solid tile that borders them, so
-  it tucks under the terrain's inset banks. One mesh rather than a quad per tile, because overlapping transparent quads
-  would blend twice where they overlap.
-- **One floor** (`PondFloor`, `PondFloor.mat`) with the same shape, `Floor Depth` (0.95) below the terrain top, since
-  the terrain is open underneath. One-tile-wide channels close up above it: the banks meet at about −0.7.
-- **The ripple simulation** sized to the pond's bounds, with a **mask** of open water: texels inside the pond and
-  outside the terrain's SDF at the water's height, so ripples bounce off the real, rounded, noisy shoreline rather than
-  the rectangle's edges. A level with no water hides the surface and floor, which also switches off the simulation and
-  reflection.
-- **Wood tiles next to water are bridges**, so the pond runs under them (Level 9).
-- Being under `Terrain`, the pond rises with it in the level intro.
-
+- **One surface quad** (`Water`, on the Water layer, with the level's `WaterRippleSimulation` and
+  `PlanarWaterReflection`) centred on the level and reaching `Sea Extent` (100) tiles past it, 0.08 below the terrain
+  top. Anything over land is hidden behind the terrain, which is opaque.
+- **A seabed** (`Seabed`, under `Terrain`, `PondFloor.mat`) `Floor Depth` (0.95) below the terrain top next to land,
+  shelving down to `Deep Floor Depth` (3) between 1 and 4 tiles out (`Shelf`), so open sea fades into the deep colour
+  while ponds and channels stay shallow. A fine grid around the level, then one row and column out to the sea's edge.
+- **The ripple simulation** covers the level plus `Ripple Margin` (2.5) tiles on every side, with a **mask** of open
+  water: texels outside the terrain's SDF at the water's height, so ripples bounce off the real, rounded, noisy
+  shoreline. Its outer metre soaks waves up (`Edge Absorb Width`) instead of reflecting them, and past it the sea is
+  flat. The mask and seabed are built in Burst jobs (about 3 ms for Level 10 in the Editor).
+- **The surface stays put while the terrain and seabed rise through it** in the level intro, so the island surfaces
+  out of the sea.
+- **Pond decor** (lily pads, logs, fish) floats at the sea's surface (`PondManager.SurfaceHeight`).
 - **Bumping into a water tile splashes it,** a little way in from the side the mower came from.
+- **Tapping open water splashes it** where the finger lands (`Tap Splash` on `PondManager`). A tap is a short press
+  that barely moves (`TapInput`), so swipes don't splash. Taps on UI or terrain, during a pinch, or outside the ripple
+  simulation's mask do nothing.
 
-Water that reaches the edge of the level stops there, over the ocean (Levels 8 and 9). Otherwise nothing disturbs the
-water yet: there are no `WaterRippleSource`s in ponds, so between bumps it's still.
+Otherwise nothing disturbs the water yet: there are no `WaterRippleSource`s on the decor, so between bumps and taps
+it's still.
 
 ## Using it
 
@@ -79,6 +91,9 @@ water yet: there are no `WaterRippleSource`s in ponds, so between bumps it's sti
   opaque downsampling off).
 - **Things under or around the water must be opaque.** Anything in the transparent queue won't be refracted or blurred
   (it isn't in the opaque texture). Floating things like lily pads should sit just above the surface.
+- **Additive effects must leave alpha alone** (`Blend One One, Zero One`). The planar reflection reads alpha as
+  coverage, so an additive quad that writes alpha shows up in the water as a black square (the grass's flower halos
+  did).
 - **Water renderers go on the `Water` layer (4).** `PlanarWaterReflection` leaves that layer out so the water doesn't
   reflect itself.
 - **One `PlanarWaterReflection`** at the water surface height. It follows `Camera.main` unless given a camera, and
@@ -117,7 +132,8 @@ Unity -batchmode -quit -projectPath . -executeMethod WaterPreviewRenderer.Render
 ```
 
 Stills go to `Temp/water` (override with `WATER_OUT`). `WATER_VIDEO=1` records a real-time clip of the close shot with
-four splashes as raw RGB24. The file header lists the other options and the ffmpeg command to encode it.
+four splashes as raw RGB24. `WATER_FLOOR=slope` swaps the floor for a bare ramp from 0.05 to 2.5 deep, for judging
+depth-based effects. The file header lists the other options and the ffmpeg command to encode it.
 
 ## How we got here
 
@@ -243,26 +259,37 @@ milky and hid the floor; it now uses slope boost 3 and intensity 0.35.
 
 ![Fresnel rim off and on](../../docs/images/water/11_fresnel_rim.jpg)
 
+### Round 7: web caustics
+
+The ripples alone left calm water looking static, so a gentle version of the round 3 shimmer came back alongside them:
+
+- **The animated Voronoi web caustics,** with their slight RGB split, on top of the ripple caustics (`Web Caustic
+  Amount` 0.6). They're added after the haze so they still shimmer through deep water, and are softened less by depth
+  blur than before (`Web Caustic Depth Softening`). Caustics from the flowing waves' own curvature were tried first,
+  but only gave soft blobs rather than the shimmering lines.
+- **Haze halved** (`Haze Amount` 0.7 → 0.35) so the floor reads more clearly.
+- **Flowing waves tried again** at 0.3, 0.15 and 0.08 alongside the ripples, then left off: the smooth surface with
+  the web caustics read better.
+
 ## Options tried and not used
 
 - **Variants A (Crystal Lagoon), C (Liquid Glass) and D (Toon Dream).** C's settings are worth revisiting for a magic
   pool; D's stepped look is still available through `Toon Steps`.
-- **Procedural flowing waves** (layered gradient noise with swirl). Still in the shader behind `Flow Waves Amount`.
 - **Calm-water variant** (wave strength 0.3, swirl 0.3), superseded by turning the flowing waves off.
 - **Screen-space reflections.** Replaced by the planar reflection.
 - **Analytic formula ripples.** Replaced by the simulation.
-- **Animated Voronoi caustics,** including a rainbow version. Replaced by ripple-driven caustics.
+- **Strong rainbow Voronoi caustics.** Brought back gently in round 7.
+- **Procedural flowing waves** (layered gradient noise with swirl). Still in the shader behind `Flow Waves Amount`.
 - **Shadow-map shadows for caustics.** Considered, not built; see above.
 - **Haze ×5 with a 0.5 cap.** Didn't read; retuned.
 
 ## Known limitations and follow-ups
 
-- **Only bumps disturb the water in the game.** Ponds have no ripple sources (rocks, lily pads) yet.
-- **One simulation per level.** Every pond in a level shares one rectangle; with separate ponds far apart most of it is
-  masked out and wasted.
-- **iPhone performance hasn't been measured.** Per water pixel: up to 32 texture reads for the depth blur, 12 depth reads
-  for the shadow march, 6 ripple reads for caustics and edges, plus a half-resolution scene render per frame for
-  reflections and a 200×160 simulation step twice per frame. Expect to trim taps and steps.
+- **Only bumps and taps disturb the water in the game.** The decor has no ripple sources yet.
+- **iPhone performance hasn't been measured, and the water now covers most of the screen.** Per water pixel: up to 32
+  texture reads for the depth blur, 12 depth reads for the shadow march, 6 ripple reads for caustics and edges, plus a
+  half-resolution scene render per frame for reflections and a simulation step of up to 440×440 (Level 10) twice per
+  frame. Expect to trim taps and steps, or use a cheaper path for deep open water.
 - **Planar reflections may be vertically flipped on device.** They were only checked in the preview, which renders to
   a texture. A one-line fix if so.
 - **Screen-space shadows only come from on-screen things,** and very thin objects give slightly stepped edges.

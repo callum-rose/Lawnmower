@@ -6,6 +6,10 @@ using Lawnmower.Model;
 
 namespace Game.Levels
 {
+	/// <summary>
+	/// The circle around each level that the intro camera frames and pond decor is scattered in. The water itself is the
+	/// sea built by PondManager; the intro timeline animates how far out from the centre the circle is showing.
+	/// </summary>
 	[ExecuteInEditMode]
 	internal class OceanManager : MonoBehaviour
 	{
@@ -13,10 +17,7 @@ namespace Game.Levels
 		[SerializeField] private int sizeOffset = 2;
 		[SerializeField] private float planeDefaultSize = 10;
 		
-		[Header("Material")]
-		[SerializeField] private Material material;
 		[SerializeField, Range(0,1)] private float amountShowingRadially;
-		[SerializeField] private float waveSpeed;
 
 		[Header("Defaults")]
 		[SerializeField] private Vector3 defaultWorldCenter;
@@ -34,10 +35,6 @@ namespace Game.Levels
 		/// <summary>How far from its centre the ocean is showing; the intro timeline animates it outwards.</summary>
 		public float ShowingRadius => amountShowingRadially * transform.localScale.x * planeDefaultSize / 2;
 
-		private static readonly int bandingId = Shader.PropertyToID("_Banding");
-		private static readonly int radialShowingId = Shader.PropertyToID("_AmountRadiallyShowing");
-		private static readonly int waveSpeedId = Shader.PropertyToID("_WaveSpeed");
-		
 		#region Unity
 
 		private void Awake()
@@ -55,11 +52,6 @@ namespace Game.Levels
 			}
 		}
 
-		private void Update()
-		{
-			SetMaterialProperties();
-		}
-
 		private void OnDestroy()
 		{
 			levelDataEventChannel.EventRaised -= LevelDataEventChannelOnEventRaised;
@@ -73,8 +65,6 @@ namespace Game.Levels
 		{
 			SetToCenter(positioner.GetLevelWorldCenter(level));
 			SetSize(GetRadius(level));
-
-			SetMaterialProperties();
 		}
 
 		#endregion
@@ -91,13 +81,6 @@ namespace Game.Levels
 		#endregion
 
 		#region Methods
-
-		private void SetMaterialProperties()
-		{
-			material.SetFloat(bandingId, transform.localScale.x * planeDefaultSize + 1);
-			material.SetFloat(radialShowingId, amountShowingRadially);
-			material.SetFloat(waveSpeedId, waveSpeed);
-		}
 
 		private void SetSize(float planeRadius)
 		{
@@ -148,7 +131,6 @@ namespace Game.Levels
 		{
 			SetToCenter(defaultWorldCenter);
 			SetSize(defaultRadius);
-			SetMaterialProperties();
 		}
 
 		#endregion

@@ -1,6 +1,7 @@
 // One step of the 2D wave equation for WaterRippleSimulation. R = current height, G = previous height.
 // The edges of the simulated area, the masked-out parts of it and the inside of every ripple source are held at zero,
-// so waves reflect off them.
+// so waves reflect off them. With _EdgeAbsorbWidth > 0 a band inside the edges soaks waves up instead, for water that
+// carries on past the simulated area.
 // A thin ring around each source with strength > 0 is driven sinusoidally to emit waves.
 Shader "Hidden/WaterRippleSimulation"
 {
@@ -31,6 +32,8 @@ Shader "Hidden/WaterRippleSimulation"
 			float _Damping;
 			float _ForcePhase;
 			float _ForceWidth;
+			// World units
+			float _EdgeAbsorbWidth;
 
 			float4 _WaterRipples[16];
 			float _WaterRippleCount;
@@ -82,6 +85,12 @@ Shader "Hidden/WaterRippleSimulation"
 				float neighbours = Height(uv - dx) + Height(uv + dx) + Height(uv - dy) + Height(uv + dy);
 				// Damping only the velocity term; scaling the whole update would add a cutoff that stops slow waves travelling.
 				float next = state.r + (state.r - state.g) * _Damping + _Courant * (neighbours - 4 * state.r);
+				if (_EdgeAbsorbWidth > 0)
+				{
+					float2 fromEdges = min(uv, 1 - uv) * _SimRect.zw;
+					float absorb = saturate(1 - min(fromEdges.x, fromEdges.y) / _EdgeAbsorbWidth);
+					next *= 1 - 0.08 * absorb * absorb;
+				}
 
 				float2 world = _SimRect.xy + uv * _SimRect.zw;
 				for (int j = 0; j < (int)_SplashCount; j++)

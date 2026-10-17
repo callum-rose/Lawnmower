@@ -376,13 +376,14 @@ Shader "Grass Ethereal"
 			ENDHLSL
 		}
 
-		// Flower halos are drawn after the grass without writing depth, so they never hide blades behind them
+		// Flower halos are drawn after the grass without writing depth, so they never hide blades behind them. They leave
+		// alpha alone, or the water's planar reflection, which reads alpha as coverage, shows each halo as a black square.
 		Pass
 		{
 			Name "FlowerHalo"
 			Tags { "LightMode"="SRPDefaultUnlit" }
 
-			Blend One One
+			Blend One One, Zero One
 			ZWrite Off
 			ZTest LEqual
 			Cull Off

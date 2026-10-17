@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using BalsamicBits.Extensions;
 using Game.Core;
+using Game.Terrain;
 using Lawnmower.Model;
 using UnityEngine;
 using Random = System.Random;
@@ -9,7 +10,7 @@ using Random = System.Random;
 namespace Game.Levels
 {
 	/// <summary>
-	/// Scatters pond props and creatures on the ocean around each level, clear of the board. How many there are scales
+	/// Scatters pond props and creatures on the sea around each level, clear of the board. How many there are scales
 	/// with the level's tile count. The layout is seeded by the level's id, so a level always looks the same.
 	/// </summary>
 	internal class PondDecorManager : MonoBehaviour
@@ -51,6 +52,7 @@ namespace Game.Levels
 
 		[SerializeField] private Positioner positioner;
 		[SerializeField] private OceanManager oceanManager;
+		[SerializeField] private PondManager pondManager;
 		[Tooltip("Decor per level tile, rounded: 3/16 gives a 4 x 4 level 3 decor.")]
 		[SerializeField] private float decorPerTile = 3f / 16;
 		[SerializeField] private float boardMargin = 0.4f;
@@ -122,7 +124,7 @@ namespace Game.Levels
 			Random random = new Random(level.Id.GetHashCode());
 			Vector3 center = _center = positioner.GetLevelWorldCenter(level);
 			float oceanRadius = oceanManager.GetRadius(level) - oceanEdgeMargin;
-			float waterY = oceanManager.transform.position.y;
+			float waterY = pondManager.SurfaceHeight;
 			Rect board = GetBoardRect(level);
 			List<Placed> placed = new List<Placed>();
 			int[] counts = PickCounts(random, Mathf.RoundToInt(level.Width * level.Depth * decorPerTile));

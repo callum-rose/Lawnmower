@@ -27,7 +27,7 @@ namespace Game.Levels
                 for (int x = 0; x < level.Width; x++)
                 {
                     Tile tile = level.GetTile(x, y);
-                    GameObject newTileObject = BuildAt(new GridVector(x, y), tile);
+                    GameObject newTileObject = BuildAt(level, new GridVector(x, y), tile);
                     tiles[x, y] = newTileObject;
                 }
             }
@@ -39,13 +39,18 @@ namespace Game.Levels
         
         #region Methods
 
-        private GameObject BuildAt(GridVector position, Tile tile)
+        private GameObject BuildAt(Level level, GridVector position, Tile tile)
         {
             GameObject newTileObject = tileFactory.Create(tile);
 
             if (!newTileObject)
             {
                 return newTileObject;
+            }
+
+            if (newTileObject.TryGetComponent(out WoodTileObject woodTileObject))
+            {
+                woodTileObject.Connect(GetWoodConnections(level, position));
             }
 
             positioner.Position(newTileObject.transform, position);
@@ -56,6 +61,20 @@ namespace Game.Levels
             tileCreatedEventChannel.Raise(newTileObject, position);
 
             return newTileObject;
+        }
+
+        private static WoodConnections GetWoodConnections(Level level, GridVector position)
+        {
+            WoodConnections connections = WoodConnections.None;
+
+            if (IsWood(GridVector.Up)) connections |= WoodConnections.North;
+            if (IsWood(GridVector.Right)) connections |= WoodConnections.East;
+            if (IsWood(GridVector.Down)) connections |= WoodConnections.South;
+            if (IsWood(GridVector.Left)) connections |= WoodConnections.West;
+
+            return connections;
+
+            bool IsWood(GridVector direction) => level.GetTile(position + direction)?.Kind == TileKind.Wood;
         }
 
         public void Remove(IEnumerable<GameObject> tileObjects)

@@ -10,10 +10,10 @@
 # Design note (R3a; the references are the previous wood_tile_2 and rock models):
 #   Wood tiles: a 1 m wooden block filling the tile, its top level with the ground and the origin at the top's centre.
 #     The top is almost all the player sees, so it carries the detail: a lid of planks, 1-voxel gaps between them
-#     showing the dark block beneath. Pieces differ only in which edges connect to a neighbouring wood tile - straight,
-#     corner, T and cross - and every connected edge meets its neighbour the same way: planks 3, 2 and 3 wide. The
-#     2-wide Oak middle plank runs from the centre to each connected edge; Pale wood planks run along each unconnected
-#     edge; any corner left over is a 3 x 3 Pale wood plank. Plank ends are bevelled 1 x 1 where they meet a connected
+#     showing the dark block beneath. Pieces differ only in which edges connect to a neighbouring wood tile - single,
+#     end, straight, corner, T and cross - and every connected edge meets its neighbour the same way: planks 3, 2 and
+#     3 wide. The 2-wide Oak middle plank runs from the centre to each connected edge; Pale wood planks run along each
+#     unconnected edge; any corner left over is a 3 x 3 Pale wood plank. Plank ends are bevelled 1 x 1 where they meet a connected
 #     edge only, mitred where two meet (R7b). A Slate strap crosses the planks 2 voxels in from each connected edge and
 #     wraps down the sides, with a Light grey nail head on each 3-wide plank; one Walnut knot breaks the symmetry.
 #     Straps and knot are markings (R12) and stop short of the bevels. Oak sides; no side grain (R7c).
@@ -224,6 +224,13 @@ def plank_cells(connections):
 			pale |= {(i, j) if dx else (j, i) for i in strip for j in range(-5, 5)}
 
 	planks = [(middle, "Oak")]
+	if not connections:
+		# The pale planks would make a ring, which plank_solid can't outline: a frame of N and S planks the full width
+		# and E and W planks between them
+		for strip in OUTER_CELLS:
+			cells = {(i, j) for i in range(-5, 5) for j in strip}
+			pale -= cells
+			planks.append((cells, "PaleWood"))
 	while pale:
 		component, frontier = set(), [pale.pop()]
 		while frontier:
@@ -360,6 +367,8 @@ def build_hole_pairs(root):
 
 
 MODELS = {
+	"Wood/wood_tile_voxel_single": lambda root: build_wood(root, ""),
+	"Wood/wood_tile_voxel_end": lambda root: build_wood(root, "S"),
 	"Wood/wood_tile_voxel_straight": lambda root: build_wood(root, "NS"),
 	"Wood/wood_tile_voxel_corner": lambda root: build_wood(root, "SE"),
 	"Wood/wood_tile_voxel_t": lambda root: build_wood(root, "WES"),

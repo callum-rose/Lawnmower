@@ -2,7 +2,8 @@ using UnityEngine;
 
 namespace Game.Levels
 {
-	/// <summary>Swims a creature round a circle centred where it was placed, facing the way it's going (+Z forward).</summary>
+	/// <summary>Swims a creature round a circle centred where it was placed, facing the way it's going.
+	/// The voxel creatures exported by tools/blender/bake_shade.py face -Z once imported, so it looks down -direction.</summary>
 	internal class PondSwimmer : MonoBehaviour
 	{
 		private Vector3 _center;
@@ -29,7 +30,7 @@ namespace Game.Levels
 		{
 			Vector3 offset = new Vector3(Mathf.Cos(_angle), 0, Mathf.Sin(_angle));
 			Vector3 direction = new Vector3(-offset.z, 0, offset.x);
-			transform.SetPositionAndRotation(_center + offset * _radius, Quaternion.LookRotation(direction));
+			transform.SetPositionAndRotation(_center + offset * _radius, Quaternion.LookRotation(-direction));
 		}
 	}
 }

@@ -21,6 +21,7 @@ namespace Game.Tiles
 		private static readonly int SplashesId = Shader.PropertyToID("_Splashes");
 		private static readonly int SplashCountId = Shader.PropertyToID("_SplashCount");
 		private static readonly int MaskId = Shader.PropertyToID("_Mask");
+		private static readonly int EdgeAbsorbWidthId = Shader.PropertyToID("_EdgeAbsorbWidth");
 		private const int MaxSplashesPerStep = 8;
 
 		[SerializeField, Tooltip("World XZ size of the simulated area.")]
@@ -37,6 +38,10 @@ namespace Game.Tiles
 
 		[SerializeField, Tooltip("Fraction of wave height lost per second.")]
 		private float dampingPerSecond = 0.15f;
+
+		[SerializeField, Tooltip("Width of a band inside the rectangle's edges that soaks up waves, in world units; 0 " +
+		                         "makes the edges walls, for water that ends there.")]
+		private float edgeAbsorbWidth;
 
 		private Texture _mask;
 		private Material _material;
@@ -131,6 +136,7 @@ namespace Game.Tiles
 			_material.SetFloat(ForceWidthId, texel * 1.5f);
 			_material.SetVectorArray(SplashesId, _splashes);
 			_material.SetFloat(SplashCountId, _splashCount);
+			_material.SetFloat(EdgeAbsorbWidthId, edgeAbsorbWidth);
 			_material.SetTexture(MaskId, _mask != null ? _mask : Texture2D.whiteTexture);
 			_splashCount = 0;
 			Graphics.Blit(_current, _next, _material);

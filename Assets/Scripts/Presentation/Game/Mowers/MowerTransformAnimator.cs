@@ -20,6 +20,8 @@ namespace Game.Mowers
 		[Header("Spring Jumps")]
 		[SerializeField, Min(0)] private float jumpHeight = 1.5f;
 		[SerializeField, Min(0.05f)] private float jumpDuration = 0.45f;
+		[Tooltip("Arc height of a step that climbs onto or off a raised surface (the spring's mushroom cap).")]
+		[SerializeField, Min(0)] private float hopHeight = 1f;
 
 		[Header("Rabbit Holes")]
 		[SerializeField, Min(0)] private float burrowDepth = 0.8f;
@@ -120,12 +122,12 @@ namespace Game.Mowers
 			{
 				_pendingRoutine = null;
 				AnimateRotation(prevPosition, targetPosition, inInverted);
-				AnimationPosition(targetPosition, inInverted);
+				AnimationPosition(prevPosition, targetPosition, inInverted);
 			}
 			else if (!inInverted)
 			{
 				// A spring jump (B3): arc to the landing tile once the step onto the spring has finished.
-				Vector3 landing = _positioner.GetWorldPosition(targetPosition);
+				Vector3 landing = _positioner.GetStandWorldPosition(targetPosition);
 				QueueTranslation(() => JumpRoutine(landing));
 			}
 			else
@@ -168,15 +170,18 @@ namespace Game.Mowers
 			}
 		}
 
-		private void AnimationPosition(GridVector position, Xor isInverted)
+		private void AnimationPosition(GridVector prevPosition, GridVector position, Xor isInverted)
 		{
-			Vector3 worldPosition = _positioner.GetWorldPosition(position);
+			Vector3 worldPosition = _positioner.GetStandWorldPosition(position);
 
 			StopTranslation();
 
 			if (!isInverted)
 			{
-				_translationRoutine = ThenPending(TranslateRoutine(worldPosition)).Start(this);
+				// Climbing onto or off a raised surface arcs over its edge rather than passing through it.
+				float prevY = _positioner.GetStandWorldPosition(prevPosition).y;
+				float arc = Mathf.Approximately(worldPosition.y, prevY) ? 0 : hopHeight;
+				_translationRoutine = ThenPending(TranslateRoutine(worldPosition, arc)).Start(this);
 			}
 			else
 			{
@@ -189,7 +194,7 @@ namespace Game.Mowers
 		{
 			StopTranslation();
 
-			Vector3 worldPosition = _positioner.GetWorldPosition(position);
+			Vector3 worldPosition = _positioner.GetStandWorldPosition(position);
 			transform.position = worldPosition;
 			MovedEventChannel.Raise(worldPosition);
 		}
@@ -207,7 +212,7 @@ namespace Game.Mowers
 			}
 		}
 
-		private IEnumerator TranslateRoutine(Vector3 to)
+		private IEnumerator TranslateRoutine(Vector3 to, float arc = 0)
 		{
 			void SetPosition(Vector3 pos)
 			{
@@ -223,7 +228,7 @@ namespace Game.Mowers
 			{
 				float interpolant = time / animationSpeedHandler.RecommendedAnimDuration;
 				float easedT = animEase.Evaluate(interpolant);
-				Vector3 position = Vector3.Lerp(from, to, easedT);
+				Vector3 position = Vector3.Lerp(from, to, easedT) + Vector3.up * (arc * 4 * easedT * (1 - easedT));
 
 				SetPosition(position);
 
@@ -244,9 +249,9 @@ namespace Game.Mowers
 			Vector3 restScale = transform.localScale;
 			_scaleBeforeBurrow = restScale;
 			Vector3 down = Vector3.down * burrowDepth;
-			Vector3 entry = _positioner.GetWorldPosition(burrow.From);
-			Vector3 exit = _positioner.GetWorldPosition(burrow.ExitHole);
-			Vector3 landing = _positioner.GetWorldPosition(burrow.To);
+			Vector3 entry = _positioner.GetStandWorldPosition(burrow.From);
+			Vector3 exit = _positioner.GetStandWorldPosition(burrow.ExitHole);
+			Vector3 landing = _positioner.GetStandWorldPosition(burrow.To);
 
 			yield return Slide(entry, entry + down, burrowSinkDuration, 0, restScale, restScale * burrowScale);
 			transform.rotation = LookAlong(burrow.Direction);
@@ -264,12 +269,12 @@ namespace Game.Mowers
 			_scaleBeforeBurrow = restScale;
 			Vector3 shrunk = restScale * burrowScale;
 			Vector3 down = Vector3.down * burrowDepth;
-			Vector3 start = _positioner.GetWorldPosition(attempted[0].From);
+			Vector3 start = _positioner.GetStandWorldPosition(attempted[0].From);
 
 			for (int i = 0; i < attempted.Count - 1; i++)
 			{
 				PathSegment segment = attempted[i];
-				Vector3 to = _positioner.GetWorldPosition(segment.To);
+				Vector3 to = _positioner.GetStandWorldPosition(segment.To);
 
 				if (segment.Kind == MovementKind.Step)
 				{
@@ -283,9 +288,9 @@ namespace Game.Mowers
 			}
 
 			PathSegment burrow = attempted[attempted.Count - 1];
-			Vector3 entry = _positioner.GetWorldPosition(burrow.From);
-			Vector3 exit = _positioner.GetWorldPosition(burrow.ExitHole);
-			Vector3 bonk = exit + (_positioner.GetWorldPosition(burrow.To) - exit) * bonkDistance;
+			Vector3 entry = _positioner.GetStandWorldPosition(burrow.From);
+			Vector3 exit = _positioner.GetStandWorldPosition(burrow.ExitHole);
+			Vector3 bonk = exit + (_positioner.GetStandWorldPosition(burrow.To) - exit) * bonkDistance;
 
 			yield return Slide(entry, entry + down, burrowSinkDuration, 0, restScale, shrunk);
 			transform.rotation = LookAlong(burrow.Direction);

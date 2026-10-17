@@ -1,21 +1,25 @@
 using System;
 using System.Collections.Generic;
 using Game.Core;
+using Game.Input;
 using Game.Levels;
 using Game.Tiles;
 using Lawnmower.Model;
+using Unity.Burst;
 using Unity.Collections;
+using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 
 namespace Game.Terrain
 {
 	/// <summary>
-	/// Fills the holes the terrain leaves at a level's water tiles with one pond: a water surface, a floor under it and a
-	/// ripple simulation whose walls follow the terrain's shoreline. Wood tiles next to water are bridges, so the pond
-	/// runs under them. The surface and floor reach half a tile under the solid tiles around the pond, because the
-	/// terrain's banks are inset from the tile grid above its pivot height. Bumping into a water tile splashes it.
-	/// Sits under the terrain in the same space (tile (x, z) covers [x, x + 1] x [z, z + 1]), so it rises with it.
+	/// The sea every level sits in: one water surface reaching far past the screen on every side, a seabed under it and a
+	/// ripple simulation over the level whose walls follow the terrain's shoreline. Water tiles, empty tiles and the
+	/// space around the level are all the same sea. The seabed sits just under the terrain next to land and shelves off
+	/// into deep water away from it. Bumping into a water tile splashes it, and so does tapping open water.
+	/// Sits in the terrain's resting space (tile (x, z) covers [x, x + 1] x [z, z + 1]). The surface stays still while
+	/// the terrain rises through it in the level intro; the floor should be under the terrain so it rises with it.
 	/// </summary>
 	internal class PondManager : MonoBehaviour
 	{
@@ -23,12 +27,25 @@ namespace Game.Terrain
 		[Tooltip("The water: on the Water layer, with the ripple simulation and planar reflection")]
 		[SerializeField] private MeshFilter surface;
 		[SerializeField] private WaterRippleSimulation rippleSimulation;
+		[Tooltip("The seabed; under the terrain so it rises with it")]
 		[SerializeField] private MeshFilter floor;
 
 		[Tooltip("How far the water surface sits below the terrain top")]
 		[SerializeField] private float surfaceDepth = 0.08f;
-		[Tooltip("How far the floor sits below the terrain top")]
+		[Tooltip("How far the sea reaches past the level on every side, in tiles")]
+		[SerializeField] private float seaExtent = 100;
+		[Tooltip("How far the ripple simulation reaches past the level on every side, in tiles")]
+		[SerializeField] private float rippleMargin = 2.5f;
+
+		[Header("Floor")]
+		[Tooltip("How far the floor sits below the terrain top next to land")]
 		[SerializeField] private float floorDepth = 0.95f;
+		[Tooltip("How far the floor sits below the terrain top out at sea")]
+		[SerializeField] private float deepFloorDepth = 3;
+		[Tooltip("Distance from land, in tiles, where the floor starts shelving down and where it reaches the deep")]
+		[SerializeField] private Vector2 shelf = new Vector2(1, 4);
+		[Tooltip("Spacing of the floor's vertices around the level, in tiles")]
+		[SerializeField] private float floorSpacing = 0.25f;
 
 		[Header("Bump Splash")]
 		[Tooltip("How far into the water tile from the side the mower bumped, in tiles")]
@@ -36,28 +53,53 @@ namespace Game.Terrain
 		[SerializeField] private float splashRadius = 0.08f;
 		[SerializeField] private float splashStrength = 1.5f;
 
+		[Header("Tap Splash")]
+		[Tooltip("Furthest a touch can move and still count as a tap, in inches")]
+		[SerializeField] private float tapMaxDistanceInches = 0.15f;
+		[Tooltip("Longest a touch can last and still count as a tap, in seconds")]
+		[SerializeField] private float tapMaxDuration = 0.35f;
+		[SerializeField] private float tapSplashRadius = 0.08f;
+		[SerializeField] private float tapSplashStrength = 1.5f;
+
 		[Header("Event Channels")]
 		[SerializeField] private LevelDataEventChannel levelStartedEventChannel;
 
 		private readonly List<Action> _unsubscribes = new List<Action>();
 
 		private Level _level;
-		private Mesh _mesh;
+		private Mesh _surfaceMesh;
+		private Mesh _floorMesh;
 		private Texture2D _mask;
+		private Rect _rippleBounds;
+		private TapInput _tapInput;
+
+		/// <summary>The water surface's world height.</summary>
+		public float SurfaceHeight => transform.TransformPoint(new Vector3(0, settings.TopHeight - surfaceDepth, 0)).y;
 
 		#region Unity
 
 		private void Awake()
 		{
-			_mesh = new Mesh { name = "Pond" };
-			surface.sharedMesh = _mesh;
-			floor.sharedMesh = _mesh;
+			_surfaceMesh = new Mesh { name = "Sea" };
+			_floorMesh = new Mesh { name = "Seabed" };
+			surface.sharedMesh = _surfaceMesh;
+			floor.sharedMesh = _floorMesh;
+			BuildSurfaceMesh();
 			SetShowing(false);
+			_tapInput = new TapInput(tapMaxDistanceInches, tapMaxDuration);
 
 			levelStartedEventChannel.EventRaised += OnLevelStarted;
 #if UNITY_EDITOR
 			settings.Changed += OnSettingsChanged;
 #endif
+		}
+
+		private void Update()
+		{
+			if (_tapInput.Tick(out Vector2 screenPosition))
+			{
+				OnTapped(screenPosition);
+			}
 		}
 
 		private void OnDestroy()
@@ -68,7 +110,8 @@ namespace Game.Terrain
 #endif
 			Unsubscribe();
 
-			Destroy(_mesh);
+			Destroy(_surfaceMesh);
+			Destroy(_floorMesh);
 			if (_mask)
 			{
 				Destroy(_mask);
@@ -96,40 +139,79 @@ namespace Game.Terrain
 		}
 #endif
 
+		private void OnTapped(Vector2 screenPosition)
+		{
+			Camera camera = Camera.main;
+			if (camera == null || !rippleSimulation.isActiveAndEnabled)
+			{
+				return;
+			}
+
+			Ray ray = camera.ScreenPointToRay(screenPosition);
+			if (!new Plane(transform.up, new Vector3(0, SurfaceHeight, 0)).Raycast(ray, out float distance))
+			{
+				return;
+			}
+
+			Vector3 worldPosition = ray.GetPoint(distance);
+			Vector3 localPosition = transform.InverseTransformPoint(worldPosition);
+			if (IsOpenWater(new Vector2(localPosition.x, localPosition.z)))
+			{
+				rippleSimulation.Splash(worldPosition, tapSplashRadius, tapSplashStrength);
+			}
+		}
+
 		#endregion
 
 		#region Methods
 
+		/// <summary>Whether a point in the terrain's resting space is water the ripple simulation covers.</summary>
+		private bool IsOpenWater(Vector2 position)
+		{
+			if (_mask == null || !_rippleBounds.Contains(position))
+			{
+				return false;
+			}
+
+			Vector2 uv = Rect.PointToNormalized(_rippleBounds, position);
+			int x = Mathf.Min((int)(uv.x * _mask.width), _mask.width - 1);
+			int y = Mathf.Min((int)(uv.y * _mask.height), _mask.height - 1);
+			return _mask.GetPixelData<byte>(0)[x + y * _mask.width] > 127;
+		}
+
 		private void Build(Level level)
 		{
-			bool[,] pond = GetPondTiles(level);
 			bool[,] solid = new bool[level.Width, level.Depth];
 			foreach (GridVector position in level.Positions)
 			{
 				solid[position.x, position.y] = TerrainManager.IsSolid(level.GetTile(position).Kind);
 			}
 
-			bool[,] cells = GetPondCells(pond, solid, out RectInt cellBounds);
-			if (cellBounds.width == 0)
+			TerrainFootprint footprint = TerrainFootprint.Create(solid, settings.ConvexCornerRadius,
+				settings.ConcaveCornerRadius, Allocator.TempJob);
+
+			try
 			{
-				SetShowing(false);
-				return;
+				Vector2 centre = new Vector2(level.Width, level.Depth) / 2;
+				float surfaceHeight = settings.TopHeight - surfaceDepth;
+				surface.transform.localPosition = new Vector3(centre.x, surfaceHeight, centre.y);
+
+				BuildFloorMesh(footprint, level.Width, level.Depth, centre);
+				floor.transform.localPosition = Vector3.zero;
+
+				SetShowing(true);
+				Rect rippleBounds = new Rect(-rippleMargin, -rippleMargin, level.Width + rippleMargin * 2,
+					level.Depth + rippleMargin * 2);
+				rippleSimulation.Size = rippleBounds.size * LevelDimensions.TileSize;
+				_rippleBounds = rippleBounds;
+				BuildMask(footprint, rippleBounds, surfaceHeight);
+				rippleSimulation.Mask = _mask;
+				rippleSimulation.Clear();
 			}
-
-			// In tiles; a cell is half a tile
-			Rect bounds = new Rect(cellBounds.x * 0.5f, cellBounds.y * 0.5f, cellBounds.width * 0.5f,
-				cellBounds.height * 0.5f);
-			float surfaceHeight = settings.TopHeight - surfaceDepth;
-
-			BuildMesh(cells, bounds.center);
-			surface.transform.localPosition = new Vector3(bounds.center.x, surfaceHeight, bounds.center.y);
-			floor.transform.localPosition = new Vector3(bounds.center.x, settings.TopHeight - floorDepth, bounds.center.y);
-
-			SetShowing(true);
-			rippleSimulation.Size = bounds.size * LevelDimensions.TileSize;
-			BuildMask(cells, solid, bounds, surfaceHeight);
-			rippleSimulation.Mask = _mask;
-			rippleSimulation.Clear();
+			finally
+			{
+				footprint.Dispose();
+			}
 		}
 
 		private void SubscribeToBumps(Level level)
@@ -176,130 +258,86 @@ namespace Game.Terrain
 			floor.gameObject.SetActive(showing);
 		}
 
-		private static bool[,] GetPondTiles(Level level)
+		/// <summary>One quad, centred on the surface's transform, reaching <see cref="seaExtent"/> past any level.</summary>
+		private void BuildSurfaceMesh()
 		{
-			bool[,] pond = new bool[level.Width, level.Depth];
-			foreach (GridVector position in level.Positions)
+			float extent = seaExtent;
+			_surfaceMesh.SetVertices(new[]
 			{
-				pond[position.x, position.y] = level.GetTile(position).Kind == TileKind.Water;
-			}
-
-			foreach (GridVector position in level.Positions)
-			{
-				if (level.GetTile(position).Kind == TileKind.Wood && IsNextToWater(level, position))
-				{
-					pond[position.x, position.y] = true;
-				}
-			}
-
-			return pond;
-		}
-
-		private static bool IsNextToWater(Level level, GridVector position)
-		{
-			foreach (GridVector offset in new[] { new GridVector(1, 0), new GridVector(-1, 0), new GridVector(0, 1), new GridVector(0, -1) })
-			{
-				if (level.GetTile(position + offset)?.Kind == TileKind.Water)
-				{
-					return true;
-				}
-			}
-
-			return false;
+				new Vector3(-extent, 0, -extent), new Vector3(-extent, 0, extent),
+				new Vector3(extent, 0, extent), new Vector3(extent, 0, -extent),
+			});
+			_surfaceMesh.SetNormals(new[] { Vector3.up, Vector3.up, Vector3.up, Vector3.up });
+			_surfaceMesh.SetTriangles(new[] { 0, 1, 2, 0, 2, 3 }, 0);
+			_surfaceMesh.RecalculateBounds();
 		}
 
 		/// <summary>
-		/// The half-tile cells the pond covers: all of each pond tile, plus each quarter of a solid tile that borders the
-		/// pond (along a side or at a corner), where the terrain's inset bank would otherwise leave a gap.
+		/// A grid in the floor's parent space: fine around the level, where the floor shelves from just under the terrain
+		/// down to the deep, plus one row and column out to <see cref="seaExtent"/> on each side.
 		/// </summary>
-		private static bool[,] GetPondCells(bool[,] pond, bool[,] solid, out RectInt bounds)
+		private void BuildFloorMesh(TerrainFootprint footprint, int width, int depth, Vector2 centre)
 		{
-			int width = pond.GetLength(0);
-			int depth = pond.GetLength(1);
-			bool[,] cells = new bool[width * 2, depth * 2];
-			int2 min = new int2(int.MaxValue);
-			int2 max = new int2(int.MinValue);
+			float margin = shelf.y + floorSpacing;
+			using NativeArray<float> xs = GetFloorLines(-margin, width + margin, centre.x);
+			using NativeArray<float> zs = GetFloorLines(-margin, depth + margin, centre.y);
+			using NativeArray<float3> vertices = new NativeArray<float3>(xs.Length * zs.Length, Allocator.TempJob);
 
-			bool IsPond(int x, int z) => x >= 0 && z >= 0 && x < width && z < depth && pond[x, z];
-
-			for (int cz = 0; cz < depth * 2; cz++)
+			new FloorJob
 			{
-				for (int cx = 0; cx < width * 2; cx++)
+				Footprint = footprint,
+				Xs = xs,
+				Zs = zs,
+				Top = settings.TopHeight,
+				Depth = new float2(floorDepth, deepFloorDepth),
+				Shelf = shelf,
+				Vertices = vertices,
+			}.Schedule(vertices.Length, 64).Complete();
+
+			int[] triangles = new int[(xs.Length - 1) * (zs.Length - 1) * 6];
+			int t = 0;
+			for (int z = 0; z < zs.Length - 1; z++)
+			{
+				for (int x = 0; x < xs.Length - 1; x++)
 				{
-					int x = cx / 2;
-					int z = cz / 2;
-					int dx = cx % 2 == 0 ? -1 : 1;
-					int dz = cz % 2 == 0 ? -1 : 1;
-
-					bool covered = pond[x, z] ||
-					               (solid[x, z] && (IsPond(x + dx, z) || IsPond(x, z + dz) || IsPond(x + dx, z + dz)));
-					if (!covered)
-					{
-						continue;
-					}
-
-					cells[cx, cz] = true;
-					min = math.min(min, new int2(cx, cz));
-					max = math.max(max, new int2(cx, cz));
+					int a = x + z * xs.Length;
+					int b = a + xs.Length;
+					triangles[t++] = a;
+					triangles[t++] = b;
+					triangles[t++] = b + 1;
+					triangles[t++] = a;
+					triangles[t++] = b + 1;
+					triangles[t++] = a + 1;
 				}
 			}
 
-			bounds = min.x > max.x ? new RectInt() : new RectInt(min.x, min.y, max.x - min.x + 1, max.y - min.y + 1);
-			return cells;
+			_floorMesh.Clear();
+			_floorMesh.SetVertices(vertices);
+			_floorMesh.SetTriangles(triangles, 0);
+			_floorMesh.RecalculateNormals();
+			_floorMesh.RecalculateBounds();
 		}
 
-		/// <summary>Flat quads over the covered cells, centred on <paramref name="centre"/>. Shared by the surface and floor.</summary>
-		private void BuildMesh(bool[,] cells, Vector2 centre)
+		/// <summary>Evenly spaced lines from <paramref name="min"/> to <paramref name="max"/>, plus the sea's edges.</summary>
+		private NativeArray<float> GetFloorLines(float min, float max, float centre)
 		{
-			int width = cells.GetLength(0);
-			int depth = cells.GetLength(1);
-			int[,] vertexIndices = new int[width + 1, depth + 1];
-			List<Vector3> vertices = new List<Vector3>();
-			List<int> triangles = new List<int>();
-
-			int Vertex(int vx, int vz)
+			int count = Mathf.CeilToInt((max - min) / floorSpacing);
+			NativeArray<float> lines = new NativeArray<float>(count + 3, Allocator.TempJob);
+			lines[0] = centre - seaExtent;
+			for (int i = 0; i <= count; i++)
 			{
-				if (vertexIndices[vx, vz] == 0)
-				{
-					vertices.Add(new Vector3(vx * 0.5f - centre.x, 0, vz * 0.5f - centre.y));
-					vertexIndices[vx, vz] = vertices.Count;
-				}
-
-				return vertexIndices[vx, vz] - 1;
+				lines[i + 1] = Mathf.Lerp(min, max, (float)i / count);
 			}
 
-			for (int cz = 0; cz < depth; cz++)
-			{
-				for (int cx = 0; cx < width; cx++)
-				{
-					if (!cells[cx, cz])
-					{
-						continue;
-					}
-
-					int a = Vertex(cx, cz);
-					int b = Vertex(cx, cz + 1);
-					int c = Vertex(cx + 1, cz + 1);
-					int d = Vertex(cx + 1, cz);
-					triangles.AddRange(new[] { a, b, c, a, c, d });
-				}
-			}
-
-			Vector3[] normals = new Vector3[vertices.Count];
-			Array.Fill(normals, Vector3.up);
-
-			_mesh.Clear();
-			_mesh.SetVertices(vertices);
-			_mesh.SetNormals(normals);
-			_mesh.SetTriangles(triangles, 0);
-			_mesh.RecalculateBounds();
+			lines[count + 2] = centre + seaExtent;
+			return lines;
 		}
 
 		/// <summary>
-		/// Marks which ripple simulation texels are open water: inside the pond's cells and outside the terrain at the
-		/// water's surface, so ripples bounce off the real shoreline rather than the tile grid.
+		/// Marks which ripple simulation texels are open water: outside the terrain at the water's surface, so ripples
+		/// bounce off the real shoreline rather than the tile grid.
 		/// </summary>
-		private void BuildMask(bool[,] cells, bool[,] solid, Rect bounds, float surfaceHeight)
+		private void BuildMask(TerrainFootprint footprint, Rect bounds, float surfaceHeight)
 		{
 			Vector2Int resolution = rippleSimulation.Resolution;
 			if (_mask == null || _mask.width != resolution.x || _mask.height != resolution.y)
@@ -311,39 +349,76 @@ namespace Game.Terrain
 
 				_mask = new Texture2D(resolution.x, resolution.y, TextureFormat.R8, false, true)
 				{
-					name = "PondMask",
+					name = "SeaMask",
 					filterMode = FilterMode.Point,
 					wrapMode = TextureWrapMode.Clamp,
 				};
 			}
 
-			TerrainShape shape = settings.Shape;
-			TerrainFootprint footprint = TerrainFootprint.Create(solid, settings.ConvexCornerRadius,
-				settings.ConcaveCornerRadius, Allocator.Temp);
+			float margin = settings.Margin;
+			using NativeArray<byte> open = new NativeArray<byte>(resolution.x * resolution.y, Allocator.TempJob);
 
-			try
+			new MaskJob
 			{
-				byte[] open = new byte[resolution.x * resolution.y];
+				Footprint = footprint,
+				Shape = settings.Shape,
+				Bounds = new float4(bounds.xMin, bounds.yMin, bounds.width, bounds.height),
+				TerrainBounds = new float4(-margin, -margin, footprint.Width + margin, footprint.Depth + margin),
+				Resolution = new int2(resolution.x, resolution.y),
+				SurfaceHeight = surfaceHeight,
+				Open = open,
+			}.Schedule(open.Length, 256).Complete();
 
-				for (int v = 0; v < resolution.y; v++)
-				{
-					for (int u = 0; u < resolution.x; u++)
-					{
-						float2 p = new float2(bounds.xMin + (u + 0.5f) / resolution.x * bounds.width,
-							bounds.yMin + (v + 0.5f) / resolution.y * bounds.height);
+			_mask.SetPixelData(open, 0);
+			_mask.Apply();
+		}
 
-						bool isOpen = cells[(int)(p.x * 2), (int)(p.y * 2)] &&
-						              shape.Evaluate(new float3(p.x, surfaceHeight, p.y), footprint.Distance(p)) > 0;
-						open[u + v * resolution.x] = (byte)(isOpen ? 255 : 0);
-					}
-				}
+		#endregion
 
-				_mask.SetPixelData(open, 0);
-				_mask.Apply();
+		#region Jobs
+
+		[BurstCompile]
+		private struct FloorJob : IJobParallelFor
+		{
+			[ReadOnly] public TerrainFootprint Footprint;
+			[ReadOnly] public NativeArray<float> Xs;
+			[ReadOnly] public NativeArray<float> Zs;
+			public float Top;
+			/// <summary>Below the top: next to land, then out at sea.</summary>
+			public float2 Depth;
+			public float2 Shelf;
+			[WriteOnly] public NativeArray<float3> Vertices;
+
+			public void Execute(int index)
+			{
+				float2 p = new float2(Xs[index % Xs.Length], Zs[index / Xs.Length]);
+				float deep = math.smoothstep(Shelf.x, Shelf.y, Footprint.Distance(p));
+				Vertices[index] = new float3(p.x, Top - math.lerp(Depth.x, Depth.y, deep), p.y);
 			}
-			finally
+		}
+
+		/// <summary>Open water is outside the terrain at the water's surface; far from the level it always is.</summary>
+		[BurstCompile]
+		private struct MaskJob : IJobParallelFor
+		{
+			[ReadOnly] public TerrainFootprint Footprint;
+			public TerrainShape Shape;
+			/// <summary>Min x, min z, width, depth.</summary>
+			public float4 Bounds;
+			/// <summary>Min x, min z, max x, max z.</summary>
+			public float4 TerrainBounds;
+			public int2 Resolution;
+			public float SurfaceHeight;
+			[WriteOnly] public NativeArray<byte> Open;
+
+			public void Execute(int index)
 			{
-				footprint.Dispose();
+				int2 texel = new int2(index % Resolution.x, index / Resolution.x);
+				float2 p = Bounds.xy + ((float2)texel + 0.5f) / Resolution * Bounds.zw;
+
+				bool isOpen = math.any(p < TerrainBounds.xy) || math.any(p > TerrainBounds.zw) ||
+				              Shape.Evaluate(new float3(p.x, SurfaceHeight, p.y), Footprint.Distance(p)) > 0;
+				Open[index] = (byte)(isOpen ? 255 : 0);
 			}
 		}
 

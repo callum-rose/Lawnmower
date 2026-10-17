@@ -1,0 +1,1042 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bunny Heaven UX</title>
+<!--
+  HTML prototype of the in-game UI (Bunny Heaven kit), for trying changes before they go into Unity.
+
+  Source of truth for every number here: the Unity builders
+    Assets/UI/BunnyHeaven/Editor/KitPrefabBuilder.cs   (kit pieces)
+    Assets/Editor/MainMenu/MainMenuBuilder.cs          (main menu)
+    Assets/Editor/Screens/LevelSelectBuilder.cs        (level select)
+    Assets/Editor/Screens/SettingsBuilder.cs           (settings)
+    Assets/Editor/GameScreens/GameScreenBuilder.cs     (HUD, pause, complete, failed)
+  Units are canvas points (the 390x844 reference frame, CanvasScaler "Expand").
+  Unity UI rotations are counter-clockwise; CSS is clockwise, so the signs are flipped here.
+
+  The sprites and fonts are loaded straight from Assets/, so serve the repo root over HTTP (masks need it):
+    python3 -m http.server 8765   →   http://localhost:8765/docs/ux.html
+  The game backdrops in docs/ux/ come from Assets/Editor/GameScreens/UxCapture.cs.
+-->
+<style>
+@font-face { font-family: "Londrina Solid"; font-weight: 900; src: url("../Assets/UI/BunnyHeaven/Fonts/LondrinaSolid-Black.ttf"); }
+@font-face { font-family: "Shantell Sans"; font-weight: 400; src: url("../Assets/UI/BunnyHeaven/Fonts/ShantellSans-Regular.ttf"); }
+@font-face { font-family: "Shantell Sans"; font-weight: 700; src: url("../Assets/UI/BunnyHeaven/Fonts/ShantellSans-Bold.ttf"); }
+
+/* ---------- Theme (UiTheme / BunnyHeavenTheme.asset) ---------- */
+:root {
+  --yellow: #FFC94A; --yellow-shadow: #E9A92C;
+  --teal: #86CFD6; --teal-shadow: #5FB1BA;
+  --cream: #FFF7E3; --white: #FFFFFF;
+  --segment-track: #FBE7B5; --slider-track: #F1D79A;
+  --scrim: rgba(59, 42, 32, 0.5); --doodle: rgba(233, 169, 44, 0.55);
+  --green: #5DBB4C; --green-shadow: #3E8E35; --green-pale: #DFF5D6;
+  --blue: #4E8BE6; --blue-shadow: #3466B8;
+  --red: #EE4D64; --red-shadow: #C2364B;
+  --ink: #3B2A20; --ink-shadow: #2A1E17; --brown: #9A6A1E; --muted: #8A6A4F;
+  --tab-track: #F3B73A; /* LevelSelectBuilder.TabTrack, not a theme token */
+
+  --panel-bg: #f6f3ee; --panel-fg: #2b2622; --panel-line: #ddd5ca; --stage-bg: #e9e4dc;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --panel-bg: #211d1a; --panel-fg: #eee7df; --panel-line: #3a332d; --stage-bg: #161311; }
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  display: flex; background: var(--stage-bg); color: var(--panel-fg);
+  font: 13px/1.4 system-ui, -apple-system, sans-serif;
+}
+
+/* ---------- Tool panel ---------- */
+#panel {
+  width: 280px; flex: none; overflow-y: auto; padding: 14px 16px 24px;
+  background: var(--panel-bg); border-right: 1px solid var(--panel-line);
+}
+#panel h1 { font: 900 22px "Londrina Solid", sans-serif; letter-spacing: .03em; margin: 0 0 2px; }
+#panel h2 { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; opacity: .6; margin: 18px 0 6px; }
+#panel p { margin: 0 0 8px; opacity: .75; }
+#panel .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+#panel button, #panel select {
+  font: inherit; color: inherit; background: transparent; border: 1px solid var(--panel-line);
+  border-radius: 6px; padding: 5px 8px; text-align: left; cursor: pointer;
+}
+#panel button:hover { background: color-mix(in srgb, var(--panel-fg) 8%, transparent); }
+#panel button.on { background: var(--panel-fg); color: var(--panel-bg); }
+#panel select { width: 100%; }
+#panel label.row { display: flex; align-items: center; gap: 8px; margin: 4px 0; cursor: pointer; }
+#theme { display: grid; grid-template-columns: 26px 1fr 72px; gap: 4px 6px; align-items: center; }
+#theme input[type=color] { width: 26px; height: 22px; padding: 0; border: 1px solid var(--panel-line); border-radius: 4px; background: none; }
+#theme input[type=text] { font: 11px ui-monospace, monospace; width: 72px; padding: 2px 4px; color: inherit; background: transparent; border: 1px solid var(--panel-line); border-radius: 4px; }
+#theme span { font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#export { width: 100%; height: 120px; font: 11px ui-monospace, monospace; margin-top: 6px; color: inherit; background: transparent; border: 1px solid var(--panel-line); border-radius: 6px; }
+
+/* ---------- Stage / device ---------- */
+#stage { flex: 1; overflow: hidden; position: relative; }
+#device {
+  position: absolute; border-radius: 44px; overflow: hidden;
+  box-shadow: 0 0 0 10px #111, 0 20px 60px rgba(0, 0, 0, .35);
+  transform-origin: 0 0;
+}
+#device.square { border-radius: 6px; }
+#canvas { position: absolute; left: 0; top: 0; transform-origin: 0 0; overflow: hidden; }
+#guides { position: absolute; inset: 0; pointer-events: none; z-index: 1000; display: none; }
+#guides.on { display: block; }
+#guides .safe-guide { position: absolute; outline: 1px dashed rgba(255, 0, 120, .8); }
+
+/* ---------- Screens ---------- */
+.screen { position: absolute; inset: 0; display: none; overflow: hidden; }
+.screen.on { display: block; }
+.overlay-screen { z-index: 500; }
+.abs { position: absolute; }
+.safe { position: absolute; top: var(--st); bottom: var(--sb); left: var(--sl); right: var(--sr); }
+.safe48 { position: absolute; top: max(48px, var(--st)); bottom: var(--sb); left: var(--sl); right: var(--sr); }
+
+/* ScreenBackground: yellow + doodle pattern (AspectRatioFitter EnvelopeParent) */
+.bg { position: absolute; inset: 0; background: var(--yellow); }
+.bg::after {
+  content: ""; position: absolute; inset: 0; background: var(--doodle);
+  -webkit-mask: url("../Assets/UI/BunnyHeaven/Sprites/Patterns/DoodlePattern.png") center / cover no-repeat;
+          mask: url("../Assets/UI/BunnyHeaven/Sprites/Patterns/DoodlePattern.png") center / cover no-repeat;
+}
+
+/* ---------- Text (ThemedText) ---------- */
+.h { font-family: "Londrina Solid", sans-serif; font-weight: 900; white-space: nowrap; text-align: center; line-height: 1.2; }
+.b { font-family: "Shantell Sans", sans-serif; font-weight: 400; text-align: center; line-height: 1.25; }
+.bb { font-family: "Shantell Sans", sans-serif; font-weight: 700; text-align: center; line-height: 1.25; }
+/* The heading ink-shadow material: TMP underlay, dilated and dropped slightly. */
+.ink-shadow {
+  -webkit-text-stroke: .1em var(--ink); paint-order: stroke fill;
+  filter: drop-shadow(0 .055em 0 var(--ink));
+}
+
+/* ---------- Frames (FrameView): white sprite with baked ink outline, multiplied by the tint ---------- */
+:where(.framed) { position: relative; }
+.framed { isolation: isolate; }
+.fl { position: absolute; pointer-events: none; z-index: -1; isolation: isolate; }
+.fl::before, .fl::after { content: ""; position: absolute; inset: 0; }
+.fl::after { background: var(--tint); mix-blend-mode: multiply; }
+.fl.whole::before { background: var(--img) center / 100% 100% no-repeat; }
+.fl.whole::after { -webkit-mask: var(--img) center / 100% 100% no-repeat; mask: var(--img) center / 100% 100% no-repeat; }
+.fl.sliced::before {
+  border-style: solid; border-width: var(--bw); border-color: transparent;
+  border-image-source: var(--img); border-image-slice: var(--sl) fill; border-image-width: var(--bw);
+}
+.fl.sliced::after {
+  -webkit-mask-box-image-source: var(--img); -webkit-mask-box-image-slice: var(--sl) fill; -webkit-mask-box-image-width: var(--bw);
+}
+.fl.off { display: none; }
+
+.icon {
+  flex: none; background: var(--tint, var(--white));
+  -webkit-mask: var(--img) center / contain no-repeat; mask: var(--img) center / contain no-repeat;
+}
+
+/* ---------- Press feedback (PressScale: 0.92) ---------- */
+.press-target { transition: transform .12s cubic-bezier(.2, .7, .3, 1); }
+.pressed .press-target, .press-target.pressed { transform: scale(.92); }
+[data-btn] { cursor: pointer; user-select: none; -webkit-user-select: none; }
+[data-btn].disabled { pointer-events: none; }
+
+/* ---------- Kit pieces ---------- */
+.big-btn { display: block; }
+.big-btn .content { position: absolute; left: 24px; right: 24px; top: 0; bottom: 4px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+.round-btn { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.round-btn .circle { position: relative; display: grid; place-items: center; }
+.round-btn .label { color: var(--ink); letter-spacing: .04em; }
+
+.pill { display: inline-flex; align-items: center; }
+.chip { position: relative; display: grid; place-items: center; flex: none; }
+.list-row { display: flex; align-items: center; height: 58px; padding: 0 14px 0 8px; gap: 12px; }
+.list-row .label { flex: 1; text-align: left; letter-spacing: .03em; font-size: 21px; }
+.list-row .accessory { display: flex; align-items: center; justify-content: flex-end; }
+
+.seg { display: inline-flex; padding: 3px; gap: 2px; }
+.seg .s { position: relative; isolation: isolate; padding: 4px 12px; font-size: 16px; letter-spacing: .04em; color: var(--brown); cursor: pointer; }
+.seg .s.sel { color: var(--white); }
+
+.switch { position: relative; width: 56px; height: 32px; cursor: pointer; }
+.switch .knob-area { position: absolute; inset: 4px; }
+.switch .knob { position: absolute; top: 50%; width: 26px; height: 26px; margin-top: -13px; left: calc(100% - 26px); transition: left .12s ease-out; }
+.switch.off .knob { left: 0; }
+
+.slider { position: relative; width: 130px; height: 28px; cursor: pointer; touch-action: none; }
+.slider .track, .slider .fill { position: absolute; top: 7px; height: 14px; }
+.slider .track { left: 0; right: 0; }
+.slider .fill { left: 0; }
+.slider .handle { position: absolute; top: 0; width: 26px; height: 28px; margin-left: -13px; }
+
+/* ModalCardView: scrim + card that pops in (0.85 → 1, ease-out-back, .25s) */
+.modal { position: absolute; inset: 0; display: none; place-items: center; z-index: 50; }
+.modal.on { display: grid; }
+.modal .scrim { position: absolute; inset: 0; background: var(--scrim); }
+.modal .card { position: relative; display: flex; flex-direction: column; align-items: stretch; }
+.modal.on .scrim { animation: fade .25s ease-out both; }
+.modal.on .card { animation: pop .25s cubic-bezier(.34, 1.56, .64, 1) both; }
+@keyframes fade { from { opacity: 0; } }
+@keyframes pop { from { opacity: 0; transform: scale(.85); } }
+
+/* ToastView: fades in while rising 24pt */
+.toast { position: absolute; left: 0; right: 0; height: 60px; display: grid; place-items: center; pointer-events: none; opacity: 0; transform: translateY(24px); transition: opacity .18s ease-out, transform .18s ease-out; z-index: 80; }
+.toast.on { opacity: 1; transform: none; }
+.toast .body { display: inline-flex; padding: 10px 22px 12px; font-size: 17px; color: var(--ink); white-space: nowrap; }
+
+/* ---------- Main menu ---------- */
+#mm-title .line { position: absolute; left: 0; right: 0; height: 109px; line-height: 109px; font-size: 92px; letter-spacing: .04em; color: var(--white); }
+#mm-hero { background: center / contain no-repeat; }
+
+/* ---------- Game ---------- */
+.backdrop { position: absolute; inset: 0; background: var(--teal) center / cover no-repeat; }
+.backdrop.missing::after {
+  content: "No capture yet: run UxCapture (see Assets/Editor/GameScreens/UxCapture.cs)";
+  position: absolute; left: 20px; right: 20px; top: 45%; text-align: center; font: 14px system-ui; color: rgba(0, 0, 0, .45);
+}
+#hud-redo { transition: transform .22s ease-in-out, opacity .04s linear .18s; }
+#hud-redo.shown { transition: transform .22s ease-in-out, opacity .04s linear; }
+#hud-redo:not(.shown) { transform: translateX(76px); opacity: 0; pointer-events: none; }
+#hud-undo.disabled { opacity: .45; }
+#tutorial { transition: opacity .2s; }
+#tutorial:not(.on) { opacity: 0; }
+#tutorial.on .card-wrap { animation: pop .2s cubic-bezier(.34, 1.56, .64, 1) both; }
+#arrow-pad { display: none; }
+#arrow-pad.on { display: block; }
+
+#failed { position: absolute; inset: 0; display: none; z-index: 40; }
+#failed.on { display: block; }
+#failed.on .sheet { animation: slide-up .3s cubic-bezier(.2, .8, .3, 1) both; }
+@keyframes slide-up { from { transform: translateY(100%); } }
+
+/* ---------- Level select ---------- */
+#ls-scroll { position: absolute; left: 0; right: 0; top: 128px; bottom: 0; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; scrollbar-width: none; }
+#ls-scroll::-webkit-scrollbar { display: none; }
+#ls-content { position: relative; height: 680px; flex: none; margin-top: auto; }
+#ls-path { position: absolute; left: 0; bottom: 0; overflow: visible; }
+.node { position: absolute; }
+.node .body { position: absolute; inset: 0; }
+.node .number { position: absolute; left: 0; right: 0; top: 0; bottom: 3px; display: grid; place-items: center; line-height: 1; }
+.node .lock { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+@keyframes shake { 0%, 100% { transform: none; } 15% { transform: translateX(6px); } 30% { transform: translateX(-5px); } 45% { transform: translateX(4px); } 60% { transform: translateX(-2.5px); } 75% { transform: translateX(1.5px); } }
+.node.shake .body { animation: shake .35s linear; }
+.tab { position: relative; isolation: isolate; display: flex; align-items: center; justify-content: center; gap: 4px; cursor: pointer; }
+
+/* ---------- Settings ---------- */
+#st-list { position: absolute; left: 0; right: 0; top: 76px; bottom: 0; overflow-y: auto; scrollbar-width: none; }
+#st-list::-webkit-scrollbar { display: none; }
+#st-content { display: flex; flex-direction: column; gap: 9px; padding: 0 24px 24px; }
+#st-content .header { height: 19px; display: flex; align-items: flex-end; font-size: 16px; letter-spacing: .08em; color: var(--brown); text-align: left; }
+</style>
+</head>
+<body>
+
+<aside id="panel">
+  <h1>BUNNY HEAVEN UX</h1>
+  <p>Prototype of the Unity UI. Tap through it like the game; everything is plain HTML/CSS in <code>docs/ux.html</code>.</p>
+
+  <h2>Screen</h2>
+  <div class="grid" id="screen-buttons"></div>
+
+  <h2>Device</h2>
+  <select id="device-select"></select>
+  <label class="row"><input type="checkbox" id="guides-toggle"> Show safe area</label>
+
+  <h2>Game state</h2>
+  <label class="row">Backdrop
+    <select id="backdrop-select" style="flex:1">
+      <option value="game-level7.jpg">Level 7</option>
+      <option value="game-level1.jpg">Level 1</option>
+      <option value="game-failed.jpg">Failed</option>
+      <option value="game-complete.jpg">Complete</option>
+    </select>
+  </label>
+  <label class="row"><input type="checkbox" id="perfect-toggle" checked> Complete: perfect</label>
+  <label class="row"><input type="checkbox" id="newbest-toggle" checked> Complete: new best</label>
+  <label class="row"><input type="checkbox" id="next-toggle" checked> Complete: has next level</label>
+  <label class="row">Tutorial
+    <select id="tutorial-select" style="flex:1">
+      <option value="">Off</option>
+      <option value="swipe">Swipe</option>
+      <option value="arrows">Tap arrows</option>
+      <option value="mow">Mow the rest</option>
+    </select>
+  </label>
+  <p style="margin-top:6px">Tap the board to make a move; Undo/Redo follow it. Movement → Arrows in Settings shows the arrow pad.</p>
+
+  <h2>Theme</h2>
+  <div id="theme"></div>
+  <button id="export-btn" style="margin-top:8px">Export as UiTheme C#</button>
+  <textarea id="export" hidden readonly></textarea>
+</aside>
+
+<main id="stage">
+  <div id="device">
+    <div id="canvas">
+
+      <!-- =============== MAIN MENU (MainMenuBuilder, Figma 12:5) =============== -->
+      <section class="screen" data-screen="main">
+        <div class="bg"></div>
+        <div class="safe">
+          <!-- Title: Figma 30,58 330x197 from the safe top (47) -->
+          <div id="mm-title" class="abs" data-longpress style="left:50%;top:11px;width:330px;height:197px;margin-left:-165px">
+            <div class="line h ink-shadow" style="top:0">BUNNY</div>
+            <div class="line h ink-shadow" style="top:88px">HEAVEN</div>
+          </div>
+          <!-- Ribbon: 183x45, Unity z -3° -->
+          <div class="abs" data-frame="Ribbon" data-fill="red" data-shadow="red-shadow"
+               style="left:50%;top:211px;width:183px;height:45px;transform:translateX(-50%) rotate(3deg)">
+            <div class="abs h" style="inset:0 0 2px 0;display:grid;place-items:center;font-size:20px;letter-spacing:.06em;color:var(--white)">A MOWING PUZZLE</div>
+          </div>
+          <!-- Hero bunny: full width, 360 tall, centred 25pt below the safe middle (a live 3D render in game) -->
+          <div id="mm-hero" class="abs" style="left:0;right:0;top:calc(50% + 25px - 180px);height:360px"></div>
+
+          <div class="abs big-btn" data-btn="play" data-color="green" data-icon="play"
+               style="left:50%;bottom:140px;width:300px;height:70px;margin-left:-150px">PLAY · LEVEL 1</div>
+
+          <!-- Round buttons: tops 114pt above the safe bottom, centres at x 89 / 187 / 293 -->
+          <div class="abs round-btn" data-btn="levels" data-color="blue" data-icon="levels" style="top:calc(100% - 114px);left:calc(50% - 106px);transform:translateX(-50%)">LEVELS</div>
+          <div class="abs round-btn" data-btn="settings" data-color="red" data-icon="settings" style="top:calc(100% - 114px);left:calc(50% - 8px);transform:translateX(-50%)">SETTINGS</div>
+          <div class="abs round-btn" data-btn="howtoplay" data-color="green" data-icon="howtoplay" style="top:calc(100% - 114px);left:calc(50% + 98px);transform:translateX(-50%)">HOW TO PLAY</div>
+
+          <div class="toast" style="top:calc(50% + 101.5px - 30px)"><div class="body bb" data-frame="Pill" data-fill="white" data-shadow="ink-shadow"></div></div>
+        </div>
+      </section>
+
+      <!-- =============== LEVEL SELECT (LevelSelectBuilder, Figma 12:204) =============== -->
+      <section class="screen" data-screen="levels">
+        <div class="bg"></div>
+        <div class="safe48">
+          <div class="abs round-btn" data-btn="back" data-color="white" data-icon="back" data-size="48" data-icon-size="22" style="left:20px;top:6px"></div>
+          <div class="abs h ink-shadow" style="left:50%;top:4px;width:200px;height:50px;margin-left:-100px;line-height:50px;font-size:42px;letter-spacing:.04em;color:var(--white)">LEVELS</div>
+          <div id="ls-pill" class="abs pill" data-chip="green" data-icon="check" data-shadow="yellow-shadow" style="right:18px;top:14px;height:36px">0/10</div>
+
+          <div id="ls-tabs" class="abs" data-frame="SegmentTrack" data-fill="tab-track" data-shadow="none" data-overhang="4 4 4 4"
+               style="left:50%;top:80px;width:350px;height:40px;margin-left:-175px;display:flex;padding:4px;gap:2px"></div>
+
+          <div id="ls-scroll"><div id="ls-content"><svg id="ls-path"></svg></div></div>
+        </div>
+        <div class="toast" style="bottom:110px"><div class="body bb" data-frame="Pill" data-fill="white" data-shadow="ink-shadow"></div></div>
+      </section>
+
+      <!-- =============== GAME (GameScreenBuilder) =============== -->
+      <section class="screen" data-screen="game">
+        <div class="backdrop" id="backdrop" data-btn="board"></div>
+
+        <div class="safe" id="game-safe">
+          <!-- Tutorial hint: 342x64 card, 94pt below the safe top -->
+          <div id="tutorial" class="abs" style="left:0;right:0;top:94px;height:64px;pointer-events:none">
+            <div class="card-wrap abs" data-frame="Card" data-fill="white" data-shadow="teal-shadow" style="left:50%;top:0;width:342px;height:64px;margin-left:-171px">
+              <div class="abs" style="inset:10px 14px;display:flex;align-items:center;gap:12px;margin-left:-6px">
+                <div class="chip" id="tut-chip" data-color="green" data-icon="move" data-size="40" data-icon-size="22"></div>
+                <div class="bb" id="tut-text" style="flex:1;text-align:left;font-size:17px;color:var(--ink);line-height:1.1">Swipe on the lawn to move the bunny</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Arrow pad (Movement: Arrows): 176x168, 131pt above the safe bottom -->
+          <div id="arrow-pad" class="abs" style="left:50%;bottom:131px;width:176px;height:168px;margin-left:-88px">
+            <div class="abs round-btn" data-btn="move" data-color="white-on-teal" data-icon="next" data-size="54" data-icon-size="26" data-rotate="-90" style="left:calc(50% - 27px);top:calc(50% - 27px - 58px)"></div>
+            <div class="abs round-btn" data-btn="move" data-color="white-on-teal" data-icon="next" data-size="54" data-icon-size="26" data-rotate="90" style="left:calc(50% - 27px);top:calc(50% - 27px + 58px)"></div>
+            <div class="abs round-btn" data-btn="move" data-color="white-on-teal" data-icon="next" data-size="54" data-icon-size="26" data-rotate="180" style="left:calc(50% - 27px - 58px);top:calc(50% - 27px)"></div>
+            <div class="abs round-btn" data-btn="move" data-color="white-on-teal" data-icon="next" data-size="54" data-icon-size="26" style="left:calc(50% - 27px + 58px);top:calc(50% - 27px)"></div>
+          </div>
+
+          <!-- Controls: 62pt circles, 18pt margin, 14pt gap; Redo hides behind Undo -->
+          <div class="abs round-btn" id="hud-redo" data-btn="redo" data-color="yellow" data-icon="redo" data-size="62" style="right:94px;bottom:18px"></div>
+          <div class="abs round-btn" id="hud-undo" data-btn="undo" data-color="yellow" data-icon="undo" data-size="62" style="right:18px;bottom:18px"></div>
+          <div class="abs round-btn" data-btn="restart" data-color="blue" data-icon="restart" data-size="62" style="right:18px;bottom:94px"></div>
+        </div>
+
+        <!-- Pause: SafeCornerAnchor on the full screen (position set in script) -->
+        <div class="abs round-btn" id="hud-pause" data-btn="pause" data-color="white-on-teal" data-icon="pause" data-size="62"></div>
+
+        <!-- Level Failed (Figma 12:1106) -->
+        <div id="failed">
+          <div class="abs" id="fail-annotation" style="width:10px;height:10px">
+            <div class="icon abs" data-icon="next" style="width:30px;height:30px;left:-10px;bottom:69px;transform:rotate(90deg)"></div>
+            <div class="abs bb" style="width:140px;height:30px;left:-19px;bottom:103px;font-size:22px;color:var(--white);transform:rotate(-6deg)">too short!</div>
+          </div>
+          <div class="sheet abs" style="left:0;right:0;bottom:0;height:290px">
+            <div class="abs" data-frame="ModalCard" data-fill="white" data-shadow="ink-shadow" data-overhang="8 8 8 40"
+                 style="left:-2px;right:-2px;top:28px;bottom:0;display:flex;flex-direction:column;align-items:center;gap:14px;padding:44px 26px 34px">
+              <div class="b" style="width:320px;font-size:16px;color:var(--ink)">You mowed a finished patch down to the dirt. Undo and try another route.</div>
+              <div class="big-btn" data-btn="fail-undo" data-color="yellow" data-icon="undo" style="width:342px;height:66px;--fs:28px">UNDO LAST MOVE</div>
+              <div style="display:flex;gap:10px">
+                <div class="big-btn" data-btn="restart" data-color="blue" data-icon="restart" style="width:166px;height:50px;--fs:20px;--is:20px">RESTART</div>
+                <div class="big-btn" data-btn="levels" data-color="red" data-icon="levels" style="width:166px;height:50px;--fs:20px;--is:20px">LEVELS</div>
+              </div>
+            </div>
+            <div class="abs" data-frame="Ribbon" data-fill="red" data-shadow="red-shadow"
+                 style="left:50%;top:0;width:196px;height:65px;margin-left:-98px;transform:rotate(3deg)">
+              <div class="abs h" style="inset:0 0 4px;display:grid;place-items:center;font-size:40px;letter-spacing:.04em;color:var(--white)">SCALPED!</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pause card -->
+        <div class="modal" id="pause-card">
+          <div class="scrim" data-btn="resume"></div>
+          <div class="card" data-frame="ModalCard" data-fill="white" data-shadow="ink-shadow" style="padding:22px 22px 24px;gap:12px">
+            <div class="b" style="font-size:20px;color:var(--muted)">Level 1</div>
+            <div style="display:flex;flex-direction:column;gap:12px;align-items:center">
+              <div class="big-btn" data-btn="resume" data-color="green" data-icon="play" style="width:266px;height:66px;--fs:28px">RESUME</div>
+              <div style="display:flex;gap:6px;align-items:flex-start">
+                <div class="round-btn" data-btn="restart" data-color="blue" data-icon="restart" data-size="52" data-icon-size="23" style="width:62px;--fs:14px">RESTART</div>
+                <div class="round-btn" data-btn="settings" data-color="yellow" data-icon="settings" data-size="52" data-icon-size="23" style="width:62px;--fs:14px">SETTINGS</div>
+                <div class="round-btn" data-btn="levels" data-color="green" data-icon="levels" data-size="52" data-icon-size="23" style="width:62px;--fs:14px">LEVELS</div>
+                <div class="round-btn" data-btn="menu" data-color="red" data-icon="menu" data-size="52" data-icon-size="23" style="width:62px;--fs:14px">MENU</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Level Complete (Figma 12:910) -->
+        <div class="modal" id="complete-card">
+          <div class="scrim"></div>
+          <div class="card" data-frame="ModalCard" data-fill="white" data-shadow="ink-shadow" style="width:310px;padding:14px 14px 22px;gap:14px;align-items:center">
+            <div id="cc-banner" data-frame="Banner" data-fill="green" data-shadow="none" data-overhang="8 8 8 8"
+                 style="width:282px;height:250px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:16px 0">
+              <div class="h" style="font-size:30px;letter-spacing:.08em;color:var(--white);line-height:36px">LAWN</div>
+              <div class="h ink-shadow" id="cc-headline" style="font-size:60px;letter-spacing:.03em;color:var(--white);line-height:72px">PERFECT!</div>
+              <div style="position:relative;width:70px;height:76px;flex:none">
+                <div id="cc-badge" class="abs" data-frame="Circle" data-fill="yellow" data-shadow="yellow-shadow" style="left:0;top:3px;width:70px;height:70px;display:grid;place-items:center">
+                  <div class="icon" data-icon="check" data-tint="ink" style="width:36px;height:36px"></div>
+                </div>
+                <div id="cc-par" class="abs bb" style="left:-40px;right:-40px;top:0;bottom:0;display:grid;place-items:center;font-size:18px;color:var(--green-pale)">Par: 7 moves</div>
+              </div>
+              <div class="h" id="cc-level" style="font-size:22px;letter-spacing:.06em;color:var(--green-pale);line-height:26px">LEVEL 1</div>
+            </div>
+            <div style="display:flex;gap:22px">
+              <div class="stat" data-label="MOVES" data-value="24"></div>
+              <div class="stat" data-label="UNDOS" data-value="3"></div>
+              <div class="stat" data-label="TIME" data-value="1:42"></div>
+            </div>
+            <div class="bb" id="cc-best" style="font-size:15px;color:var(--red)">New best: 24 moves!</div>
+            <div class="big-btn" id="cc-next" data-btn="next" data-color="green" data-icon="next" style="width:282px;height:66px;--fs:28px">NEXT LEVEL</div>
+            <div style="display:flex;gap:10px">
+              <div class="big-btn" data-btn="restart" data-color="blue" data-icon="restart" style="width:136px;height:50px;--fs:20px;--is:20px">REPLAY</div>
+              <div class="big-btn" data-btn="levels" data-color="red" data-icon="levels" style="width:136px;height:50px;--fs:20px;--is:20px">LEVELS</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="toast" style="bottom:300px"><div class="body bb" data-frame="Pill" data-fill="white" data-shadow="ink-shadow"></div></div>
+      </section>
+
+      <!-- =============== SETTINGS OVERLAY (SettingsBuilder, Figma 12:770) =============== -->
+      <section class="screen overlay-screen" data-screen="settings">
+        <div class="bg"></div>
+        <div class="safe48">
+          <div class="abs round-btn" data-btn="close-settings" data-color="white" data-icon="back" data-size="48" data-icon-size="22" style="left:20px;top:6px"></div>
+          <div class="abs h ink-shadow" style="left:50%;top:0;width:260px;height:57px;margin-left:-130px;line-height:57px;font-size:48px;letter-spacing:.04em;color:var(--white)">SETTINGS</div>
+
+          <div id="st-list"><div id="st-content">
+            <div class="header h">DISPLAY</div>
+            <div class="list-row" data-icon="sparkle" data-chip="blue" data-label="GRAPHICS"><div class="seg" data-labels="LOW,HIGH" data-selected="1"></div></div>
+            <div class="header h">CONTROLS</div>
+            <div class="list-row" data-icon="move" data-chip="red" data-label="MOVEMENT"><div class="seg" id="movement-seg" data-labels="SWIPE,ARROWS" data-selected="0"></div></div>
+            <div class="list-row" data-icon="vibrate" data-chip="green" data-label="HAPTICS"><div class="switch"></div></div>
+            <div class="header h">AUDIO</div>
+            <div class="list-row" data-icon="music" data-chip="blue" data-label="MUSIC"><div class="slider" data-value="0.6"></div></div>
+            <div class="list-row" data-icon="sound" data-chip="red" data-label="SOUNDS"><div class="slider" data-value="0.6"></div></div>
+            <div class="header h">GAME</div>
+            <div class="list-row" data-btn="replay-tutorial" data-icon="howtoplay" data-chip="green" data-label="REPLAY TUTORIAL" data-chevron></div>
+            <div class="list-row" data-btn="reset" data-icon="trash" data-chip="red" data-label="RESET PROGRESS" data-chevron data-text="red"></div>
+            <div style="height:4px"></div>
+            <div class="b" style="font-size:12px;color:var(--brown);line-height:1.05">Sounds: Kenney (kenney.nl), CC0  ·  Fonts: Londrina Solid &amp; Shantell Sans, SIL Open Font License 1.1</div>
+            <div class="b" style="font-size:13px;color:var(--brown)">v0.1</div>
+          </div></div>
+        </div>
+
+        <div class="modal" id="reset-modal">
+          <div class="scrim"></div>
+          <div class="card" data-frame="ModalCard" data-fill="white" data-shadow="ink-shadow" style="width:310px;padding:22px 14px;gap:14px">
+            <div class="h" style="font-size:36px;letter-spacing:.02em;color:var(--red)">RESET PROGRESS?</div>
+            <div class="b" style="font-size:16px;color:var(--muted)">Every level's best, perfect and unlock will be wiped. This can't be undone.</div>
+            <div style="display:flex;gap:10px;justify-content:center">
+              <div class="big-btn" data-btn="keep" data-color="blue" style="width:132px;height:50px;--fs:22px;--pad:10px">KEEP</div>
+              <div class="big-btn" data-btn="confirm-reset" data-color="red" data-icon="trash" style="width:132px;height:50px;--fs:22px;--is:20px;--pad:10px">RESET</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="toast" style="bottom:110px"><div class="body bb" data-frame="Pill" data-fill="white" data-shadow="ink-shadow"></div></div>
+      </section>
+
+    </div>
+    <div id="guides"><div class="safe-guide"></div></div>
+  </div>
+</main>
+
+<script>
+const SPRITES = "../Assets/UI/BunnyHeaven/Sprites/";
+const CAPTURES = "ux/";
+const REF_W = 390, REF_H = 844;
+
+// ---------- Kit data (KitAssets.Borders: left, bottom, right, top in points; sprites are 3x) ----------
+const FRAMES = {
+  Card: [40, 34, 40, 30], ModalCard: [46, 46, 46, 46], Button: [46, 40, 46, 36], ButtonSmall: [36, 30, 36, 28],
+  Pill: [34, 32, 34, 28], Ribbon: [20, 20, 20, 20], Banner: [40, 40, 40, 40],
+  SegmentTrack: [26, 20, 26, 20], SegmentOn: [22, 18, 22, 18], Toggle_Track: [20, 18, 20, 18], Slider_Track: [10, 0, 10, 0],
+  Circle: null, Chip: null, StatCircle: null, Toggle_Knob: null, Slider_Knob: null,
+};
+const SPRITE_FILE = { Toggle_Track: "Toggle_Track", Slider_Track: "Slider_Track", Toggle_Knob: "Toggle_Knob", Slider_Knob: "Slider_Knob" };
+const OVERHANG = [8, 8, 8, 12]; // left, top, right, bottom
+
+// UiTheme.GetPalette: fill, shadow, content
+const PALETTES = {
+  green: ["green", "green-shadow", "white"], yellow: ["yellow", "yellow-shadow", "ink"],
+  blue: ["blue", "blue-shadow", "white"], red: ["red", "red-shadow", "white"],
+  white: ["white", "yellow-shadow", "ink"], "white-on-teal": ["white", "teal-shadow", "ink"],
+};
+
+// Physical size in points, safe insets, and whether there's a central notch/island (SafeCornerAnchor).
+const DEVICES = [
+  { name: "Figma frame 390×844", w: 390, h: 844, top: 47, bottom: 34, notch: true },
+  { name: "iPhone 15 / 16", w: 393, h: 852, top: 59, bottom: 34, notch: true },
+  { name: "iPhone 15 / 16 Pro Max", w: 430, h: 932, top: 59, bottom: 34, notch: true },
+  { name: "iPhone SE", w: 375, h: 667, top: 20, bottom: 0, notch: false },
+  { name: "Pixel 8", w: 412, h: 915, top: 24, bottom: 0, notch: false },
+  { name: "iPad mini", w: 744, h: 1133, top: 24, bottom: 20, notch: false, square: true },
+];
+
+// Level select demo states, level 1 first (LevelNodeState).
+const LEVELS = ["perfect", "perfect", "completed", "next", "locked", "locked", "locked", "locked", "locked", "locked"];
+const NODE_CENTRES = [[110, 772], [205, 724], [292, 662], [248, 588], [146, 540], [90, 462], [176, 398], [284, 350], [246, 268], [136, 226]];
+const WORLDS = [["BACK GARDEN", false, 124], ["THE PARK", true, 110], ["SEASIDE", true, 104]];
+
+const cv = token => `var(--${token})`;
+const $ = (sel, root = document) => root.querySelector(sel);
+const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
+const el = (tag, cls, style) => { const e = document.createElement(tag); if (cls) e.className = cls; if (style) e.style.cssText = style; return e; };
+
+// ---------- Builders ----------
+function frameLayer(name, tint, overhang, shadow) {
+  const file = SPRITE_FILE[name] || `Frame_${name}${shadow ? "_Shadow" : ""}`;
+  const border = FRAMES[name];
+  const [l, t, r, b] = overhang;
+  const layer = el("div", `fl ${border ? "sliced" : "whole"} ${shadow ? "shadow" : "fill"}`,
+    `left:${-l}px;top:${-t}px;right:${-r}px;bottom:${-b}px`);
+  layer.style.setProperty("--img", `url("${SPRITES}Frames/${file}.png")`);
+  layer.style.setProperty("--tint", tint);
+  if (border) {
+    const [bl, bb, br, bt] = border;
+    layer.style.setProperty("--sl", `${bt * 3} ${br * 3} ${bb * 3} ${bl * 3}`);
+    layer.style.setProperty("--bw", `${bt}px ${br}px ${bb}px ${bl}px`);
+  }
+  return layer;
+}
+
+/** FrameView: an offset shadow, then the tinted body, behind the element's content. */
+function frame(target, name, fill, shadow, overhang = OVERHANG) {
+  target.classList.add("framed");
+  target.style.setProperty("--fill", cv(fill));
+  if (shadow) target.style.setProperty("--shadow", cv(shadow));
+  const layers = [];
+  if (shadow) layers.push(frameLayer(name, "var(--shadow)", overhang, true));
+  layers.push(frameLayer(name, "var(--fill)", overhang, false));
+  target.prepend(...layers);
+}
+
+function setFrameColors(target, fill, shadow) {
+  if (fill) target.style.setProperty("--fill", cv(fill));
+  if (shadow) target.style.setProperty("--shadow", cv(shadow));
+}
+
+function icon(name, size, tint, rotate = 0) {
+  const i = el("div", "icon", `width:${size}px;height:${size}px;--tint:${cv(tint)}`);
+  i.style.setProperty("--img", `url("${SPRITES}Icons/Icon_${name}.png")`);
+  if (rotate) i.style.transform = `rotate(${rotate}deg)`;
+  return i;
+}
+
+function chip(size, color, iconName, iconSize, target = el("div", "chip")) {
+  target.classList.add("chip");
+  target.style.width = target.style.height = `${size}px`;
+  frame(target, "Chip", color, null, Array(4).fill(8 * size / 40));
+  target.append(icon(iconName, iconSize, "white"));
+  return target;
+}
+
+function buildBigButton(b) {
+  const [fill, shadow, content] = PALETTES[b.dataset.color];
+  const text = b.textContent.trim();
+  b.textContent = "";
+  b.classList.add("press-target");
+  frame(b, "Button", fill, shadow);
+  const pad = b.style.getPropertyValue("--pad");
+  const row = el("div", "content", pad ? `left:${pad};right:${pad}` : "");
+  if (b.dataset.icon) row.append(icon(b.dataset.icon, parseFloat(b.style.getPropertyValue("--is")) || 24, content));
+  const label = el("div", "h", `font-size:${b.style.getPropertyValue("--fs") || "30px"};letter-spacing:.03em;color:${cv(content)}`);
+  label.textContent = text;
+  row.append(label);
+  b.append(row);
+}
+
+function buildRoundButton(b) {
+  const [fill, shadow, content] = PALETTES[b.dataset.color];
+  const size = +(b.dataset.size || 64);
+  const text = b.textContent.trim();
+  b.textContent = "";
+  const circle = el("div", "circle press-target", `width:${size}px;height:${size}px`);
+  frame(circle, "Circle", fill, shadow);
+  circle.append(icon(b.dataset.icon, +(b.dataset.iconSize || 28), content, +(b.dataset.rotate || 0)));
+  b.append(circle);
+  if (text) {
+    const label = el("div", "label h", `font-size:${b.style.getPropertyValue("--fs") || "16px"}`);
+    label.textContent = text;
+    b.append(label);
+  }
+}
+
+function buildPill(p) {
+  const text = p.textContent.trim();
+  p.textContent = "";
+  p.style.padding = "5px 14px 5px 5px";
+  p.style.gap = "6px";
+  frame(p, "Pill", "white", p.dataset.shadow || "teal-shadow");
+  const c = chip(26, p.dataset.chip, p.dataset.icon, 14);
+  c.querySelector(".fl").style.inset = "-7.2px"; // the overhang keeps the kit's 36pt build size
+  const label = el("div", "h", "font-size:18px;letter-spacing:.02em;color:var(--ink)");
+  label.textContent = text;
+  p.append(c, label);
+}
+
+function buildListRow(r) {
+  const accessory = el("div", "accessory");
+  accessory.append(...r.childNodes);
+  frame(r, "Card", "white", "yellow-shadow");
+  r.classList.add("press-target");
+  const label = el("div", "label h", `color:${cv(r.dataset.text || "ink")}`);
+  label.textContent = r.dataset.label;
+  r.append(chip(40, r.dataset.chip, r.dataset.icon, 20), label, accessory);
+  if (r.hasAttribute("data-chevron")) accessory.append(icon("next", 22, r.dataset.text || "ink"));
+}
+
+function buildSegment(s) {
+  frame(s, "SegmentTrack", "segment-track", null, [8, 8, 8, 8]);
+  s.dataset.labels.split(",").forEach((text, i) => {
+    const seg = el("div", "s h");
+    seg.textContent = text;
+    frame(seg, "SegmentOn", "green", null, [8, 8, 8, 8]);
+    seg.addEventListener("click", () => selectSegment(s, i));
+    s.append(seg);
+  });
+  selectSegment(s, +s.dataset.selected, true);
+}
+
+function selectSegment(s, index, silent) {
+  $$(".s", s).forEach((seg, i) => {
+    seg.classList.toggle("sel", i === index);
+    seg.querySelector(".fl").classList.toggle("off", i !== index);
+  });
+  s.dataset.selected = index;
+  if (!silent) s.dispatchEvent(new CustomEvent("change", { detail: index }));
+}
+
+function buildSwitch(sw) {
+  const track = frameLayer("Toggle_Track", "var(--track)", [4, 4, 4, 4], false);
+  track.style.zIndex = 0;
+  const area = el("div", "knob-area");
+  const knob = el("div", "knob framed");
+  knob.append(frameLayer("Toggle_Knob", cv("white"), [0, 0, 0, 0], false));
+  area.append(knob);
+  sw.append(track, area);
+  const apply = () => sw.style.setProperty("--track", cv(sw.classList.contains("off") ? "slider-track" : "green"));
+  sw.addEventListener("click", () => { sw.classList.toggle("off"); apply(); });
+  apply();
+}
+
+function buildSlider(s) {
+  const track = el("div", "track framed"); track.append(frameLayer("Slider_Track", cv("slider-track"), [0, 0, 0, 0], false));
+  const fill = el("div", "fill framed"); fill.append(frameLayer("Slider_Track", cv("green"), [0, 0, 0, 0], false));
+  const handle = el("div", "handle framed"); handle.append(frameLayer("Slider_Knob", cv("yellow"), [0, 0, 0, 0], false));
+  s.append(track, fill, handle);
+  const set = v => {
+    v = Math.min(1, Math.max(0, v));
+    s.dataset.value = v;
+    const x = 12 + v * (130 - 24);
+    fill.style.width = `${x}px`;
+    handle.style.left = `${x}px`;
+  };
+  const fromEvent = e => {
+    const rect = s.getBoundingClientRect();
+    const scale = rect.width / 130;
+    set(((e.clientX - rect.left) / scale - 12) / 106);
+  };
+  s.addEventListener("pointerdown", e => { s.setPointerCapture(e.pointerId); fromEvent(e); });
+  s.addEventListener("pointermove", e => { if (s.hasPointerCapture(e.pointerId)) fromEvent(e); });
+  set(+s.dataset.value);
+}
+
+function buildStat(s) {
+  s.style.cssText = "display:flex;flex-direction:column;align-items:center;gap:4px";
+  const circle = el("div", "", "width:62px;height:62px;display:grid;place-items:center");
+  frame(circle, "StatCircle", "cream", null, [8, 8, 8, 8]);
+  const value = el("div", "h value", "font-size:26px;color:var(--ink);line-height:1");
+  value.textContent = s.dataset.value;
+  circle.append(value);
+  const label = el("div", "h", "font-size:14px;letter-spacing:.05em;color:var(--muted);line-height:1.1");
+  label.textContent = s.dataset.label;
+  s.append(circle, label);
+}
+
+// ---------- Level select ----------
+function catmullRom(p0, p1, p2, p3, t) {
+  const t2 = t * t, t3 = t2 * t;
+  return [0, 1].map(k => 0.5 * ((2 * p1[k]) + (-p0[k] + p2[k]) * t + (2 * p0[k] - 5 * p1[k] + 4 * p2[k] - p3[k]) * t2 + (-p0[k] + 3 * p1[k] - 3 * p2[k] + p3[k]) * t3));
+}
+
+function buildLevelSelect() {
+  const content = $("#ls-content");
+  const svg = $("#ls-path");
+  const H = 680, BOTTOM = 26;
+  // LevelSelectBuilder: x from the centre, y up from the content bottom.
+  const pts = NODE_CENTRES.map(([x, y]) => [x - 195, 804 - y + BOTTOM]);
+  const curve = [];
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[Math.max(i - 1, 0)], p3 = pts[Math.min(i + 2, pts.length - 1)];
+    for (let s = 0; s < 12; s++) curve.push(catmullRom(p0, pts[i], pts[i + 1], p3, s / 12));
+  }
+  curve.push(pts[pts.length - 1]);
+  const d = "M" + curve.map(([x, y]) => `${x.toFixed(1)},${(H - y).toFixed(1)}`).join("L");
+  svg.setAttribute("width", 1); svg.setAttribute("height", H);
+  svg.style.left = "50%";
+  svg.innerHTML = `<path d="${d}" fill="none" stroke="var(--yellow-shadow)" stroke-width="26" stroke-linejoin="round"/>
+    <path d="${d}" fill="none" stroke="var(--white)" stroke-width="7" stroke-dasharray="7 9" stroke-linejoin="round"/>`;
+
+  pts.forEach(([x, y], i) => content.append(buildNode(i + 1, LEVELS[i], x, y)));
+
+  const perfects = LEVELS.filter(s => s === "perfect").length;
+  $("#ls-pill .h").textContent = `${perfects}/${LEVELS.length}`;
+
+  const tabs = $("#ls-tabs");
+  WORLDS.forEach(([name, locked, width], i) => {
+    const tab = el("div", "tab press-target", `width:${width}px`);
+    tab.append(frameLayer("SegmentOn", cv("white"), [4, 4, 4, 4], false));
+    if (i !== 0) tab.querySelector(".fl").classList.add("off");
+    if (locked) tab.append(icon("lock", 14, "brown"));
+    const label = el("div", "h", `font-size:16px;letter-spacing:.04em;color:${cv(i === 0 ? "ink" : "brown")}`);
+    label.textContent = name;
+    tab.append(label);
+    tab.dataset.btn = locked ? "locked-world" : "world";
+    tab.dataset.world = name;
+    tabs.append(tab);
+  });
+}
+
+function buildNode(number, state, x, y) {
+  const next = state === "next", done = state === "completed" || state === "perfect", locked = state === "locked";
+  const side = next ? 80 : 64;
+  const node = el("div", "node", `width:${side}px;height:${side}px;left:calc(50% + ${x - side / 2}px);bottom:${y - side / 2}px`);
+  node.dataset.btn = locked ? "locked-node" : "node";
+  const body = el("div", "body press-target");
+  node.append(body);
+  frame(body, "Circle", locked ? "tab-track" : done ? "green" : "white", locked ? null : done ? "green-shadow" : "yellow-shadow");
+  if (locked) {
+    body.append(Object.assign(icon("lock", 24, "brown"), { className: "icon lock" }));
+  } else {
+    const n = el("div", "number h", `font-size:${next ? 40 : 32}px;color:${cv(done ? "white" : next ? "red" : "ink")}`);
+    n.textContent = number;
+    body.append(n);
+  }
+  if (state === "perfect") {
+    const badge = el("div", "abs", "width:24px;height:24px;right:-4px;top:-4px;display:grid;place-items:center");
+    frame(badge, "Chip", "yellow", null, [5, 5, 5, 5]);
+    badge.append(icon("check", 13, "ink"));
+    body.append(badge);
+  }
+  if (next) {
+    const bunny = el("img", "abs", "width:84px;height:84px;left:calc(50% - 42px + 12px);bottom:calc(100% - 18px);pointer-events:none");
+    bunny.src = "../Assets/Art/LevelSelect/NextBunny.png";
+    body.append(bunny);
+    const tag = el("div", "abs", "width:68px;height:36px;left:-34px;top:-28px;transform:rotate(-6deg)");
+    frame(tag, "Ribbon", "red", "red-shadow", [6, 6, 6, 9]);
+    const label = el("div", "abs h", "inset:0 0 3px;display:grid;place-items:center;font-size:18px;letter-spacing:.04em;color:var(--white)");
+    label.textContent = "NEXT!";
+    tag.append(label);
+    body.append(tag);
+  }
+  return node;
+}
+
+// ---------- Screens & state ----------
+const SCREENS = [
+  ["main", "Main menu"], ["levels", "Level select"], ["game", "Game HUD"], ["pause", "Pause"],
+  ["complete", "Level complete"], ["failed", "Level failed"], ["settings", "Settings"], ["reset", "Reset confirm"],
+];
+const state = { screen: "main", overlay: null, moves: 0, redo: 0, history: [] };
+
+function showScreen(name) {
+  $$(".screen").forEach(s => s.classList.toggle("on", s.dataset.screen === name || (s.dataset.screen === "game" && name === "game")));
+  state.screen = name;
+  if (name === "levels") requestAnimationFrame(() => { const s = $("#ls-scroll"); s.scrollTop = s.scrollHeight; });
+  syncPanel();
+}
+
+function openSettings(open) {
+  $("[data-screen=settings]").classList.toggle("on", open);
+  if (!open) $("#reset-modal").classList.remove("on");
+  syncPanel();
+}
+
+function closeGameCards() {
+  ["#pause-card", "#complete-card"].forEach(s => $(s).classList.remove("on"));
+  $("#failed").classList.remove("on");
+}
+
+function go(target) {
+  openSettings(false);
+  closeGameCards();
+  switch (target) {
+    case "main": case "levels": showScreen(target); break;
+    case "game": showScreen("game"); break;
+    case "pause": showScreen("game"); $("#pause-card").classList.add("on"); break;
+    case "complete": showScreen("game"); applyComplete(); $("#complete-card").classList.add("on"); break;
+    case "failed": showScreen("game"); setBackdrop("game-failed.jpg"); $("#failed").classList.add("on"); break;
+    case "settings": openSettings(true); break;
+    case "reset": openSettings(true); $("#reset-modal").classList.add("on"); break;
+  }
+  state.current = target;
+  syncPanel();
+}
+
+function syncPanel() {
+  $$("#screen-buttons button").forEach(b => b.classList.toggle("on", b.dataset.target === state.current));
+}
+
+function toast(screen, text, seconds = 1.5) {
+  const t = $(`[data-screen=${screen}] .toast`);
+  $(".body", t).lastChild.textContent = text;
+  t.classList.add("on");
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove("on"), seconds * 1000 + 180);
+}
+
+function applyHistory() {
+  $("#hud-undo").classList.toggle("disabled", state.moves === 0);
+  $("#hud-redo").classList.toggle("shown", state.redo > 0);
+}
+
+function applyComplete() {
+  const perfect = $("#perfect-toggle").checked, newBest = $("#newbest-toggle").checked;
+  setFrameColors($("#cc-banner"), perfect ? "green" : "blue");
+  $("#cc-headline").textContent = perfect ? "PERFECT!" : "DONE!";
+  $("#cc-badge").style.display = perfect ? "" : "none";
+  $("#cc-par").style.display = perfect ? "none" : "";
+  $("#cc-best").textContent = newBest ? "New best: 24 moves!" : "Best: 22 moves";
+  $("#cc-best").style.color = cv(newBest ? "red" : "muted");
+  $("#cc-next").style.display = $("#next-toggle").checked ? "" : "none";
+}
+
+function setTutorial(step) {
+  const tut = $("#tutorial");
+  tut.classList.toggle("on", !!step);
+  if (!step) return;
+  $("#tut-text").textContent = { swipe: "Swipe on the lawn to move the bunny", arrows: "Tap the arrows to move the bunny", mow: "Mow the rest of the garden!" }[step];
+  const chipIcon = $("#tut-chip .icon");
+  chipIcon.style.setProperty("--img", `url("${SPRITES}Icons/Icon_${step === "mow" ? "sparkle" : "move"}.png")`);
+  $("#tutorial-select").value = step;
+}
+
+function setBackdrop(file) {
+  const b = $("#backdrop");
+  const img = new Image();
+  img.onload = () => { b.style.backgroundImage = `url("${CAPTURES}${file}")`; b.classList.remove("missing"); };
+  img.onerror = () => { b.style.backgroundImage = ""; b.classList.add("missing"); };
+  img.src = CAPTURES + file;
+  $("#backdrop-select").value = file;
+}
+
+const ACTIONS = {
+  play: () => { resetGame(); go("game"); },
+  levels: () => go("levels"),
+  settings: () => go("settings"),
+  howtoplay: () => { resetGame(); go("game"); setTutorial($("#movement-seg").dataset.selected === "1" ? "arrows" : "swipe"); },
+  back: () => go("main"),
+  "close-settings": () => openSettings(false),
+  node: () => { resetGame(); go("game"); },
+  "locked-node": n => { n.classList.remove("shake"); void n.offsetWidth; n.classList.add("shake"); },
+  "locked-world": t => toast("levels", `${titleCase(t.dataset.world)}: coming soon!`),
+  world: () => {},
+  pause: () => go("pause"),
+  resume: () => go("game"),
+  restart: () => { resetGame(); go("game"); },
+  menu: () => go("main"),
+  next: () => { resetGame(); go("game"); },
+  board: () => move(),
+  move: () => move(),
+  undo: () => { if (state.moves) { state.moves--; state.redo++; applyHistory(); } },
+  redo: () => { if (state.redo) { state.redo--; state.moves++; applyHistory(); } },
+  "fail-undo": () => { go("game"); setBackdrop("game-level7.jpg"); ACTIONS.undo(); },
+  reset: () => $("#reset-modal").classList.add("on"),
+  keep: () => $("#reset-modal").classList.remove("on"),
+  "confirm-reset": () => { $("#reset-modal").classList.remove("on"); toast("settings", "Progress reset"); },
+  "replay-tutorial": () => { openSettings(false); resetGame(); go("game"); setTutorial("swipe"); },
+};
+
+function move() {
+  state.moves++; state.redo = 0; applyHistory();
+  if ($("#tutorial").classList.contains("on") && $("#tutorial-select").value !== "mow") {
+    setTutorial("mow");
+    clearTimeout(state.tutTimer);
+    state.tutTimer = setTimeout(() => setTutorial(""), 4000);
+  }
+}
+
+function resetGame() { state.moves = 0; state.redo = 0; applyHistory(); setTutorial(""); setBackdrop($("#backdrop-select").value === "game-failed.jpg" ? "game-level7.jpg" : $("#backdrop-select").value); }
+
+const titleCase = s => s.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+
+// Press feedback + routing for anything with data-btn
+document.addEventListener("pointerdown", e => {
+  const b = e.target.closest("[data-btn]");
+  if (!b) return;
+  b.classList.add("pressed");
+  const release = () => { b.classList.remove("pressed"); window.removeEventListener("pointerup", release); window.removeEventListener("pointercancel", release); };
+  window.addEventListener("pointerup", release);
+  window.addEventListener("pointercancel", release);
+});
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-btn]");
+  if (b && ACTIONS[b.dataset.btn]) ACTIONS[b.dataset.btn](b);
+});
+
+// Long-press the title (LongPressTrigger) → unlock-all toast
+(() => {
+  const title = $("#mm-title");
+  let timer;
+  title.addEventListener("pointerdown", () => { timer = setTimeout(() => toast("main", "All levels unlocked!", 2), 800); });
+  ["pointerup", "pointerleave", "pointercancel"].forEach(ev => title.addEventListener(ev, () => clearTimeout(timer)));
+})();
+
+// ---------- Device ----------
+function applyDevice(device) {
+  const s = Math.min(device.w / REF_W, device.h / REF_H);
+  const cw = device.w / s, ch = device.h / s;
+  const dev = $("#device"), canvas = $("#canvas");
+  dev.style.width = `${device.w}px`; dev.style.height = `${device.h}px`;
+  dev.classList.toggle("square", !!device.square);
+  canvas.style.width = `${cw}px`; canvas.style.height = `${ch}px`;
+  canvas.style.transform = `scale(${s})`;
+  const st = device.top / s, sb = device.bottom / s;
+  canvas.style.setProperty("--st", `${st}px`); canvas.style.setProperty("--sb", `${sb}px`);
+  canvas.style.setProperty("--sl", "0px"); canvas.style.setProperty("--sr", "0px");
+
+  // SafeCornerAnchor for the 62pt pause button.
+  const radius = 31, cornerRadius = 55, gap = 6;
+  const centre = Math.max(radius + gap, cornerRadius - (cornerRadius - radius - gap) / Math.SQRT2);
+  const pause = $("#hud-pause");
+  const inset = device.notch ? centre - radius : null;
+  pause.style.right = `${device.notch ? inset : 16}px`;
+  pause.style.top = `${device.notch ? inset : st + 16}px`;
+
+  const guide = $("#guides .safe-guide");
+  guide.style.cssText = `left:0;right:0;top:${device.top}px;bottom:${device.bottom}px`;
+  fitStage();
+}
+
+function fitStage() {
+  const stage = $("#stage"), dev = $("#device");
+  const w = parseFloat(dev.style.width), h = parseFloat(dev.style.height);
+  const k = Math.min(1.25, (stage.clientWidth - 60) / w, (stage.clientHeight - 60) / h);
+  dev.style.transform = `scale(${k})`;
+  dev.style.left = `${(stage.clientWidth - w * k) / 2}px`;
+  dev.style.top = `${(stage.clientHeight - h * k) / 2}px`;
+}
+window.addEventListener("resize", fitStage);
+
+// ---------- Theme panel ----------
+const TOKENS = ["yellow", "yellow-shadow", "teal", "teal-shadow", "cream", "white", "segment-track", "slider-track", "scrim", "doodle",
+  "green", "green-shadow", "green-pale", "blue", "blue-shadow", "red", "red-shadow", "ink", "ink-shadow", "brown", "muted", "tab-track"];
+
+function parseColor(str) {
+  const c = document.createElement("canvas").getContext("2d");
+  c.fillStyle = str.trim();
+  const v = c.fillStyle;
+  if (v.startsWith("#")) return { hex: v.toUpperCase(), a: 1 };
+  const m = v.match(/rgba?\(([^)]+)\)/);
+  const [r, g, b, a = 1] = m[1].split(",").map(Number);
+  return { hex: "#" + [r, g, b].map(n => n.toString(16).padStart(2, "0")).join("").toUpperCase(), a };
+}
+
+function buildThemePanel() {
+  const root = document.documentElement, box = $("#theme");
+  TOKENS.forEach(token => {
+    const { hex, a } = parseColor(getComputedStyle(root).getPropertyValue(`--${token}`));
+    const picker = el("input"); picker.type = "color"; picker.value = hex.toLowerCase();
+    const text = el("input"); text.type = "text"; text.value = a < 1 ? `${hex} ${a}` : hex;
+    const name = el("span"); name.textContent = token;
+    const apply = (h, alpha) => {
+      const n = parseInt(h.slice(1), 16);
+      root.style.setProperty(`--${token}`, alpha < 1 ? `rgba(${n >> 16}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})` : h);
+    };
+    picker.addEventListener("input", () => { const alpha = +(text.value.split(" ")[1] || 1); text.value = alpha < 1 ? `${picker.value.toUpperCase()} ${alpha}` : picker.value.toUpperCase(); apply(picker.value, alpha); });
+    text.addEventListener("change", () => { const [h, alpha = 1] = text.value.trim().split(/\s+/); if (/^#[0-9a-f]{6}$/i.test(h)) { picker.value = h.toLowerCase(); apply(h, +alpha); } });
+    box.append(picker, name, text);
+  });
+  $("#export-btn").addEventListener("click", () => {
+    const out = $("#export");
+    out.hidden = false;
+    out.value = TOKENS.filter(t => t !== "tab-track").map(token => {
+      const { hex, a } = parseColor(getComputedStyle(root).getPropertyValue(`--${token}`));
+      const field = token.replace(/-(\w)/g, (_, c) => c.toUpperCase());
+      return `public Color ${field} = Hex(0x${hex.slice(1)}${a < 1 ? `, ${+a.toFixed(2)}f` : ""});`;
+    }).join("\n");
+    out.select();
+  });
+}
+
+// ---------- Boot ----------
+$$("[data-frame]").forEach(f => {
+  const o = f.dataset.overhang ? f.dataset.overhang.split(" ").map(Number) : OVERHANG;
+  frame(f, f.dataset.frame, f.dataset.fill, f.dataset.shadow === "none" ? null : f.dataset.shadow, o);
+});
+$$(".toast .body").forEach(b => b.append(document.createTextNode("")));
+$$(".big-btn").forEach(buildBigButton);
+$$(".round-btn").forEach(buildRoundButton);
+$$(".pill").forEach(buildPill);
+$$(".list-row").forEach(buildListRow);
+$$(".seg").forEach(buildSegment);
+$$(".switch").forEach(buildSwitch);
+$$(".slider").forEach(buildSlider);
+$$(".stat").forEach(buildStat);
+$$(".chip[data-icon]").forEach(c => chip(+c.dataset.size, c.dataset.color, c.dataset.icon, +c.dataset.iconSize, c));
+$$(".icon[data-icon]").forEach(i => { i.style.setProperty("--img", `url("${SPRITES}Icons/Icon_${i.dataset.icon}.png")`); i.style.setProperty("--tint", cv(i.dataset.tint || "white")); });
+buildLevelSelect();
+buildThemePanel();
+
+// The hero bunny is a live 3D render in game; fall back to the level-select sprite until it's captured.
+(() => {
+  const img = new Image();
+  img.onload = () => { $("#mm-hero").style.backgroundImage = `url("${img.src}")`; };
+  img.onerror = () => { $("#mm-hero").style.backgroundImage = `url("../Assets/Art/LevelSelect/NextBunny.png")`; };
+  img.src = `${CAPTURES}menu-bunny.png`;
+})();
+$("#movement-seg").addEventListener("change", e => $("#arrow-pad").classList.toggle("on", e.detail === 1));
+
+const sb = $("#screen-buttons");
+SCREENS.forEach(([target, label]) => {
+  const b = el("button"); b.textContent = label; b.dataset.target = target;
+  b.addEventListener("click", () => go(target));
+  sb.append(b);
+});
+const ds = $("#device-select");
+DEVICES.forEach((d, i) => { const o = el("option"); o.value = i; o.textContent = d.name; ds.append(o); });
+ds.addEventListener("change", () => applyDevice(DEVICES[ds.value]));
+$("#guides-toggle").addEventListener("change", e => $("#guides").classList.toggle("on", e.target.checked));
+$("#backdrop-select").addEventListener("change", e => setBackdrop(e.target.value));
+$("#tutorial-select").addEventListener("change", e => setTutorial(e.target.value));
+["#perfect-toggle", "#newbest-toggle", "#next-toggle"].forEach(s => $(s).addEventListener("change", applyComplete));
+
+// Failed annotation sits over the mower; roughly the board centre in the capture.
+Object.assign($("#fail-annotation").style, { left: "calc(50% - 5px)", top: "calc(42% - 10px)" });
+
+applyDevice(DEVICES[0]);
+setBackdrop("game-level7.jpg");
+applyHistory();
+go(new URLSearchParams(location.search).get("screen") || "main");
+</script>
+</body>
+</html>
