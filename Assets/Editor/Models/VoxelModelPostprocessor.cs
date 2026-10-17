@@ -8,7 +8,7 @@ using UnityEngine;
 /// </summary>
 internal class VoxelModelPostprocessor : AssetPostprocessor
 {
-	private const string staticFolder = "Assets/Models/Pond/";
+	private static readonly string[] staticFolders = { "Assets/Models/Pond/", "Assets/Models/Tiles/" };
 	private const string animatedFolder = "Assets/Models/Creatures/";
 	private const string paletteFolder = "Assets/Materials/Game/Environment/Palette";
 	private const string palettePrefix = "Palette_";
@@ -21,7 +21,7 @@ internal class VoxelModelPostprocessor : AssetPostprocessor
 			return false;
 		}
 
-		return path.StartsWith(staticFolder) || path.StartsWith(animatedFolder);
+		return System.Array.Exists(staticFolders, path.StartsWith) || path.StartsWith(animatedFolder);
 	}
 
 	private void OnPreprocessModel()
