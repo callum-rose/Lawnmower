@@ -70,6 +70,12 @@ Shader "Water"
 		_GlowAmount("Glow Amount", Range(0, 1)) = 0.12
 		_CrestGlow("Crest Glow", Range(0, 2)) = 0.9
 
+		[Header(Fresnel Rim)]
+		[HDR] _FresnelRimColour("Fresnel Rim Colour", Color) = (0.85,0.9,1.2,1)
+		_FresnelRimIntensity("Fresnel Rim Intensity", Range(0, 2)) = 0.35
+		_FresnelRimPower("Fresnel Rim Power", Range(0.5, 8)) = 3
+		_FresnelRimSlope("Fresnel Rim Slope Boost", Range(0, 40)) = 3
+
 		[Header(Toon)]
 		_ToonSteps("Toon Steps (0 is smooth)", Range(0, 8)) = 0
 	}
@@ -148,6 +154,10 @@ Shader "Water"
 			float4 _GlowColour;
 			float _GlowAmount;
 			float _CrestGlow;
+			float4 _FresnelRimColour;
+			float _FresnelRimIntensity;
+			float _FresnelRimPower;
+			float _FresnelRimSlope;
 			float _ToonSteps;
 			CBUFFER_END
 
@@ -477,6 +487,12 @@ Shader "Water"
 				colour += sparkle * _SparkleIntensity * _SpecularColour.rgb;
 
 				colour += _GlowColour.rgb * (_GlowAmount + saturate(h + 0.1) * _CrestGlow * 0.3);
+
+				// Stylised fresnel rim. From the steep game camera the surface is seen nearly head-on, so the grazing term
+				// alone barely shows; the slope term lights ripple faces tipped away from the camera compared with flat water.
+				float flatNDotV = saturate(toCamera.y);
+				float rim = pow(1 - nDotV, _FresnelRimPower) + saturate((flatNDotV - nDotV) * _FresnelRimSlope);
+				colour += Quantise(saturate(rim)) * _FresnelRimColour.rgb * _FresnelRimIntensity;
 
 				// Shallow-water glow: the band's reach wobbles with layered noise and lacy gaps open up inside it, with a
 				// thin solid line kept right where the water touches things. The noise is 3D and only moves along Y, so the
