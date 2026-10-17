@@ -151,6 +151,25 @@ namespace Tests.PlayMode
 		}
 
 		[UnityTest]
+		public IEnumerator RabbitHoleLevel_PlaysThroughToCompleted()
+		{
+			string[] guids = AssetDatabase.FindAssets("\"Level Rabbit Hole Test\" t:LevelData");
+			if (guids.Length == 0)
+			{
+				Assert.Ignore("No rabbit hole test level in the project");
+			}
+
+			LevelData level = Copy(AssetDatabase.LoadAssetAtPath<LevelData>(AssetDatabase.GUIDToAssetPath(guids[0])));
+			GameManager game = null;
+			yield return StartLevel(level, g => game = g);
+
+			yield return Play(game, MoveNotation.Parse(level.Solution));
+
+			Assert.AreEqual(LevelStatus.Completed, game.Simulation.Status);
+			Assert.AreEqual(level.Par, game.Presenter.Stats.Moves);
+		}
+
+		[UnityTest]
 		public IEnumerator Failing_ThenUndoLastMove_ResumesPlay()
 		{
 			LevelData level = Copy(Load<LevelDataManager>("t:LevelDataManager").GetLevel(0).LevelData);

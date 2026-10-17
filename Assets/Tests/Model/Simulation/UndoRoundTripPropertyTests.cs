@@ -32,7 +32,7 @@ namespace Lawnmower.Model.Tests
 
 			List<LevelDefinition> levels = Seeds().Select(RandomLevels.Generate).ToList();
 			HashSet<TileKind> kinds = new HashSet<TileKind>(levels.SelectMany(l => l.Tiles).Select(t => t.Kind));
-			CollectionAssert.IsSupersetOf(kinds, new[] { TileKind.Grass, TileKind.Stone, TileKind.Water, TileKind.Empty, TileKind.Wood, TileKind.Spring });
+			CollectionAssert.IsSupersetOf(kinds, new[] { TileKind.Grass, TileKind.Stone, TileKind.Water, TileKind.Empty, TileKind.Wood, TileKind.Spring, TileKind.RabbitHole });
 
 			HashSet<MoveOutcome> outcomes = new HashSet<MoveOutcome>();
 			bool movedAfterFailed = false;

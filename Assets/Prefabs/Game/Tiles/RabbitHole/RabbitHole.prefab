@@ -1,0 +1,120 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &8301170894232928230
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4200979526082877473}
+  - component: {fileID: 7381861541227355985}
+  m_Layer: 0
+  m_Name: RabbitHole
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4200979526082877473
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8301170894232928230}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 116948609219083896}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7381861541227355985
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8301170894232928230}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 69c4507eb74324712af3e4d3468a50e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Lawnmower.Presentation::Game.Tiles.RabbitHoleTileObject
+  pairMarker: {fileID: 7204056340096578058}
+  pairMaterials:
+  - {fileID: 2100000, guid: 6373c800d181d49ab83732381a68b0ac, type: 2}
+  - {fileID: 2100000, guid: c6f82df70794d44eea16efbfa557a7dc, type: 2}
+  - {fileID: 2100000, guid: 31ee2e126e95f42dd86b6bd0a2740ac4, type: 2}
+  - {fileID: 2100000, guid: 45824aa89a8994a388e1020b56df40d3, type: 2}
+--- !u!1001 &438473548601219475
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 4200979526082877473}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: 05af9e61a507e48b8806eefa8b891ddc, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 05af9e61a507e48b8806eefa8b891ddc, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 05af9e61a507e48b8806eefa8b891ddc, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 05af9e61a507e48b8806eefa8b891ddc, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 05af9e61a507e48b8806eefa8b891ddc, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 05af9e61a507e48b8806eefa8b891ddc, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 05af9e61a507e48b8806eefa8b891ddc, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 05af9e61a507e48b8806eefa8b891ddc, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 05af9e61a507e48b8806eefa8b891ddc, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 05af9e61a507e48b8806eefa8b891ddc, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 05af9e61a507e48b8806eefa8b891ddc, type: 3}
+      propertyPath: m_Name
+      value: rabbit_hole_voxel
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 05af9e61a507e48b8806eefa8b891ddc, type: 3}
+--- !u!4 &116948609219083896 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 05af9e61a507e48b8806eefa8b891ddc, type: 3}
+  m_PrefabInstance: {fileID: 438473548601219475}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &7204056340096578058 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -1879067243961341031, guid: 05af9e61a507e48b8806eefa8b891ddc, type: 3}
+  m_PrefabInstance: {fileID: 438473548601219475}
+  m_PrefabAsset: {fileID: 0}

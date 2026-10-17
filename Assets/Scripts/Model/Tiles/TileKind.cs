@@ -11,6 +11,7 @@ namespace Lawnmower.Model
 		Stone = 2,
 		Water = 3,
 		Wood = 4,
-		Spring = 5
+		Spring = 5,
+		RabbitHole = 6
 	}
 }

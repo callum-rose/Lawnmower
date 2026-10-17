@@ -28,8 +28,9 @@
 #     ground to a dark floor. Earth darkens downwards: Chestnut top, Brown sides, Dark brown inside, Umber floor.
 #     A carrot is planted point-down in the back corner, behind the opening from the thumbnail camera, leaning 10 deg
 #     with two Forest leaves. Its body is its own part, PairMarker, in one colour, so each pair of holes can be told
-#     apart by recolouring it: carrots come in orange, purple, yellow and white (CARROT_COLOURS). The ground must be
-#     open over the opening: the tile underneath is earth with an octagonal hole, not grass.
+#     apart by recolouring it: carrots come in orange, purple, yellow and white (CARROT_COLOURS). The terrain leaves a
+#     gap for the tile, as it does for wood, so the model brings its own ground: a 1 m earth block, Chestnut on top,
+#     with an octagonal opening the mound's base drops into.
 
 import math
 import sys
@@ -84,6 +85,8 @@ ROCKS = [
 
 # The burrow's profile, outside in (see sweep): up the mound's side, over its bevel, across its top and down the opening.
 MOUND_BASE = (-1, 4.5, 4.5, 2)
+# The tile's ground: down its sides, across its top and down into the opening, where the mound's base hides the edge.
+GROUND_PROFILE = [(-WOOD_DEPTH, WOOD_HALF), (0, WOOD_HALF), (0, 4.5, 4.5, 2), MOUND_BASE]
 BURROW_PROFILE = [MOUND_BASE, (1, 4.5, 4.5, 2), (2, 3.5, 3.5, 1), (2, 2.5, 2.5, 0), (-4, 2.5, 2.5, 0), (-4, 0)]
 CARROT = (3.5, 3.5, 4.5)  # where the carrot's top sits, in the back corner
 CARROT_RINGS = [(0, 1.5), (4, 1), (7, 0)]  # built top-up, then turned point-down
@@ -144,7 +147,7 @@ def loft(rings):
 
 def sweep(rings):
 	"""An open surface through cross-sections (see ring_outline) in order, ending at a point if the last half width is
-	0. Its faces point to the left of the direction of travel, so a profile that climbs outside, crosses the top and
+	0 and open otherwise. Its faces point to the left of the direction of travel, so a profile that climbs outside, crosses the top and
 	drops down the inside faces out of the solid all the way."""
 	n = 8
 	verts, faces = [], []
@@ -154,8 +157,12 @@ def sweep(rings):
 		a, b = r * n, (r + 1) * n
 		faces += [(a + i, a + (i + 1) % n, b + (i + 1) % n, b + i) for i in range(n)]
 	a = (len(rings) - 2) * n
-	verts.append((0, 0, rings[-1][0]))
-	faces += [(a + i, a + (i + 1) % n, a + n) for i in range(n)]
+	if rings[-1][1] == 0:
+		verts.append((0, 0, rings[-1][0]))
+		faces += [(a + i, a + (i + 1) % n, a + n) for i in range(n)]
+	else:
+		verts += [(x, y, rings[-1][0]) for x, y in ring_outline(rings[-1])]
+		faces += [(a + i, a + (i + 1) % n, a + n + (i + 1) % n, a + n + i) for i in range(n)]
 	return verts, faces
 
 
@@ -324,6 +331,9 @@ def build_rabbit_hole(root, offset=(0, 0), carrot_colour=CARROT_COLOURS[0]):
 
 	verts, faces = sweep(BURROW_PROFILE)
 	parts = [build_part("Burrow", root, verts, faces, (0.5, 0.5, 0), burrow_colour, offset + (0,))]
+	verts, faces = sweep(GROUND_PROFILE)
+	parts.append(build_part(
+		"Ground", root, verts, faces, (0, 0, 0), lambda c, n: "Chestnut" if n.z > 0.5 else "Brown", offset + (0,)))
 
 	x, y, z = CARROT
 	verts, faces = loft(CARROT_RINGS)
@@ -506,15 +516,14 @@ def main():
 		export(root, f"{output_dir}/{name}.fbx")
 		print(f"Exported {model_name}: {len(parts)} parts, {sum(len(p.data.polygons) for p in parts)} faces")
 		if preview_dir:
-			ground_z = -WOOD_DEPTH * VOXEL if name.startswith("Wood") else 0
-			holes = [(0, 0)] if name.startswith("RabbitHole") else []
-			render_preview(parts, f"{preview_dir}/{model_name}.png", ground_z, holes)
+			ground_z = -WOOD_DEPTH * VOXEL if name.startswith(("Wood", "RabbitHole")) else 0
+			render_preview(parts, f"{preview_dir}/{model_name}.png", ground_z)
 
 	if preview_dir:
 		_, parts = new_model("WoodLayout", build_wood_layout)
 		render_preview(parts, f"{preview_dir}/wood_layout.png", -WOOD_DEPTH * VOXEL)
 		_, parts = new_model("HolePairs", build_hole_pairs)
-		render_preview(parts, f"{preview_dir}/rabbit_hole_pairs.png", 0, [(x, y) for x, y, _ in HOLE_PAIRS])
+		render_preview(parts, f"{preview_dir}/rabbit_hole_pairs.png", -WOOD_DEPTH * VOXEL)
 
 
 main()

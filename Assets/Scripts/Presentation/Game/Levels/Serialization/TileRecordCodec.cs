@@ -26,6 +26,8 @@ namespace Game.Levels.Serialization
 					return TileSpec.Wood;
 				case TileKind.Spring:
 					return TileSpec.Spring(record.springOffset);
+				case TileKind.RabbitHole:
+					return TileSpec.RabbitHole(record.holePair);
 				default:
 					throw new ArgumentOutOfRangeException(nameof(record), record.kind, "Unknown tile kind");
 			}
@@ -45,6 +47,8 @@ namespace Game.Levels.Serialization
 					return new TileRecord { kind = TileKind.Stone, stoneDirection = spec.StoneDirection };
 				case TileKind.Spring:
 					return new TileRecord { kind = TileKind.Spring, springOffset = spec.SpringOffset };
+				case TileKind.RabbitHole:
+					return new TileRecord { kind = TileKind.RabbitHole, holePair = spec.HolePair };
 				default:
 					throw new ArgumentOutOfRangeException(nameof(spec), spec.Kind, "Unknown tile kind");
 			}

@@ -12,7 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 77e53c6d019425c4684d4a8c5a350cd9, type: 3}
   m_Name: LevelDataManager
   m_EditorClassIdentifier: 
-  unlockAllLevels: 0
   levelDatas:
   - {fileID: 11400000, guid: 7249bc6e5bbde40878347385c51914c9, type: 2}
   - {fileID: 11400000, guid: 8797dfd8086344e4494f22965811f2c6, type: 2}
@@ -24,3 +23,4 @@ MonoBehaviour:
   - {fileID: 11400000, guid: a0e2f9d50332149f7aec050eb0bff35b, type: 2}
   - {fileID: 11400000, guid: 0abdb97e8a7dc4ceb87d2dd16a0e8e37, type: 2}
   - {fileID: 11400000, guid: f16bfcfddf5e54199945eb7a08cd8027, type: 2}
+  - {fileID: 11400000, guid: cf4c264551e95427d92c5ca46532b79f, type: 2}

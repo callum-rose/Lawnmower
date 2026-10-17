@@ -68,7 +68,7 @@ namespace Tests.EditMode
 		public void LevelList_FollowsTheDifficultyCurve()
 		{
 			LevelData[] levels = ListedLevels().Select(AssetDatabase.LoadAssetAtPath<LevelData>).ToArray();
-			Assert.AreEqual(10, levels.Length);
+			Assert.AreEqual(11, levels.Length);
 
 			HashSet<TileKind> seen = new HashSet<TileKind>();
 			int previousPar = 0;
@@ -104,7 +104,7 @@ namespace Tests.EditMode
 				previousPar = levels[i].Par;
 			}
 
-			CollectionAssert.IsSubsetOf(new[] { TileKind.Stone, TileKind.Wood, TileKind.Water, TileKind.Spring }, seen);
+			CollectionAssert.IsSubsetOf(new[] { TileKind.Stone, TileKind.Wood, TileKind.Water, TileKind.Spring, TileKind.RabbitHole }, seen);
 		}
 
 		/// <summary>Par only (stops at the first, shortest, solution), on a worker thread with a timeout.</summary>

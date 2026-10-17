@@ -1,8 +1,10 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using Game.Core;
 using Game.Mowers.Input;
 using Game.UndoSystem;
+using Lawnmower.Model;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -33,6 +35,9 @@ namespace Game.Mowers.Models
 			new Vector3(-0.75f, 0.05f, 0.22f),
 			new Vector3(0.66f, 0.1f, 0.34f),
 		};
+
+		[Tooltip("How long the bunny looks dazed after bouncing out of a blocked rabbit hole")]
+		[SerializeField, Min(0)] private float dazedDuration = 1.2f;
 
 		[Header("Expressions")]
 		[SerializeField] private FacePose neutral = new FacePose
@@ -203,11 +208,13 @@ namespace Game.Mowers.Models
 		{
 			_mowerPosition = mowerPosition;
 			_mowerPosition.CurrentPosition.ValueChangedFromTo += OnMowerMoved;
+			_mowerPosition.Bounced += OnMowerBounced;
 		}
 
 		void INeedMowerPosition.Clear()
 		{
 			_mowerPosition.CurrentPosition.ValueChangedFromTo -= OnMowerMoved;
+			_mowerPosition.Bounced -= OnMowerBounced;
 			_mowerPosition = null;
 		}
 
@@ -223,6 +230,16 @@ namespace Game.Mowers.Models
 			}
 
 			Animate();
+		}
+
+		private void OnMowerBounced(IReadOnlyList<PathSegment> attempted)
+		{
+			if (!isActiveAndEnabled)
+			{
+				return;
+			}
+
+			ShowExpression(FaceExpression.Surprised, dazedDuration);
 		}
 
 		#endregion

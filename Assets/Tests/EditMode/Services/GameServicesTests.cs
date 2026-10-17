@@ -63,7 +63,7 @@ namespace Tests.EditMode
 			LevelDataManager levels = LoadConfig().Levels;
 
 			CollectionAssert.AreEqual(levels.Levels.Select(l => l.Id), GameServices.Progression.Levels);
-			Assert.AreEqual(10, GameServices.Progression.LevelCount);
+			Assert.AreEqual(11, GameServices.Progression.LevelCount);
 		}
 
 		[Test]

@@ -10,6 +10,7 @@ internal class VoxelModelPostprocessor : AssetPostprocessor
 {
 	private const string staticFolder = "Assets/Models/Pond/";
 	private const string terrainFolder = "Assets/Models/Terrain/";
+	private const string rabbitHoleFolder = "Assets/Models/Tile/RabbitHole/";
 	private const string animatedFolder = "Assets/Models/Creatures/";
 	private const string paletteFolder = "Assets/Materials/Game/Environment/Palette";
 	private const string palettePrefix = "Palette_";
@@ -22,7 +23,8 @@ internal class VoxelModelPostprocessor : AssetPostprocessor
 			return false;
 		}
 
-		return path.StartsWith(staticFolder) || path.StartsWith(terrainFolder) || path.StartsWith(animatedFolder);
+		return path.StartsWith(staticFolder) || path.StartsWith(terrainFolder) || path.StartsWith(animatedFolder) ||
+			path.StartsWith(rabbitHoleFolder);
 	}
 
 	private void OnPreprocessModel()

@@ -22,19 +22,23 @@ namespace Game.Levels.Serialization
 		/// <summary>Spring only: landing position relative to the spring's own cell.</summary>
 		public GridVector springOffset;
 
+		/// <summary>Rabbit hole only: which pair it belongs to.</summary>
+		public int holePair;
+
 		public bool Equals(TileRecord other) =>
 			kind == other.kind && grassHeight == other.grassHeight && stoneDirection == other.stoneDirection &&
-			springOffset.Equals(other.springOffset);
+			springOffset.Equals(other.springOffset) && holePair == other.holePair;
 
 		public override bool Equals(object obj) => obj is TileRecord other && Equals(other);
 
-		public override int GetHashCode() => HashCode.Combine((int)kind, grassHeight, stoneDirection, springOffset);
+		public override int GetHashCode() => HashCode.Combine((int)kind, grassHeight, stoneDirection, springOffset, holePair);
 
 		public override string ToString() => kind switch
 		{
 			TileKind.Grass => $"Grass:{grassHeight}",
 			TileKind.Stone => $"Stone:{stoneDirection}",
 			TileKind.Spring => $"Spring:{springOffset}",
+			TileKind.RabbitHole => $"RabbitHole:{holePair}",
 			_ => kind.ToString()
 		};
 	}

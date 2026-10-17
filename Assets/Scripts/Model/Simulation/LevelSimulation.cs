@@ -26,7 +26,7 @@ namespace Lawnmower.Model
 		/// <summary>Raised from the undo record: inverted is false on Do/Redo and true on Undo.</summary>
 		public event UndoableAction<MoveResult> Moved;
 
-		/// <summary>Raised when the mower bumps into a tile it can't enter. Not an undo step.</summary>
+		/// <summary>Raised when the mower bumps into a tile it can't enter, or bounces out of a blocked rabbit hole. Not an undo step.</summary>
 		public event Action<MoveResult> Bumped;
 
 		private readonly EventProperty<GridVector> _mowerPosition;
@@ -79,6 +79,19 @@ namespace Lawnmower.Model
 				{
 					MoveResult result = new MoveResult(direction, plan.Outcome, from, null, plan.BumpedAt, Status, Status);
 					Level.GetTile(plan.BumpedAt.Value).BumpInto(plan.BumpDirection, false);
+					Bumped?.Invoke(result);
+					return result;
+				}
+
+				case MoveOutcome.Bounced:
+				{
+					MoveResult result = new MoveResult(direction, plan.Outcome, from, null, plan.BumpedAt, Status, Status,
+						plan.Segments.ToArray());
+					if (plan.BumpedAt.HasValue)
+					{
+						Level.GetTile(plan.BumpedAt.Value).BumpInto(plan.BumpDirection, false);
+					}
+
 					Bumped?.Invoke(result);
 					return result;
 				}

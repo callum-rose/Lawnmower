@@ -17,7 +17,9 @@ namespace Lawnmower.Model.Tests
 			sim.MowerPosition.ValueChangedFromTo += (from, to, inv) => Add($"pos {P(from)}->{P(to)}", inv);
 			sim.StatusChanged += (from, to, inv) => Add($"status {from}->{to}", inv);
 			sim.Moved += (result, inv) => Add($"moved {Dir(result.Direction)} {P(result.From)}->{P(result.To)}", inv);
-			sim.Bumped += result => Log.Add($"bumped {Dir(result.Direction)} at {P(result.BumpedAt.Value)}");
+			sim.Bumped += result => Log.Add(result.Outcome == MoveOutcome.Bounced
+				? $"bounced {Dir(result.Direction)}" + (result.BumpedAt.HasValue ? $" at {P(result.BumpedAt.Value)}" : "")
+				: $"bumped {Dir(result.Direction)} at {P(result.BumpedAt.Value)}");
 
 			foreach (GridVector p in sim.Level.Positions)
 			{
