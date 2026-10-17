@@ -217,7 +217,9 @@ namespace Game.Tiles
 
 				Vector3 faceNormal = Vector3.Cross(Vector3.up, sideways).normalized;
 				Vector3 normal = (faceNormal + Vector3.up * NormalUpBias).normalized;
-				Vector2 bladeUV = new Vector2(basePosition.x + 0.5f, basePosition.z + 0.5f);
+				// From the mesh's origin, unlike the lawn meshes' tile space (their origin is on the tile's corner): the grass
+				// shader's intro growth places each blade at its object origin plus uv1
+				Vector2 bladeUV = new Vector2(basePosition.x, basePosition.z);
 
 				float capRadius = width * 0.5f * TipWidthRatio;
 				float shoulderT = 1 - Mathf.Min(capRadius / height, 0.5f);
