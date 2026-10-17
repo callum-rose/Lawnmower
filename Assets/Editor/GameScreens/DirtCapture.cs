@@ -102,23 +102,6 @@ namespace Lawnmower.Editor.GameScreens
 			{
 				setter.SetAppearance(0);
 			}
-
-			TerrainManager terrain = UnityEngine.Object.FindAnyObjectByType<TerrainManager>();
-			const BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic;
-			Texture2D cells = (Texture2D)typeof(TerrainManager).GetField("_cells", flags).GetValue(terrain);
-			Texture2D rake = (Texture2D)typeof(TerrainManager).GetField("_rake", flags).GetValue(terrain);
-			Color32[] routes = rake.GetPixels32();
-			Color[] colours = cells.GetPixels();
-			for (int i = 0; i < colours.Length; i++)
-			{
-				if (routes[i].r != RakePath.None || routes[i].g != RakePath.None)
-				{
-					colours[i] = new Color(0.36f, 0.22f, 0.12f, 1);
-				}
-			}
-
-			cells.SetPixels(colours);
-			cells.Apply();
 		}
 
 		private static void Next(int step, double seconds)
