@@ -18,7 +18,8 @@ using Random = UnityEngine.Random;
 // encode with ffmpeg -f rawvideo -pix_fmt rgb24 -s WxH -r 30 -i Water.rgb -vf vflip out.mp4), WATER_W (width),
 // WATER_SECONDS, WATER_FPS, WATER_SHOT (close|wide), WATER_WARMUP (ripple seconds simulated first),
 // WATER_REFLECT=0 (no planar reflection), WATER_SOURCES=0 (no constant ripple emitters, only splashes, as in the game),
-// WATER_DEBUG=1 (dump the ripple height field over time instead).
+// WATER_DEBUG=1 (dump the ripple height field over time instead), WATER_FLOOR=slope (a bare floor ramping from shallow on
+// the right to deep on the left, for judging depth-based effects).
 public static class WaterPreviewRenderer
 {
 	static Action BeforeRender;
@@ -302,6 +303,43 @@ public static class WaterPreviewRenderer
 		Random.InitState(42);
 		float depth = top - floor;
 		var sand = new Color(0.95f, 0.88f, 0.7f);
+		if (Env("WATER_FLOOR", "flat") == "slope")
+		{
+			const float shallow = 0.05f, deep = 2.5f, width = 6;
+			float angle = Mathf.Atan2(deep - shallow, width) * Mathf.Rad2Deg;
+			float centreY = surface - (shallow + deep) * 0.5f - 0.05f;
+			Prim(PrimitiveType.Cube, new Vector3(0, centreY, 0.5f), new Vector3(width / Mathf.Cos(angle * Mathf.Deg2Rad), 0.1f, 5), Quaternion.Euler(0, 0, angle), sand);
+		}
+		else
+			BuildPondFloor(floor, depth, sand, Prim);
+
+		void Fish(Vector3 pos, float yaw, Color body, float size)
+		{
+			var rot = Quaternion.Euler(0, yaw, 0);
+			Prim(PrimitiveType.Sphere, pos, new Vector3(0.13f, 0.09f, 0.36f) * size, rot, body);
+			Prim(PrimitiveType.Cube, pos + rot * new Vector3(0, 0, -0.22f * size), new Vector3(0.12f, 0.02f, 0.12f) * size, rot * Quaternion.Euler(0, 45, 0), body);
+			Prim(PrimitiveType.Sphere, pos + rot * new Vector3(0, 0.035f, 0.04f) * size, new Vector3(0.08f, 0.04f, 0.14f) * size, rot, Color.white);
+		}
+		Fish(new Vector3(-0.6f, surface - 0.2f, 0.3f), 60, new Color(1f, 0.45f, 0.12f), 1.1f);
+		Fish(new Vector3(0.4f, surface - 0.45f, 1.1f), -30, new Color(1f, 0.8f, 0.2f), 1f);
+		Fish(new Vector3(1.2f, surface - 0.3f, -0.4f), 150, new Color(0.95f, 0.95f, 0.95f), 0.9f);
+		Fish(new Vector3(-1.5f, surface - 0.6f, -0.6f), 200, new Color(1f, 0.35f, 0.3f), 1.2f);
+
+		var pad = new Color(0.36f, 0.72f, 0.3f);
+		Prim(PrimitiveType.Cylinder, new Vector3(-1.6f, surface, -0.5f), new Vector3(0.6f, 0.012f, 0.6f), Quaternion.identity, pad);
+		Prim(PrimitiveType.Cylinder, new Vector3(-1.0f, surface, -0.9f), new Vector3(0.4f, 0.012f, 0.4f), Quaternion.identity, pad * 1.08f);
+		Prim(PrimitiveType.Cylinder, new Vector3(0.9f, surface, 0.6f), new Vector3(0.5f, 0.012f, 0.5f), Quaternion.identity, pad * 0.95f);
+		var petal = new Color(1f, 0.72f, 0.85f);
+		for (int i = 0; i < 6; i++)
+		{
+			var rot = Quaternion.Euler(-35, i * 60, 0);
+			Prim(PrimitiveType.Sphere, new Vector3(-1.6f, surface + 0.06f, -0.5f) + rot * new Vector3(0, 0, 0.07f), new Vector3(0.06f, 0.03f, 0.13f), rot, petal);
+		}
+		Prim(PrimitiveType.Sphere, new Vector3(-1.6f, surface + 0.08f, -0.5f), Vector3.one * 0.06f, Quaternion.identity, new Color(1f, 0.92f, 0.4f));
+	}
+
+	static void BuildPondFloor(float floor, float depth, Color sand, Func<PrimitiveType, Vector3, Vector3, Quaternion, Color, GameObject> Prim)
+	{
 		Prim(PrimitiveType.Cube, new Vector3(0, floor - 0.05f, 0.5f), new Vector3(6, 0.1f, 5), Quaternion.identity, sand);
 
 		Color[] pebbleColours = { new(0.98f, 0.97f, 0.95f), new(0.85f, 0.8f, 0.78f), new(0.95f, 0.75f, 0.75f), new(0.7f, 0.78f, 0.85f) };
@@ -334,29 +372,5 @@ public static class WaterPreviewRenderer
 		PlantClump(new Vector3(-2.1f, floor, -1.1f), 7, depth + 0.15f);
 		PlantClump(new Vector3(2.1f, floor, 0.4f), 6, depth * 0.7f);
 		PlantClump(new Vector3(-0.2f, floor, 2.2f), 5, depth * 0.8f);
-
-		void Fish(Vector3 pos, float yaw, Color body, float size)
-		{
-			var rot = Quaternion.Euler(0, yaw, 0);
-			Prim(PrimitiveType.Sphere, pos, new Vector3(0.13f, 0.09f, 0.36f) * size, rot, body);
-			Prim(PrimitiveType.Cube, pos + rot * new Vector3(0, 0, -0.22f * size), new Vector3(0.12f, 0.02f, 0.12f) * size, rot * Quaternion.Euler(0, 45, 0), body);
-			Prim(PrimitiveType.Sphere, pos + rot * new Vector3(0, 0.035f, 0.04f) * size, new Vector3(0.08f, 0.04f, 0.14f) * size, rot, Color.white);
-		}
-		Fish(new Vector3(-0.6f, surface - 0.2f, 0.3f), 60, new Color(1f, 0.45f, 0.12f), 1.1f);
-		Fish(new Vector3(0.4f, surface - 0.45f, 1.1f), -30, new Color(1f, 0.8f, 0.2f), 1f);
-		Fish(new Vector3(1.2f, surface - 0.3f, -0.4f), 150, new Color(0.95f, 0.95f, 0.95f), 0.9f);
-		Fish(new Vector3(-1.5f, surface - 0.6f, -0.6f), 200, new Color(1f, 0.35f, 0.3f), 1.2f);
-
-		var pad = new Color(0.36f, 0.72f, 0.3f);
-		Prim(PrimitiveType.Cylinder, new Vector3(-1.6f, surface, -0.5f), new Vector3(0.6f, 0.012f, 0.6f), Quaternion.identity, pad);
-		Prim(PrimitiveType.Cylinder, new Vector3(-1.0f, surface, -0.9f), new Vector3(0.4f, 0.012f, 0.4f), Quaternion.identity, pad * 1.08f);
-		Prim(PrimitiveType.Cylinder, new Vector3(0.9f, surface, 0.6f), new Vector3(0.5f, 0.012f, 0.5f), Quaternion.identity, pad * 0.95f);
-		var petal = new Color(1f, 0.72f, 0.85f);
-		for (int i = 0; i < 6; i++)
-		{
-			var rot = Quaternion.Euler(-35, i * 60, 0);
-			Prim(PrimitiveType.Sphere, new Vector3(-1.6f, surface + 0.06f, -0.5f) + rot * new Vector3(0, 0, 0.07f), new Vector3(0.06f, 0.03f, 0.13f), rot, petal);
-		}
-		Prim(PrimitiveType.Sphere, new Vector3(-1.6f, surface + 0.08f, -0.5f), Vector3.one * 0.06f, Quaternion.identity, new Color(1f, 0.92f, 0.4f));
 	}
 }

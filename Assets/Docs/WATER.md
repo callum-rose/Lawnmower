@@ -34,7 +34,9 @@ For every water pixel the shader:
    the point faces the sun, and removed where a short ray march towards the sun through the depth buffer is blocked
    (lily pads, overhangs, fish). Blocked points are also darkened (`Underwater Shadow Darkening`).
 5. **Absorption and haze.** Light fades per channel with path length (`Absorption`), and the colour mixes towards
-   `Deep Colour` with depth (`Haze Density`, up to `Haze Amount`).
+   `Deep Colour` with depth (`Haze Density`, up to `Haze Amount`). Then the thinner the water over the floor, the
+   lighter it gets: it's screened towards `Shallow Light Colour` by `Shallow Light Amount`, fading out by `Shallow Light
+   Depth` (3, the deep sea floor) with `Shallow Light Falloff`, so water near land reads lighter than open sea.
 6. **Reflection.** A sky gradient weighted by fresnel, then the planar reflection texture (mip-blurred and rippled)
    blended in with an exaggerated `Object Reflection Strength` so it reads from the steep game camera.
 7. **Highlights and glow.** Sun specular, twinkling sparkles on crests, a constant glow, and a shallow-edge glow where
@@ -44,6 +46,10 @@ For every water pixel the shader:
    the surface is seen nearly head-on, so the grazing term (`Fresnel Rim Power`) barely shows on its own; `Fresnel Rim
    Slope Boost` also lights ripple faces tipped away from the camera compared with flat water, so rings and splashes
    pick up a pearly edge.
+
+![Shallow lightening](../../docs/images/water/12_shallow_lightening.jpg)
+
+*Shallow lightening over a floor ramping from 0.05 deep (right) to 2.5 deep (left).*
 
 ![Ripple height field](../../docs/images/water/06_ripple_field.jpg)
 
@@ -122,7 +128,8 @@ Unity -batchmode -quit -projectPath . -executeMethod WaterPreviewRenderer.Render
 ```
 
 Stills go to `Temp/water` (override with `WATER_OUT`). `WATER_VIDEO=1` records a real-time clip of the close shot with
-four splashes as raw RGB24. The file header lists the other options and the ffmpeg command to encode it.
+four splashes as raw RGB24. `WATER_FLOOR=slope` swaps the floor for a bare ramp from 0.05 to 2.5 deep, for judging
+depth-based effects. The file header lists the other options and the ffmpeg command to encode it.
 
 ## How we got here
 

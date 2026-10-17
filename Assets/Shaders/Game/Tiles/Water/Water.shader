@@ -17,6 +17,12 @@ Shader "Water"
 		_DepthBlur("Depth Blur (world units per unit depth)", Range(0, 0.5)) = 0.12
 		_DepthBlurMax("Depth Blur Max (world units)", Range(0, 0.5)) = 0.2
 
+		[Header(Shallow Lightening)]
+		[HDR] _ShallowLightColour("Shallow Light Colour", Color) = (0.8,1,0.95,1)
+		_ShallowLightAmount("Shallow Light Amount", Range(0, 1)) = 0.5
+		_ShallowLightDepth("Shallow Light Depth (world units)", Range(0.05, 6)) = 3
+		_ShallowLightFalloff("Shallow Light Falloff", Range(0.25, 4)) = 1.5
+
 		[Header(Surface Flow)]
 		_AnimationSpeed("Animation Speed", Range(0, 2)) = 0.5
 		_FlowWaveAmount("Flow Waves Amount", Range(0, 1)) = 0
@@ -119,6 +125,10 @@ Shader "Water"
 			float _HazeDensity;
 			float _DepthBlur;
 			float _DepthBlurMax;
+			float4 _ShallowLightColour;
+			float _ShallowLightAmount;
+			float _ShallowLightDepth;
+			float _ShallowLightFalloff;
 			float _FlowWaveAmount;
 			float _WaveScale;
 			float _WaveStrength;
@@ -533,6 +543,10 @@ Shader "Water"
 				float3 underwater = refracted * transmittance * _ShallowTint.rgb;
 				underwater = lerp(underwater, _DeepColour.rgb, inscatter);
 				underwater += web * 0.5;
+				// The thinner the water over the terrain, the lighter it gets: screened towards the shallow colour so the
+				// floor's detail still shows through.
+				float shallowness = pow(saturate(1 - verticalDepth / _ShallowLightDepth), _ShallowLightFalloff) * _ShallowLightAmount;
+				underwater = lerp(underwater, 1 - (1 - saturate(underwater)) * (1 - saturate(_ShallowLightColour.rgb)), shallowness);
 
 				float3 reflectDir = reflect(rayDir, normalWS);
 				reflectDir = normalize(float3(reflectDir.x, max(reflectDir.y, 0.08), reflectDir.z));
