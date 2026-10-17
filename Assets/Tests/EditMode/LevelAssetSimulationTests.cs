@@ -51,8 +51,8 @@ namespace Tests.EditMode
 			CollectionAssert.AreEqual(
 				new[]
 				{
-					"Archive/Level Spring Test", "Archive/Level3", "Archive/Level5", "Archive/Level6", "Archive/Level7", "Archive/Level8",
-					"Level01", "Level02", "Level03", "Level04", "Level05", "Level06", "Level07", "Level08", "Level09", "Level10"
+					"Archive/Level Rabbit Hole Test", "Archive/Level Spring Test", "Archive/Level3", "Archive/Level5", "Archive/Level6", "Archive/Level7", "Archive/Level8",
+					"Level01", "Level02", "Level03", "Level04", "Level05", "Level06", "Level07", "Level08", "Level09", "Level10", "Level11"
 				},
 				LevelNames().ToArray());
 		}
@@ -92,7 +92,7 @@ namespace Tests.EditMode
 		}
 
 		[Test]
-		public void LevelList_IsTheTenCurveLevels_InOrder()
+		public void LevelList_IsTheCurveLevels_InOrder()
 		{
 			SerializedProperty list = new SerializedObject(AssetDatabase.LoadMainAssetAtPath(ManagerPath)).FindProperty("levelDatas");
 			Assert.IsNotNull(list);
@@ -105,8 +105,8 @@ namespace Tests.EditMode
 				paths.Add(AssetDatabase.GetAssetPath(entry));
 			}
 
-			// Bunny Heaven ships the ten curve levels (Assets/Docs/LEVELS.md); retired levels stay in Archive/.
-			CollectionAssert.AreEqual(Enumerable.Range(1, 10).Select(i => PathOf($"Level{i:00}")).ToArray(), paths);
+			// Bunny Heaven ships the eleven curve levels (Assets/Docs/LEVELS.md); retired levels stay in Archive/.
+			CollectionAssert.AreEqual(Enumerable.Range(1, 11).Select(i => PathOf($"Level{i:00}")).ToArray(), paths);
 			Assert.That(paths, Has.None.StartsWith(ArchiveDir + "/"));
 		}
 

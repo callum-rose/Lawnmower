@@ -59,6 +59,7 @@ namespace Lawnmower.Model.Tests
 		[TestCase("empty", false, true, false)]
 		[TestCase("wood", true, true, false)]
 		[TestCase("spring:0,2", true, true, false)]
+		[TestCase("hole:0", true, true, false)]
 		public void DefaultFlags(string token, bool traversable, bool complete, bool ruined)
 		{
 			Tile tile = TileFactory.Create(LevelText.ParseTile(token));

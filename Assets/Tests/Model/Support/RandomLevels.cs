@@ -7,7 +7,8 @@ namespace Lawnmower.Model.Tests
 {
 	/// <summary>
 	/// Seeded generator of small valid levels: 2x2 to 5x5, grass 1-3, stone, water, empty and wood,
-	/// plus 0-2 springs whose landings are in bounds and never on another spring (so no cycles).
+	/// plus 0-2 springs whose landings are in bounds and never on another spring (so no cycles), and 0-1 pair
+	/// of rabbit holes that no spring lands on (so a hole's exit can't spring back into it).
 	/// The start is always on grass or wood.
 	/// </summary>
 	public static class RandomLevels
@@ -37,8 +38,20 @@ namespace Lawnmower.Model.Tests
 				tiles[startIndex] = TileSpec.Grass(random.Next(1, 4));
 			}
 
-			int springs = random.Next(3);
 			List<int> candidates = Enumerable.Range(0, tiles.Length).Where(i => i != startIndex).ToList();
+			HashSet<int> holeCells = new HashSet<int>();
+			if (random.Next(2) == 0 && candidates.Count > 3)
+			{
+				for (int h = 0; h < 2; h++)
+				{
+					int cell = candidates[random.Next(candidates.Count)];
+					candidates.Remove(cell);
+					holeCells.Add(cell);
+					tiles[cell] = TileSpec.RabbitHole(0);
+				}
+			}
+
+			int springs = random.Next(3);
 			HashSet<int> springCells = new HashSet<int>();
 			for (int s = 0; s < springs && candidates.Count > 1; s++)
 			{
@@ -49,7 +62,7 @@ namespace Lawnmower.Model.Tests
 
 			foreach (int cell in springCells)
 			{
-				List<int> landings = Enumerable.Range(0, tiles.Length).Where(i => i != cell && !springCells.Contains(i)).ToList();
+				List<int> landings = Enumerable.Range(0, tiles.Length).Where(i => i != cell && !springCells.Contains(i) && !holeCells.Contains(i)).ToList();
 				int landing = landings[random.Next(landings.Count)];
 				GridVector offset = new GridVector(landing % width - cell % width, landing / width - cell / width);
 				tiles[cell] = TileSpec.Spring(offset);

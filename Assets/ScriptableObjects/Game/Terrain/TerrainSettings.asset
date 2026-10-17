@@ -13,16 +13,22 @@ MonoBehaviour:
   m_Name: TerrainSettings
   m_EditorClassIdentifier: Lawnmower.Presentation::Game.Terrain.TerrainSettings
   voxelSize: 0.0625
-  margin: 1
+  margin: 1.5
   convexCornerRadius: 0.35
   concaveCornerRadius: 0.25
   topHeight: -0.01
   pivotHeight: -0.1
   shoreWidth: 0.35
-  bottomHeight: -1.2
+  bottomHeight: -1.4
   slope: 0.8
   edgeRadius: 0.15
   noiseAmplitude: 0.04
   noiseFrequency: 2
   noiseFadeDepth: 0.3
   noiseOffset: {x: 17.3, y: 3.1, z: 41.9}
+  roughnessDepth: 0.8
+  slopeVariation: 0.5
+  slopeVariationFrequency: 0.6
+  lumpAmplitude: 0.2
+  lumpFrequency: 1.3
+  lumpVerticalScale: 1.8

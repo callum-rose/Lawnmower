@@ -18,7 +18,9 @@ namespace Tests.EditMode
 			TileSpec.Stone(3),
 			TileSpec.Water,
 			TileSpec.Wood,
-			TileSpec.Spring(new GridVector(4, -2))
+			TileSpec.Spring(new GridVector(4, -2)),
+			TileSpec.RabbitHole(0),
+			TileSpec.RabbitHole(3)
 		};
 
 		[Test]
@@ -42,6 +44,17 @@ namespace Tests.EditMode
 			Assert.AreEqual(3, (int)TileKind.Water);
 			Assert.AreEqual(4, (int)TileKind.Wood);
 			Assert.AreEqual(5, (int)TileKind.Spring);
+			Assert.AreEqual(6, (int)TileKind.RabbitHole);
+		}
+
+		[Test]
+		public void RabbitHole_KeepsItsPair()
+		{
+			TileRecord record = TileRecordCodec.FromSpec(TileSpec.RabbitHole(2));
+
+			Assert.AreEqual(TileKind.RabbitHole, record.kind);
+			Assert.AreEqual(2, record.holePair);
+			Assert.AreNotEqual(TileRecordCodec.FromSpec(TileSpec.RabbitHole(1)), record);
 		}
 
 		[Test]

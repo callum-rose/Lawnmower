@@ -34,6 +34,18 @@ namespace Game.Terrain
 		[SerializeField, Min(0)] private float noiseFadeDepth = 0.3f;
 		[SerializeField] private Vector3 noiseOffset = new Vector3(17.3f, 3.1f, 41.9f);
 
+		[Header("Roughness")]
+		[Tooltip("Depth below the pivot over which the sides get rougher, reaching full roughness at the bottom of it")]
+		[SerializeField, Min(0)] private float roughnessDepth = 0.8f;
+		[Tooltip("How much the slope wanders around the outline at full roughness, as a fraction of it")]
+		[SerializeField, Range(0, 1)] private float slopeVariation = 0.5f;
+		[SerializeField] private float slopeVariationFrequency = 0.6f;
+		[Tooltip("How far large lumps push the sides in and out at full roughness, in tiles")]
+		[SerializeField, Range(0, 0.5f)] private float lumpAmplitude = 0.2f;
+		[SerializeField] private float lumpFrequency = 1.3f;
+		[Tooltip("Scales the lumps' vertical frequency: above 1 squashes them into ledges")]
+		[SerializeField, Range(0.25f, 4)] private float lumpVerticalScale = 1.8f;
+
 #if UNITY_EDITOR
 		/// <summary>Raised when the settings are edited, so the terrain can be tuned live in play mode.</summary>
 		public event Action Changed;
@@ -63,6 +75,12 @@ namespace Game.Terrain
 			NoiseFrequency = noiseFrequency,
 			NoiseFadeDepth = noiseFadeDepth,
 			NoiseOffset = (float3)noiseOffset,
+			RoughnessDepth = roughnessDepth,
+			SlopeVariation = slopeVariation,
+			SlopeVariationFrequency = slopeVariationFrequency,
+			LumpAmplitude = lumpAmplitude,
+			LumpFrequency = lumpFrequency,
+			LumpVerticalScale = lumpVerticalScale,
 		};
 	}
 }
