@@ -1,7 +1,7 @@
 // One step of the 2D wave equation for WaterRippleSimulation. R = current height, G = previous height.
-// The edges of the simulated area, the masked-out parts of it and the inside of every ripple source are held at zero,
-// so waves reflect off them. With _EdgeAbsorbWidth > 0 a band inside the edges soaks waves up instead, for water that
-// carries on past the simulated area.
+// The masked-out parts of the simulated area and the inside of every ripple source are held at zero, so waves reflect
+// off them. So are the area's edges, unless _EdgeAbsorbWidth > 0: then a band inside them damps waves gradually and the
+// outermost texels pass what's left out (a first-order Mur boundary), for water that carries on past the simulated area.
 // A thin ring around each source with strength > 0 is driven sinusoidally to emit waves.
 Shader "Hidden/WaterRippleSimulation"
 {
@@ -28,7 +28,10 @@ Shader "Hidden/WaterRippleSimulation"
 			// Same size as the state; red below 0.5 is a wall, e.g. the bank of a pond that isn't a rectangle.
 			TEXTURE2D(_Mask);
 			float4 _SimRect;
+			// Courant number squared
 			float _Courant;
+			// (c - 1) / (c + 1) for Courant number c
+			float _MurCoefficient;
 			float _Damping;
 			float _ForcePhase;
 			float _ForceWidth;
@@ -74,9 +77,9 @@ Shader "Hidden/WaterRippleSimulation"
 				return SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_PointClamp, uv, 0).r;
 			}
 
-			float4 Frag(Varyings input) : SV_Target
+			// The wave equation's next height here, before sources and splashes.
+			float Propagate(float2 uv)
 			{
-				float2 uv = input.uv;
 				if (!IsOpen(uv))
 					return 0;
 				float2 state = SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_PointClamp, uv, 0).rg;
@@ -84,12 +87,38 @@ Shader "Hidden/WaterRippleSimulation"
 				float2 dy = float2(0, _MainTex_TexelSize.y);
 				float neighbours = Height(uv - dx) + Height(uv + dx) + Height(uv - dy) + Height(uv + dy);
 				// Damping only the velocity term; scaling the whole update would add a cutoff that stops slow waves travelling.
-				float next = state.r + (state.r - state.g) * _Damping + _Courant * (neighbours - 4 * state.r);
+				// Scaling the whole update in the edge band also reflects waves off the band, more than a wall would.
+				float velocity = (state.r - state.g) * _Damping;
 				if (_EdgeAbsorbWidth > 0)
 				{
 					float2 fromEdges = min(uv, 1 - uv) * _SimRect.zw;
 					float absorb = saturate(1 - min(fromEdges.x, fromEdges.y) / _EdgeAbsorbWidth);
-					next *= 1 - 0.08 * absorb * absorb;
+					velocity *= 1 - 0.1 * absorb * absorb;
+				}
+
+				return state.r + velocity + _Courant * (neighbours - 4 * state.r);
+			}
+
+			float4 Frag(Varyings input) : SV_Target
+			{
+				float2 uv = input.uv;
+				if (!IsOpen(uv))
+					return 0;
+				float height = SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_PointClamp, uv, 0).r;
+				float next = Propagate(uv);
+				if (_EdgeAbsorbWidth > 0)
+				{
+					// On the outermost texels, carry the wave arriving from the texel inside straight on out.
+					float2 texel = _MainTex_TexelSize.xy;
+					float2 inward = float2(uv.x < texel.x ? 1 : uv.x > 1 - texel.x ? -1 : 0,
+						uv.y < texel.y ? 1 : uv.y > 1 - texel.y ? -1 : 0);
+					if (inward.x != 0)
+						inward.y = 0;
+					if (any(inward != 0))
+					{
+						float2 inside = uv + inward * texel;
+						next = Height(inside) + _MurCoefficient * (Propagate(inside) - height);
+					}
 				}
 
 				float2 world = _SimRect.xy + uv * _SimRect.zw;
@@ -110,7 +139,7 @@ Shader "Hidden/WaterRippleSimulation"
 						next = source.w * sin(_ForcePhase);
 				}
 
-				return float4(next, state.r, 0, 0);
+				return float4(next, height, 0, 0);
 			}
 			ENDHLSL
 		}

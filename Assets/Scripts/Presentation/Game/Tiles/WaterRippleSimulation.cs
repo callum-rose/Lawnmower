@@ -3,7 +3,7 @@ using UnityEngine;
 namespace Game.Tiles
 {
 	// Simulates ripples over a rectangle of water centred on this transform, so waves from WaterRippleSource objects
-	// spread, bounce off the rectangle's edges and off other sources, and interfere. The Water shader reads the result.
+	// spread, bounce off the rectangle's edges (unless they absorb them) and off other sources, and interfere. The Water shader reads the result.
 	// An optional mask holds parts of the rectangle still, so ponds that aren't rectangles have walls of their own.
 	public class WaterRippleSimulation : MonoBehaviour
 	{
@@ -15,6 +15,7 @@ namespace Game.Tiles
 		private static readonly int EnabledId = Shader.PropertyToID("_WaterRippleSimEnabled");
 		private static readonly int SimRectId = Shader.PropertyToID("_SimRect");
 		private static readonly int CourantId = Shader.PropertyToID("_Courant");
+		private static readonly int MurCoefficientId = Shader.PropertyToID("_MurCoefficient");
 		private static readonly int DampingId = Shader.PropertyToID("_Damping");
 		private static readonly int ForcePhaseId = Shader.PropertyToID("_ForcePhase");
 		private static readonly int ForceWidthId = Shader.PropertyToID("_ForceWidth");
@@ -31,7 +32,7 @@ namespace Game.Tiles
 		private float texelsPerUnit = 40;
 
 		[SerializeField, Tooltip("World units per second.")]
-		private float waveSpeed = 0.25f;
+		private float waveSpeed = 0.5f;
 
 		[SerializeField, Tooltip("Distance between rings emitted by sources, in world units.")]
 		private float wavelength = 0.32f;
@@ -39,8 +40,9 @@ namespace Game.Tiles
 		[SerializeField, Tooltip("Fraction of wave height lost per second.")]
 		private float dampingPerSecond = 0.15f;
 
-		[SerializeField, Tooltip("Width of a band inside the rectangle's edges that soaks up waves, in world units; 0 " +
-		                         "makes the edges walls, for water that ends there.")]
+		[SerializeField, Tooltip("Width of a band inside the rectangle's edges that soaks up waves, in world units, for " +
+		                         "water that carries on past them; 0 makes the edges walls, for water that ends there. " +
+		                         "Faster or longer waves need a wider band.")]
 		private float edgeAbsorbWidth;
 
 		private Texture _mask;
@@ -131,6 +133,7 @@ namespace Game.Tiles
 
 			_material.SetVector(SimRectId, rect);
 			_material.SetFloat(CourantId, courant * courant);
+			_material.SetFloat(MurCoefficientId, (courant - 1) / (courant + 1));
 			_material.SetFloat(DampingId, Mathf.Pow(1 - dampingPerSecond, StepTime));
 			_material.SetFloat(ForcePhaseId, 2 * Mathf.PI * waveSpeed / wavelength * _time);
 			_material.SetFloat(ForceWidthId, texel * 1.5f);

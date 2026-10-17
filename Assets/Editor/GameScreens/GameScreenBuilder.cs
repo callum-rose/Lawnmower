@@ -398,10 +398,13 @@ namespace Lawnmower.Editor.GameScreens
 			Stretch(root, 0, 0, 0, 0);
 			root.gameObject.AddComponent<CanvasGroup>();
 
-			// Covers the board and the HUD: only the sheet's buttons work while it's up.
+			// Covers the board and the HUD: a tap off the sheet dismisses it (free roam), a tap on it stops there.
 			var blocker = root.gameObject.AddComponent<Image>();
 			blocker.color = Color.clear;
 			blocker.raycastTarget = true;
+			var outside = root.gameObject.AddComponent<Button>();
+			outside.transition = Selectable.Transition.None;
+			outside.navigation = new Navigation { mode = Navigation.Mode.None };
 
 			// Annotation: "too short!" with an arrow down to the failed tile, placed over the mower each frame.
 			RectTransform annotation = NewUI("Annotation", root);
@@ -425,6 +428,8 @@ namespace Lawnmower.Editor.GameScreens
 			sheet.pivot = new Vector2(0.5f, 0);
 			sheet.sizeDelta = new Vector2(0, (FrameHeight - 582) - (FrameHeight - SafeBottom) + 28 + 34);
 			sheet.anchoredPosition = Vector2.zero;
+			var sheetBlocker = sheet.gameObject.AddComponent<Image>();
+			sheetBlocker.color = Color.clear;
 
 			RectTransform body = NewUI("Body", sheet);
 			Stretch(body, -2, 28, -2, 0);
@@ -470,7 +475,8 @@ namespace Lawnmower.Editor.GameScreens
 				("restartButton", restart),
 				("levelsButton", levels),
 				("annotation", annotation),
-				("annotationNote", note.rectTransform));
+				("annotationNote", note.rectTransform),
+				("outsideButton", outside));
 			return view;
 		}
 

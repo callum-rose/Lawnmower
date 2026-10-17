@@ -4,7 +4,8 @@ using UnityEngine;
 /// <summary>
 /// Import settings for the voxel-style FBXs (Assets/Docs/VoxelExport.md): keeps the per-corner vertex data intact,
 /// loops the creatures' baked animation and swaps each embedded <c>Palette_&lt;hex&gt;</c> material for a shared
-/// <c>Game/VoxelProp</c> material of that colour in Assets/Materials/Game/Environment/Palette.
+/// <c>Game/VoxelProp</c> material of that colour in Assets/Materials/Game/Environment/Palette. Any other embedded material
+/// in a terrain model is swapped for the shared material of the same name in Assets/Materials/Game/Environment.
 /// </summary>
 internal class VoxelModelPostprocessor : AssetPostprocessor
 {
@@ -13,7 +14,8 @@ internal class VoxelModelPostprocessor : AssetPostprocessor
 	private const string animatedFolder = "Assets/Models/Creatures/";
 	private const string tileFolder = "Assets/Models/Tile/";
 	private const string tileVoxelMarker = "_voxel";
-	private const string paletteFolder = "Assets/Materials/Game/Environment/Palette";
+	private const string environmentFolder = "Assets/Materials/Game/Environment";
+	private const string paletteFolder = environmentFolder + "/Palette";
 	private const string palettePrefix = "Palette_";
 	private const string shaderName = "Game/VoxelProp";
 
@@ -83,9 +85,14 @@ internal class VoxelModelPostprocessor : AssetPostprocessor
 
 	private Material OnAssignMaterialModel(Material material, Renderer renderer)
 	{
-		if (!IsVoxelModel(assetPath) || !material.name.StartsWith(palettePrefix))
+		if (!IsVoxelModel(assetPath))
 		{
 			return null;
+		}
+
+		if (!material.name.StartsWith(palettePrefix))
+		{
+			return assetPath.StartsWith(terrainFolder) ? LoadShared($"{environmentFolder}/{material.name}.mat") : null;
 		}
 
 		string path = $"{paletteFolder}/{material.name}.mat";
@@ -99,5 +106,18 @@ internal class VoxelModelPostprocessor : AssetPostprocessor
 		}
 
 		return palette;
+	}
+
+	private Material LoadShared(string path)
+	{
+		context.DependsOnSourceAsset(path);
+		Material shared = AssetDatabase.LoadAssetAtPath<Material>(path);
+
+		if (shared == null)
+		{
+			Debug.LogWarning($"{assetPath}: no shared material at {path}, keeping the embedded one.");
+		}
+
+		return shared;
 	}
 }

@@ -18,6 +18,7 @@ MonoBehaviour:
   concaveCornerRadius: 0.25
   topHeight: -0.01
   pivotHeight: -0.1
+  shoreWidth: 0.35
   bottomHeight: -1.4
   slope: 0.8
   edgeRadius: 0.15

@@ -62,7 +62,7 @@ namespace Lawnmower.Model
 
 			GridVector from = _mowerPosition.Value;
 
-			// Only Completed rejects input: a Failed level still accepts moves (it can only recover by undo).
+			// Only Completed rejects input: a Failed level still accepts moves (free roam; it can only recover by undo).
 			if (Status == LevelStatus.Completed)
 			{
 				return new MoveResult(direction, MoveOutcome.Rejected, from, null, null, Status, Status);

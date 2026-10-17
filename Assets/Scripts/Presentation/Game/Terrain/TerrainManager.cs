@@ -15,7 +15,8 @@ namespace Game.Terrain
 	/// Builds one smooth terrain mesh under each level from an SDF of its solid tiles, in place of a block per tile.
 	/// The mesh sits in the level container's space, where tile (x, z) covers [x, x + 1] x [z, z + 1]. Each tile's top
 	/// colour (grass height, dirt, ...) goes in a one-texel-per-tile texture the terrain shader blends between, with how
-	/// much of it is dirt in alpha. The dirt is raked along a <see cref="RakePath"/> through the grass tiles.
+	/// much of it is dirt in alpha, inside a one-texel border. Empty tiles and the border are wholly dirt, so the bare
+	/// shore past the tiles is too. The dirt is raked along a <see cref="RakePath"/> through the grass tiles.
 	/// </summary>
 	[RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 	internal class TerrainManager : MonoBehaviour
@@ -132,7 +133,7 @@ namespace Game.Terrain
 					level.Depth + margin);
 
 				TerrainMesher.Build(_mesh, footprint, settings.Shape, min, max, settings.VoxelSize);
-				edging.Build(footprint, settings.TopHeight);
+				edging.Build(footprint, settings.TopHeight, settings.ShoreWidth);
 			}
 			finally
 			{
@@ -144,14 +145,16 @@ namespace Game.Terrain
 
 		private void BuildCells(Level level)
 		{
-			if (_cells == null || _cells.width != level.Width || _cells.height != level.Depth)
+			int width = level.Width + 2;
+			int depth = level.Depth + 2;
+			if (_cells == null || _cells.width != width || _cells.height != depth)
 			{
 				if (_cells)
 				{
 					Destroy(_cells);
 				}
 
-				_cells = new Texture2D(level.Width, level.Depth, TextureFormat.RGBA32, false, false)
+				_cells = new Texture2D(width, depth, TextureFormat.RGBA32, false, false)
 				{
 					name = "TerrainCells",
 					filterMode = FilterMode.Bilinear,
@@ -159,15 +162,20 @@ namespace Game.Terrain
 				};
 			}
 
+			// The border, like any empty tile, is bare shore: all dirt
+			Color32[] shore = new Color32[width * depth];
+			Array.Fill(shore, (Color32)GrassColour(0));
+			_cells.SetPixels32(shore);
+
 			foreach (GridVector position in level.Positions)
 			{
 				Tile tile = level.GetTile(position);
-				_cells.SetPixel(position.x, position.y, GetTopColour(tile));
+				SetCell(position, GetTopColour(tile), false);
 
 				if (tile is IReadonlyGrassTile grass)
 				{
 					GridVector cell = position;
-					UndoableAction<int, int> onHeightChanged = (_, height, _) => SetCell(cell, GrassColour(height));
+					UndoableAction<int, int> onHeightChanged = (_, height, _) => SetCell(cell, GrassColour(height), true);
 					grass.GrassHeight.ValueChangedFromTo += onHeightChanged;
 					_unsubscribes.Add(() => grass.GrassHeight.ValueChangedFromTo -= onHeightChanged);
 				}
@@ -221,10 +229,13 @@ namespace Game.Terrain
 			_rake.Apply();
 		}
 
-		private void SetCell(GridVector position, Color colour)
+		private void SetCell(GridVector position, Color colour, bool apply)
 		{
-			_cells.SetPixel(position.x, position.y, colour);
-			_cells.Apply();
+			_cells.SetPixel(position.x + 1, position.y + 1, colour);
+			if (apply)
+			{
+				_cells.Apply();
+			}
 		}
 
 		private void Unsubscribe()
@@ -243,7 +254,8 @@ namespace Game.Terrain
 			{
 				IReadonlyGrassTile grass => GrassColour(grass.GrassHeight.Value),
 				_ when tile.Kind == TileKind.Spring => WithoutDirt(springColour),
-				_ => WithoutDirt(stoneColour),
+				_ when IsSolid(tile.Kind) => WithoutDirt(stoneColour),
+				_ => GrassColour(0),
 			};
 		}
 
