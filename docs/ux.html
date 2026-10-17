@@ -204,11 +204,6 @@ body {
 #arrow-pad { display: none; }
 #arrow-pad.on { display: block; }
 
-#failed { position: absolute; inset: 0; display: none; z-index: 40; }
-#failed.on { display: block; }
-#failed.on .sheet { animation: slide-up .3s cubic-bezier(.2, .8, .3, 1) both; }
-@keyframes slide-up { from { transform: translateY(100%); } }
-
 /* ---------- Level select ---------- */
 #ls-scroll { position: absolute; left: 0; right: 0; top: 128px; bottom: 0; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; scrollbar-width: none; }
 #ls-scroll::-webkit-scrollbar { display: none; }
@@ -262,7 +257,8 @@ body {
       <option value="mow">Mow the rest</option>
     </select>
   </label>
-  <p style="margin-top:6px">Tap the board to make a move; Undo/Redo follow it. Movement → Arrows in Settings shows the arrow pad.</p>
+  <p style="margin-top:6px">Level failed has no UI; the board itself shows it. Undo or Restart clears it.</p>
+  <p>Tap the board to make a move; Undo/Redo follow it. Movement → Arrows in Settings shows the arrow pad.</p>
 
   <h2>Theme</h2>
   <div id="theme"></div>
@@ -345,29 +341,6 @@ body {
 
         <!-- Pause: SafeCornerAnchor on the full screen (position set in script) -->
         <div class="abs round-btn" id="hud-pause" data-btn="pause" data-color="white-on-teal" data-icon="pause" data-size="62"></div>
-
-        <!-- Level Failed (Figma 12:1106) -->
-        <div id="failed">
-          <div class="abs" id="fail-annotation" style="width:10px;height:10px">
-            <div class="icon abs" data-icon="next" style="width:30px;height:30px;left:-10px;bottom:69px;transform:rotate(90deg)"></div>
-            <div class="abs bb" style="width:140px;height:30px;left:-19px;bottom:103px;font-size:22px;color:var(--white);transform:rotate(-6deg)">too short!</div>
-          </div>
-          <div class="sheet abs" style="left:0;right:0;bottom:0;height:290px">
-            <div class="abs" data-frame="ModalCard" data-fill="white" data-shadow="ink-shadow" data-overhang="8 8 8 40"
-                 style="left:-2px;right:-2px;top:28px;bottom:0;display:flex;flex-direction:column;align-items:center;gap:14px;padding:44px 26px 34px">
-              <div class="b" style="width:320px;font-size:16px;color:var(--ink)">You mowed a finished patch down to the dirt. Undo and try another route.</div>
-              <div class="big-btn" data-btn="fail-undo" data-color="yellow" data-icon="undo" style="width:342px;height:66px;--fs:28px">UNDO LAST MOVE</div>
-              <div style="display:flex;gap:10px">
-                <div class="big-btn" data-btn="restart" data-color="blue" data-icon="restart" style="width:166px;height:50px;--fs:20px;--is:20px">RESTART</div>
-                <div class="big-btn" data-btn="levels" data-color="red" data-icon="levels" style="width:166px;height:50px;--fs:20px;--is:20px">LEVELS</div>
-              </div>
-            </div>
-            <div class="abs" data-frame="Ribbon" data-fill="red" data-shadow="red-shadow"
-                 style="left:50%;top:0;width:196px;height:65px;margin-left:-98px;transform:rotate(3deg)">
-              <div class="abs h" style="inset:0 0 4px;display:grid;place-items:center;font-size:40px;letter-spacing:.04em;color:var(--white)">SCALPED!</div>
-            </div>
-          </div>
-        </div>
 
         <!-- Pause card -->
         <div class="modal" id="pause-card">
@@ -778,7 +751,7 @@ function openSettings(open) {
 
 function closeGameCards() {
   ["#pause-card", "#complete-card"].forEach(s => $(s).classList.remove("on"));
-  $("#failed").classList.remove("on");
+  setFailed(false);
 }
 
 function go(target) {
@@ -789,7 +762,7 @@ function go(target) {
     case "game": showScreen("game"); break;
     case "pause": showScreen("game"); $("#pause-card").classList.add("on"); break;
     case "complete": showScreen("game"); applyComplete(); $("#complete-card").classList.add("on"); break;
-    case "failed": showScreen("game"); setBackdrop("game-failed.jpg"); $("#failed").classList.add("on"); break;
+    case "failed": showScreen("game"); setFailed(true); break;
     case "settings": openSettings(true); break;
     case "reset": openSettings(true); $("#reset-modal").classList.add("on"); break;
   }
@@ -838,8 +811,9 @@ function setTutorial(step) {
 function setBackdrop(file) {
   const b = $("#backdrop");
   const img = new Image();
-  img.onload = () => { b.style.backgroundImage = `url("${CAPTURES}${file}")`; b.classList.remove("missing"); };
-  img.onerror = () => { b.style.backgroundImage = ""; b.classList.add("missing"); };
+  b.dataset.file = file;
+  img.onload = () => { if (b.dataset.file !== file) return; b.style.backgroundImage = `url("${CAPTURES}${file}")`; b.classList.remove("missing"); };
+  img.onerror = () => { if (b.dataset.file !== file) return; b.style.backgroundImage = ""; b.classList.add("missing"); };
   img.src = CAPTURES + file;
   $("#backdrop-select").value = file;
 }
@@ -862,9 +836,8 @@ const ACTIONS = {
   next: () => { resetGame(); go("game"); },
   board: () => move(),
   move: () => move(),
-  undo: () => { if (state.moves) { state.moves--; state.redo++; applyHistory(); } },
+  undo: () => { if (state.moves) { state.moves--; state.redo++; applyHistory(); } if (state.failed) { setFailed(false); setBackdrop("game-level7.jpg"); } },
   redo: () => { if (state.redo) { state.redo--; state.moves++; applyHistory(); } },
-  "fail-undo": () => { go("game"); setBackdrop("game-level7.jpg"); ACTIONS.undo(); },
   reset: () => $("#reset-modal").classList.add("on"),
   keep: () => $("#reset-modal").classList.remove("on"),
   "confirm-reset": () => { $("#reset-modal").classList.remove("on"); toast("settings", "Progress reset"); },
@@ -880,7 +853,14 @@ function move() {
   }
 }
 
-function resetGame() { state.moves = 0; state.redo = 0; applyHistory(); setTutorial(""); setBackdrop($("#backdrop-select").value === "game-failed.jpg" ? "game-level7.jpg" : $("#backdrop-select").value); }
+function setFailed(on) {
+  state.failed = on;
+  if (!on) return;
+  setBackdrop("game-failed.jpg");
+  state.moves = Math.max(state.moves, 1); state.redo = 0; applyHistory();
+}
+
+function resetGame() { setFailed(false); state.moves = 0; state.redo = 0; applyHistory(); setTutorial(""); setBackdrop($("#backdrop-select").value === "game-failed.jpg" ? "game-level7.jpg" : $("#backdrop-select").value); }
 
 const titleCase = s => s.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
 
@@ -1024,9 +1004,6 @@ $("#guides-toggle").addEventListener("change", e => $("#guides").classList.toggl
 $("#backdrop-select").addEventListener("change", e => setBackdrop(e.target.value));
 $("#tutorial-select").addEventListener("change", e => setTutorial(e.target.value));
 ["#perfect-toggle", "#newbest-toggle", "#next-toggle"].forEach(s => $(s).addEventListener("change", applyComplete));
-
-// Failed annotation sits over the mower; roughly the board centre in the capture.
-Object.assign($("#fail-annotation").style, { left: "calc(50% - 5px)", top: "calc(42% - 10px)" });
 
 applyDevice(DEVICES[0]);
 setBackdrop("game-level7.jpg");
