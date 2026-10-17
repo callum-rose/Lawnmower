@@ -1,8 +1,13 @@
-// Raked dirt for the terrain's tops: grooves that follow RakePath's route through the tiles. Positions are in tiles (object xz), where tile (x, z) covers [x, x + 1] x [z, z + 1].
+// Raked dirt for the terrain's tops: grooves that follow RakePath's route through the tiles, lifted off round the
+// obstacles (stones, springs) and the little mushrooms marking where springs land, which get rings of their own. Positions are in tiles (object xz), where tile (x, z)
+// covers [x, x + 1] x [z, z + 1].
 #ifndef RAKED_DIRT_INCLUDED
 #define RAKED_DIRT_INCLUDED
 
 TEXTURE2D(_TerrainRake);
+// Round ground the rake went round besides the tiles' obstacles: centres (xy) and radii (z), in tiles
+float4 _RakeCircles[32];
+float _RakeCircleCount;
 
 #define RAKE_NONE 4
 
@@ -30,6 +35,78 @@ int2 RakeSidesOf(float2 cell)
 	int2 size = int2(_TerrainRake_TexelSize.zw);
 	int2 texel = clamp(int2(cell), 0, size - 1);
 	return int2(round(LOAD_TEXTURE2D(_TerrainRake, texel).rg * 255));
+}
+
+// Half the width of the ground the tile's obstacle stands on, in tiles: 0 for none, and off the level
+float ObstacleHalfSize(int2 cell)
+{
+	int2 size = int2(_TerrainRake_TexelSize.zw);
+	if (any(cell < 0) || any(cell >= size))
+	{
+		return 0;
+	}
+
+	return LOAD_TEXTURE2D(_TerrainRake, cell).b;
+}
+
+// Signed distance from a rounded square of half-width h, corners rounded by r, and its gradient
+float RoundedSquare(float2 p, float h, float r, out float2 gradient)
+{
+	float2 q = abs(p) - (h - r);
+	float2 outside = max(q, 0);
+	float d = length(outside) + min(max(q.x, q.y), 0) - r;
+	gradient = sign(p) * (any(q > 0) ? outside / max(length(outside), 1e-5) : (q.x > q.y ? float2(1, 0) : float2(0, 1)));
+	return d;
+}
+
+// Polynomial smooth minimum of distances d and e, with their gradients
+void SmoothMin(inout float d, inout float2 gradient, float e, float2 eGradient)
+{
+	float k = _RakeStampMerge;
+	float t = saturate(0.5 + 0.5 * (e - d) / k);
+	d = lerp(e, d, t) - k * t * (1 - t);
+	gradient = normalize(lerp(eGradient, gradient, t) + 1e-5);
+}
+
+// Distance from the nearest obstacle's footprint, in tiles (negative under it, large with none near), and its
+// gradient. Neighbouring obstacles' footprints are merged smoothly so their rings run round both. Only the four tiles
+// whose centres surround p are looked at, so an obstacle's footprint plus its rings must reach less than a tile from
+// its centre.
+float ObstacleDistance(float2 tile, out float2 gradient)
+{
+	int2 first = int2(floor(tile - 0.5));
+	float d = 1e3;
+	gradient = float2(0, 1);
+	for (int i = 0; i < 4; i++)
+	{
+		int2 cell = first + int2(i & 1, i >> 1);
+		float h = ObstacleHalfSize(cell);
+		if (h <= 0)
+		{
+			continue;
+		}
+
+		float2 g;
+		float e = RoundedSquare(tile - (cell + 0.5), h, h * _RakeStampRoundness, g);
+		SmoothMin(d, gradient, e, g);
+	}
+
+	return d;
+}
+
+// Distance from the nearest of _RakeCircles, in tiles, and its gradient, merged as ObstacleDistance's are
+float CircleDistance(float2 tile, out float2 gradient)
+{
+	float d = 1e3;
+	gradient = float2(0, 1);
+	for (int i = 0; i < (int)_RakeCircleCount; i++)
+	{
+		float2 offset = tile - _RakeCircles[i].xy;
+		float e = length(offset) - _RakeCircles[i].z;
+		SmoothMin(d, gradient, e, offset / max(length(offset), 1e-5));
+	}
+
+	return d;
 }
 
 // A rounded square's "radius": the circle's at _RakeTurnSquareness = 2, squarer above, so arcs reach further into
@@ -97,6 +174,17 @@ struct DirtSurface
 	float2 tilt;
 };
 
+// Rings raked round the obstacles, d from their footprints, where clearance (how far past the last ring) isn't
+// positive: the height of the grooves (0 beyond them) and its slope across them
+float StampHeight(float d, float clearance, out float slope)
+{
+	float x = frac(d * _RakeLines) - 0.5;
+	float inside = step(0, d) * step(clearance, 0);
+	const float e = 0.01;
+	slope = (GrooveHeight(x + e, _RakeGrooveWidth) - GrooveHeight(x - e, _RakeGrooveWidth)) / (2 * e) * inside;
+	return GrooveHeight(x, _RakeGrooveWidth) * inside;
+}
+
 DirtSurface RakedDirt(float2 tile, half3 dirt)
 {
 	DirtSurface surface;
@@ -110,6 +198,14 @@ DirtSurface RakedDirt(float2 tile, half3 dirt)
 	float toEnd;
 	float band = RakeAcross(raked, across, toEnd);
 	float u = band * _RakeLines;
+
+	// The rake was lifted round each obstacle and landing marker mushroom, which were then circled by a whole number of
+	// grooves. Where their rings meet they follow the distance from both, so they bend round each other
+	float2 away, awayFromCircle;
+	float obstacle = ObstacleDistance(raked, away);
+	float circle = CircleDistance(raked, awayFromCircle);
+	float clearance = min(obstacle - round(_RakeStampRings) / _RakeLines, circle - round(_RakeMarkerRings) / _RakeLines);
+	SmoothMin(obstacle, away, circle, awayFromCircle);
 	// Faded out as the grooves get too fine for the pixels. Not fwidth(u): u can jump between tiles without its
 	// grooves doing so, but it never grows faster than one line per 1 / _RakeLines tiles
 	float2 footprint = fwidth(tile);
@@ -120,7 +216,11 @@ DirtSurface RakedDirt(float2 tile, half3 dirt)
 	float x = frac(u) - 0.5;
 	// Where the rake was lifted each groove gets shallower and narrower until it's gone, the prongs leaving at
 	// slightly different points
-	float lift = smoothstep(-_RakeEndFade, 0, toEnd + (RakeHash(floor(u)) - 0.5) * 0.1);
+	float jitter = (RakeHash(floor(u)) - 0.5) * 0.1;
+	float lift = max(smoothstep(-_RakeEndFade, 0, toEnd + jitter),
+		smoothstep(-_RakeStampFade, 0, jitter * 0.5 - clearance));
+	// Nothing of the path on an obstacle's own tile
+	lift = ObstacleHalfSize(int2(floor(raked))) > 0 ? 1 : lift;
 	float w = _RakeGrooveWidth * (1 - 0.5 * lift);
 	// The rake pressed in harder in some places than others
 	float pressure = 1 + (RakeNoise(raked * 2.3 + 7.7) - 0.5) * 2 * _RakePressureVariation;
@@ -131,9 +231,18 @@ DirtSurface RakedDirt(float2 tile, half3 dirt)
 	// Grooves are _RakeDepth * 0.04 tiles deep; x grows _RakeLines times faster than the tile coordinates
 	surface.tilt = -slope * 0.04 * _RakeDepth * _RakeLines * strength * across;
 
+	// The rings start right at the footprint, so the first one's heap is the dirt pushed up against the obstacle
+	float ringSlope;
+	float ringStrength = fade * pressure;
+	float ringHeight = StampHeight(obstacle, clearance, ringSlope) * ringStrength;
+	height += ringHeight;
+	surface.tilt -= ringSlope * 0.04 * _RakeDepth * _RakeLines * ringStrength * away;
+
 	float grain = RakeNoise(tile * 23) * 0.6 + RakeNoise(tile * 61) * 0.4;
 	half3 albedo = dirt * (1 + _RakeGrooveShade * min(height, 0));
 	albedo *= 1 + (grain - 0.5) * _DirtGrain;
+	// Darker where the obstacle meets the dirt, as if pressed in
+	albedo *= 1 - _RakeStampShade * exp(-max(obstacle, 0) / 0.04);
 
 	surface.albedo = albedo;
 	return surface;
