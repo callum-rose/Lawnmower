@@ -10,7 +10,7 @@ Videos: [final look with splashes](../../docs/images/water/final.mp4), [the four
 
 ## How it works
 
-Four pieces:
+Five pieces:
 
 | Piece | Path | Job |
 |---|---|---|
@@ -18,6 +18,7 @@ Four pieces:
 | `WaterRippleSimulation` | `Assets/Scripts/Presentation/Game/Tiles/` + `Hidden/WaterRippleSimulation` shader | Runs the 2D wave equation over a rectangle of water. The surface's shape comes from here. |
 | `WaterRippleSource` | `Assets/Scripts/Presentation/Game/Tiles/` | Anything touching the surface (rock, lily pad, fish). Blocks ripples and, with strength > 0, sends out rings. |
 | `PlanarWaterReflection` | `Assets/Scripts/Presentation/Game/Tiles/` | Renders the scene mirrored about the water plane at half resolution for reflections. |
+| `PondManager` + `Pond.prefab` | `Assets/Scripts/Presentation/Game/Terrain/`, `Assets/Prefabs/Game/Tiles/Water/` | Builds each level's pond from its water tiles: the surface, a floor, and the ripple simulation's size and mask. |
 
 For every water pixel the shader:
 
@@ -39,11 +40,38 @@ For every water pixel the shader:
 7. **Highlights and glow.** Sun specular, twinkling sparkles on crests, a constant glow, and a shallow-edge glow where
    the water is thin (walls, rocks, lily pads). The edge band's reach and lacy breakup come from 3D noise that only
    moves along Y, so it reshapes in place, and it swells and retreats with passing ripples.
+8. **Fresnel rim.** A stylised, tintable sheen on top of the physical fresnel in step 6. From the steep game camera
+   the surface is seen nearly head-on, so the grazing term (`Fresnel Rim Power`) barely shows on its own; `Fresnel Rim
+   Slope Boost` also lights ripple faces tipped away from the camera compared with flat water, so rings and splashes
+   pick up a pearly edge.
 
 ![Ripple height field](../../docs/images/water/06_ripple_field.jpg)
 
 *The ripple simulation's height field from above: rings from the rock and lily pads bouncing off the pond walls and
 interfering.*
+
+## In the game
+
+Water tiles don't get a tile object each (`TilePrefabsManager` still has no water prefab). Instead `Pond.prefab`, under
+the `Terrain` object in `Game.unity`, fills every level's water tiles with one pond when the level starts:
+
+- **One surface mesh** (`Water`, on the Water layer, with the level's `WaterRippleSimulation` and
+  `PlanarWaterReflection`) covering the water tiles plus each quarter of a solid tile that borders them, so
+  it tucks under the terrain's inset banks. One mesh rather than a quad per tile, because overlapping transparent quads
+  would blend twice where they overlap.
+- **One floor** (`PondFloor`, `PondFloor.mat`) with the same shape, `Floor Depth` (0.95) below the terrain top, since
+  the terrain is open underneath. One-tile-wide channels close up above it: the banks meet at about −0.7.
+- **The ripple simulation** sized to the pond's bounds, with a **mask** of open water: texels inside the pond and
+  outside the terrain's SDF at the water's height, so ripples bounce off the real, rounded, noisy shoreline rather than
+  the rectangle's edges. A level with no water hides the surface and floor, which also switches off the simulation and
+  reflection.
+- **Wood tiles next to water are bridges**, so the pond runs under them (Level 9).
+- Being under `Terrain`, the pond rises with it in the level intro.
+
+- **Bumping into a water tile splashes it,** a little way in from the side the mower came from.
+
+Water that reaches the edge of the level stops there, over the ocean (Levels 8 and 9). Otherwise nothing disturbs the
+water yet: there are no `WaterRippleSource`s in ponds, so between bumps it's still.
 
 ## Using it
 
@@ -97,7 +125,7 @@ four splashes as raw RGB24. The file header lists the other options and the ffmp
 
 - `Water.shader` was an Amplify-generated, opaque, cel-shaded blue gradient. Nothing used it.
 - `Water.mat` was actually a URP Lit material, and no water tile prefab is assigned in `TilePrefabsManager`, so water
-  tiles render nothing in-game. **This is still true**: hooking water up to tiles is follow-up work.
+  tiles render nothing in-game. Hooking water up to tiles came later; see "In the game".
 - The pipeline had the depth and opaque textures off, which refraction needs.
 
 The brief: properly transparent, lots of refraction, fluid flow, inviting and crystalline, with exaggerated physical
@@ -207,6 +235,14 @@ From a reference photo of rings spreading round a stone:
 
   ![Caustics and shadows](../../docs/images/water/08_caustics_and_shadows.jpg)
 
+### Round 6: fresnel rim
+
+The reflection already used fresnel, but from the game camera it sat near its bias and didn't read. A separate rim term
+was added rather than retuning the reflection. The first pass (slope boost 12, intensity 0.6) turned the whole pond
+milky and hid the floor; it now uses slope boost 3 and intensity 0.35.
+
+![Fresnel rim off and on](../../docs/images/water/11_fresnel_rim.jpg)
+
 ## Options tried and not used
 
 - **Variants A (Crystal Lagoon), C (Liquid Glass) and D (Toon Dream).** C's settings are worth revisiting for a magic
@@ -221,11 +257,9 @@ From a reference photo of rings spreading round a stone:
 
 ## Known limitations and follow-ups
 
-- **Water isn't in the game yet.** There is no water tile prefab; when there is, it needs the Water layer, plus one
-  `PlanarWaterReflection` and one `WaterRippleSimulation` per pond (or per level), a pond floor, and a surface that
-  overlaps the terrain's banks (see "With the SDF terrain").
-- **The simulation is one rectangle.** Only its edges act as walls. Non-rectangular ponds made of tiles need a mask
-  built from the level grid (or from the terrain's footprint) so other tiles reflect too.
+- **Only bumps disturb the water in the game.** Ponds have no ripple sources (rocks, lily pads) yet.
+- **One simulation per level.** Every pond in a level shares one rectangle; with separate ponds far apart most of it is
+  masked out and wasted.
 - **iPhone performance hasn't been measured.** Per water pixel: up to 32 texture reads for the depth blur, 12 depth reads
   for the shadow march, 6 ripple reads for caustics and edges, plus a half-resolution scene render per frame for
   reflections and a 200×160 simulation step twice per frame. Expect to trim taps and steps.
