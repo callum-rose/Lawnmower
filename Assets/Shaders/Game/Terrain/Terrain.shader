@@ -145,7 +145,7 @@ Shader "Game/Terrain"
 				half3 topColour = lerp(top.rgb, dirt.albedo, top.a);
 				half3 albedo = lerp(SideColour(input.positionOS.y), topColour, topness);
 
-				// The grooves and pebbles bend the normal, as a height map would, wherever the top is dirt
+				// The grooves bend the normal, as a height map would, wherever the top is dirt
 				float3 bumpedOS = normalize(float3(dirt.tilt.x, 1, dirt.tilt.y));
 				float3 bumped = normalize(lerp(normal, TransformObjectToWorldNormal(bumpedOS), top.a * topness));
 
