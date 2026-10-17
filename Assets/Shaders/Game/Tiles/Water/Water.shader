@@ -201,6 +201,9 @@ Shader "Water"
 			TEXTURE2D(_WaterRippleSimTex);
 			float4 _WaterRippleSimRect;
 			float _WaterRippleSimEnabled;
+			// Width, height, 1 / width, 1 / height of the ripple texture, set when the GPU can't filter it (32-bit float
+			// filtering is missing on most phones), so Ripples blends the four nearest texels itself. z is 0 otherwise.
+			float4 _WaterRippleSimManualFilterSize;
 
 			struct Attributes
 			{
@@ -298,6 +301,19 @@ Shader "Water"
 				float2 uv = (p - _WaterRippleSimRect.xy) / _WaterRippleSimRect.zw;
 				if (any(uv < 0) || any(uv > 1))
 					return 0;
+				[branch]
+				if (_WaterRippleSimManualFilterSize.z > 0)
+				{
+					float2 texelPos = uv * _WaterRippleSimManualFilterSize.xy - 0.5;
+					float2 f = frac(texelPos);
+					float2 base = (floor(texelPos) + 0.5) * _WaterRippleSimManualFilterSize.zw;
+					float2 texel = _WaterRippleSimManualFilterSize.zw;
+					float a = SAMPLE_TEXTURE2D_LOD(_WaterRippleSimTex, sampler_PointClamp, base, 0).r;
+					float b = SAMPLE_TEXTURE2D_LOD(_WaterRippleSimTex, sampler_PointClamp, base + float2(texel.x, 0), 0).r;
+					float c = SAMPLE_TEXTURE2D_LOD(_WaterRippleSimTex, sampler_PointClamp, base + float2(0, texel.y), 0).r;
+					float d = SAMPLE_TEXTURE2D_LOD(_WaterRippleSimTex, sampler_PointClamp, base + texel, 0).r;
+					return lerp(lerp(a, b, f.x), lerp(c, d, f.x), f.y) * _RippleAmplitude;
+				}
 				return SAMPLE_TEXTURE2D_LOD(_WaterRippleSimTex, sampler_LinearClamp, uv, 0).r * _RippleAmplitude;
 			}
 

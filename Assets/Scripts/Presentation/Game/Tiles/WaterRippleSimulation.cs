@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 
 namespace Game.Tiles
 {
@@ -13,6 +14,7 @@ namespace Game.Tiles
 		private static readonly int TextureId = Shader.PropertyToID("_WaterRippleSimTex");
 		private static readonly int RectId = Shader.PropertyToID("_WaterRippleSimRect");
 		private static readonly int EnabledId = Shader.PropertyToID("_WaterRippleSimEnabled");
+		private static readonly int ManualFilterSizeId = Shader.PropertyToID("_WaterRippleSimManualFilterSize");
 		private static readonly int SimRectId = Shader.PropertyToID("_SimRect");
 		private static readonly int CourantId = Shader.PropertyToID("_Courant");
 		private static readonly int MurCoefficientId = Shader.PropertyToID("_MurCoefficient");
@@ -148,6 +150,9 @@ namespace Game.Tiles
 			Shader.SetGlobalTexture(TextureId, _current);
 			Shader.SetGlobalVector(RectId, rect);
 			Shader.SetGlobalFloat(EnabledId, 1);
+			Shader.SetGlobalVector(ManualFilterSizeId, SystemInfo.IsFormatSupported(_current.graphicsFormat, GraphicsFormatUsage.Linear)
+				? Vector4.zero
+				: new Vector4(_current.width, _current.height, 1f / _current.width, 1f / _current.height));
 		}
 
 		private void EnsureResources()
