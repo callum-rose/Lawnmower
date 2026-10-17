@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using BalsamicBits.Extensions;
 using Game.Levels;
 using UnityEngine;
@@ -11,6 +12,8 @@ namespace Game.Core
     {
         [SerializeField] private Transform container;
 
+        // Tiles placed with a surface the mower stands on; a destroyed tile reads as null and falls back to the ground
+        private readonly Dictionary<GridVector, Component> _standSurfaces = new Dictionary<GridVector, Component>();
 
         private void Awake()
         {
@@ -25,6 +28,15 @@ namespace Game.Core
             }
 
             transform.localPosition = GetLocalPosition(position);
+
+            if (transform.TryGetComponent(out IStandSurface surface))
+            {
+                _standSurfaces[position] = (Component)surface;
+            }
+            else
+            {
+                _standSurfaces.Remove(position);
+            }
         }
 
         public Vector3 GetLocalPosition(GridVector position)
@@ -35,6 +47,19 @@ namespace Game.Core
         public Vector3 GetWorldPosition(GridVector position)
         {
             return GetLocalPosition(position) + container.position;
+        }
+
+        /// <summary>Where the mower stands on a tile: its world position, raised onto any <see cref="IStandSurface"/>.</summary>
+        public Vector3 GetStandWorldPosition(GridVector position)
+        {
+            Vector3 worldPosition = GetWorldPosition(position);
+
+            if (_standSurfaces.TryGetValue(position, out Component surface) && surface)
+            {
+                worldPosition.y += ((IStandSurface)surface).StandHeight;
+            }
+
+            return worldPosition;
         }
 
         public GridVector GetGridPosition(Vector3 worldPosition)
