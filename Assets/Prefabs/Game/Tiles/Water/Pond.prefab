@@ -168,10 +168,10 @@ MonoBehaviour:
   shader: {fileID: 4800000, guid: 2c93a2dcd16324eae8a204a7f5a03c15, type: 3}
   size: {x: 5, y: 4}
   texelsPerUnit: 40
-  waveSpeed: 0.25
+  waveSpeed: 0.5
   wavelength: 0.32
   dampingPerSecond: 0.15
-  edgeAbsorbWidth: 1
+  edgeAbsorbWidth: 1.5
 --- !u!114 &8304481171345610818
 MonoBehaviour:
   m_ObjectHideFlags: 0

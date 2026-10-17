@@ -57,7 +57,7 @@ namespace Lawnmower.Editor.Capture
 			[CliArg("warmup", "Frames to render and throw away before the kept one, to settle temporal effects and UI layout (default 2).")]
 			int warmup = 2,
 			[CliArg("setup", "Static method to run after the scene opens and before rendering, as Namespace.Type.Method. " +
-				"It may take no parameters or one string (--setup_arg); its return value is reported.")]
+				"It may take no parameters or one string, number, bool or enum (--setup_arg); its return value is reported.")]
 			string setup = "",
 			[CliArg("setup_arg", "String passed to the --setup method when it takes one.")]
 			string setupArg = "",
@@ -126,7 +126,7 @@ namespace Lawnmower.Editor.Capture
 
 		/// <summary>Opens <paramref name="scenePath"/> alone, returning the previous setup to restore, or null if it was
 		/// already the only scene open.</summary>
-		private static SceneSetup[] OpenScene(string scenePath)
+		internal static SceneSetup[] OpenScene(string scenePath)
 		{
 			if (AssetDatabase.LoadAssetAtPath<SceneAsset>(scenePath) == null)
 			{
@@ -159,7 +159,7 @@ namespace Lawnmower.Editor.Capture
 			return previous;
 		}
 
-		private static string RunSetup(string setup, string arg)
+		internal static string RunSetup(string setup, string arg)
 		{
 			int dot = setup.LastIndexOf('.');
 			if (dot <= 0)
@@ -177,14 +177,28 @@ namespace Lawnmower.Editor.Capture
 			const BindingFlags flags = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
 			MethodInfo method =
 				type.GetMethod(methodName, flags, null, new[] { typeof(string) }, null)
+				?? type.GetMethods(flags).FirstOrDefault(m => m.Name == methodName && m.GetParameters().Length == 1 &&
+					(m.GetParameters()[0].ParameterType.IsPrimitive || m.GetParameters()[0].ParameterType.IsEnum))
 				?? type.GetMethod(methodName, flags, null, Type.EmptyTypes, null)
 				?? throw new ArgumentException($"--setup method '{methodName}' on {typeName} must be static and take no " +
-					"parameters or one string.");
+					"parameters or one string, number, bool or enum.");
 
 			object value;
 			try
 			{
-				value = method.Invoke(null, method.GetParameters().Length == 1 ? new object[] { arg } : null);
+				object[] args = null;
+				if (method.GetParameters().Length == 1)
+				{
+					Type parameterType = method.GetParameters()[0].ParameterType;
+					args = new[]
+					{
+						parameterType.IsEnum
+							? Enum.Parse(parameterType, arg, true)
+							: Convert.ChangeType(arg, parameterType, System.Globalization.CultureInfo.InvariantCulture),
+					};
+				}
+
+				value = method.Invoke(null, args);
 			}
 			catch (TargetInvocationException e)
 			{
@@ -194,7 +208,7 @@ namespace Lawnmower.Editor.Capture
 			return value?.ToString() ?? "ok";
 		}
 
-		private static Camera FindCamera(string name)
+		internal static Camera FindCamera(string name)
 		{
 			Camera[] all = Object.FindObjectsByType<Camera>(FindObjectsInactive.Include, FindObjectsSortMode.None);
 			if (!string.IsNullOrEmpty(name))
@@ -255,7 +269,7 @@ namespace Lawnmower.Editor.Capture
 
 		/// <summary>Puts every active root Screen Space - Overlay canvas just in front of <paramref name="cam"/>, and adds
 		/// their layers to its culling mask (a UI camera's mask is often Nothing, as overlays don't need it).</summary>
-		private static List<(Canvas, float)> MoveOverlaysOnto(Camera cam)
+		internal static List<(Canvas, float)> MoveOverlaysOnto(Camera cam)
 		{
 			var moved = new List<(Canvas, float)>();
 			float distance = cam.nearClipPlane + Mathf.Min(0.1f, (cam.farClipPlane - cam.nearClipPlane) * 0.01f);
@@ -279,13 +293,13 @@ namespace Lawnmower.Editor.Capture
 			return moved;
 		}
 
-		private static string ResolveOutput(string output, Camera cam)
+		internal static string ResolveOutput(string output, Camera cam, string extension = ".png")
 		{
 			string projectRoot = System.IO.Path.GetDirectoryName(Application.dataPath);
 			if (string.IsNullOrEmpty(output))
 			{
 				string sceneName = cam.gameObject.scene.IsValid() ? cam.gameObject.scene.name : "scene";
-				output = $"{DefaultFolder}/{sceneName}-{cam.name}-{DateTime.Now:yyyyMMdd-HHmmss-fff}.png";
+				output = $"{DefaultFolder}/{sceneName}-{cam.name}-{DateTime.Now:yyyyMMdd-HHmmss-fff}{extension}";
 			}
 
 			return System.IO.Path.GetFullPath(System.IO.Path.IsPathRooted(output)
@@ -293,7 +307,7 @@ namespace Lawnmower.Editor.Capture
 				: System.IO.Path.Combine(projectRoot, output));
 		}
 
-		private static IEnumerable<string> OpenScenePaths()
+		internal static IEnumerable<string> OpenScenePaths()
 		{
 			for (int i = 0; i < EditorSceneManager.sceneCount; i++)
 			{

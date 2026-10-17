@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 68c46c7e09684bfcb3b98d8e235c2e48, type: 3}
   m_Name: TileAnimator
   m_EditorClassIdentifier: 
-  positionOffset: {x: 0, y: -2, z: 0}
-  perTileAnimDuration: 0.5
-  gamePlayData: {fileID: 11400000, guid: 123151afb2fdd074f9d46e345d51c0f4, type: 2}
+  growDuration: 1
+  waveSpread: 0.55
+  popDuration: 0.35
+  popEase: 27
   levelStartedEventChannelContainer:
     ObjectField: {fileID: 11400000, guid: 6893d8a204369ee449b9d7778103aad6, type: 2}
     ResultType: 

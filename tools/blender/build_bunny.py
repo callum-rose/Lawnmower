@@ -6,7 +6,7 @@ blender --background --factory-startup --python build_bunny.py -- [variant=class
 
 (or, with Blender's `bpy` module installed from pip: python build_bunny.py -- variant=... out=...)
 
-Four takes on the same character, all from Assets/Models/Mower/Blender/regular_bunny.blend as the
+Four takes on the same character, all from Assets/Archive/RegularBunny/regular_bunny.blend as the
 reference: an orange egg of a body with a butter face panel carrying the game's own face texture, two
 tall ears with butter insides, a white tail and four dark feet.
 

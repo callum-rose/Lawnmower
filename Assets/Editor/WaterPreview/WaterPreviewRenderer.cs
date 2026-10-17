@@ -227,18 +227,9 @@ public static class WaterPreviewRenderer
 		int width = MaxX - MinX + 1, depth = MaxZ - MinZ + 1;
 		var solid = new bool[width, depth];
 		// One texel border, all dirt like the water tiles, as TerrainManager writes it
-		var cells = new Texture2D(width + 2, depth + 2, TextureFormat.RGBA32, false, false) { filterMode = FilterMode.Bilinear, wrapMode = TextureWrapMode.Clamp };
-		var shore = new Color32[(width + 2) * (depth + 2)];
-		Array.Fill(shore, (Color32)new Color(0.36f, 0.22f, 0.12f, 1));
-		cells.SetPixels32(shore);
 		for (int x = 0; x < width; x++)
 		for (int z = 0; z < depth; z++)
-		{
 			solid[x, z] = !InPond(x + MinX, z + MinZ);
-			if (solid[x, z])
-				cells.SetPixel(x + 1, z + 1, new Color(0.16f, 0.22f, 0.06f, 0));
-		}
-		cells.Apply();
 
 		var mesh = new Mesh { name = "Terrain" };
 		var footprint = TerrainFootprint.Create(solid, settings.ConvexCornerRadius, settings.ConcaveCornerRadius, Allocator.TempJob);
@@ -258,9 +249,6 @@ public static class WaterPreviewRenderer
 		terrain.AddComponent<MeshFilter>().sharedMesh = mesh;
 		var renderer = terrain.AddComponent<MeshRenderer>();
 		renderer.sharedMaterial = AssetDatabase.LoadAssetAtPath<Material>("Assets/Materials/Tiles/Terrain.mat");
-		var block = new MaterialPropertyBlock();
-		block.SetTexture("_TerrainCells", cells);
-		renderer.SetPropertyBlock(block);
 	}
 
 	static void BuildBank()

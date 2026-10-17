@@ -1,6 +1,6 @@
 """Shape variations on the in-game regular_bunny.blend (base|chubby|tall|lop|swept), rendered from four sides.
 
-python original_shapes.py -- Assets/Models/Mower/Blender/regular_bunny.blend <variant> <out prefix>
+python original_shapes.py -- Assets/Archive/RegularBunny/regular_bunny.blend <variant> <out prefix>
 """
 import bpy, sys, math, os
 from mathutils import Vector, Matrix
@@ -11,9 +11,14 @@ for n in ["Body.001", "Sphere.005", "Sphere.006", "Sphere.007", "Sphere.008"]:
     bpy.data.objects[n].hide_render = True
 for o in bpy.data.objects:
     o.animation_data_clear()
+ASSETS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../Assets/")
 for im in bpy.data.images:
     if "Mowers/" in im.filepath:
-        im.filepath = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../Assets/Textures/Game/Mowers/") + im.filepath.split("Mowers/")[1]
+        name = im.filepath.split("Mowers/")[1]
+        for d in ("Textures/Game/Mowers/", "Archive/RegularBunny/"):
+            if os.path.exists(ASSETS + d + name):
+                im.filepath = ASSETS + d + name
+                break
 bpy.context.scene.frame_set(0)
 O = bpy.data.objects
 body = O["Body"]; centre = body.matrix_world.translation.copy()

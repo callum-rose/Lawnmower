@@ -11,7 +11,7 @@ namespace Lawnmower.Editor.GameScreens
 {
 	/// <summary>
 	/// Captures the board from the game camera for judging the raked dirt: a few levels with every grass tile shown as
-	/// dirt, as if mowed bare, each with a close-up of where a rake path ends. Runs in play mode; from a shell, in batch mode without -quit:
+	/// dirt, as if mowed bare, each with close-ups of where a rake path ends and of an obstacle (a stone or spring) and of a spring's landing marker. Runs in play mode; from a shell, in batch mode without -quit:
 	/// <para>Unity -batchmode -projectPath . -executeMethod Lawnmower.Editor.GameScreens.DirtCapture.Run</para>
 	/// Environment variables: DIRT_OUT (output folder, default Temp/dirt), DIRT_W / DIRT_H (image size).
 	/// </summary>
@@ -24,6 +24,7 @@ namespace Lawnmower.Editor.GameScreens
 		private static readonly (int level, string file)[] Shots =
 		{
 			(2, "level03-dirt.png"),
+			(3, "level04-dirt.png"),
 			(6, "level07-dirt.png"),
 			(9, "level10-dirt.png"),
 		};
@@ -83,7 +84,10 @@ namespace Lawnmower.Editor.GameScreens
 						break;
 					default:
 						Capture(Shots[shot].file);
-						CapturePathEnd(Path.GetFileNameWithoutExtension(Shots[shot].file) + "-end.png");
+						string name = Path.GetFileNameWithoutExtension(Shots[shot].file);
+						CapturePathEnd(name + "-end.png");
+						CaptureObstacle(name + "-obstacle.png");
+						CaptureLandingMarker(name + "-landing.png");
 						Next(step + 1, 0.5);
 						break;
 				}
@@ -102,23 +106,6 @@ namespace Lawnmower.Editor.GameScreens
 			{
 				setter.SetAppearance(0);
 			}
-
-			TerrainManager terrain = UnityEngine.Object.FindAnyObjectByType<TerrainManager>();
-			const BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic;
-			Texture2D cells = (Texture2D)typeof(TerrainManager).GetField("_cells", flags).GetValue(terrain);
-			Texture2D rake = (Texture2D)typeof(TerrainManager).GetField("_rake", flags).GetValue(terrain);
-			Color32[] routes = rake.GetPixels32();
-			Color[] colours = cells.GetPixels();
-			for (int i = 0; i < colours.Length; i++)
-			{
-				if (routes[i].r != RakePath.None || routes[i].g != RakePath.None)
-				{
-					colours[i] = new Color(0.36f, 0.22f, 0.12f, 1);
-				}
-			}
-
-			cells.SetPixels(colours);
-			cells.Apply();
 		}
 
 		private static void Next(int step, double seconds)
@@ -151,7 +138,39 @@ namespace Lawnmower.Editor.GameScreens
 				return;
 			}
 
-			Vector3 tile = terrain.transform.TransformPoint(end % rake.width + 0.5f, 0, end / rake.width + 0.5f);
+			CaptureCloseUp(terrain.transform.TransformPoint(end % rake.width + 0.5f, 0, end / rake.width + 0.5f), file);
+		}
+
+		/// <summary>The game camera zoomed in on the first stone or spring, if the level has one.</summary>
+		private static void CaptureObstacle(string file)
+		{
+			BaseTileObject obstacle = (BaseTileObject)UnityEngine.Object.FindAnyObjectByType<StoneTileObject>() ??
+				UnityEngine.Object.FindAnyObjectByType<SpringTileObject>();
+			if (obstacle)
+			{
+				CaptureCloseUp(obstacle.transform.position, file);
+			}
+		}
+
+		/// <summary>The game camera zoomed in on the first spring's landing marker, if the level has one.</summary>
+		private static void CaptureLandingMarker(string file)
+		{
+			foreach (SpringTileObject spring in UnityEngine.Object.FindObjectsByType<SpringTileObject>())
+			{
+				foreach (Transform child in spring.transform)
+				{
+					if (child.name.StartsWith("spring_landing"))
+					{
+						CaptureCloseUp(child.position, file);
+						return;
+					}
+				}
+			}
+		}
+
+		private static void CaptureCloseUp(Vector3 tile, string file)
+		{
+			TerrainManager terrain = UnityEngine.Object.FindAnyObjectByType<TerrainManager>();
 			tile.y = terrain.GetComponent<MeshRenderer>().bounds.max.y;
 			// Zoomed rather than moved in, which could put the board inside the near clip plane
 			Camera camera = Camera.main;

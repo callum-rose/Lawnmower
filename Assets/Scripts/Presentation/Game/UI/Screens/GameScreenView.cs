@@ -73,6 +73,10 @@ namespace Game.UI.Screens
 			failedSheet.UndoButton.Clicked += PressUndoLastMove;
 			failedSheet.RestartButton.Clicked += () => RestartRequested?.Invoke();
 			failedSheet.LevelsButton.Clicked += () => LevelSelectRequested?.Invoke();
+			if (failedSheet.OutsideButton != null)
+			{
+				failedSheet.OutsideButton.onClick.AddListener(HideFailed);
+			}
 
 			pauseCard.HideImmediate();
 			completeCard.HideImmediate();

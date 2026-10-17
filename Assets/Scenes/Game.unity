@@ -1033,13 +1033,6 @@ MonoBehaviour:
   settings: {fileID: 11400000, guid: 53a6daddc02ef4cfd8804267b035c18a, type: 2}
   gamePlayData: {fileID: 11400000, guid: 123151afb2fdd074f9d46e345d51c0f4, type: 2}
   edging: {fileID: 1426447865}
-  grassColours:
-  - {r: 0.36, g: 0.22, b: 0.12, a: 1}
-  - {r: 0.05, g: 0.2, b: 0.08, a: 1}
-  - {r: 0.16, g: 0.22, b: 0.06, a: 1}
-  - {r: 0.32, g: 0.32, b: 0.13, a: 1}
-  stoneColour: {r: 0.05, g: 0.2, b: 0.08, a: 1}
-  springColour: {r: 0.36, g: 0.22, b: 0.12, a: 1}
   introOffset: {x: 0, y: -2, z: 0}
   introEase: 9
   levelStartedEventChannel: {fileID: 11400000, guid: 6893d8a204369ee449b9d7778103aad6, type: 2}
