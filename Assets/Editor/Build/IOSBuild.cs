@@ -21,6 +21,7 @@ namespace Lawnmower.Editor.Build
 		public const string DefaultOutputDir = "Builds/iOS";
 
 		private const string OutputArg = "-buildOutput";
+		private const string DevelopmentArg = "-developmentBuild";
 
 		[MenuItem("Bunny Heaven/Build/Apply iOS Player Settings")]
 		public static void ApplyPlayerSettings()
@@ -33,6 +34,7 @@ namespace Lawnmower.Editor.Build
 			PlayerSettings.iOS.appleDeveloperTeamID = TeamId;
 			PlayerSettings.iOS.appleEnableAutomaticSigning = true;
 			PlayerSettings.iOS.targetOSVersionString = MinimumIOSVersion;
+			PlayerSettings.enableFrameTimingStats = true;
 
 			PlayerSettings.defaultInterfaceOrientation = UIOrientation.Portrait;
 			PlayerSettings.allowedAutorotateToPortrait = false;
@@ -124,7 +126,7 @@ namespace Lawnmower.Editor.Build
 				locationPathName = outputDir,
 				target = BuildTarget.iOS,
 				targetGroup = BuildTargetGroup.iOS,
-				options = BuildOptions.None
+				options = HasArg(DevelopmentArg) ? BuildOptions.Development : BuildOptions.None
 			};
 
 			BuildReport report = BuildPipeline.BuildPlayer(options);
@@ -153,5 +155,7 @@ namespace Lawnmower.Editor.Build
 			int i = Array.IndexOf(args, OutputArg);
 			return i >= 0 && i + 1 < args.Length ? args[i + 1] : null;
 		}
+
+		private static bool HasArg(string name) => Environment.GetCommandLineArgs().Contains(name);
 	}
 }

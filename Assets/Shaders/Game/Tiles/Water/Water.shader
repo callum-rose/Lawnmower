@@ -205,6 +205,13 @@ Shader "Water"
 			// filtering is missing on most phones), so Ripples blends the four nearest texels itself. z is 0 otherwise.
 			float4 _WaterRippleSimManualFilterSize;
 
+			// Web caustic edge distances from WaterCausticBaker: red at caustic time t, green at 1.3t, tiling every
+			// _WaterCausticPeriod cells. Without it (no baker running) the web is evaluated per pixel instead.
+			TEXTURE2D(_WaterCausticTex);
+			SAMPLER(sampler_WaterCausticTex);
+			float _WaterCausticPeriod;
+			float _WaterCausticTexEnabled;
+
 			struct Attributes
 			{
 				float4 positionOS : POSITION;
@@ -417,9 +424,20 @@ Shader "Water"
 
 			float WebCaustic(float2 p, float t, float sharpness)
 			{
-				p += float2(GradientNoise(p * 0.6 + t * 0.1), GradientNoise(p * 0.6 + 4.1 - t * 0.1)) * 0.6;
-				float a = CausticWeb(p, t, sharpness);
-				float b = CausticWeb(p * 1.37 + float2(3.1, 7.7), t * 1.3, sharpness);
+				float2 q = p * 1.37 + float2(3.1, 7.7);
+				float a;
+				float b;
+				[branch]
+				if (_WaterCausticTexEnabled > 0.5)
+				{
+					a = exp(-SAMPLE_TEXTURE2D_LOD(_WaterCausticTex, sampler_WaterCausticTex, p / _WaterCausticPeriod, 0).r * sharpness);
+					b = exp(-SAMPLE_TEXTURE2D_LOD(_WaterCausticTex, sampler_WaterCausticTex, q / _WaterCausticPeriod, 0).g * sharpness);
+				}
+				else
+				{
+					a = CausticWeb(p, t, sharpness);
+					b = CausticWeb(q, t * 1.3, sharpness);
+				}
 				return a * 0.75 + a * b * 1.5 + b * 0.25;
 			}
 
@@ -428,6 +446,8 @@ Shader "Water"
 			{
 				p *= _CausticScale;
 				t *= _CausticSpeed;
+				// One warp for all three colours: the split is small enough that warping each separately doesn't show.
+				p += float2(GradientNoise(p * 0.6 + t * 0.1), GradientNoise(p * 0.6 + 4.1 - t * 0.1)) * 0.6;
 				float3 c;
 				[branch]
 				if (_CausticSplit <= 0.0001)
@@ -475,13 +495,15 @@ Shader "Water"
 
 			// Whether sunlight reaching an underwater point is blocked by something solid above it (a lily pad, a rock
 			// overhang, a fish), found by marching towards the light through the depth buffer. Only on-screen things block.
-			float UnderwaterShadow(float3 p, float3 lightDir, float depth)
+			// Few steps, offset per pixel by jitter in [0, 1), so the gaps between them don't show as bands.
+			float UnderwaterShadow(float3 p, float3 lightDir, float depth, float jitter)
 			{
+				const int steps = 8;
 				float maxDistance = (depth + 0.2) / max(lightDir.y, 0.2);
 				[loop]
-				for (int i = 0; i < 12; i++)
+				for (int i = 0; i < steps; i++)
 				{
-					float d = 0.03 + maxDistance * (i + 1) / 12.0;
+					float d = 0.03 + maxDistance * (i + jitter) / steps;
 					float3 q = p + lightDir * d;
 					float2 uv = WorldToScreenUV(q);
 					if (any(uv < 0) || any(uv > 1))
@@ -528,6 +550,7 @@ Shader "Water"
 
 				// Thickness of water behind the surface along the view ray, before and after refraction.
 				// Refraction shifts the point seen through the water sideways in world space, further for deeper things.
+				float pixelNoise = InterleavedGradientNoise(input.positionCS.xy, 0);
 				float3 cameraForward = -UNITY_MATRIX_V[2].xyz;
 				float rayToEye = 1 / max(0.001, dot(rayDir, cameraForward));
 				float rawThickness = max(0, SceneEyeDepth(screenUV) - surfaceDepth);
@@ -561,11 +584,12 @@ Shader "Water"
 				{
 					float3 blurred = 0;
 					float weight = 0;
-					float rotation = InterleavedGradientNoise(input.positionCS.xy, 0) * 6.2831;
+					const int taps = 8;
+					float rotation = pixelNoise * 6.2831;
 					[unroll]
-					for (int i = 0; i < 16; i++)
+					for (int i = 0; i < taps; i++)
 					{
-						float r = sqrt((i + 0.5) / 16);
+						float r = sqrt((i + 0.5) / taps);
 						float a = i * 2.39996 + rotation;
 						float2 uv = refractedUV + float2(cos(a), sin(a)) * r * blurRadius;
 						float w = SceneEyeDepth(uv) > surfaceDepth ? 1 : 0;
@@ -581,7 +605,7 @@ Shader "Water"
 				float3 floorNormal = normalize(cross(ddy(floorWS), ddx(floorWS)));
 				floorNormal = dot(floorNormal, toCamera) < 0 ? -floorNormal : floorNormal;
 				float facing = saturate(dot(floorNormal, mainLight.direction));
-				float shadow = verticalDepth > 0.01 ? UnderwaterShadow(floorWS, mainLight.direction, verticalDepth) : 0;
+				float shadow = verticalDepth > 0.01 ? UnderwaterShadow(floorWS, mainLight.direction, verticalDepth, pixelNoise) : 0;
 				refracted *= 1 - shadow * _UnderwaterShadow;
 
 				float2 causticP = floorWS.xz + mainLight.direction.xz * verticalDepth * 0.5;
@@ -670,17 +694,27 @@ Shader "Water"
 				// Shallow-water glow: the band's reach wobbles with layered noise and lacy gaps open up inside it, with a
 				// thin solid line kept right where the water touches things. The noise is 3D and only moves along Y, so the
 				// pattern reshapes in place instead of visibly sliding across the surface.
-				float3 edgeP = float3(p.x * _EdgeNoiseScale, t * _EdgeNoiseSpeed, p.y * _EdgeNoiseScale);
-				float reach = GradientNoise3D(edgeP) * 0.55
-					+ GradientNoise3D(edgeP * float3(2.3, 1.3, 2.3) + float3(0, 0, 3.7)) * 0.3
-					+ GradientNoise3D(edgeP * float3(5.3, 1.7, 5.3) + float3(8.1, 0, 0)) * 0.15;
-				float lace = GradientNoise3D(edgeP * float3(3.1, 1.5, 3.1) + float3(reach * 2, 0, 0)) * 0.5
-					+ GradientNoise3D(edgeP * float3(7.7, 2, 7.7) + float3(1.3, 0, 5.1)) * 0.25;
 				// Ripple crests deepen the water at the edge and troughs make it shallower, so the band breathes with them.
 				// Clamped so deep troughs out in open water (e.g. a splash) can't make it look shallow.
 				float shore = (rawThickness + clamp(Ripples(p) * _EdgeRippleInfluence, -_EdgeWidth, _EdgeWidth)) / _EdgeWidth;
-				float band = saturate(1 - shore + reach * _EdgeNoiseStrength);
-				float foam = band * band * lerp(1, smoothstep(-0.05, 0.2, lace + band * 0.3 - 0.15), _EdgeBreakup);
+				float foam = 0;
+				// reach stays within about +-0.8, so past this the band is empty and the noise isn't needed.
+				[branch]
+				if (shore < 1 + _EdgeNoiseStrength)
+				{
+					float3 edgeP = float3(p.x * _EdgeNoiseScale, t * _EdgeNoiseSpeed, p.y * _EdgeNoiseScale);
+					float reach = GradientNoise3D(edgeP) * 0.55
+						+ GradientNoise3D(edgeP * float3(2.3, 1.3, 2.3) + float3(0, 0, 3.7)) * 0.3
+						+ GradientNoise3D(edgeP * float3(5.3, 1.7, 5.3) + float3(8.1, 0, 0)) * 0.15;
+					float band = saturate(1 - shore + reach * _EdgeNoiseStrength);
+					[branch]
+					if (band > 0)
+					{
+						float lace = GradientNoise3D(edgeP * float3(3.1, 1.5, 3.1) + float3(reach * 2, 0, 0)) * 0.5
+							+ GradientNoise3D(edgeP * float3(7.7, 2, 7.7) + float3(1.3, 0, 5.1)) * 0.25;
+						foam = band * band * lerp(1, smoothstep(-0.05, 0.2, lace + band * 0.3 - 0.15), _EdgeBreakup);
+					}
+				}
 				float contact = saturate(1 - rawThickness / (_EdgeWidth * 0.15));
 				colour += Quantise(saturate(foam + contact * contact * 0.6)) * _EdgeColour.rgb * _EdgeIntensity;
 

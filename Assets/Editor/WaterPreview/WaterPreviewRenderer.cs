@@ -127,6 +127,11 @@ public static class WaterPreviewRenderer
 		else
 			reflection.enabled = false;
 
+		var bakerType = Type.GetType("Game.Tiles.WaterCausticBaker, Lawnmower.Presentation");
+		var baker = water.AddComponent(bakerType);
+		var bake = bakerType.GetMethod("Bake");
+		BeforeRender += () => bake.Invoke(baker, null);
+
 		int w = int.Parse(Env("WATER_W", "1200")), h = w * 3 / 4;
 		var rt = new RenderTexture(w, h, 24, RenderTextureFormat.ARGB32) { antiAliasing = 4 };
 		cam.targetTexture = rt;

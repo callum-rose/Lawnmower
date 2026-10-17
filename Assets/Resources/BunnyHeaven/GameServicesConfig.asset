@@ -25,4 +25,4 @@ MonoBehaviour:
   lowQualityLevel: Low
   highQualityLevel: High
   lowRenderScale: 0.75
-  highRenderScale: 1
+  highRenderScale: 0.85

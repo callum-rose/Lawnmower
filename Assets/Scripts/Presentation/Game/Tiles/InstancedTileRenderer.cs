@@ -18,6 +18,12 @@ namespace Game.Tiles
 		// Instanced draws are capped by the size of the per-instance constant buffer
 		private const int MaxInstancesPerDraw = 1023;
 
+#if DEVELOPMENT_BUILD
+		/// <summary>Development builds: every material drawn through here, and a filter that skips batches (PerfExperiments).</summary>
+		public static readonly HashSet<Material> DebugMaterials = new HashSet<Material>();
+		public static Func<Material, bool> DebugSkipMaterial;
+
+#endif
 		private readonly Dictionary<BatchKey, Batch> _batches = new Dictionary<BatchKey, Batch>();
 		private readonly List<Batch> _batchList = new List<Batch>();
 		private readonly Dictionary<GameObject, List<Instance>> _instancesByTile = new Dictionary<GameObject, List<Instance>>();
@@ -84,6 +90,13 @@ namespace Game.Tiles
 
 			foreach (Batch batch in _batchList)
 			{
+#if DEVELOPMENT_BUILD
+				if (DebugSkipMaterial != null && DebugSkipMaterial(batch.Material))
+				{
+					continue;
+				}
+
+#endif
 				batch.Draw(sortCamera != null, cameraPosition);
 			}
 		}
@@ -146,6 +159,9 @@ namespace Game.Tiles
 				lightProbeUsage = LightProbeUsage.Off,
 			};
 
+#if DEVELOPMENT_BUILD
+			DebugMaterials.Add(material);
+#endif
 			batch = new Batch(mesh, subMesh, renderParams, material.renderQueue > (int)RenderQueue.GeometryLast);
 			_batches.Add(key, batch);
 			_batchList.Add(batch);
@@ -232,6 +248,8 @@ namespace Game.Tiles
 				_renderParams = renderParams;
 				_sortBackToFront = sortBackToFront;
 			}
+
+			public Material Material => _renderParams.material;
 
 			public void Add(Instance instance)
 			{
