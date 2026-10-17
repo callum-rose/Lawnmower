@@ -22,6 +22,14 @@
 #     sunk a voxel into the ground with straight sides, corners cut 2 x 2 and a 2 x 2 bevel round the top; a taller
 #     darker stone leans 10 deg against its side; a pale pebble at its foot. Everything stays inside the tile so
 #     neighbouring rocks never meet. No moss (it would vanish against the grass) and no cracks (R7c).
+#   Rabbit hole: a burrow the mower drops into and pops out of its pair, origin at ground level. A 9-wide octagonal
+#     mound of dug earth (R7b: 9 clears the 8-voxel floor for a round part), sunk a voxel, 2 voxels proud with a 1 x 1
+#     bevel round its top, around a square 5-wide opening (under 8 wide, so square, R7c) that drops 4 voxels below
+#     ground to a dark floor. Earth darkens downwards: Chestnut top, Brown sides, Dark brown inside, Umber floor.
+#     A carrot is planted point-down in the back corner, behind the opening from the thumbnail camera, leaning 10 deg
+#     with two Forest leaves. Its body is its own part, PairMarker, in one colour, so each pair of holes can be told
+#     apart by recolouring it: carrots come in orange, purple, yellow and white (CARROT_COLOURS). The ground must be
+#     open over the opening: the tile underneath is earth with an octagonal hole, not grass.
 
 import math
 import sys
@@ -43,6 +51,15 @@ PALETTE = {
 	"Limestone": "b8b0a4",  # P28
 	"Stone": "8a837a",  # P29
 	"DarkStone": "5c5650",  # P30
+	"Chestnut": "8e5634",  # P13
+	"Brown": "6e3d22",  # P14
+	"DarkBrown": "4a2818",  # P15
+	"Umber": "2e1810",  # P16
+	"Forest": "3b7038",  # P22
+	"Orange": "f08236",  # P44
+	"Purple": "b868c0",  # P47
+	"Yellow": "f6d021",  # P42
+	"White": "f6f6f2",  # P00
 }
 GRASS = "5a9440"  # P21, preview only
 
@@ -64,6 +81,15 @@ ROCKS = [
 	("LeaningStone", [(0, 2, 2, 1), (6, 2, 2, 1), (7, 1, 1, 0)], (2, -2, -1), (-10, 0, 20), "DarkStone"),
 	("Pebble", [(0, 1.5, 1.5, 1), (2, 1.5, 1.5, 1), (3, 0.5, 0.5, 0)], (-3, -3, -1), (0, 0, -15), "Limestone"),
 ]
+
+# The burrow's profile, outside in (see sweep): up the mound's side, over its bevel, across its top and down the opening.
+MOUND_BASE = (-1, 4.5, 4.5, 2)
+BURROW_PROFILE = [MOUND_BASE, (1, 4.5, 4.5, 2), (2, 3.5, 3.5, 1), (2, 2.5, 2.5, 0), (-4, 2.5, 2.5, 0), (-4, 0)]
+CARROT = (3.5, 3.5, 4.5)  # where the carrot's top sits, in the back corner
+CARROT_RINGS = [(0, 1.5), (4, 1), (7, 0)]  # built top-up, then turned point-down
+CARROT_ROTATION = (170, 0, 45)
+LEAF_TILTS = (-20, 20)
+CARROT_COLOURS = ["Orange", "Purple", "Yellow", "White"]  # one per pair; the exported model is the first
 
 
 def srgb_to_linear(c):
@@ -113,6 +139,23 @@ def loft(rings):
 		verts += [(x, y, top[0]) for x, y in ring_outline(top)]
 		faces += [(a + i, a + (i + 1) % n, a + n + (i + 1) % n, a + n + i) for i in range(n)]
 		faces.append(tuple(range(a + n, a + 2 * n)))
+	return verts, faces
+
+
+def sweep(rings):
+	"""An open surface through cross-sections (see ring_outline) in order, ending at a point if the last half width is
+	0. Its faces point to the left of the direction of travel, so a profile that climbs outside, crosses the top and
+	drops down the inside faces out of the solid all the way."""
+	n = 8
+	verts, faces = [], []
+	for ring in rings[:-1]:
+		verts += [(x, y, ring[0]) for x, y in ring_outline(ring)]
+	for r in range(len(rings) - 2):
+		a, b = r * n, (r + 1) * n
+		faces += [(a + i, a + (i + 1) % n, b + (i + 1) % n, b + i) for i in range(n)]
+	a = (len(rings) - 2) * n
+	verts.append((0, 0, rings[-1][0]))
+	faces += [(a + i, a + (i + 1) % n, a + n) for i in range(n)]
 	return verts, faces
 
 
@@ -273,12 +316,46 @@ def build_rock(root):
 	return parts
 
 
+def build_rabbit_hole(root, offset=(0, 0), carrot_colour=CARROT_COLOURS[0]):
+	def burrow_colour(c, n):
+		if c.z < -0.01:
+			return "Umber" if n.z > 0.99 else "DarkBrown"
+		return "Chestnut" if n.z > 0.5 else "Brown"
+
+	verts, faces = sweep(BURROW_PROFILE)
+	parts = [build_part("Burrow", root, verts, faces, (0.5, 0.5, 0), burrow_colour, offset + (0,))]
+
+	x, y, z = CARROT
+	verts, faces = loft(CARROT_RINGS)
+	parts.append(build_part(
+		"PairMarker", root, verts, faces, (0.5, 0.5, 0), lambda c, n: carrot_colour, (offset[0] + x, offset[1] + y, z),
+		CARROT_ROTATION))
+	for i, tilt in enumerate(LEAF_TILTS):
+		verts, faces = loft([(0, 0.5), (4, 0.5)])
+		parts.append(build_part(
+			f"Leaf{i + 1}", root, verts, faces, (0.5, 0.5, 0), lambda c, n: "Forest", (offset[0] + x, offset[1] + y, z - 1),
+			(tilt, 0, CARROT_ROTATION[2])))
+	return parts
+
+
+# Two pairs of holes, a tile of grass between the holes of each pair, as a level would place them.
+HOLE_PAIRS = [(-10, 10, 0), (10, 10, 0), (-10, -10, 1), (10, -10, 1)]  # (x, y, index into CARROT_COLOURS)
+
+
+def build_hole_pairs(root):
+	parts = []
+	for x, y, colour in HOLE_PAIRS:
+		parts += build_rabbit_hole(root, (x, y), CARROT_COLOURS[colour])
+	return parts
+
+
 MODELS = {
 	"Wood/wood_tile_voxel_straight": lambda root: build_wood(root, "NS"),
 	"Wood/wood_tile_voxel_corner": lambda root: build_wood(root, "SE"),
 	"Wood/wood_tile_voxel_t": lambda root: build_wood(root, "WES"),
 	"Wood/wood_tile_voxel_cross": lambda root: build_wood(root, "NESW"),
 	"Rock/rock_voxel": build_rock,
+	"RabbitHole/rabbit_hole_voxel": build_rabbit_hole,
 }
 
 
@@ -323,7 +400,26 @@ def export(root, path):
 	)
 
 
-def render_preview(parts, path, ground_z):
+def preview_ground(ground_z, holes):
+	"""A 20 m ground plane, opened under each burrow at `holes` (voxel offsets) by the mound's base outline."""
+	bm = bmesh.new()
+	loops = [[(x, y) for x in (-10, 10) for y in ((-10, 10) if x < 0 else (10, -10))]]
+	loops += [[(ox * VOXEL + x * VOXEL, oy * VOXEL + y * VOXEL) for x, y in ring_outline(MOUND_BASE)] for ox, oy in holes]
+	edges = []
+	for loop in loops:
+		loop = [p for i, p in enumerate(loop) if p != loop[i - 1]]  # a square outline repeats its corners
+		verts = [bm.verts.new((x, y, ground_z)) for x, y in loop]
+		edges += [bm.edges.new((verts[i], verts[(i + 1) % len(verts)])) for i in range(len(verts))]
+	bmesh.ops.triangle_fill(bm, use_beauty=True, use_dissolve=True, edges=edges, normal=Vector((0, 0, 1)))
+	mesh = bpy.data.meshes.new("PreviewGround")
+	bm.to_mesh(mesh)
+	bm.free()
+	ground = bpy.data.objects.new("PreviewGround", mesh)
+	bpy.context.scene.collection.objects.link(ground)
+	return ground
+
+
+def render_preview(parts, path, ground_z, holes=()):
 	"""Palette colour x baked AO (R23) under a soft ambient and one key light, from the thumbnail camera (R7c)."""
 	for part in parts:
 		for slot in part.material_slots:
@@ -350,8 +446,7 @@ def render_preview(parts, path, ground_z):
 	high = Vector(tuple(max(c[i] for c in corners) for i in range(3)))
 	centre = (low + high) / 2
 
-	bpy.ops.mesh.primitive_plane_add(size=20, location=(0, 0, ground_z))
-	ground = bpy.context.object
+	ground = preview_ground(ground_z, holes)
 	ground_material = bpy.data.materials.new("PreviewGround")
 	ground_material.use_nodes = True
 	nodes = ground_material.node_tree.nodes
@@ -411,11 +506,15 @@ def main():
 		export(root, f"{output_dir}/{name}.fbx")
 		print(f"Exported {model_name}: {len(parts)} parts, {sum(len(p.data.polygons) for p in parts)} faces")
 		if preview_dir:
-			render_preview(parts, f"{preview_dir}/{model_name}.png", -WOOD_DEPTH * VOXEL if name.startswith("Wood") else 0)
+			ground_z = -WOOD_DEPTH * VOXEL if name.startswith("Wood") else 0
+			holes = [(0, 0)] if name.startswith("RabbitHole") else []
+			render_preview(parts, f"{preview_dir}/{model_name}.png", ground_z, holes)
 
 	if preview_dir:
 		_, parts = new_model("WoodLayout", build_wood_layout)
 		render_preview(parts, f"{preview_dir}/wood_layout.png", -WOOD_DEPTH * VOXEL)
+		_, parts = new_model("HolePairs", build_hole_pairs)
+		render_preview(parts, f"{preview_dir}/rabbit_hole_pairs.png", 0, [(x, y) for x, y, _ in HOLE_PAIRS])
 
 
 main()
