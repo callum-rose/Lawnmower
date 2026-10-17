@@ -26,6 +26,7 @@ namespace Lawnmower.Model
 			Depth = depth;
 			StartPosition = startPosition;
 			_tiles = tiles;
+			LinkRabbitHoles();
 		}
 
 		public static Level FromDefinition(LevelDefinition definition)
@@ -72,5 +73,41 @@ namespace Lawnmower.Model
 
 		public bool IsComplete => _tiles.All(t => t.IsComplete);
 		public bool IsRuined => _tiles.Any(t => t.IsRuined);
+
+		/// <summary>Points each rabbit hole at the other hole of its pair. A pair without exactly two holes isn't linked.</summary>
+		private void LinkRabbitHoles()
+		{
+			// The solver clones levels constantly, so keep the common no-holes case to one pass.
+			Dictionary<int, List<int>> pairs = null;
+			for (int i = 0; i < _tiles.Length; i++)
+			{
+				if (_tiles[i] is RabbitHoleTile hole)
+				{
+					pairs ??= new Dictionary<int, List<int>>();
+					if (!pairs.TryGetValue(hole.Pair, out List<int> holes))
+					{
+						pairs.Add(hole.Pair, holes = new List<int>(2));
+					}
+
+					holes.Add(i);
+				}
+			}
+
+			if (pairs == null)
+			{
+				return;
+			}
+
+			foreach (List<int> holes in pairs.Values)
+			{
+				if (holes.Count != 2)
+				{
+					continue;
+				}
+
+				((RabbitHoleTile)_tiles[holes[0]]).Partner = new GridVector(holes[1] % Width, holes[1] / Width);
+				((RabbitHoleTile)_tiles[holes[1]]).Partner = new GridVector(holes[0] % Width, holes[0] / Width);
+			}
+		}
 	}
 }

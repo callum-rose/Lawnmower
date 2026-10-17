@@ -1,6 +1,6 @@
 # Bunny Heaven levels
 
-The ten levels in `LevelDataManager.asset`, in play order. Every one is verified by `Lawnmower.Solver`
+The eleven levels in `LevelDataManager.asset`, in play order. Every one is verified by `Lawnmower.Solver`
 (a BFS over `LevelSimulation`, the same rules the game runs). Par is the solver's shortest solution, and
 that solution is recorded on the asset and replays to Completed in `LevelAssetSimulationTests` and
 `LevelSolverAssetTests`.
@@ -20,14 +20,16 @@ of first moves after which the level can no longer be won. See `SolveResult.Diff
 | 8 | `Level08` (new) | 5×6 | grass 2–3, water, spring | 24 | 15,837 | 2/3 | 168.0 | Water splits the lawn and the spring only goes one way. Finish this bank before you jump. |
 | 9 | `Level09` (new) | 5×6 | grass 2–3, water, wood, spring | 27 | 59,814 | 2/3 | 215.0 | A wooden bridge can be crossed both ways, again and again, but the spring can't. Plan your crossings. |
 | 10 | `Level10` (new) | 6×6 | grass 2–3, water, spring ×2 | 31 | 41,921 | 2/3 | 238.8 | Two springs, one each way. Cross the river and come back, with tall grass on both banks. |
+| 11 | `Level11` (new) | 5×5 | grass 2–3, water, rabbit holes | 22 | 8,828 | 2/3 | 144.7 | A pair of rabbit holes: in one, out of the other, still heading the same way. Which way you go in decides where you come out. |
 
 ## The curve
 
 - **Levels 1–3:** grass only, up to 4×4. Par 7, 10, 15.
 - **Levels 4–6:** stone (L4), tall grass (L5) and wood (L6). Par 17, 20, 23.
 - **Levels 7–10:** springs (L7), water (L8), then both together with bridges, up to 6×6. Par 21, 24, 27, 31.
-- **Par** only drops once, at L7 (23 → 21), the level that introduces springs. Difficulty dips there too
-  (118 → 89), then climbs to 239.
+- **Level 11:** rabbit holes, on a 5×5 lawn. Par 22.
+- **Par** only drops at levels that introduce a tile kind: L7 (23 → 21, springs) and L11 (31 → 22, rabbit holes).
+  Difficulty dips at both (118 → 89, 239 → 145) and climbs between them.
 - `LevelSolverAssetTests.LevelList_FollowsTheDifficultyCurve` pins these rules:
   - grass only and at most 4×4 for levels 1–3;
   - no springs or water in levels 4–6;
@@ -43,6 +45,10 @@ of first moves after which the level can no longer be won. See `SolveResult.Diff
 - **Blocking tiles:** stone, water and empty tiles can't be entered.
 - **Wood:** never mowed, so it can be crossed any number of times.
 - **Spring:** stepping on one launches you to its offset and mows the tile you land on. It works one way only.
+- **Rabbit hole:** holes come in pairs (`hole:N`). Entering one takes you out of the other, one tile further on in the
+  direction you were going, and mows the tile you land on; the holes themselves are never mowed. If that tile is off the
+  level, blocked or another hole, the move bounces: nothing changes and it isn't a move. A pair needs exactly two holes;
+  otherwise its holes are plain tiles.
 
 ## Retired levels (`Data/Archive/`)
 

@@ -23,13 +23,15 @@ namespace Lawnmower.Model
 					return new WoodTile();
 				case TileKind.Spring:
 					return new SpringTile(spec.SpringOffset);
+				case TileKind.RabbitHole:
+					return new RabbitHoleTile(spec.HolePair);
 				default:
 					throw new ArgumentOutOfRangeException(nameof(spec), spec.Kind, "Unknown tile kind");
 			}
 		}
 	}
 
-	/// <summary>Every distinct tile configuration a level can contain (springs use a placeholder offset).</summary>
+	/// <summary>Every distinct tile configuration a level can contain (springs use a placeholder offset, rabbit holes the first pair).</summary>
 	public static class TileCatalog
 	{
 		public static IReadOnlyList<TileSpec> All { get; } = new[]
@@ -41,7 +43,8 @@ namespace Lawnmower.Model
 			TileSpec.Stone(0),
 			TileSpec.Water,
 			TileSpec.Wood,
-			TileSpec.Spring(GridVector.Up * 2)
+			TileSpec.Spring(GridVector.Up * 2),
+			TileSpec.RabbitHole(0)
 		};
 	}
 }

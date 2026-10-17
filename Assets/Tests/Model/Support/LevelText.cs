@@ -9,7 +9,8 @@ namespace Lawnmower.Model.Tests
 {
 	/// <summary>
 	/// Levels as text, in the same grammar as LevelAssetSnapshotTests: rows from y = 0 upward,
-	/// separated by "/"; tokens grass:N, stone:D, water, wood, empty, spring:dx,dy (relative offset).
+	/// separated by "/"; tokens grass:N, stone:D, water, wood, empty, spring:dx,dy (relative offset),
+	/// hole:N (rabbit hole of pair N).
 	/// </summary>
 	public static class LevelText
 	{
@@ -46,6 +47,7 @@ namespace Lawnmower.Model.Tests
 				case "wood": return TileSpec.Wood;
 				case "grass": return TileSpec.Grass(Int(parts[1]));
 				case "stone": return TileSpec.Stone(Int(parts[1]));
+				case "hole": return TileSpec.RabbitHole(Int(parts[1]));
 				case "spring":
 				{
 					string[] xy = parts[1].Split(',');
