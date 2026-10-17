@@ -6,8 +6,8 @@ using UnityEngine.InputSystem;
 namespace MainMenu
 {
 	/// <summary>
-	/// The Main Menu's showcase bunny. Cycles through the face expressions with a little hop on each change,
-	/// and turns gently from side to side in between. While the screen is pressed it watches the finger instead.
+	/// The Main Menu's showcase bunny. Rests on a neutral face, every few seconds pulling a random emote with a little
+	/// hop before settling back, and turns gently from side to side throughout. While the screen is pressed it watches the finger instead.
 	/// </summary>
 	public class HeroBunny : MonoBehaviour
 	{
@@ -15,10 +15,9 @@ namespace MainMenu
 		[SerializeField] private Transform body;
 		[SerializeField] private CameraRawImage portrait;
 
-		[SerializeField] private FaceExpression[] expressions =
+		[SerializeField] private FaceExpression[] emotes =
 		{
 			FaceExpression.Happy,
-			FaceExpression.Neutral,
 			FaceExpression.Surprised,
 			FaceExpression.Sad,
 			FaceExpression.Angry,
@@ -26,7 +25,9 @@ namespace MainMenu
 		};
 
 		[Header("Timing")]
-		[SerializeField] private float holdDuration = 2.2f;
+		[SerializeField, Tooltip("Seconds spent on the neutral face between emotes")]
+		private Vector2 neutralDurationRange = new Vector2(3f, 5f);
+		[SerializeField] private float emoteDuration = 1.6f;
 
 		[Header("Hop")]
 		[SerializeField] private float hopHeight = 0.25f;
@@ -101,19 +102,32 @@ namespace MainMenu
 
 		private IEnumerator CycleRoutine()
 		{
-			var wait = new WaitForSeconds(holdDuration);
+			var emoteWait = new WaitForSeconds(emoteDuration);
+			int lastEmote = -1;
 
-			for (int i = 0; ; i = (i + 1) % expressions.Length)
+			while (true)
 			{
+				face.ShowExpression(FaceExpression.Neutral);
+
+				yield return new WaitForSeconds(Random.Range(neutralDurationRange.x, neutralDurationRange.y));
+
 				while (_isPressed)
 				{
 					yield return null;
 				}
 
-				face.ShowExpression(expressions[i]);
+				int emote = Random.Range(0, emotes.Length);
+				if (emote == lastEmote && emotes.Length > 1)
+				{
+					emote = (emote + 1) % emotes.Length;
+				}
+
+				lastEmote = emote;
+
+				face.ShowExpression(emotes[emote]);
 				_hopStartTime = Time.time;
 
-				yield return wait;
+				yield return emoteWait;
 			}
 		}
 
