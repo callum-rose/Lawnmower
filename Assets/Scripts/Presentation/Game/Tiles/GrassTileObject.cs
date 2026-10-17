@@ -8,7 +8,6 @@ namespace Game.Tiles
 	[RequireComponent(typeof(IAppearanceSetter))]
 	internal class GrassTileObject : BaseTileObject
 	{
-		[SerializeField] private DirtAppearanceSetter dirtAppearanceSetter;
 		[SerializeField] private Vector3AndIntEventChannel grassParticlesEventChannel;
 		[SerializeField] private Vector3EventChannel dirtParticlesEventChannel;
 
@@ -18,8 +17,6 @@ namespace Game.Tiles
 		private IReadonlyGrassTile _tileData;
 		
 		private IAppearanceSetter _appearanceSetter;
-
-		private GridVector _lastTraverseOntoDirection;
 
 		#region Unity
 
@@ -39,10 +36,6 @@ namespace Game.Tiles
 
 			_tileData.GrassHeight.ValueChangedFromTo += OnGrassHeightValueChanged;
 			SetAppearance(_tileData.GrassHeight.Value);
-
-			_tileData.TraversedOnto += OnTraversedOnto;
-			_tileData.TraversedAway += OnTraversedAway;
-			_tileData.BumpedInto += OnBumpedInto;
 		}
 
 		public override void Dispose()
@@ -53,10 +46,6 @@ namespace Game.Tiles
 			}
 			
 			_tileData.GrassHeight.ValueChangedFromTo -= OnGrassHeightValueChanged;
-			
-			_tileData.TraversedOnto -= OnTraversedOnto;
-			_tileData.TraversedAway -= OnTraversedAway;
-			_tileData.BumpedInto -= OnBumpedInto;
 		}
 
 		#endregion
@@ -78,32 +67,6 @@ namespace Game.Tiles
 			}
 			
 			GetAppearanceSetter().TransitionAppearance(prevGrassHeight, grassHeight);
-		}
-
-		private void OnTraversedOnto(GridVector fromDirection, Xor isInverted)
-		{
-			dirtAppearanceSetter.Set(fromDirection);
-			
-			_lastTraverseOntoDirection = fromDirection;
-		}
-
-		private void OnTraversedAway(GridVector toDirection, Xor isInverted)
-		{
-			if (isInverted)
-			{
-				return;
-			}
-
-			if (_tileData.GrassHeight.Value > 0)
-			{
-				return;
-			}
-
-			dirtAppearanceSetter.Set(_lastTraverseOntoDirection, toDirection);
-		}
-
-		private void OnBumpedInto(GridVector direction, Xor isInverted)
-		{
 		}
 
 		#endregion
