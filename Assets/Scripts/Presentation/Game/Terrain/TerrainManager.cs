@@ -1,4 +1,3 @@
-using DG.Tweening;
 using Game.Core;
 using Game.Levels;
 using Lawnmower.Model;
@@ -17,12 +16,7 @@ namespace Game.Terrain
 	internal class TerrainManager : MonoBehaviour
 	{
 		[SerializeField] private TerrainSettings settings;
-		[SerializeField] private GamePlayData gamePlayData;
 		[SerializeField] private TerrainEdging edging;
-
-		[Header("Intro")]
-		[SerializeField] private Vector3 introOffset = new Vector3(0, -2, 0);
-		[SerializeField] private Ease introEase = Ease.OutCubic;
 
 		[Header("Event Channels")]
 		[SerializeField] private LevelDataEventChannel levelStartedEventChannel;
@@ -73,7 +67,6 @@ namespace Game.Terrain
 			_level = level;
 			Build(level);
 			BuildRake(level);
-			PlayIntro();
 		}
 
 #if UNITY_EDITOR
@@ -158,13 +151,6 @@ namespace Game.Terrain
 			_renderer.GetPropertyBlock(_propertyBlock);
 			_propertyBlock.SetTexture(RakeId, _rake);
 			_renderer.SetPropertyBlock(_propertyBlock);
-		}
-
-		private void PlayIntro()
-		{
-			transform.DOKill();
-			transform.localPosition = introOffset;
-			transform.DOLocalMove(Vector3.zero, gamePlayData.LevelIntroDuration).SetEase(introEase);
 		}
 
 		internal static bool IsSolid(TileKind kind)

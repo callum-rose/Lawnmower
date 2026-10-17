@@ -72,8 +72,8 @@ Water tiles don't get a tile object each (`TilePrefabsManager` still has no wate
   while ponds and channels stay shallow. A fine grid around the level, then one row and column out to the sea's edge.
 - **The ripple simulation** covers the level plus `Ripple Margin` (2.5) tiles on every side, with a **mask** of open
   water: texels outside the terrain's SDF at the water's height, so ripples bounce off the real, rounded, noisy
-  shoreline. Its outer metre soaks waves up (`Edge Absorb Width`) instead of reflecting them, and past it the sea is
-  flat. The mask and seabed are built in Burst jobs (about 3 ms for Level 10 in the Editor).
+  shoreline. Its outer 1.5 units soak waves up (`Edge Absorb Width`) and its outermost texels let what's left out
+  (a Mur absorbing boundary) instead of reflecting it; past them the sea is flat. Ripples travel at 0.5 units/s. The mask and seabed are built in Burst jobs (about 3 ms for Level 10 in the Editor).
 - **The surface stays put while the terrain and seabed rise through it** in the level intro, so the island surfaces
   out of the sea.
 - **Pond decor** (lily pads, logs, fish) floats at the sea's surface (`PondManager.SurfaceHeight`).
@@ -270,6 +270,14 @@ The ripples alone left calm water looking static, so a gentle version of the rou
 - **Haze halved** (`Haze Amount` 0.7 → 0.35) so the floor reads more clearly.
 - **Flowing waves tried again** at 0.3, 0.15 and 0.08 alongside the ripples, then left off: the smooth surface with
   the web caustics read better.
+
+### Round 8: faster ripples that leave the sea
+
+- **Speed doubled** to 0.5 units/s.
+- **Ripples stopped coming back from the open sea.** The edge band used to scale the whole height down each step, which
+  is a sudden change in the medium: measured in a CPU model of the shader, it reflected about 3x more than a plain wall
+  at the new speed. The band now damps only the velocity (over 1.5 units, up from 1), and the outermost texels use a
+  first-order Mur boundary that carries arriving waves on out. Together they reflect about 3% of what the old band did.
 
 ## Options tried and not used
 

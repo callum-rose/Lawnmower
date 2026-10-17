@@ -171,17 +171,25 @@ namespace Lawnmower.Presenters
 		}
 
 		/// <summary>
-		/// Ignored before <see cref="BeginPlay"/> and while the level is Failed: the model would accept the
-		/// move, but the Level Failed card covers the board until the player undoes or restarts.
+		/// Ignored before <see cref="BeginPlay"/>. A Failed level is free roam: moves still apply (it stays Failed
+		/// until an undo or a restart), and the first one puts the Level Failed card away.
 		/// </summary>
 		public void RequestMove(GridVector direction)
 		{
-			if (!IsAcceptingInput || !direction.IsCardinalUnit || Simulation.Status == LevelStatus.Failed)
+			if (!IsAcceptingInput || !direction.IsCardinalUnit)
 			{
 				return;
 			}
 
-			Run(() => Simulation.Move(direction));
+			Run(() =>
+			{
+				if (Simulation.Status == LevelStatus.Failed)
+				{
+					_screen.HideFailed();
+				}
+
+				Simulation.Move(direction);
+			});
 		}
 
 		/// <summary>Undo one move (also the Failed card's "Undo Last Move").</summary>
@@ -201,10 +209,9 @@ namespace Lawnmower.Presenters
 			});
 		}
 
-		/// <summary>Ignored while the level is Failed, like moves.</summary>
 		public void Redo()
 		{
-			if (!IsAcceptingInput || Simulation.Status == LevelStatus.Failed)
+			if (!IsAcceptingInput)
 			{
 				return;
 			}
