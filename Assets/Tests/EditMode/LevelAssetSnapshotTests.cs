@@ -154,9 +154,11 @@ namespace Tests.EditMode
 		}
 
 		[TestCase("EggBunny", "344dbd1651b546189959dd71f623276d")]
+		[TestCase("PatchworkBunny", "74c3a9e4249b4da9a47b171f5bd88dc0")]
 		[TestCase("RegularBunny", "57944479062546d9bab013ca63cb41f6")]
 		[TestCase("RoboBunny", "f7536016d50d4cbd8d3016edd0422253")]
 		[TestCase("RoboSnail", "42f1c3d3cf164371ac4ec62a81a89296")]
+		[TestCase("SandyBunny", "5b29802830164088898299586da44fd1")]
 		public void MowerAsset_HasPersistedId(string name, string id)
 		{
 			MowerData mower = AssetDatabase.LoadAssetAtPath<MowerData>(MowerDir + name + ".asset");
