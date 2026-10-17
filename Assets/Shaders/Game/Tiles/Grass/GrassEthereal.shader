@@ -3,6 +3,8 @@
 // Flower stems are marked by uv0.x = 2 + flowerIndex, bulbs by 10 + flowerIndex and halo quads by 20 + flowerIndex.
 // Halo quad vertices all sit at the bulb centre; their normal's sign gives the corner to expand to in view space.
 // uv2.x runs -1 -> 1 across each blade, so the blade's side edges can be rim lit.
+// In the level intro each blade grows up out of the ground in a wave from the level's centre (GrassGrowth.hlsl), with
+// flowers coming up at the back of it.
 Shader "Grass Ethereal"
 {
 	Properties
@@ -80,6 +82,7 @@ Shader "Grass Ethereal"
 		HLSLINCLUDE
 		#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 		#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+		#include "GrassGrowth.hlsl"
 
 		struct Attributes
 		{
@@ -215,12 +218,13 @@ Shader "Grass Ethereal"
 			else
 			{
 				// Every tile shares one mesh, so each candidate flower is shown or hidden per tile from the tile's position
+				float3 tileOrigin = TransformObjectToWorld(float3(0, 0, 0));
+				bool isFlowerPart = input.uv0.x > 1.5;
 				bool flowerHidden = false;
-				if (input.uv0.x > 1.5)
+				if (isFlowerPart)
 				{
 					// Key on the tile's grid cell (the grass meshes' origins differ slightly per height) so the roll is the
 					// same at every height; with Flower Chance rising as grass gets shorter, mowing only ever adds flowers
-					float3 tileOrigin = TransformObjectToWorld(float3(0, 0, 0));
 					float2 tileCell = round(tileOrigin.xz + 0.5);
 					float flowerRoll = Hash(tileCell + GetFlowerIndex(input.uv0.x) * 17.13);
 					flowerHidden = flowerRoll >= _FlowerChance;
@@ -230,8 +234,25 @@ Shader "Grass Ethereal"
 					}
 				}
 
+				// The meshes' origins are on the ground, so growing is scaling up from the origin's height
+				// A few early blades come up well ahead of the wave
+				float2 bladeSeed = round(tileOrigin.xz) * 3.17 + input.uv1 * 7.31;
+				float jitter = isFlowerPart ? 1 : Hash(bladeSeed);
+				float headStart = !isFlowerPart && Hash(bladeSeed + 11.7) < 0.12 ? 0.2 + 0.3 * Hash(bladeSeed + 5.3) : 0;
+				// uv1 is roughly where the blade is in the tile; close enough to place it on the wave's front
+				float3 bladePosition = tileOrigin + float3(input.uv1.x, 0, input.uv1.y);
+				float growth = GrassGrowth(bladePosition, jitter, headStart);
+				if (growth <= 0)
+				{
+					// Not sprouted yet: flattened, it would show as a smear on the ground
+					output.positionCS = float4(0, 0, 0, 1);
+					return output;
+				}
+
 				float3 positionWS = TransformObjectToWorld(input.positionOS.xyz);
-				input.positionOS.xyz += GetVertexOffset(positionWS, input.uv0, input.uv1);
+				positionWS.y = tileOrigin.y + (positionWS.y - tileOrigin.y) * growth;
+				input.positionOS.xyz = TransformWorldToObject(positionWS);
+				input.positionOS.xyz += GetVertexOffset(positionWS, input.uv0, input.uv1) * saturate(growth);
 
 				output.positionWS = TransformObjectToWorld(input.positionOS.xyz);
 				output.uv = float4(input.uv0, input.uv1);
@@ -244,7 +265,7 @@ Shader "Grass Ethereal"
 					// Halo: expand the quad around the bulb centre so it always faces the camera
 					float2 corner = float2(sign(input.normalOS.x), sign(input.normalOS.y + input.normalOS.z));
 					float3 positionVS = TransformWorldToView(output.positionWS);
-					positionVS.xy += corner * _FlowerHaloSize;
+					positionVS.xy += corner * _FlowerHaloSize * saturate(growth);
 					output.positionCS = TransformWViewToHClip(positionVS);
 					output.normalWS = float3(corner, 0);
 				}
