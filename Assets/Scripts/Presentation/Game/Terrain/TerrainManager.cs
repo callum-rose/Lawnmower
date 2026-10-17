@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using DG.Tweening;
 using Game.Core;
 using Game.Levels;
 using Game.Tiles;
@@ -22,7 +21,6 @@ namespace Game.Terrain
 	internal class TerrainManager : MonoBehaviour
 	{
 		[SerializeField] private TerrainSettings settings;
-		[SerializeField] private GamePlayData gamePlayData;
 		[SerializeField] private TerrainEdging edging;
 
 		[Header("Top Colours")]
@@ -37,10 +35,6 @@ namespace Game.Terrain
 
 		[SerializeField] private Color stoneColour = new Color(0.05f, 0.20f, 0.08f);
 		[SerializeField] private Color springColour = new Color(0.36f, 0.22f, 0.12f);
-
-		[Header("Intro")]
-		[SerializeField] private Vector3 introOffset = new Vector3(0, -2, 0);
-		[SerializeField] private Ease introEase = Ease.OutCubic;
 
 		[Header("Event Channels")]
 		[SerializeField] private LevelDataEventChannel levelStartedEventChannel;
@@ -103,7 +97,6 @@ namespace Game.Terrain
 			Unsubscribe();
 			Build(level);
 			BuildCells(level);
-			PlayIntro();
 		}
 
 #if UNITY_EDITOR
@@ -218,7 +211,9 @@ namespace Game.Terrain
 			{
 				for (int x = 0; x < level.Width; x++)
 				{
-					pixels[z * level.Width + x] = new Color32(sides[x, z].a, sides[x, z].b, 0, 0);
+					// Blue marks the grass, which shows raked dirt until it has grown in the level intro
+					pixels[z * level.Width + x] = new Color32(sides[x, z].a, sides[x, z].b,
+						rakeable[x, z] ? byte.MaxValue : byte.MinValue, 0);
 				}
 			}
 
@@ -230,13 +225,6 @@ namespace Game.Terrain
 		{
 			_cells.SetPixel(position.x, position.y, colour);
 			_cells.Apply();
-		}
-
-		private void PlayIntro()
-		{
-			transform.DOKill();
-			transform.localPosition = introOffset;
-			transform.DOLocalMove(Vector3.zero, gamePlayData.LevelIntroDuration).SetEase(introEase);
 		}
 
 		private void Unsubscribe()

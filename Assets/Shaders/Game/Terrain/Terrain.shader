@@ -1,6 +1,7 @@
 // The level's SDF terrain. Tops take each tile's colour from _TerrainCells (one texel per tile, in object space where
 // tile (x, z) covers [x, x + 1] x [z, z + 1]), blended softly across tile edges. Sides and the rounded edge fall back
 // to a gradient by height between two stone colours, under the cobbles that edge the shore.
+// In the level intro the grass tiles show raked dirt until the grass over them has grown (GrassGrowth.hlsl).
 Shader "Game/Terrain"
 {
 	Properties
@@ -89,6 +90,7 @@ Shader "Game/Terrain"
 			SAMPLER(sampler_TerrainCells);
 
 			#include "RakedDirt.hlsl"
+			#include "../Tiles/Grass/GrassGrowth.hlsl"
 
 			struct Attributes
 			{
@@ -128,6 +130,33 @@ Shader "Game/Terrain"
 				return SAMPLE_TEXTURE2D(_TerrainCells, sampler_TerrainCells, uv);
 			}
 
+			// 1 on grass tiles (_TerrainRake's blue), blended across tile edges like TileColour
+			float GrassMask(float2 tile)
+			{
+				float2 p = tile - 0.5;
+				int2 size = int2(_TerrainRake_TexelSize.zw);
+				int2 cell = int2(floor(p));
+				float2 f = saturate((frac(p) - 0.5) / _CellBlend + 0.5);
+				float a = LOAD_TEXTURE2D(_TerrainRake, clamp(cell, 0, size - 1)).b;
+				float b = LOAD_TEXTURE2D(_TerrainRake, clamp(cell + int2(1, 0), 0, size - 1)).b;
+				float c = LOAD_TEXTURE2D(_TerrainRake, clamp(cell + int2(0, 1), 0, size - 1)).b;
+				float d = LOAD_TEXTURE2D(_TerrainRake, clamp(cell + int2(1, 1), 0, size - 1)).b;
+				return lerp(lerp(a, b, f.x), lerp(c, d, f.x), f.y);
+			}
+
+			// How much of the grass's ground is still bare in the level intro: it greens in patches as the grass
+			// grows, a little ahead of the blades so they're never standing on bare dirt once grown
+			float UngrownGrass(float2 tile, float3 positionWS)
+			{
+				if (GrassGrowRemaining <= 0)
+				{
+					return 0;
+				}
+
+				float growth = GrassGrowthLinear(positionWS, RakeNoise(tile * 2.3), 0);
+				return GrassMask(tile) * (1 - saturate(growth * 1.5));
+			}
+
 			half3 SideColour(float height)
 			{
 				float v = saturate((height - _SideBottom) / (_SideTop - _SideBottom));
@@ -141,6 +170,7 @@ Shader "Game/Terrain"
 				Light light = GetMainLight(TransformWorldToShadowCoord(input.positionWS));
 
 				half4 top = TileColour(input.positionOS.xz);
+				top.a = max(top.a, UngrownGrass(input.positionOS.xz, input.positionWS));
 				DirtSurface dirt = RakedDirt(input.positionOS.xz, _DirtColour.rgb);
 				half3 topColour = lerp(top.rgb, dirt.albedo, top.a);
 				half3 albedo = lerp(SideColour(input.positionOS.y), topColour, topness);
