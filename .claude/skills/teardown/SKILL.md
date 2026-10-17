@@ -63,7 +63,7 @@ pgrep -fl -i blender
 ```
 
 Include only processes whose command line contains `$WT` or the scratchpad path, or whose PID you launched in this chat (e.g. `blender --background --python …`).
-**Never** include `blender-mcp` server processes (they belong to the Claude app). A GUI Blender that the user opened is theirs — list it under "ask", don't kill it.
+**Never** include `blender-mcp` server processes (they belong to the agent app, not this session). A GUI Blender that the user opened is theirs — list it under "ask", don't kill it.
 
 ### Other processes running inside the worktree
 
