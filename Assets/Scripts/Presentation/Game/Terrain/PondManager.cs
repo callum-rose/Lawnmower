@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Game.Core;
+using Game.Input;
 using Game.Levels;
 using Game.Tiles;
 using Lawnmower.Model;
@@ -16,7 +17,7 @@ namespace Game.Terrain
 	/// The sea every level sits in: one water surface reaching far past the screen on every side, a seabed under it and a
 	/// ripple simulation over the level whose walls follow the terrain's shoreline. Water tiles, empty tiles and the
 	/// space around the level are all the same sea. The seabed sits just under the terrain next to land and shelves off
-	/// into deep water away from it. Bumping into a water tile splashes it.
+	/// into deep water away from it. Bumping into a water tile splashes it, and so does tapping open water.
 	/// Sits in the terrain's resting space (tile (x, z) covers [x, x + 1] x [z, z + 1]). The surface stays still while
 	/// the terrain rises through it in the level intro; the floor should be under the terrain so it rises with it.
 	/// </summary>
@@ -52,6 +53,14 @@ namespace Game.Terrain
 		[SerializeField] private float splashRadius = 0.08f;
 		[SerializeField] private float splashStrength = 1.5f;
 
+		[Header("Tap Splash")]
+		[Tooltip("Furthest a touch can move and still count as a tap, in inches")]
+		[SerializeField] private float tapMaxDistanceInches = 0.15f;
+		[Tooltip("Longest a touch can last and still count as a tap, in seconds")]
+		[SerializeField] private float tapMaxDuration = 0.35f;
+		[SerializeField] private float tapSplashRadius = 0.08f;
+		[SerializeField] private float tapSplashStrength = 1.5f;
+
 		[Header("Event Channels")]
 		[SerializeField] private LevelDataEventChannel levelStartedEventChannel;
 
@@ -61,6 +70,8 @@ namespace Game.Terrain
 		private Mesh _surfaceMesh;
 		private Mesh _floorMesh;
 		private Texture2D _mask;
+		private Rect _rippleBounds;
+		private TapInput _tapInput;
 
 		/// <summary>The water surface's world height.</summary>
 		public float SurfaceHeight => transform.TransformPoint(new Vector3(0, settings.TopHeight - surfaceDepth, 0)).y;
@@ -75,11 +86,20 @@ namespace Game.Terrain
 			floor.sharedMesh = _floorMesh;
 			BuildSurfaceMesh();
 			SetShowing(false);
+			_tapInput = new TapInput(tapMaxDistanceInches, tapMaxDuration);
 
 			levelStartedEventChannel.EventRaised += OnLevelStarted;
 #if UNITY_EDITOR
 			settings.Changed += OnSettingsChanged;
 #endif
+		}
+
+		private void Update()
+		{
+			if (_tapInput.Tick(out Vector2 screenPosition))
+			{
+				OnTapped(screenPosition);
+			}
 		}
 
 		private void OnDestroy()
@@ -119,9 +139,45 @@ namespace Game.Terrain
 		}
 #endif
 
+		private void OnTapped(Vector2 screenPosition)
+		{
+			Camera camera = Camera.main;
+			if (camera == null || !rippleSimulation.isActiveAndEnabled)
+			{
+				return;
+			}
+
+			Ray ray = camera.ScreenPointToRay(screenPosition);
+			if (!new Plane(transform.up, new Vector3(0, SurfaceHeight, 0)).Raycast(ray, out float distance))
+			{
+				return;
+			}
+
+			Vector3 worldPosition = ray.GetPoint(distance);
+			Vector3 localPosition = transform.InverseTransformPoint(worldPosition);
+			if (IsOpenWater(new Vector2(localPosition.x, localPosition.z)))
+			{
+				rippleSimulation.Splash(worldPosition, tapSplashRadius, tapSplashStrength);
+			}
+		}
+
 		#endregion
 
 		#region Methods
+
+		/// <summary>Whether a point in the terrain's resting space is water the ripple simulation covers.</summary>
+		private bool IsOpenWater(Vector2 position)
+		{
+			if (_mask == null || !_rippleBounds.Contains(position))
+			{
+				return false;
+			}
+
+			Vector2 uv = Rect.PointToNormalized(_rippleBounds, position);
+			int x = Mathf.Min((int)(uv.x * _mask.width), _mask.width - 1);
+			int y = Mathf.Min((int)(uv.y * _mask.height), _mask.height - 1);
+			return _mask.GetPixelData<byte>(0)[x + y * _mask.width] > 127;
+		}
 
 		private void Build(Level level)
 		{
@@ -147,6 +203,7 @@ namespace Game.Terrain
 				Rect rippleBounds = new Rect(-rippleMargin, -rippleMargin, level.Width + rippleMargin * 2,
 					level.Depth + rippleMargin * 2);
 				rippleSimulation.Size = rippleBounds.size * LevelDimensions.TileSize;
+				_rippleBounds = rippleBounds;
 				BuildMask(footprint, rippleBounds, surfaceHeight);
 				rippleSimulation.Mask = _mask;
 				rippleSimulation.Clear();
