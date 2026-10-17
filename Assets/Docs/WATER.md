@@ -39,6 +39,10 @@ For every water pixel the shader:
 7. **Highlights and glow.** Sun specular, twinkling sparkles on crests, a constant glow, and a shallow-edge glow where
    the water is thin (walls, rocks, lily pads). The edge band's reach and lacy breakup come from 3D noise that only
    moves along Y, so it reshapes in place, and it swells and retreats with passing ripples.
+8. **Fresnel rim.** A stylised, tintable sheen on top of the physical fresnel in step 6. From the steep game camera
+   the surface is seen nearly head-on, so the grazing term (`Fresnel Rim Power`) barely shows on its own; `Fresnel Rim
+   Slope Boost` also lights ripple faces tipped away from the camera compared with flat water, so rings and splashes
+   pick up a pearly edge.
 
 ![Ripple height field](../../docs/images/water/06_ripple_field.jpg)
 
@@ -206,6 +210,14 @@ From a reference photo of rings spreading round a stone:
     inside the water shader.
 
   ![Caustics and shadows](../../docs/images/water/08_caustics_and_shadows.jpg)
+
+### Round 6: fresnel rim
+
+The reflection already used fresnel, but from the game camera it sat near its bias and didn't read. A separate rim term
+was added rather than retuning the reflection. The first pass (slope boost 12, intensity 0.6) turned the whole pond
+milky and hid the floor; it now uses slope boost 3 and intensity 0.35.
+
+![Fresnel rim off and on](../../docs/images/water/11_fresnel_rim.jpg)
 
 ## Options tried and not used
 
