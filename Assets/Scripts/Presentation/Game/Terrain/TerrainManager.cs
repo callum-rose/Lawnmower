@@ -124,9 +124,12 @@ namespace Game.Terrain
 		private void Build(Level level)
 		{
 			bool[,] solid = new bool[level.Width, level.Depth];
+			bool[,] holes = new bool[level.Width, level.Depth];
 			foreach (GridVector position in level.Positions)
 			{
-				solid[position.x, position.y] = IsSolid(level.GetTile(position).Kind);
+				TileKind kind = level.GetTile(position).Kind;
+				solid[position.x, position.y] = IsSolid(kind);
+				holes[position.x, position.y] = kind == TileKind.RabbitHole;
 			}
 
 			TerrainFootprint footprint = TerrainFootprint.Create(solid, settings.ConvexCornerRadius,
@@ -140,7 +143,7 @@ namespace Game.Terrain
 					level.Depth + margin);
 
 				TerrainMesher.Build(_mesh, footprint, settings.Shape, min, max, settings.VoxelSize);
-				edging.Build(footprint, settings.TopHeight, settings.ShoreWidth);
+				edging.Build(footprint, settings.TopHeight, settings.ShoreWidth, holes);
 			}
 			finally
 			{

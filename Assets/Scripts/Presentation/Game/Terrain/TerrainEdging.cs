@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -12,7 +11,9 @@ namespace Game.Terrain
 	/// end along a locus offset outwards from each straight side and corner arc of the <see cref="TerrainFootprint"/>,
 	/// out on the bare shore past the tiles and sunk into the rounded top edge, each turned to follow the shore in 5°
 	/// steps. Round rocks go everywhere; long slabs are mixed in only on long straight runs, never round a corner or at
-	/// either end of a run. Pebbles fill some of the joints between rocks, on the water side. Which rock goes where is hashed from its position, so a level always looks the same.
+	/// either end of a run. Pebbles fill some of the joints between rocks, on the water side. Sides and corners facing a
+	/// bare cell, like a rabbit hole, get no rocks. Which rock goes where is hashed from its position, so a level always
+	/// looks the same.
 	/// </summary>
 	[RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 	internal class TerrainEdging : MonoBehaviour
@@ -84,6 +85,7 @@ namespace Game.Terrain
 		private List<int>[] _triangles;
 		private readonly List<Cobble> _run = new List<Cobble>();
 		private readonly List<float4> _runs = new List<float4>();
+		private readonly List<float4> _segments = new List<float4>();
 		private readonly Dictionary<int2, int> _segmentStarts = new Dictionary<int2, int>();
 
 		#region Unity
@@ -106,7 +108,8 @@ namespace Game.Terrain
 		#region API
 
 		/// <param name="shore">How far the terrain's top runs past the tiles' outline.</param>
-		public void Build(TerrainFootprint footprint, float topHeight, float shore)
+		/// <param name="bare">Empty cells whose edge gets no rocks, indexed [x, z].</param>
+		public void Build(TerrainFootprint footprint, float topHeight, float shore, bool[,] bare)
 		{
 			_positions.Clear();
 			_normals.Clear();
@@ -121,7 +124,18 @@ namespace Game.Terrain
 			float offset = shore - inset;
 			_shore = shore;
 
-			MergeRuns(footprint.Segments);
+			_segments.Clear();
+			foreach (float4 segment in footprint.Segments)
+			{
+				float2 middle = math.lerp(segment.xy, segment.zw, 0.5f);
+				float2 outward = Outward(footprint, middle, math.normalize(segment.zw - segment.xy));
+				if (!IsBare(bare, middle + outward * 0.5f))
+				{
+					_segments.Add(segment);
+				}
+			}
+
+			MergeRuns(_segments);
 			foreach (float4 run in _runs)
 			{
 				AddRun(footprint, run.xy, run.zw, offset, y);
@@ -131,6 +145,16 @@ namespace Game.Terrain
 			{
 				// Offsetting outwards grows a convex arc (centred inside) and shrinks a concave one, down to its corner
 				bool convex = footprint.IsInside(arc.Centre);
+				// A convex corner's centre is in its solid cell, beside two empty ones; a concave one's is in its empty cell
+				bool bareCorner = convex
+					? IsBare(bare, arc.Centre - new float2(arc.Facing.x, 0)) ||
+					  IsBare(bare, arc.Centre - new float2(0, arc.Facing.y))
+					: IsBare(bare, arc.Centre);
+				if (bareCorner)
+				{
+					continue;
+				}
+
 				float radius = math.max(0, arc.Radius + (convex ? offset : -offset));
 				int count = Mathf.Max(1, Mathf.RoundToInt(radius * math.PI * 0.5f / math.max(_averageRockLength + gap, 0.05f)));
 
@@ -177,16 +201,16 @@ namespace Game.Terrain
 		/// Joins the footprint's per-tile side segments into straight runs: a segment carries on from another when it
 		/// starts where that one ends, heading the same way.
 		/// </summary>
-		private void MergeRuns(NativeArray<float4> segments)
+		private void MergeRuns(List<float4> segments)
 		{
 			_runs.Clear();
 			_segmentStarts.Clear();
-			for (int i = 0; i < segments.Length; i++)
+			for (int i = 0; i < segments.Count; i++)
 			{
 				_segmentStarts[PointKey(segments[i].xy)] = i;
 			}
 
-			for (int i = 0; i < segments.Length; i++)
+			for (int i = 0; i < segments.Count; i++)
 			{
 				float4 segment = segments[i];
 				if (Continues(segments, segment))
@@ -205,10 +229,10 @@ namespace Game.Terrain
 		}
 
 		/// <summary>Whether <paramref name="segment"/> carries straight on from another segment ending at its start.</summary>
-		private static bool Continues(NativeArray<float4> segments, float4 segment)
+		private static bool Continues(List<float4> segments, float4 segment)
 		{
 			float2 direction = math.normalize(segment.zw - segment.xy);
-			for (int i = 0; i < segments.Length; i++)
+			for (int i = 0; i < segments.Count; i++)
 			{
 				float4 other = segments[i];
 				if (math.distancesq(other.zw, segment.xy) < 1e-6f &&
@@ -219,6 +243,13 @@ namespace Game.Terrain
 			}
 
 			return false;
+		}
+
+		private static bool IsBare(bool[,] bare, float2 point)
+		{
+			int2 cell = (int2)math.floor(point);
+			return cell.x >= 0 && cell.y >= 0 && cell.x < bare.GetLength(0) && cell.y < bare.GetLength(1) &&
+			       bare[cell.x, cell.y];
 		}
 
 		private static int2 PointKey(float2 point)
