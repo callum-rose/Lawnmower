@@ -94,6 +94,7 @@ namespace Game.Mowers.Models
 
 		private FaceExpression _expression = FaceExpression.Neutral;
 		private Vector3 _lookAroundTarget;
+		private Vector2? _lookOverride;
 		private bool _blinking;
 		private bool _hopMouthOpen;
 		private float _lastMoveTime;
@@ -147,10 +148,12 @@ namespace Game.Mowers.Models
 
 			FacePose pose = GetPose(_expression);
 
-			// Only the neutral face wanders; other expressions hold their own gaze
-			Vector3 look = _expression == FaceExpression.Neutral
-				? _lookAroundTarget
-				: new Vector3(pose.look.x, pose.look.y, pose.converge);
+			// A gaze override wins; otherwise only the neutral face wanders and other expressions hold their own gaze
+			Vector3 look = _lookOverride.HasValue
+				? new Vector3(_lookOverride.Value.x, _lookOverride.Value.y, pose.converge)
+				: _expression == FaceExpression.Neutral
+					? _lookAroundTarget
+					: new Vector3(pose.look.x, pose.look.y, pose.converge);
 
 			float dt = Time.deltaTime;
 
@@ -197,6 +200,19 @@ namespace Game.Mowers.Models
 			{
 				_expressionRoutine = StartCoroutine(ReturnToNeutralRoutine(duration));
 			}
+		}
+
+		/// <summary>The material whose face parameters are animated.</summary>
+		public Material Material
+		{
+			get => material;
+			set => material = value;
+		}
+
+		/// <summary>Holds the gaze on a direction (-1..1, +y looks down) until cleared with null.</summary>
+		public void SetLookOverride(Vector2? look)
+		{
+			_lookOverride = look;
 		}
 
 		void INeedMowerPosition.Set(IMowerPosition mowerPosition)
