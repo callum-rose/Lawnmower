@@ -18,6 +18,7 @@ Five pieces:
 | `WaterRippleSimulation` | `Assets/Scripts/Presentation/Game/Tiles/` + `Hidden/WaterRippleSimulation` shader | Runs the 2D wave equation over a rectangle of water. The surface's shape comes from here. |
 | `WaterRippleSource` | `Assets/Scripts/Presentation/Game/Tiles/` | Anything touching the surface (rock, lily pad, fish). Blocks ripples and, with strength > 0, sends out rings. |
 | `PlanarWaterReflection` | `Assets/Scripts/Presentation/Game/Tiles/` | Renders the scene mirrored about the water plane at half resolution for reflections. |
+| `PlanarReflectionDepthFeature` | `Assets/Scripts/Presentation/Game/Tiles/` | Renderer feature (on `UniversalRenderPipelineAsset_Renderer`) that copies the reflection camera's depth for the height fade. |
 | `PondManager` + `Pond.prefab` | `Assets/Scripts/Presentation/Game/Terrain/`, `Assets/Prefabs/Game/Tiles/Water/` | Builds the sea every level sits in: the surface, the seabed, and the ripple simulation's size and mask. |
 
 For every water pixel the shader:
@@ -37,8 +38,10 @@ For every water pixel the shader:
    `Deep Colour` with depth (`Haze Density`, up to `Haze Amount`). Then the thinner the water over the floor, the
    lighter it gets: it's screened towards `Shallow Light Colour` by `Shallow Light Amount`, fading out by `Shallow Light
    Depth` (3, the deep sea floor) with `Shallow Light Falloff`, so water near land reads lighter than open sea.
-6. **Reflection.** A sky gradient weighted by fresnel, then the planar reflection texture (mip-blurred and rippled)
-   blended in with an exaggerated `Object Reflection Strength` so it reads from the steep game camera.
+6. **Reflection.** A sky gradient weighted by fresnel, then the planar reflection texture (mip-blurred, rippled by the
+   surface normal, and wobbled by drifting noise from `Object Reflection Ripple` so it never sits still) blended in, fading
+   with each reflected point's height above the water (halving every `Object Reflection Fade Height`, from the
+   reflection camera's depth), with an exaggerated `Object Reflection Strength` so it reads from the steep game camera.
 7. **Highlights and glow.** Sun specular, twinkling sparkles on crests, a constant glow, and a shallow-edge glow where
    the water is thin (walls, rocks, lily pads). The edge band's reach and lacy breakup come from 3D noise that only
    moves along Y, so it reshapes in place, and it swells and retreats with passing ripples.
@@ -98,6 +101,8 @@ it's still.
   reflect itself.
 - **One `PlanarWaterReflection`** at the water surface height. It follows `Camera.main` unless given a camera, and
   renders in `LateUpdate`, so reflections only update in Play mode.
+- **`PlanarReflectionDepthFeature` must stay on the renderer.** Without it the reflection depth texture is never
+  filled, and reflections don't fade with height.
 - **One `WaterRippleSimulation`** centred on the water, with `Size` set to the water's XZ extent. Its edges act as
   walls.
 - **A `WaterRippleSource`** on each rock, lily pad or other thing that touches the surface. `Radius` is its footprint
