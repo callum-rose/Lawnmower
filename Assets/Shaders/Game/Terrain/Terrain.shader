@@ -1,8 +1,6 @@
-// The level's SDF terrain. Tops take each tile's colour from _TerrainCells (one texel per tile, in object space where
-// tile (x, z) covers [x, x + 1] x [z, z + 1], inside a one-texel border), blended softly across tile edges; alpha is
-// how much of the top is raked dirt, which empty tiles and the border are wholly, so the bare shore past the tiles is
-// dirt. Sides and the rounded edge fall back to a gradient by height between two stone colours, under the rocks that
-// edge the shore.
+// The level's SDF terrain. Tops are raked dirt everywhere, under the grass and whatever else sits on the tiles, in
+// object space where tile (x, z) covers [x, x + 1] x [z, z + 1]. Sides and the rounded edge fall back to a gradient by
+// height between two stone colours, under the rocks that edge the shore.
 Shader "Game/Terrain"
 {
 	Properties
@@ -13,7 +11,6 @@ Shader "Game/Terrain"
 		_SideBottom("Side Gradient Bottom Height", Float) = -1.2
 		_TopStart("Top Starts At Normal Y", Range(0, 1)) = 0.8
 		_TopEnd("Top Complete At Normal Y", Range(0, 1)) = 0.95
-		_CellBlend("Tile Colour Blend Width", Range(0.001, 1)) = 0.15
 		_DiffuseAmount("Diffuse Amount", Range(0, 1)) = 0.25
 		_ShadowCutoff("Shadow Cutoff", Range(0, 1)) = 0.3
 		_ShadowSmoothness("Shadow Smoothness", Range(0.001, 1)) = 0.1
@@ -32,7 +29,6 @@ Shader "Game/Terrain"
 		_RakeGrooveShade("Groove Shade", Range(0, 1)) = 0.08
 		_RakeLighting("Bump Diffuse Lighting", Range(0, 2)) = 0.35
 		_DirtGrain("Grain", Range(0, 1)) = 0.2
-		[HideInInspector] _TerrainCells("Tile Colours", 2D) = "white" {}
 		[HideInInspector] _TerrainRake("Rake Route", 2D) = "black" {}
 	}
 
@@ -50,12 +46,10 @@ Shader "Game/Terrain"
 			float _SideBottom;
 			float _TopStart;
 			float _TopEnd;
-			float _CellBlend;
 			float _DiffuseAmount;
 			float _ShadowCutoff;
 			float _ShadowSmoothness;
 			half4 _ShadowColour;
-			float4 _TerrainCells_TexelSize;
 			float4 _TerrainRake_TexelSize;
 			half4 _DirtColour;
 			float _RakeLines;
@@ -87,9 +81,6 @@ Shader "Game/Terrain"
 
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 
-			TEXTURE2D(_TerrainCells);
-			SAMPLER(sampler_TerrainCells);
-
 			#include "RakedDirt.hlsl"
 
 			struct Attributes
@@ -119,17 +110,6 @@ Shader "Game/Terrain"
 				return output;
 			}
 
-			// Flat within each tile, blending to its neighbours only within _CellBlend of the edge. Alpha is how much
-			// of it is dirt
-			half4 TileColour(float2 tile)
-			{
-				float2 p = tile - 0.5;
-				float2 cell = floor(p);
-				float2 f = saturate((frac(p) - 0.5) / _CellBlend + 0.5);
-				float2 uv = (cell + f + 1.5) * _TerrainCells_TexelSize.xy;
-				return SAMPLE_TEXTURE2D(_TerrainCells, sampler_TerrainCells, uv);
-			}
-
 			half3 SideColour(float height)
 			{
 				float v = saturate((height - _SideBottom) / (_SideTop - _SideBottom));
@@ -142,14 +122,12 @@ Shader "Game/Terrain"
 				float topness = smoothstep(_TopStart, _TopEnd, normal.y);
 				Light light = GetMainLight(TransformWorldToShadowCoord(input.positionWS));
 
-				half4 top = TileColour(input.positionOS.xz);
 				DirtSurface dirt = RakedDirt(input.positionOS.xz, _DirtColour.rgb);
-				half3 topColour = lerp(top.rgb, dirt.albedo, top.a);
-				half3 albedo = lerp(SideColour(input.positionOS.y), topColour, topness);
+				half3 albedo = lerp(SideColour(input.positionOS.y), dirt.albedo, topness);
 
-				// The grooves bend the normal, as a height map would, wherever the top is dirt
+				// The grooves bend the normal, as a height map would, across the top
 				float3 bumpedOS = normalize(float3(dirt.tilt.x, 1, dirt.tilt.y));
-				float3 bumped = normalize(lerp(normal, TransformObjectToWorldNormal(bumpedOS), top.a * topness));
+				float3 bumped = normalize(lerp(normal, TransformObjectToWorldNormal(bumpedOS), topness));
 
 				float lit = saturate(dot(bumped, light.direction)) * light.shadowAttenuation;
 				float band = smoothstep(_ShadowCutoff - _ShadowSmoothness, _ShadowCutoff + _ShadowSmoothness, lit);
