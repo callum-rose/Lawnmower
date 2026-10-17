@@ -92,7 +92,7 @@ namespace Lawnmower.Editor.GameScreens
 
 		/// <summary>
 		/// Pause in the top-right corner (beside a central notch when there is one, so it sits on the full-screen root);
-		/// Undo bottom-right with Restart above it; Redo bottom-left, hiding behind Undo when there's nothing to redo.
+		/// Undo bottom-right with Restart above it; Redo just left of Undo, hiding behind it when there's nothing to redo.
 		/// </summary>
 		private static GameHudView BuildHud(RectTransform parent, RectTransform screen)
 		{
@@ -119,7 +119,7 @@ namespace Lawnmower.Editor.GameScreens
 			// Redo first so Undo draws over it while it hides.
 			const float centre = HudMargin + HudButton / 2;
 			ButtonView redo = RoundButton(controls, "RedoButton", ButtonColor.Yellow, "redo", null, HudButton, HudIcon, 0);
-			CentreIn(redo, new Vector2(0, 0), new Vector2(centre, centre));
+			CentreIn(redo, new Vector2(1, 0), new Vector2(-centre - HudButton - HudGap, centre));
 			ButtonView undo = RoundButton(controls, "UndoButton", ButtonColor.Yellow, "undo", null, HudButton, HudIcon, 0);
 			CentreIn(undo, new Vector2(1, 0), new Vector2(-centre, centre));
 			ButtonView restart = RoundButton(controls, "RestartButton", ButtonColor.Blue, "restart", null, HudButton, HudIcon, 0);
