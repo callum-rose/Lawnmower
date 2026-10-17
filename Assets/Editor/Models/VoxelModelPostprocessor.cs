@@ -9,6 +9,7 @@ using UnityEngine;
 internal class VoxelModelPostprocessor : AssetPostprocessor
 {
 	private const string staticFolder = "Assets/Models/Pond/";
+	private const string terrainFolder = "Assets/Models/Terrain/";
 	private const string animatedFolder = "Assets/Models/Creatures/";
 	private const string tileFolder = "Assets/Models/Tile/";
 	private const string tileVoxelMarker = "_voxel";
@@ -27,7 +28,7 @@ internal class VoxelModelPostprocessor : AssetPostprocessor
 		bool isVoxelTile = path.StartsWith(tileFolder) &&
 			System.IO.Path.GetFileNameWithoutExtension(path).Contains(tileVoxelMarker);
 
-		return path.StartsWith(staticFolder) || path.StartsWith(animatedFolder) || isVoxelTile;
+		return path.StartsWith(staticFolder) || path.StartsWith(terrainFolder) || path.StartsWith(animatedFolder) || isVoxelTile;
 	}
 
 	private void OnPreprocessModel()
@@ -49,6 +50,8 @@ internal class VoxelModelPostprocessor : AssetPostprocessor
 		importer.importLights = false;
 		importer.importBlendShapes = false;
 		importer.preserveHierarchy = true;
+		// The terrain's cobbles are read at runtime and combined into one edging mesh
+		importer.isReadable = assetPath.StartsWith(terrainFolder);
 		bool animated = assetPath.StartsWith(animatedFolder);
 		importer.animationType = animated ? ModelImporterAnimationType.Legacy : ModelImporterAnimationType.None;
 		importer.importAnimation = animated;
