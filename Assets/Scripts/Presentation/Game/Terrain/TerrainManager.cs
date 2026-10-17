@@ -1,6 +1,9 @@
+using System;
+using System.Collections.Generic;
 using Game.Core;
 using Game.Levels;
 using Game.Tiles;
+using Game.UndoSystem;
 using Lawnmower.Model;
 using Unity.Collections;
 using Unity.Mathematics;
@@ -13,13 +16,26 @@ namespace Game.Terrain
 	/// The mesh sits in the level container's space, where tile (x, z) covers [x, x + 1] x [z, z + 1]. Its top is raked
 	/// dirt throughout, along a <see cref="RakePath"/> through the grass tiles. The rake goes round the obstacles
 	/// (stones and springs), which are circled by rings of their own, as is each of the little mushrooms that mark where
-	/// a spring lands.
+	/// a spring lands. Where there's grass, the top is tinted by its height from a one-texel-per-tile texture the
+	/// terrain shader blends between, with how much of it is dirt in alpha, inside a one-texel border; everywhere else,
+	/// including mown-out grass, is bare dirt. The tint makes the grass look thicker, so it fades in as the grass grows
+	/// in the level intro.
 	/// </summary>
 	[RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 	internal class TerrainManager : MonoBehaviour
 	{
 		[SerializeField] private TerrainSettings settings;
 		[SerializeField] private TerrainEdging edging;
+
+		[Header("Grass Tint")]
+		[Tooltip("Under grass, indexed by grass height: ruined (0, unused: ruined grass is bare dirt) to tallest (3)")]
+		[SerializeField] private Color[] grassColours =
+		{
+			new Color(0.36f, 0.22f, 0.12f),
+			new Color(0.05f, 0.20f, 0.08f),
+			new Color(0.16f, 0.22f, 0.06f),
+			new Color(0.32f, 0.32f, 0.13f),
+		};
 
 		[Header("Obstacles")]
 		[Tooltip("Half the width of the ground a stone stands on, in tiles. The rake goes round it")]
@@ -38,6 +54,7 @@ namespace Game.Terrain
 		[Header("Event Channels")]
 		[SerializeField] private LevelDataEventChannel levelStartedEventChannel;
 
+		private static readonly int CellsId = Shader.PropertyToID("_TerrainCells");
 		private static readonly int RakeId = Shader.PropertyToID("_TerrainRake");
 		private static readonly int CirclesId = Shader.PropertyToID("_RakeCircles");
 		private static readonly int CircleCountId = Shader.PropertyToID("_RakeCircleCount");
@@ -45,8 +62,11 @@ namespace Game.Terrain
 		// As many as the terrain shader's _RakeCircles holds
 		private const int MaxCircles = 32;
 
+		private readonly List<Action> _unsubscribes = new List<Action>();
+
 		private Level _level;
 		private Mesh _mesh;
+		private Texture2D _cells;
 		private Texture2D _rake;
 		private readonly Vector4[] _circles = new Vector4[MaxCircles];
 		private int _circleCount;
@@ -75,7 +95,14 @@ namespace Game.Terrain
 #if UNITY_EDITOR
 			settings.Changed -= OnSettingsChanged;
 #endif
+			Unsubscribe();
+
 			Destroy(_mesh);
+			if (_cells)
+			{
+				Destroy(_cells);
+			}
+
 			if (_rake)
 			{
 				Destroy(_rake);
@@ -89,8 +116,10 @@ namespace Game.Terrain
 		private void OnLevelStarted(Level level)
 		{
 			_level = level;
+			Unsubscribe();
 			Build(level);
 			BuildRake(level);
+			BuildCells(level);
 		}
 
 #if UNITY_EDITOR
@@ -185,6 +214,78 @@ namespace Game.Terrain
 			_propertyBlock.SetVectorArray(CirclesId, _circles);
 			_propertyBlock.SetFloat(CircleCountId, _circleCount);
 			_renderer.SetPropertyBlock(_propertyBlock);
+		}
+
+		private void BuildCells(Level level)
+		{
+			int width = level.Width + 2;
+			int depth = level.Depth + 2;
+			if (_cells == null || _cells.width != width || _cells.height != depth)
+			{
+				if (_cells)
+				{
+					Destroy(_cells);
+				}
+
+				_cells = new Texture2D(width, depth, TextureFormat.RGBA32, false, false)
+				{
+					name = "TerrainCells",
+					filterMode = FilterMode.Bilinear,
+					wrapMode = TextureWrapMode.Clamp,
+				};
+			}
+
+			// The border, like any tile without grass, is bare dirt
+			Color32[] dirt = new Color32[width * depth];
+			Array.Fill(dirt, (Color32)Color.white);
+			_cells.SetPixels32(dirt);
+
+			foreach (GridVector position in level.Positions)
+			{
+				if (level.GetTile(position) is not IReadonlyGrassTile grass)
+				{
+					continue;
+				}
+
+				SetCell(position, GrassColour(grass.GrassHeight.Value), false);
+
+				GridVector cell = position;
+				UndoableAction<int, int> onHeightChanged = (_, height, _) => SetCell(cell, GrassColour(height), true);
+				grass.GrassHeight.ValueChangedFromTo += onHeightChanged;
+				_unsubscribes.Add(() => grass.GrassHeight.ValueChangedFromTo -= onHeightChanged);
+			}
+
+			_cells.Apply();
+
+			_renderer.GetPropertyBlock(_propertyBlock);
+			_propertyBlock.SetTexture(CellsId, _cells);
+			_renderer.SetPropertyBlock(_propertyBlock);
+		}
+
+		private void SetCell(GridVector position, Color colour, bool apply)
+		{
+			_cells.SetPixel(position.x + 1, position.y + 1, colour);
+			if (apply)
+			{
+				_cells.Apply();
+			}
+		}
+
+		private Color GrassColour(int height)
+		{
+			Color colour = grassColours[Mathf.Clamp(height, 0, grassColours.Length - 1)];
+			colour.a = height <= 0 ? 1 : 0;
+			return colour;
+		}
+
+		private void Unsubscribe()
+		{
+			foreach (Action unsubscribe in _unsubscribes)
+			{
+				unsubscribe();
+			}
+
+			_unsubscribes.Clear();
 		}
 
 		// Round ground the rake goes round that isn't a tile's: the landing markers' mushrooms. Each is its centre (xy, in
