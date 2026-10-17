@@ -53,6 +53,11 @@ namespace Game.Levels
                 woodTileObject.Connect(GetWoodConnections(level, position));
             }
 
+            if (newTileObject.TryGetComponent(out GrassEdgeBlades grassEdges))
+            {
+                grassEdges.Connect(level, position);
+            }
+
             positioner.Position(newTileObject.transform, position);
 #if UNITY_EDITOR
             newTileObject.name = "Tile " + position;
