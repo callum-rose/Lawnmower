@@ -2,7 +2,7 @@
 // tile (x, z) covers [x, x + 1] x [z, z + 1], inside a one-texel border), blended softly across tile edges; alpha is
 // how much of the top is raked dirt, which empty tiles and the border are wholly, so the bare shore past the tiles is
 // dirt. Sides and the rounded edge fall back to a gradient by height between two stone colours, under the rocks that
-// edge the shore.
+// edge the shore. _TerrainRake holds the rake's route (RakePath) and, in blue, the footprint of each tile's obstacle.
 Shader "Game/Terrain"
 {
 	Properties
@@ -32,6 +32,13 @@ Shader "Game/Terrain"
 		_RakeGrooveShade("Groove Shade", Range(0, 1)) = 0.08
 		_RakeLighting("Bump Diffuse Lighting", Range(0, 2)) = 0.35
 		_DirtGrain("Grain", Range(0, 1)) = 0.2
+		[Header(Raked Round Obstacles)]
+		[IntRange] _RakeStampRings("Rings", Range(0, 4)) = 2
+		[IntRange] _RakeMarkerRings("Rings Round Landing Marker Mushrooms", Range(0, 4)) = 1
+		_RakeStampRoundness("Footprint Roundness", Range(0, 1)) = 0.6
+		_RakeStampMerge("Merge Neighbours' Rings", Range(0.01, 0.5)) = 0.2
+		_RakeStampFade("Groove End Fade Length", Range(0.01, 0.5)) = 0.12
+		_RakeStampShade("Contact Shade", Range(0, 1)) = 0.3
 		[HideInInspector] _TerrainCells("Tile Colours", 2D) = "white" {}
 		[HideInInspector] _TerrainRake("Rake Route", 2D) = "black" {}
 	}
@@ -70,6 +77,12 @@ Shader "Game/Terrain"
 			float _RakeGrooveShade;
 			float _RakeLighting;
 			float _DirtGrain;
+			float _RakeStampRings;
+			float _RakeMarkerRings;
+			float _RakeStampRoundness;
+			float _RakeStampMerge;
+			float _RakeStampFade;
+			float _RakeStampShade;
 		CBUFFER_END
 		ENDHLSL
 
