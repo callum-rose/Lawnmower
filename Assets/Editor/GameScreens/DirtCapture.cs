@@ -106,23 +106,6 @@ namespace Lawnmower.Editor.GameScreens
 			{
 				setter.SetAppearance(0);
 			}
-
-			TerrainManager terrain = UnityEngine.Object.FindAnyObjectByType<TerrainManager>();
-			const BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic;
-			Texture2D cells = (Texture2D)typeof(TerrainManager).GetField("_cells", flags).GetValue(terrain);
-			Texture2D rake = (Texture2D)typeof(TerrainManager).GetField("_rake", flags).GetValue(terrain);
-			Color32[] routes = rake.GetPixels32();
-			for (int i = 0; i < routes.Length; i++)
-			{
-				// Raked tiles, and obstacles, which stand in whatever the grass around them is
-				if (routes[i].r != RakePath.None || routes[i].g != RakePath.None || routes[i].b > 0)
-				{
-					// The cells have a one-texel border the rake route doesn't
-					cells.SetPixel(i % rake.width + 1, i / rake.width + 1, new Color(0.36f, 0.22f, 0.12f, 1));
-				}
-			}
-
-			cells.Apply();
 		}
 
 		private static void Next(int step, double seconds)

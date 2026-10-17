@@ -142,6 +142,7 @@ GameObject:
   - component: {fileID: 8723563144886214523}
   - component: {fileID: 43315966577984983}
   - component: {fileID: 2793972216092024432}
+  - component: {fileID: 6120845370912846251}
   m_Layer: 0
   m_Name: Grass
   m_TagString: Untagged
@@ -184,6 +185,28 @@ MonoBehaviour:
   grassParticlesEventChannel: {fileID: 11400000, guid: a0d44f1fe0272654481648582818aafc, type: 2}
   dirtParticlesEventChannel: {fileID: 11400000, guid: c50c4a082720ead48b7e0f97b1db35c5, type: 2}
   displayGrassHeight: 3
+--- !u!114 &6120845370912846251
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8723563144886214407}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 56fc91b7e1e3439dae0119e4e4383a38, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  heights:
+  - container: {fileID: 119246918897246057}
+    material: {fileID: 2100000, guid: 30f1cfd116411ba48bc4c83fb63ab5b4, type: 2}
+    heightScale: 0.8
+  - container: {fileID: 4565693094959257178}
+    material: {fileID: 2100000, guid: 1aacdddcd7b654a43842458afae7246b, type: 2}
+    heightScale: 1
+  - container: {fileID: 2828678578515844785}
+    material: {fileID: 2100000, guid: f110a092dbe9ee641b51d53bc25ff9fe, type: 2}
+    heightScale: 1.2
 --- !u!114 &2793972216092024432
 MonoBehaviour:
   m_ObjectHideFlags: 0

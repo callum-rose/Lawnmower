@@ -21,6 +21,18 @@ It renders in edit mode (or captures the running game if a live Editor is alread
 
 Options: `--scene`, `--camera`, `--width`, `--height`, `--ui`, `--warmup`, `--output`, and `--setup Namespace.Type.Method` (with `--setup_arg`) to put the scene in the state you want first. For anything more, add a static setup method rather than another capture script. The parameter descriptions are in `GameCapture.cs`.
 
+## Video
+
+Use the project's `record` command (`Assets/Editor/Capture/GameRecord.cs`) for gameplay video. It works the same in batch mode and in a live Editor, and writes an MP4 (H.264) or WebM with Screen Space - Overlay UI included:
+
+```bash
+unity run "$PWD" --command record -- --scene Assets/Scenes/MainMenu.unity --setup Lawnmower.Editor.GameScreens.GameScreensDebug.LoadLevel --setup_arg 0 --duration 5 --output Captures/level1.mp4
+```
+
+Unlike `capture`, it enters Play Mode. `--setup` runs once Play Mode has started (so it can load a level), then the game runs for `--delay` seconds before `--duration` seconds are recorded at `--fps`. Game time is locked to the frame rate, so the video plays at real speed however slowly it renders. It sizes the Game view to the video so screen-dependent layout (the board framer) matches. There's no audio.
+
+Options: `--scene`, `--camera`, `--width`, `--height`, `--fps`, `--duration`, `--delay`, `--ui`, `--setup`, `--setup_arg`, `--output`. Setup methods can take one string, number, bool or enum argument.
+
 ## Blender
 
 Prefer running Blender in headless mode (`blender --background --python <script>`) over driving the Blender editor through the Blender MCP, unless I say otherwise.
