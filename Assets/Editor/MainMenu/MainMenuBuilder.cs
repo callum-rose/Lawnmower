@@ -15,8 +15,8 @@ namespace Lawnmower.MainMenuEditor
 	/// <summary>
 	/// Builds the Main Menu screen prefab (Figma 12:5) from the Bunny Heaven UI kit, and sets up the MainMenu scene
 	/// around it. Positions are Figma frame points (390x844): the title, ribbon and buttons keep their distance from the
-	/// safe area's top or bottom edge (Figma assumes a 47pt status bar and a 34pt home indicator), and the lawn card
-	/// stays centred between them, so taller screens only add space around the card.
+	/// safe area's top or bottom edge (Figma assumes a 47pt status bar and a 34pt home indicator), and the hero bunny
+	/// stays centred between them, so taller screens only add space around it.
 	/// </summary>
 	public static class MainMenuBuilder
 	{
@@ -26,7 +26,7 @@ namespace Lawnmower.MainMenuEditor
 		private const string KitDir = "Assets/Prefabs/UI/BunnyHeaven";
 		private const string SpriteDir = "Assets/UI/BunnyHeaven/Sprites";
 		private const string ThemePath = "Assets/UI/BunnyHeaven/Theme/BunnyHeavenTheme.asset";
-		private const string PreviewPath = "Assets/Art/Previews/Level01_Preview.png";
+		private const string HeroBunnyStagePath = "Assets/Prefabs/UI/MainMenu/HeroBunnyStage.prefab";
 		private const string LevelDataManagerPath = "Assets/ScriptableObjects/Game/Levels/Functionals/LevelDataManager.asset";
 		private const string CurrentMowerManagerPath = "Assets/ScriptableObjects/Game/Mower/Functionals/CurrentMowerManager.asset";
 
@@ -84,6 +84,13 @@ namespace Lawnmower.MainMenuEditor
 			var screen = (GameObject) PrefabUtility.InstantiatePrefab(AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath), scene);
 			screen.name = "MainMenuScreen";
 
+			// The bunny is rendered off to the side, into the screen's hero image
+			var stage = (GameObject) PrefabUtility.InstantiatePrefab(AssetDatabase.LoadAssetAtPath<GameObject>(HeroBunnyStagePath), scene);
+			stage.transform.position = new Vector3(0, -100, 0);
+			var heroImage = screen.GetComponentInChildren<CameraRawImage>();
+			SetRefs(heroImage, ("sourceCamera", stage.GetComponentInChildren<Camera>()));
+			SetRefs(stage.GetComponentInChildren<HeroBunny>(), ("portrait", heroImage));
+
 			var rootGo = new GameObject("MainMenu");
 			var manager = rootGo.AddComponent<MainMenuSceneManager>();
 			SetRefs(manager,
@@ -128,7 +135,7 @@ namespace Lawnmower.MainMenuEditor
 
 			LongPressTrigger title = BuildTitle(safe);
 			BuildRibbon(safe);
-			BuildLawnCard(safe);
+			BuildHeroBunny(safe);
 
 			var play = Kit("BigButton_Green", safe).GetComponent<ButtonView>();
 			play.name = "PlayButton";
@@ -140,7 +147,7 @@ namespace Lawnmower.MainMenuEditor
 			ButtonView settings = RoundButton(safe, "SettingsButton", ButtonColor.Red, "settings", "SETTINGS", 187);
 			ButtonView howToPlay = RoundButton(safe, "HowToPlayButton", ButtonColor.Green, "howtoplay", "HOW TO PLAY", 293);
 
-			// Floats up over the bottom of the lawn card, clear of the buttons.
+			// Floats up over the bottom of the hero bunny, clear of the buttons.
 			var toast = Kit("Toast", safe).GetComponent<ToastView>();
 			var toastRect = (RectTransform) toast.transform;
 			toastRect.anchorMin = new Vector2(0, 0.5f);
@@ -195,19 +202,17 @@ namespace Lawnmower.MainMenuEditor
 			Stretch(label.rectTransform, 0, 0, 0, 2);
 		}
 
-		private static void BuildLawnCard(RectTransform parent)
+		/// <summary>Full width between the ribbon and the play button; the scene points it at the hero bunny's camera.</summary>
+		private static void BuildHeroBunny(RectTransform parent)
 		{
-			RectTransform card = Kit("Card", parent);
-			card.name = "LawnCard";
-			Place(card, 70, 303, 259, 271, Edge.Middle);
-			card.localRotation = Quaternion.Euler(0, 0, 2);
+			RectTransform hero = NewUI("HeroBunny", parent);
+			Place(hero, 0, 273.5f, FrameWidth, 360, Edge.Middle);
+			hero.anchorMin = new Vector2(0, 0.5f);
+			hero.anchorMax = new Vector2(1, 0.5f);
+			hero.sizeDelta = new Vector2(0, hero.sizeDelta.y);
 
-			RectTransform lawn = NewUI("Lawn", card);
-			Stretch(lawn, 14, 18, 14, 14);
-			var image = lawn.gameObject.AddComponent<Image>();
-			image.sprite = AssetDatabase.LoadAssetAtPath<Sprite>(PreviewPath);
-			image.preserveAspect = true;
-			image.raycastTarget = false;
+			hero.gameObject.AddComponent<RawImage>().raycastTarget = false;
+			hero.gameObject.AddComponent<CameraRawImage>();
 		}
 
 		private static ButtonView RoundButton(RectTransform parent, string name, ButtonColor color, string icon, string label,

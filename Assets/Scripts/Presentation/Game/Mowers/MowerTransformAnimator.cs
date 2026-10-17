@@ -17,6 +17,8 @@ namespace Game.Mowers
 		[Header("Spring Jumps")]
 		[SerializeField, Min(0)] private float jumpHeight = 1.5f;
 		[SerializeField, Min(0.05f)] private float jumpDuration = 0.45f;
+		[Tooltip("Arc height of a step that climbs onto or off a raised surface (the spring's mushroom cap).")]
+		[SerializeField, Min(0)] private float hopHeight = 1f;
 
 		[Header("Event Channels")]
 		[SerializeField] private IVector3EventChannelTransmitterContainer movedEventChannel;
@@ -94,12 +96,12 @@ namespace Game.Mowers
 			{
 				_pendingJumpTarget = null;
 				AnimateRotation(prevPosition, targetPosition, inInverted);
-				AnimationPosition(targetPosition, inInverted);
+				AnimationPosition(prevPosition, targetPosition, inInverted);
 			}
 			else if (!inInverted)
 			{
 				// A spring jump (B3): arc to the landing tile once the step onto the spring has finished.
-				Vector3 landing = _positioner.GetWorldPosition(targetPosition);
+				Vector3 landing = _positioner.GetStandWorldPosition(targetPosition);
 
 				if (_translationRoutine != null)
 				{
@@ -140,16 +142,19 @@ namespace Game.Mowers
 			}
 		}
 
-		private void AnimationPosition(GridVector position, Xor isInverted)
+		private void AnimationPosition(GridVector prevPosition, GridVector position, Xor isInverted)
 		{
-			Vector3 worldPosition = _positioner.GetWorldPosition(position);
+			Vector3 worldPosition = _positioner.GetStandWorldPosition(position);
 
 			_translationRoutine.Stop(this);
 			_translationRoutine = null;
 
 			if (!isInverted)
 			{
-				_translationRoutine = TranslateRoutine(worldPosition).Start(this);
+				// Climbing onto or off a raised surface arcs over its edge rather than passing through it.
+				float prevY = _positioner.GetStandWorldPosition(prevPosition).y;
+				float arc = Mathf.Approximately(worldPosition.y, prevY) ? 0 : hopHeight;
+				_translationRoutine = TranslateRoutine(worldPosition, arc).Start(this);
 			}
 			else
 			{
@@ -163,12 +168,12 @@ namespace Game.Mowers
 			_translationRoutine.Stop(this);
 			_translationRoutine = null;
 
-			Vector3 worldPosition = _positioner.GetWorldPosition(position);
+			Vector3 worldPosition = _positioner.GetStandWorldPosition(position);
 			transform.position = worldPosition;
 			MovedEventChannel.Raise(worldPosition);
 		}
 
-		private IEnumerator TranslateRoutine(Vector3 to)
+		private IEnumerator TranslateRoutine(Vector3 to, float arc)
 		{
 			void SetPosition(Vector3 pos)
 			{
@@ -184,7 +189,7 @@ namespace Game.Mowers
 			{
 				float interpolant = time / animationSpeedHandler.RecommendedAnimDuration;
 				float easedT = animEase.Evaluate(interpolant);
-				Vector3 position = Vector3.Lerp(from, to, easedT);
+				Vector3 position = Vector3.Lerp(from, to, easedT) + Vector3.up * (arc * 4 * easedT * (1 - easedT));
 
 				SetPosition(position);
 
