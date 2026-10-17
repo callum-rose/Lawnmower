@@ -12,7 +12,7 @@ Shader "Water"
 		_DeepColour("Deep Colour", Color) = (0.5,0.72,1,1)
 		_Absorption("Absorption Per Unit (RGB)", Vector) = (0.6,0.32,0.2,0)
 		_AbsorptionScale("Absorption Scale", Range(0, 8)) = 1
-		_InscatterAmount("Haze Amount", Range(0, 1)) = 0.7
+		_InscatterAmount("Haze Amount", Range(0, 1)) = 0.35
 		_HazeDensity("Haze Density", Range(0, 10)) = 1.8
 		_DepthBlur("Depth Blur (world units per unit depth)", Range(0, 0.5)) = 0.12
 		_DepthBlurMax("Depth Blur Max (world units)", Range(0, 0.5)) = 0.2
@@ -40,6 +40,12 @@ Shader "Water"
 		_CausticIntensity("Caustic Intensity", Range(0, 4)) = 1
 		_CausticFocusDepth("Caustic Focus Depth", Range(0.05, 2)) = 0.5
 		_CausticDepthFade("Caustic Depth Fade", Range(0, 4)) = 0.5
+		_WebCausticAmount("Web Caustic Amount", Range(0, 2)) = 0.6
+		_CausticScale("Web Caustic Scale", Float) = 1.3
+		_CausticSpeed("Web Caustic Speed", Float) = 0.7
+		_CausticSharpness("Web Caustic Sharpness", Range(1, 40)) = 11
+		_CausticSplit("Web Caustic Chromatic Split", Range(0, 0.3)) = 0.06
+		_WebCausticBlur("Web Caustic Depth Softening", Range(0, 40)) = 10
 		_UnderwaterShadow("Underwater Shadow Darkening", Range(0, 1)) = 0.35
 
 		[Header(Reflection)]
@@ -127,6 +133,12 @@ Shader "Water"
 			float _CausticIntensity;
 			float _CausticFocusDepth;
 			float _CausticDepthFade;
+			float _WebCausticAmount;
+			float _CausticScale;
+			float _CausticSpeed;
+			float _CausticSharpness;
+			float _CausticSplit;
+			float _WebCausticBlur;
 			float _UnderwaterShadow;
 			float4 _SkyHorizon;
 			float4 _SkyZenith;
@@ -268,9 +280,10 @@ Shader "Water"
 				return SAMPLE_TEXTURE2D_LOD(_WaterRippleSimTex, sampler_LinearClamp, uv, 0).r * _RippleAmplitude;
 			}
 
-			float WaterHeight(float2 p, float t)
+			float FlowWaves(float2 p, float t)
 			{
-				float ripples = Ripples(p);
+				if (_FlowWaveAmount <= 0)
+					return 0;
 				float2 flow = _FlowDirection.xy * _FlowSpeed * t;
 				p += Swirl(p, t) * _SwirlStrength;
 				float2 q = (p - flow) * _WaveScale;
@@ -279,7 +292,12 @@ Shader "Water"
 				h += GradientNoise(q + float2(t * 0.11, 0)) * 0.27;
 				q = mul(float2x2(0.8, -0.6, 0.6, 0.8), q) * 2.11 + float2(8.3, 2.8);
 				h += GradientNoise(q - float2(0, t * 0.17)) * 0.13;
-				return h * _FlowWaveAmount + ripples;
+				return h * _FlowWaveAmount;
+			}
+
+			float WaterHeight(float2 p, float t)
+			{
+				return FlowWaves(p, t) + Ripples(p);
 			}
 
 			// Light focused by the ripples: bright under crests (converging) and dim under troughs, from the curvature of the
@@ -291,6 +309,64 @@ Shader "Water"
 				float curvature = (Ripples(surfaceP + float2(e, 0)) + Ripples(surfaceP - float2(e, 0))
 					+ Ripples(surfaceP + float2(0, e)) + Ripples(surfaceP - float2(0, e)) - 4 * centre) / (e * e);
 				return -curvature * 0.02 * saturate(depth / _CausticFocusDepth);
+			}
+
+			// Edge distance of an animated Voronoi web; thin lines where cells meet.
+			float CausticWeb(float2 p, float t, float sharpness)
+			{
+				float2 n = floor(p);
+				float2 f = frac(p);
+				float f1 = 8;
+				float f2 = 8;
+				[unroll]
+				for (int j = -1; j <= 1; j++)
+				{
+					[unroll]
+					for (int i = -1; i <= 1; i++)
+					{
+						float2 g = float2(i, j);
+						float2 o = Hash22(n + g);
+						o = 0.5 + 0.45 * sin(t + 6.2831 * o);
+						float d = length(g + o - f);
+						if (d < f1)
+						{
+							f2 = f1;
+							f1 = d;
+						}
+						else if (d < f2)
+						{
+							f2 = d;
+						}
+					}
+				}
+				return exp(-(f2 - f1) * sharpness);
+			}
+
+			float WebCaustic(float2 p, float t, float sharpness)
+			{
+				p += float2(GradientNoise(p * 0.6 + t * 0.1), GradientNoise(p * 0.6 + 4.1 - t * 0.1)) * 0.6;
+				float a = CausticWeb(p, t, sharpness);
+				float b = CausticWeb(p * 1.37 + float2(3.1, 7.7), t * 1.3, sharpness);
+				return a * 0.75 + a * b * 1.5 + b * 0.25;
+			}
+
+			// Shimmering lines of light on the floor, split into RGB for a faint rainbow fringe.
+			float3 WebCaustics(float2 p, float t, float sharpness)
+			{
+				p *= _CausticScale;
+				t *= _CausticSpeed;
+				float3 c;
+				[branch]
+				if (_CausticSplit <= 0.0001)
+				{
+					c = WebCaustic(p, t, sharpness).xxx;
+				}
+				else
+				{
+					float2 d = float2(_CausticSplit, _CausticSplit * 0.5);
+					c = float3(WebCaustic(p - d, t, sharpness), WebCaustic(p, t, sharpness), WebCaustic(p + d, t, sharpness));
+				}
+				return c;
 			}
 
 			float3 SceneColour(float2 uv)
@@ -435,17 +511,28 @@ Shader "Water"
 				float shadow = verticalDepth > 0.01 ? UnderwaterShadow(floorWS, mainLight.direction, verticalDepth) : 0;
 				refracted *= 1 - shadow * _UnderwaterShadow;
 
-				float caustic = RippleCaustic(floorWS.xz + mainLight.direction.xz * verticalDepth * 0.5, verticalDepth, blurWorld)
-					* facing * (1 - shadow);
+				float2 causticP = floorWS.xz + mainLight.direction.xz * verticalDepth * 0.5;
+				float lit = facing * (1 - shadow);
+				float caustic = RippleCaustic(causticP, verticalDepth, blurWorld) * lit;
 				caustic = clamp(caustic * exp(-verticalDepth * _CausticDepthFade) * _CausticIntensity, -0.5, 3);
 				float3 caustics = Quantise(max(caustic, 0).xxx) - max(-caustic, 0);
 				refracted += refracted * caustics * _CausticColour.rgb * mainLight.color;
+				// The web is added after the haze below so it still shimmers through deep, milky water.
+				float3 web = 0;
+				[branch]
+				if (_WebCausticAmount > 0)
+				{
+					float webMask = saturate(verticalDepth * 6) * exp(-verticalDepth * _CausticDepthFade) / (1 + blurWorld * 4) * lit;
+					web = WebCaustics(causticP, t, _CausticSharpness / (1 + blurWorld * _WebCausticBlur));
+					web = Quantise(saturate(web)) * webMask * _WebCausticAmount * _CausticColour.rgb * mainLight.color;
+				}
 
 				float pathLength = (verticalDepth + thickness) * 0.5;
 				float3 transmittance = exp(-_Absorption.rgb * _AbsorptionScale * pathLength);
 				float inscatter = (1 - exp(-pathLength * _HazeDensity)) * _InscatterAmount;
 				float3 underwater = refracted * transmittance * _ShallowTint.rgb;
 				underwater = lerp(underwater, _DeepColour.rgb, inscatter);
+				underwater += web * 0.5;
 
 				float3 reflectDir = reflect(rayDir, normalWS);
 				reflectDir = normalize(float3(reflectDir.x, max(reflectDir.y, 0.08), reflectDir.z));

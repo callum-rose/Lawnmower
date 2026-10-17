@@ -17,7 +17,8 @@ using Random = UnityEngine.Random;
 // Environment variables: WATER_OUT (output folder), WATER_VIDEO=1 (raw RGB24 clip of the close shot instead of stills,
 // encode with ffmpeg -f rawvideo -pix_fmt rgb24 -s WxH -r 30 -i Water.rgb -vf vflip out.mp4), WATER_W (width),
 // WATER_SECONDS, WATER_FPS, WATER_SHOT (close|wide), WATER_WARMUP (ripple seconds simulated first),
-// WATER_REFLECT=0 (no planar reflection), WATER_DEBUG=1 (dump the ripple height field over time instead).
+// WATER_REFLECT=0 (no planar reflection), WATER_SOURCES=0 (no constant ripple emitters, only splashes, as in the game),
+// WATER_DEBUG=1 (dump the ripple height field over time instead).
 public static class WaterPreviewRenderer
 {
 	static Action BeforeRender;
@@ -52,10 +53,13 @@ public static class WaterPreviewRenderer
 			rippleType.GetProperty("Radius").SetValue(source, radius);
 			rippleType.GetProperty("Strength").SetValue(source, strength);
 		}
-		Ripple(new Vector3(1.7f, surface, 1.9f), 0.3f, 0.2f);
-		Ripple(new Vector3(-1.6f, surface, -0.5f), 0.3f, 0.1f);
-		Ripple(new Vector3(0.9f, surface, 0.6f), 0.25f, 0.1f);
-		Ripple(new Vector3(-1.0f, surface, -0.9f), 0.2f, 0.07f);
+		if (Env("WATER_SOURCES", "1") == "1")
+		{
+			Ripple(new Vector3(1.7f, surface, 1.9f), 0.3f, 0.2f);
+			Ripple(new Vector3(-1.6f, surface, -0.5f), 0.3f, 0.1f);
+			Ripple(new Vector3(0.9f, surface, 0.6f), 0.25f, 0.1f);
+			Ripple(new Vector3(-1.0f, surface, -0.9f), 0.2f, 0.07f);
+		}
 
 		var waterMaterial = AssetDatabase.LoadAssetAtPath<Material>("Assets/Shaders/Game/Tiles/Water/Water.mat");
 		foreach (var message in ShaderUtil.GetShaderMessages(waterMaterial.shader))
