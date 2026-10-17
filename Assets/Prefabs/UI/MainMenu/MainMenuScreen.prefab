@@ -168,6 +168,92 @@ MonoBehaviour:
   m_EditorClassIdentifier: BunnyHeaven.UI::BunnyHeaven.UI.ThemedGraphic
   theme: {fileID: 11400000, guid: 392634b46d1f2432db74b518ff32f5fe, type: 2}
   token: 15
+--- !u!1 &2948487109215660832
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8463434261736827605}
+  - component: {fileID: 6890584936318214530}
+  - component: {fileID: 829597159661217439}
+  - component: {fileID: 8469456997350165190}
+  m_Layer: 5
+  m_Name: HeroBunny
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &8463434261736827605
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2948487109215660832}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8909284300020518148}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0.5}
+  m_AnchorMax: {x: 1, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: -25}
+  m_SizeDelta: {x: 0, y: 360}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &6890584936318214530
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2948487109215660832}
+  m_CullTransparentMesh: 1
+--- !u!114 &829597159661217439
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2948487109215660832}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1344c3c82d62a2a41a3576d8abb8e3ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.RawImage
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Texture: {fileID: 0}
+  m_UVRect:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 1
+    height: 1
+--- !u!114 &8469456997350165190
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2948487109215660832}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c447e335d404b4553b2c1e661ee7d17c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Lawnmower.Presentation::MainMenu.CameraRawImage
+  sourceCamera: {fileID: 0}
 --- !u!1 &3117119826636326763
 GameObject:
   m_ObjectHideFlags: 0
@@ -286,9 +372,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Lawnmower.Presentation::MainMenu.MainMenuView
   playButton: {fileID: 8781616168456244003}
-  levelsButton: {fileID: 2106868173535337963}
+  levelsButton: {fileID: 7469955758160289301}
   settingsButton: {fileID: 7785441876463165043}
-  howToPlayButton: {fileID: 4366248762558603958}
+  howToPlayButton: {fileID: 7235529715186415044}
   title: {fileID: 1290805601477182783}
   toast: {fileID: 6334263232178727571}
 --- !u!1 &3278839179692065688
@@ -692,81 +778,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: BunnyHeaven.UI::BunnyHeaven.UI.ThemedGraphic
   theme: {fileID: 11400000, guid: 392634b46d1f2432db74b518ff32f5fe, type: 2}
   token: 8
---- !u!1 &6820410760676268326
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 4262841001829969587}
-  - component: {fileID: 2990342524329799118}
-  - component: {fileID: 5836944095806992159}
-  m_Layer: 5
-  m_Name: Lawn
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &4262841001829969587
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6820410760676268326}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 5605933013774181927}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -2}
-  m_SizeDelta: {x: -28, y: -32}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!222 &2990342524329799118
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6820410760676268326}
-  m_CullTransparentMesh: 1
---- !u!114 &5836944095806992159
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6820410760676268326}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 0
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 255b9e8d83a984a10ba1f92bb02ba0ba, type: 3}
-  m_Type: 0
-  m_PreserveAspect: 1
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
 --- !u!1 &7251210606017911049
 GameObject:
   m_ObjectHideFlags: 0
@@ -798,11 +809,11 @@ RectTransform:
   m_Children:
   - {fileID: 593656443482145179}
   - {fileID: 2684828902925064659}
-  - {fileID: 5605933013774181927}
+  - {fileID: 8463434261736827605}
   - {fileID: 7590996348624699228}
-  - {fileID: 2952115902028314378}
+  - {fileID: 5940108933309707508}
   - {fileID: 6471231306545116306}
-  - {fileID: 4366248762558603957}
+  - {fileID: 5885324303455723301}
   - {fileID: 2986169679543510204}
   m_Father: {fileID: 6380239196637987864}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1044,111 +1055,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Lawnmower.Presentation::MainMenu.LongPressTrigger
   holdSeconds: 2
---- !u!1001 &1674264002404050580
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 8909284300020518148}
-    m_Modifications:
-    - target: {fileID: 4166543897975669296, guid: d1d6c1217790949f88c3ac1c27ed0585, type: 3}
-      propertyPath: m_Name
-      value: LawnCard
-      objectReference: {fileID: 0}
-    - target: {fileID: 6552852230945456307, guid: d1d6c1217790949f88c3ac1c27ed0585, type: 3}
-      propertyPath: m_Pivot.x
-      value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 6552852230945456307, guid: d1d6c1217790949f88c3ac1c27ed0585, type: 3}
-      propertyPath: m_Pivot.y
-      value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 6552852230945456307, guid: d1d6c1217790949f88c3ac1c27ed0585, type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 6552852230945456307, guid: d1d6c1217790949f88c3ac1c27ed0585, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 6552852230945456307, guid: d1d6c1217790949f88c3ac1c27ed0585, type: 3}
-      propertyPath: m_AnchorMin.x
-      value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 6552852230945456307, guid: d1d6c1217790949f88c3ac1c27ed0585, type: 3}
-      propertyPath: m_AnchorMin.y
-      value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 6552852230945456307, guid: d1d6c1217790949f88c3ac1c27ed0585, type: 3}
-      propertyPath: m_SizeDelta.x
-      value: 259
-      objectReference: {fileID: 0}
-    - target: {fileID: 6552852230945456307, guid: d1d6c1217790949f88c3ac1c27ed0585, type: 3}
-      propertyPath: m_SizeDelta.y
-      value: 271
-      objectReference: {fileID: 0}
-    - target: {fileID: 6552852230945456307, guid: d1d6c1217790949f88c3ac1c27ed0585, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6552852230945456307, guid: d1d6c1217790949f88c3ac1c27ed0585, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6552852230945456307, guid: d1d6c1217790949f88c3ac1c27ed0585, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6552852230945456307, guid: d1d6c1217790949f88c3ac1c27ed0585, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 0.9998477
-      objectReference: {fileID: 0}
-    - target: {fileID: 6552852230945456307, guid: d1d6c1217790949f88c3ac1c27ed0585, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6552852230945456307, guid: d1d6c1217790949f88c3ac1c27ed0585, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6552852230945456307, guid: d1d6c1217790949f88c3ac1c27ed0585, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0.017452406
-      objectReference: {fileID: 0}
-    - target: {fileID: 6552852230945456307, guid: d1d6c1217790949f88c3ac1c27ed0585, type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: 4.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 6552852230945456307, guid: d1d6c1217790949f88c3ac1c27ed0585, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: -10
-      objectReference: {fileID: 0}
-    - target: {fileID: 6552852230945456307, guid: d1d6c1217790949f88c3ac1c27ed0585, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6552852230945456307, guid: d1d6c1217790949f88c3ac1c27ed0585, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6552852230945456307, guid: d1d6c1217790949f88c3ac1c27ed0585, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects:
-    - targetCorrespondingSourceObject: {fileID: 6552852230945456307, guid: d1d6c1217790949f88c3ac1c27ed0585, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 4262841001829969587}
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: d1d6c1217790949f88c3ac1c27ed0585, type: 3}
---- !u!224 &5605933013774181927 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 6552852230945456307, guid: d1d6c1217790949f88c3ac1c27ed0585, type: 3}
-  m_PrefabInstance: {fileID: 1674264002404050580}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &3817567929709021443
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1561,12 +1467,12 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4a83703bc21004f2fa11f7b3e1e52a05, type: 3}
---- !u!224 &4366248762558603957 stripped
+--- !u!224 &5885324303455723301 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 7869151222185917841, guid: 4a83703bc21004f2fa11f7b3e1e52a05, type: 3}
   m_PrefabInstance: {fileID: 4366248762558603956}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &4366248762558603958 stripped
+--- !u!114 &7235529715186415044 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 6409127965609908080, guid: 4a83703bc21004f2fa11f7b3e1e52a05, type: 3}
   m_PrefabInstance: {fileID: 4366248762558603956}
@@ -1674,7 +1580,12 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4a83703bc21004f2fa11f7b3e1e52a05, type: 3}
---- !u!114 &2106868173535337963 stripped
+--- !u!224 &5940108933309707508 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 7869151222185917841, guid: 4a83703bc21004f2fa11f7b3e1e52a05, type: 3}
+  m_PrefabInstance: {fileID: 4565338039621273957}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7469955758160289301 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 6409127965609908080, guid: 4a83703bc21004f2fa11f7b3e1e52a05, type: 3}
   m_PrefabInstance: {fileID: 4565338039621273957}
@@ -1685,11 +1596,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3d5926bc0e94e4349883244dd1728446, type: 3}
   m_Name: 
   m_EditorClassIdentifier: BunnyHeaven.UI::BunnyHeaven.UI.ButtonView
---- !u!224 &2952115902028314378 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 7869151222185917841, guid: 4a83703bc21004f2fa11f7b3e1e52a05, type: 3}
-  m_PrefabInstance: {fileID: 4565338039621273957}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &5029626458001443483
 PrefabInstance:
   m_ObjectHideFlags: 0
