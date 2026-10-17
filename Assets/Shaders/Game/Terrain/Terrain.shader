@@ -1,6 +1,8 @@
 // The level's SDF terrain. Tops take each tile's colour from _TerrainCells (one texel per tile, in object space where
-// tile (x, z) covers [x, x + 1] x [z, z + 1]), blended softly across tile edges. Sides and the rounded edge fall back
-// to a gradient by height between two stone colours, under the cobbles that edge the shore.
+// tile (x, z) covers [x, x + 1] x [z, z + 1], inside a one-texel border), blended softly across tile edges; alpha is
+// how much of the top is raked dirt, which empty tiles and the border are wholly, so the bare shore past the tiles is
+// dirt. Sides and the rounded edge fall back to a gradient by height between two stone colours, under the rocks that
+// edge the shore.
 Shader "Game/Terrain"
 {
 	Properties
@@ -124,7 +126,7 @@ Shader "Game/Terrain"
 				float2 p = tile - 0.5;
 				float2 cell = floor(p);
 				float2 f = saturate((frac(p) - 0.5) / _CellBlend + 0.5);
-				float2 uv = (cell + f + 0.5) * _TerrainCells_TexelSize.xy;
+				float2 uv = (cell + f + 1.5) * _TerrainCells_TexelSize.xy;
 				return SAMPLE_TEXTURE2D(_TerrainCells, sampler_TerrainCells, uv);
 			}
 

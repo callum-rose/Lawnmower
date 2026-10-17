@@ -3,15 +3,18 @@ using Unity.Mathematics;
 namespace Game.Terrain
 {
 	/// <summary>
-	/// The 3D terrain field built from a <see cref="TerrainFootprint"/>: a flat top, a rounded top edge and sloped sides
-	/// that meet the tile grid exactly at <see cref="PivotHeight"/>, with noise roughening the sides but not the top.
-	/// Below the pivot the sides get rougher the deeper they go: the slope wanders around the outline and large lumps
-	/// grow in, so the cliff reads as natural rock while the shoreline still follows the grid.
+	/// The 3D terrain field built from a <see cref="TerrainFootprint"/>: a flat top that runs <see cref="Shore"/> past the
+	/// tiles, a rounded top edge and sloped sides that meet that shoreline exactly at <see cref="PivotHeight"/>, with noise
+	/// roughening the sides but not the top. Below the pivot the sides get rougher the deeper they go: the slope wanders
+	/// around the outline and large lumps grow in, so the cliff reads as natural rock while the shoreline still follows
+	/// the grid.
 	/// </summary>
 	internal struct TerrainShape
 	{
 		public float TopHeight;
 		public float PivotHeight;
+		/// <summary>How far the top runs past the tiles' outline, as bare shore for the edging rocks.</summary>
+		public float Shore;
 		/// <summary>Horizontal run per unit of drop; 0 is a vertical wall.</summary>
 		public float Slope;
 		public float EdgeRadius;
@@ -44,7 +47,7 @@ namespace Game.Terrain
 			}
 
 			float slopeLength = math.sqrt(1 + slope * slope);
-			float side = (footprintDistance + (p.y - PivotHeight) * slope) / slopeLength;
+			float side = (footprintDistance - Shore + (p.y - PivotHeight) * slope) / slopeLength;
 			float top = p.y - TopHeight;
 
 			float distance = SmoothMax(top, side, EdgeRadius);

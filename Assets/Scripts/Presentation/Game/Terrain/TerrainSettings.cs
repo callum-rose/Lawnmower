@@ -21,6 +21,8 @@ namespace Game.Terrain
 		[SerializeField] private float topHeight = -0.01f;
 		[Tooltip("Where the sides cross the tile grid exactly: above it they're inset, below it they spread outwards")]
 		[SerializeField] private float pivotHeight = -0.1f;
+		[Tooltip("How far the top runs past the tiles as bare shore, in tiles, so the edging rocks sit clear of the grass")]
+		[SerializeField, Min(0)] private float shoreWidth = 0.3f;
 		[SerializeField] private float bottomHeight = -1.2f;
 		[Tooltip("Horizontal run per unit of drop; 0 is a vertical wall")]
 		[SerializeField, Range(0, 3)] private float slope = 0.8f;
@@ -59,12 +61,14 @@ namespace Game.Terrain
 		public float ConvexCornerRadius => convexCornerRadius;
 		public float ConcaveCornerRadius => concaveCornerRadius;
 		public float TopHeight => topHeight;
+		public float ShoreWidth => shoreWidth;
 		public float BottomHeight => bottomHeight;
 
 		public TerrainShape Shape => new TerrainShape
 		{
 			TopHeight = topHeight,
 			PivotHeight = pivotHeight,
+			Shore = shoreWidth,
 			Slope = slope,
 			EdgeRadius = edgeRadius,
 			NoiseAmplitude = noiseAmplitude,
