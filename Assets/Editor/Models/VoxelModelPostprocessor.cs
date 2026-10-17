@@ -9,6 +9,7 @@ using UnityEngine;
 internal class VoxelModelPostprocessor : AssetPostprocessor
 {
 	private const string staticFolder = "Assets/Models/Pond/";
+	private const string terrainFolder = "Assets/Models/Terrain/";
 	private const string animatedFolder = "Assets/Models/Creatures/";
 	private const string paletteFolder = "Assets/Materials/Game/Environment/Palette";
 	private const string palettePrefix = "Palette_";
@@ -21,7 +22,7 @@ internal class VoxelModelPostprocessor : AssetPostprocessor
 			return false;
 		}
 
-		return path.StartsWith(staticFolder) || path.StartsWith(animatedFolder);
+		return path.StartsWith(staticFolder) || path.StartsWith(terrainFolder) || path.StartsWith(animatedFolder);
 	}
 
 	private void OnPreprocessModel()
@@ -43,6 +44,8 @@ internal class VoxelModelPostprocessor : AssetPostprocessor
 		importer.importLights = false;
 		importer.importBlendShapes = false;
 		importer.preserveHierarchy = true;
+		// The terrain's cobbles are read at runtime and combined into one edging mesh
+		importer.isReadable = assetPath.StartsWith(terrainFolder);
 		bool animated = assetPath.StartsWith(animatedFolder);
 		importer.animationType = animated ? ModelImporterAnimationType.Legacy : ModelImporterAnimationType.None;
 		importer.importAnimation = animated;
