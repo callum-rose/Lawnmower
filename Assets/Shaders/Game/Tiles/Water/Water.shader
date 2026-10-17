@@ -63,6 +63,10 @@ Shader "Water"
 		_ObjectReflectionStrength("Object Reflection Strength", Range(0, 1)) = 0.55
 		_ReflectionDistortion("Object Reflection Distortion", Range(0, 1)) = 0.15
 		_ReflectionBlur("Object Reflection Blur (mip level)", Range(0, 5)) = 1.5
+		_ReflectionRippleAmount("Object Reflection Ripple (world units)", Range(0, 0.3)) = 0.07
+		_ReflectionRippleScale("Object Reflection Ripple Scale", Float) = 2.2
+		_ReflectionRippleSpeed("Object Reflection Ripple Speed", Float) = 0.6
+		_ReflectionFadeHeight("Object Reflection Fade Height (halves every N world units)", Range(0.02, 4)) = 0.7
 		[HDR] _SpecularColour("Specular Colour", Color) = (1.2,1.15,1,1)
 		_SpecularPower("Specular Power", Range(8, 2048)) = 400
 		_SparkleDensity("Sparkle Density", Float) = 9
@@ -158,6 +162,10 @@ Shader "Water"
 			float _ObjectReflectionStrength;
 			float _ReflectionDistortion;
 			float _ReflectionBlur;
+			float _ReflectionRippleAmount;
+			float _ReflectionRippleScale;
+			float _ReflectionRippleSpeed;
+			float _ReflectionFadeHeight;
 			float _AnimationSpeed;
 			float _RippleAmplitude;
 			float4 _SpecularColour;
@@ -184,6 +192,9 @@ Shader "Water"
 			CBUFFER_END
 
 			TEXTURE2D(_PlanarReflectionTexture);
+			TEXTURE2D_FLOAT(_PlanarReflectionDepth);
+			float4 _PlanarReflectionProjZ;
+			float4 _PlanarReflectionProjW;
 			float _PlanarReflectionEnabled;
 
 			// Ripple height field from WaterRippleSimulation; rect is world xz origin and size.
@@ -303,6 +314,42 @@ Shader "Water"
 				q = mul(float2x2(0.8, -0.6, 0.6, 0.8), q) * 2.11 + float2(8.3, 2.8);
 				h += GradientNoise(q - float2(0, t * 0.17)) * 0.13;
 				return h * _FlowWaveAmount;
+			}
+
+			// Sideways wobble, in world units, for the planar reflection: two noise layers drifting against each other so the
+			// mirrored scene shimmers even when the surface itself is flat.
+			float2 ReflectionRipple(float2 p, float t)
+			{
+				if (_ReflectionRippleAmount <= 0)
+					return 0;
+				float ts = t * _ReflectionRippleSpeed;
+				float2 q = p * _ReflectionRippleScale;
+				float2 a = float2(GradientNoise(q + float2(ts, ts * 0.6)), GradientNoise(q + float2(3.1, 7.7) - float2(ts * 0.7, ts)));
+				q = mul(float2x2(0.8, 0.6, -0.6, 0.8), q) * 1.9 + float2(5.4, 1.9);
+				float2 b = float2(GradientNoise(q - float2(ts * 1.3, 0)), GradientNoise(q + float2(0, ts * 1.3)));
+				return (a + b * 0.5) * _ReflectionRippleAmount;
+			}
+
+			// Height above the surface of the reflected point at reflectUV, from the mirrored camera's depth. That point's
+			// mirror image lies on the view ray continued below the surface, so its distance along the ray is solved from
+			// the z and w rows of the reflection camera's oblique projection. Returns -1 where nothing was reflected.
+			float ReflectedHeight(float2 reflectUV, float3 positionWS, float3 rayDir)
+			{
+				float raw = SAMPLE_TEXTURE2D_LOD(_PlanarReflectionDepth, sampler_PointClamp, reflectUV, 0).r;
+				#if UNITY_REVERSED_Z
+					if (raw <= 0)
+						return -1;
+					float z = raw;
+				#else
+					if (raw >= 1)
+						return -1;
+					float z = raw * 2 - 1;
+				#endif
+				float4 surfaceVS = float4(TransformWorldToView(positionWS), 1);
+				float3 rayVS = TransformWorldToViewDir(rayDir, false);
+				float distance = (dot(_PlanarReflectionProjZ, surfaceVS) - z * dot(_PlanarReflectionProjW, surfaceVS))
+					/ (z * dot(_PlanarReflectionProjW.xyz, rayVS) - dot(_PlanarReflectionProjZ.xyz, rayVS));
+				return max(0, -rayDir.y * distance);
 			}
 
 			float WaterHeight(float2 p, float t)
@@ -555,13 +602,14 @@ Shader "Water"
 				float fresnel = saturate(saturate(_FresnelBias + (1 - _FresnelBias) * pow(1 - nDotV, _FresnelPower)) * _ReflectionStrength);
 				float3 colour = lerp(underwater, sky, fresnel);
 
-				// Mirrored scene from PlanarWaterReflection, rippled by the surface normal. Objects reflect more strongly
+				// Mirrored scene from PlanarWaterReflection, rippled by the surface normal and an always-on wobble. Objects reflect more strongly
 				// than physically plausible so they read clearly from the steep game camera.
 				[branch]
 				if (_PlanarReflectionEnabled > 0.5)
 				{
 					float uvPerWorld = abs(UNITY_MATRIX_P[1][1]) * 0.5 / (unity_OrthoParams.w > 0.5 ? 1 : surfaceDepth);
-					float2 reflectUV = screenUV + normalWS.xz * _ReflectionDistortion * uvPerWorld * float2(_ScaledScreenParams.y / _ScaledScreenParams.x, 1);
+					float2 reflectOffset = normalWS.xz * _ReflectionDistortion + ReflectionRipple(p, t);
+					float2 reflectUV = screenUV + reflectOffset * uvPerWorld * float2(_ScaledScreenParams.y / _ScaledScreenParams.x, 1);
 					// Mip-blurred, with four offset taps to smooth out the blockiness of the lower mips.
 					float2 texel = exp2(_ReflectionBlur) / _ScaledScreenParams.xy;
 					float4 planar = SAMPLE_TEXTURE2D_LOD(_PlanarReflectionTexture, sampler_LinearClamp, reflectUV + texel * float2(0.5, 1), _ReflectionBlur)
@@ -569,6 +617,14 @@ Shader "Water"
 						+ SAMPLE_TEXTURE2D_LOD(_PlanarReflectionTexture, sampler_LinearClamp, reflectUV + texel * float2(-0.5, -1), _ReflectionBlur)
 						+ SAMPLE_TEXTURE2D_LOD(_PlanarReflectionTexture, sampler_LinearClamp, reflectUV + texel * float2(1, -0.5), _ReflectionBlur);
 					planar *= 0.25;
+					// Faded by height above the water, from the lowest of the taps so silhouettes keep their blurred edge.
+					float4 heights = float4(ReflectedHeight(reflectUV + texel * float2(0.5, 1), positionWS, rayDir),
+						ReflectedHeight(reflectUV + texel * float2(-1, 0.5), positionWS, rayDir),
+						ReflectedHeight(reflectUV + texel * float2(-0.5, -1), positionWS, rayDir),
+						ReflectedHeight(reflectUV + texel * float2(1, -0.5), positionWS, rayDir));
+					heights = heights < 0 ? 1e4 : heights;
+					float reflectedHeight = min(min(heights.x, heights.y), min(heights.z, heights.w));
+					planar.a *= reflectedHeight < 1e4 ? exp2(-reflectedHeight / _ReflectionFadeHeight) : 1;
 					colour = lerp(colour, planar.rgb, saturate(planar.a) * saturate(fresnel + _ObjectReflectionStrength));
 				}
 
