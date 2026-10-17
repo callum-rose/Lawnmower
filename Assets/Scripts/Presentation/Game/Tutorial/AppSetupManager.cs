@@ -14,8 +14,6 @@ namespace Game.Tutorial
 		
 		private void Awake()
 		{
-			Application.targetFrameRate = Screen.currentResolution.refreshRate;
-			
 			bool isTutorialIncomplete = !PersistantData.LevelModule.TutorialCompleted.Load();
 			
 			if (isTutorialIncomplete)

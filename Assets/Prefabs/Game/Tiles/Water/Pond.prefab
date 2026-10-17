@@ -73,6 +73,7 @@ GameObject:
   - component: {fileID: 2065657184240015234}
   - component: {fileID: 366881690861106688}
   - component: {fileID: 8304481171345610818}
+  - component: {fileID: 5182736409917263541}
   m_Layer: 4
   m_Name: Water
   m_TagString: Untagged
@@ -164,6 +165,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ba16aa8cd84b41809e8eaa7512c3748, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Lawnmower.Presentation::Game.Tiles.WaterRippleSimulation
+  shader: {fileID: 4800000, guid: 2c93a2dcd16324eae8a204a7f5a03c15, type: 3}
   size: {x: 5, y: 4}
   texelsPerUnit: 40
   waveSpeed: 0.25
@@ -188,3 +190,17 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967279
   clipPlaneOffset: 0.01
+--- !u!114 &5182736409917263541
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7967512353772843805}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d7c5cf6758f54de0a5933f799946fb0a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Lawnmower.Presentation::Game.Tiles.WaterCausticBaker
+  shader: {fileID: 4800000, guid: 4d93b18c66ed4398ab3f95e090aa74e7, type: 3}
+  resolution: 512

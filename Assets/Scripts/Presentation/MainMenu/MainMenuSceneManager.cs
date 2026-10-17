@@ -32,6 +32,14 @@ namespace MainMenu
 			_presenter.SettingsRequested += OpenSettings;
 			_presenter.HowToPlayRequested += OpenHowToPlay;
 			_presenter.Start();
+
+#if DEVELOPMENT_BUILD && !UNITY_EDITOR
+			if (Lawnmower.Diagnostics.PerfExperiments.TryTakeAutoLevel(out int autoLevel))
+			{
+				ViewManager.Instance.Load(UnityScene.Game,
+					new GameSetupPassThroughData(currentMowerManager.GetCurrent(), levelDataManager.GetLevel(autoLevel).LevelData));
+			}
+#endif
 		}
 
 		private void OnDestroy()

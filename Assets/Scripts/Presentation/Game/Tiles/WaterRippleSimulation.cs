@@ -24,6 +24,9 @@ namespace Game.Tiles
 		private static readonly int EdgeAbsorbWidthId = Shader.PropertyToID("_EdgeAbsorbWidth");
 		private const int MaxSplashesPerStep = 8;
 
+		[SerializeField, Tooltip("Hidden/WaterRippleSimulation; referenced so it's included in builds.")]
+		private Shader shader;
+
 		[SerializeField, Tooltip("World XZ size of the simulated area.")]
 		private Vector2 size = new(5, 4);
 
@@ -151,7 +154,7 @@ namespace Game.Tiles
 		{
 			if (_material == null)
 			{
-				_material = new Material(Shader.Find("Hidden/WaterRippleSimulation")) { hideFlags = HideFlags.DontSave };
+				_material = new Material(shader != null ? shader : Shader.Find("Hidden/WaterRippleSimulation")) { hideFlags = HideFlags.DontSave };
 			}
 
 			Vector2Int resolution = Resolution;

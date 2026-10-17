@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # Build Bunny Heaven for iOS and install it on the test iPhone.
 #
-#   tools/build_and_install.sh [--skip-unity] [--skip-xcode] [--no-install] [--no-launch]
+#   tools/build_and_install.sh [--development] [--skip-unity] [--skip-xcode] [--no-install] [--no-launch]
+#
+# --development makes a Unity development player (Profiler-connectable, logs [Perf] FPS/memory lines).
 #
 # Builds the git worktree it is invoked from (the current directory), so the same
 # script works from any worktree. Steps:
@@ -21,14 +23,15 @@ BUNDLE_ID="${BUNDLE_ID:-com.callumrose.bunnyheaven}"
 INSTALL_TIMEOUT_MIN="${INSTALL_TIMEOUT_MIN:-30}"
 BUILD_METHOD="Lawnmower.Editor.Build.IOSBuild.BuildIOS"
 
-SKIP_UNITY=0; SKIP_XCODE=0; DO_INSTALL=1; DO_LAUNCH=1
+DEVELOPMENT=0; SKIP_UNITY=0; SKIP_XCODE=0; DO_INSTALL=1; DO_LAUNCH=1
 for arg in "$@"; do
 	case "$arg" in
+		--development) DEVELOPMENT=1 ;;
 		--skip-unity) SKIP_UNITY=1 ;;
 		--skip-xcode) SKIP_XCODE=1 ;;
 		--no-install) DO_INSTALL=0; DO_LAUNCH=0 ;;
 		--no-launch) DO_LAUNCH=0 ;;
-		-h|--help) sed -n '2,16p' "$0"; exit 0 ;;
+		-h|--help) sed -n '2,18p' "$0"; exit 0 ;;
 		*) echo "Unknown argument: $arg" >&2; exit 2 ;;
 	esac
 done
@@ -60,6 +63,7 @@ sys.exit(0 if any(i.get("state")=="ready" for i in (d.get("data") or {}).get("in
 if [[ $SKIP_UNITY -eq 0 ]]; then
 	command -v unity >/dev/null || die "Unity CLI ('unity') not on PATH"
 	if live_editor_ready; then
+		[[ $DEVELOPMENT -eq 0 ]] || die "--development needs a batch-mode build; close the editor on this project first"
 		log "Unity iOS build via the live editor"
 		# Pick up any on-disk changes (the editor may be unfocused) and wait for the compile.
 		unity command --project-path "$PROJECT" --result-only eval \
@@ -86,10 +90,12 @@ if [[ $SKIP_UNITY -eq 0 ]]; then
 		cat "$STATUS_FILE"; echo
 		grep -q '\[IOSBuild\] Succeeded' "$STATUS_FILE" || die "Unity iOS build failed in the live editor (see its console)"
 	else
-		log "Unity iOS build in batch mode"
+		log "Unity iOS build in batch mode$([[ $DEVELOPMENT -eq 1 ]] && echo ' (development)')"
+		DEV_ARGS=()
+		[[ $DEVELOPMENT -eq 1 ]] && DEV_ARGS=(--args "-developmentBuild")
 		UNITY_LOG="$LOG_DIR/unity-ios-$STAMP.log"
 		unity build "$PROJECT" --target iOS --execute-method "$BUILD_METHOD" \
-			--output-path "$IOS_DIR" --log-file "$UNITY_LOG" --no-tail --non-interactive \
+			--output-path "$IOS_DIR" --log-file "$UNITY_LOG" --no-tail --non-interactive ${DEV_ARGS[@]+"${DEV_ARGS[@]}"} \
 			|| die "Unity iOS build failed; log: $UNITY_LOG"
 		grep -q '\[IOSBuild\] Succeeded' "$UNITY_LOG" || die "Unity build exited 0 but did not report success; log: $UNITY_LOG"
 	fi
