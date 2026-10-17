@@ -80,9 +80,9 @@ in-game Egg Bunny. Run them the same way as the scripts above.
   grass, leaving the middle clear); `piece=pair` renders the spring with its marker two tiles ahead.
   The `board` springboard points its chevron along +Z, so the tile can turn it to face its `Offset`.
   Previews are in [`docs/images/spring-voxel`](../../docs/images/spring-voxel).
-  The game uses the **mushroom**: `Assets/Models/Tiles/MushroomSpring.fbx` (on the Spring prefab) and
-  `MushroomSpringLanding.fbx` (the fairy ring `SpringTileObject` spawns on the landing tile). Re-export with
+  The game uses the **mushroom**: `Assets/Models/Tile/Spring/spring_voxel.fbx` (on the Spring prefab) and
+  `spring_landing_voxel.fbx` (the fairy ring `SpringTileObject` spawns on the landing tile). Re-export with
   `tiles=0`, which leaves the preview tiles out:
-  `... bake_shade.py -- build_spring.py ../../Assets/Models/Tiles/MushroomSpring.fbx Stem variant=mushroom piece=spring tiles=0`
-  (`MushroomSpringLanding.fbx Marker0 ... piece=landing` for the ring). The cap's top is 1 m up, the Spring
+  `... bake_shade.py -- build_spring.py ../../Assets/Models/Tile/Spring/spring_voxel.fbx Stem variant=mushroom piece=spring tiles=0`
+  (`spring_landing_voxel.fbx Marker0 ... piece=landing` for the ring). The cap's top is 1 m up, the Spring
   prefab's `standHeight`, which the mower hops onto before it launches.

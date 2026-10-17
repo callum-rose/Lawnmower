@@ -10,8 +10,9 @@ internal class VoxelModelPostprocessor : AssetPostprocessor
 {
 	private const string staticFolder = "Assets/Models/Pond/";
 	private const string terrainFolder = "Assets/Models/Terrain/";
-	private const string tilesFolder = "Assets/Models/Tiles/";
 	private const string animatedFolder = "Assets/Models/Creatures/";
+	private const string tileFolder = "Assets/Models/Tile/";
+	private const string tileVoxelMarker = "_voxel";
 	private const string paletteFolder = "Assets/Materials/Game/Environment/Palette";
 	private const string palettePrefix = "Palette_";
 	private const string shaderName = "Game/VoxelProp";
@@ -23,8 +24,11 @@ internal class VoxelModelPostprocessor : AssetPostprocessor
 			return false;
 		}
 
-		return path.StartsWith(staticFolder) || path.StartsWith(terrainFolder) || path.StartsWith(tilesFolder) ||
-			path.StartsWith(animatedFolder);
+		// The tile folder also holds the older, hand-made tile models, which keep their own import settings
+		bool isVoxelTile = path.StartsWith(tileFolder) &&
+			System.IO.Path.GetFileNameWithoutExtension(path).Contains(tileVoxelMarker);
+
+		return path.StartsWith(staticFolder) || path.StartsWith(terrainFolder) || path.StartsWith(animatedFolder) || isVoxelTile;
 	}
 
 	private void OnPreprocessModel()
